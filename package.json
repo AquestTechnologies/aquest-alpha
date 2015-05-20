@@ -1,13 +1,31 @@
 {
-  "name": "AquestApp",
-  "description": "Rock'n'Roll.",
+  "name": "Aquest-alpha",
+  "version": "0.0.1",
+  "description": "Version alpha",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "gulp liveserver",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aquest Technologies",
+  "devDependencies": {
+    "babelify": "^6.1.0",
+    "browserify": "^10.2.0",
+    "del": "^1.1.0",
+    "gulp": "^3.8.10",
+    "gulp-htmlmin": "^1.1.1",
+    "gulp-less": "^3.0.3",
+    "gulp-nodemon": "^2.0.3",
+    "require-dir": "^0.1.0",
+    "run-sequence": "^1.0.2",
+    "vinyl-source-stream": "^1.1.0"
+  },
   "dependencies": {
-    "browserify": "*",
-    "gulp": "*",
-    "react": "*",
-    "del": "*",
-    "vinyl-source-stream": "*",
-    "gulp-less": "*",
-    "babelify": "*"
+    "hapi": "^8.4.0",
+    "flummox": "^4.0.0-alpha2",
+    "react": "^0.13.0",
+    "react-router": "^0.13.3",
+    "immutable": "^3.7.3"
   }
 }
