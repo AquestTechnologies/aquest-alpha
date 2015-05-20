@@ -1,0 +1,10 @@
+#!/bin/sh
+
+git config --global user.email "augustin.bessette@gmail.com"
+git config --global user.name "abessette"
+
+git add .
+git commit -m "$*"
+
+git push origin master
+

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+git config --global user.email "david@aquest.fr"
+git config --global user.name "dherault"
+
+git add .
+git commit -m "$*"
+
+git push origin master
+

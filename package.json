@@ -1,0 +1,13 @@
+{
+  "name": "AquestApp",
+  "description": "Rock'n'Roll.",
+  "dependencies": {
+    "browserify": "*",
+    "gulp": "*",
+    "react": "*",
+    "del": "*",
+    "vinyl-source-stream": "*",
+    "gulp-less": "*",
+    "babelify": "*"
+  }
+}
