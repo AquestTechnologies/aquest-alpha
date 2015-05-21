@@ -71,7 +71,7 @@ gulp.task('default', ['build'], function() {
   
   nodemon({
     script:   paths.server, 
-    delay:    '500ms',
+    delay:    '0ms',
     ext:      'jsx js less',
     env:      { 'NODE_ENV': 'development' },
     ignore:   ["_misc", "node_modules", "dist"],

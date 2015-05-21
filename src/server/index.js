@@ -33,5 +33,5 @@ server.route({
 });
 
 server.start(function() {
-  console.log('Make it rain! %s', server.info.uri);
+  console.log('Make it rain! Server started at %s', server.info.uri);
 });

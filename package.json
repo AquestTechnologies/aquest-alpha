@@ -23,10 +23,10 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
+    "alt": "^0.16.5",
     "hapi": "^8.4.0",
-    "flummox": "^4.0.0-alpha2",
+    "immutable": "^3.7.3",
     "react": "^0.13.0",
-    "react-router": "^0.13.3",
-    "immutable": "^3.7.3"
+    "react-router": "^0.13.3"
   }
 }
