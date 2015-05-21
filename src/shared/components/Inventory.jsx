@@ -24,10 +24,10 @@ class Inventory extends React.Component {
             
             <div className="inventory_list">
               <CardNew />
-              <Card imgPath="image1.png"/>
+              <Card imgPath="img/image1.png"/>
               <Card />
               <Card />
-              <Card imgPath="image2.png"/>
+              <Card imgPath="img/image2.png"/>
               <Card />
               <Card />
               <Card />

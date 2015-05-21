@@ -8,3 +8,6 @@ gulp.task('liveserver', ['browserify','less','minifyhtml'], function() {
     tasks: ['watch']
   });
 });
+
+// The default task (called when we run `gulp` from cli)
+gulp.task('default', ['liveserver']);

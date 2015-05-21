@@ -1,3 +1,5 @@
 # aquest-alpha
 
-Copyright Aquest Technologies SAS.
+Rock'n'Roll
+
+Aquest Technologies © 2015
