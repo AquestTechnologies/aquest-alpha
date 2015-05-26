@@ -23671,6 +23671,49 @@ module.exports = exports["default"];
 },{"react":195}],208:[function(require,module,exports){
 'use strict';
 
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouter = require('react-router');
+
+var _reactRouter2 = _interopRequireDefault(_reactRouter);
+
+var _componentsAppJsx = require('./components/App.jsx');
+
+var _componentsAppJsx2 = _interopRequireDefault(_componentsAppJsx);
+
+var _componentsLayoutJsx = require('./components/Layout.jsx');
+
+var _componentsLayoutJsx2 = _interopRequireDefault(_componentsLayoutJsx);
+
+var _componentsNotFoundJsx = require('./components/NotFound.jsx');
+
+var _componentsNotFoundJsx2 = _interopRequireDefault(_componentsNotFoundJsx);
+
+var Route = _reactRouter2['default'].Route;
+var DefaultRoute = _reactRouter2['default'].DefaultRoute;
+var NotFoundRoute = _reactRouter2['default'].NotFoundRoute;
+
+var routes = _react2['default'].createElement(
+  Route,
+  { path: '/', handler: _componentsAppJsx2['default'] },
+  _react2['default'].createElement(DefaultRoute, { handler: _componentsLayoutJsx2['default'] }),
+  _react2['default'].createElement(NotFoundRoute, { handler: _componentsNotFoundJsx2['default'] })
+);
+
+exports['default'] = routes;
+module.exports = exports['default'];
+
+},{"./components/App.jsx":196,"./components/Layout.jsx":204,"./components/NotFound.jsx":207,"react":195,"react-router":26}],209:[function(require,module,exports){
+'use strict';
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var _react = require('react');
@@ -23693,15 +23736,12 @@ var _reactRouter = require('react-router');
 
 var _reactRouter2 = _interopRequireDefault(_reactRouter);
 
-var routes = _react2['default'].createElement(
-  _reactRouter.Route,
-  { path: '/', handler: _componentsAppJsx2['default'] },
-  _react2['default'].createElement(_reactRouter.DefaultRoute, { handler: _componentsLayoutJsx2['default'] }),
-  _react2['default'].createElement(_reactRouter.NotFoundRoute, { handler: _componentsNotFoundJsx2['default'] })
-);
+var _routesJsx = require('./routes.jsx');
 
-_reactRouter2['default'].run(routes, _reactRouter2['default'].HistoryLocation, function (Handler) {
+var _routesJsx2 = _interopRequireDefault(_routesJsx);
+
+_reactRouter2['default'].run(_routesJsx2['default'], _reactRouter2['default'].HistoryLocation, function (Handler) {
   _react2['default'].render(_react2['default'].createElement(Handler, null), document.getElementById('mountNode'));
 });
 
-},{"./components/App.jsx":196,"./components/Layout.jsx":204,"./components/NotFound.jsx":207,"react":195,"react-router":26}]},{},[208]);
+},{"./components/App.jsx":196,"./components/Layout.jsx":204,"./components/NotFound.jsx":207,"./routes.jsx":208,"react":195,"react-router":26}]},{},[209]);
