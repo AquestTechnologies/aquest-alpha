@@ -94,12 +94,8 @@ gulp.task('default', ['build'], function() {
       return tasks;
     }
   }).on('restart', function(){
-/*		// when the app has restarted, run livereload.
-		gulp.src(dist)
-		  .pipe(wait(500))
-			.pipe(livereload());
-		gutil.log(gutil.colors.bgYellow('Livereload'));
-*/	});
+		gutil.log(gutil.colors.black.bgYellow('Server restarted'));
+	});
 });
 
 

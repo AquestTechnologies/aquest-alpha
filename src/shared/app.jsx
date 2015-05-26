@@ -9,3 +9,4 @@ import routes from './routes.jsx';
 Router.run(routes, Router.HistoryLocation, function (Handler) {  
   React.render(<Handler/>, document.getElementById('mountNode'));
 });
+

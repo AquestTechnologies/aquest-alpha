@@ -22802,12 +22802,10 @@ var App = (function (_React$Component) {
 
   _createClass(App, [{
     key: 'render',
+
+    //ici plein de belles choses
     value: function render() {
-      return _react2['default'].createElement(
-        'div',
-        null,
-        _react2['default'].createElement(RouteHandler, null)
-      );
+      return _react2['default'].createElement(RouteHandler, null);
     }
   }]);
 
