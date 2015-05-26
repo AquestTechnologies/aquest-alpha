@@ -1,3 +1,9 @@
+LES NOTES DE DAVID !
+bienvenue !
+
+lsof -i tcp:8080 -> affiche qui utilise le port 8080
+kill xxxx -> kill le proc xxxx
+
 aquest == http://[nom de l'app].com
 
 aquest/ --> landing page, avec redirection vers aquest/[univers préféré] en cas de connection

@@ -1,21 +1,15 @@
 import React from 'react';
+import App from './components/App.jsx';
 import Layout from './components/Layout.jsx';
 import NotFound from './components/NotFound.jsx';
 import Router from 'react-router';  
-import { NotFoundRoute, DefaultRoute, Link, Route, RouteHandler } from 'react-router';
+import { NotFoundRoute, DefaultRoute, Link, Route, RouterHandler } from 'react-router';
 
-class App extends React.Component {
-  render() {
-    return (
-      <RouteHandler />
-    );
-  }
-}
 
 let routes = (  
-  <Route path="/" handler={Layout}>
-   /* <DefaultRoute handler={Layout} />*/
-    <NotFoundRoute handler={NotFound}/>
+  <Route path="/" handler={App}>
+    <DefaultRoute handler={Layout} />
+    <NotFoundRoute handler={NotFound} />
   </Route>
   
 );

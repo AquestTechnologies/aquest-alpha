@@ -5,7 +5,7 @@ class NotFound extends React.Component {
   render() {
     return (
       <div className="404">
-        404 :)
+        Bonjour quatre cent quatre
       </div>
     );
   }

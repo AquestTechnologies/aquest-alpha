@@ -22765,6 +22765,59 @@ module.exports = warning;
 module.exports = require('./lib/React');
 
 },{"./lib/React":68}],196:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouter = require('react-router');
+
+var _reactRouter2 = _interopRequireDefault(_reactRouter);
+
+var RouteHandler = _reactRouter2['default'].RouteHandler;
+
+var App = (function (_React$Component) {
+  function App() {
+    _classCallCheck(this, App);
+
+    if (_React$Component != null) {
+      _React$Component.apply(this, arguments);
+    }
+  }
+
+  _inherits(App, _React$Component);
+
+  _createClass(App, [{
+    key: 'render',
+    value: function render() {
+      return _react2['default'].createElement(
+        'div',
+        null,
+        _react2['default'].createElement(RouteHandler, null)
+      );
+    }
+  }]);
+
+  return App;
+})(_react2['default'].Component);
+
+exports['default'] = App;
+module.exports = exports['default'];
+
+},{"react":195,"react-router":26}],197:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22851,7 +22904,7 @@ Card.defaultProps = {
 exports["default"] = Card;
 module.exports = exports["default"];
 
-},{"react":195}],197:[function(require,module,exports){
+},{"react":195}],198:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22934,7 +22987,7 @@ CardNew.defaultProps = {
 exports["default"] = CardNew;
 module.exports = exports["default"];
 
-},{"react":195}],198:[function(require,module,exports){
+},{"react":195}],199:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23030,7 +23083,7 @@ var Chat = (function (_React$Component) {
 exports['default'] = Chat;
 module.exports = exports['default'];
 
-},{"./ChatFooter.jsx":199,"./ChatHeader.jsx":200,"./Message.jsx":205,"react":195}],199:[function(require,module,exports){
+},{"./ChatFooter.jsx":200,"./ChatHeader.jsx":201,"./Message.jsx":206,"react":195}],200:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23084,7 +23137,7 @@ var ChatFooter = (function (_React$Component) {
 exports['default'] = ChatFooter;
 module.exports = exports['default'];
 
-},{"react":195}],200:[function(require,module,exports){
+},{"react":195}],201:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23149,7 +23202,7 @@ var ChatHeader = (function (_React$Component) {
 exports['default'] = ChatHeader;
 module.exports = exports['default'];
 
-},{"./Icon.jsx":201,"react":195}],201:[function(require,module,exports){
+},{"./Icon.jsx":202,"react":195}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23251,7 +23304,7 @@ Icon.defaultProps = {
 exports["default"] = Icon;
 module.exports = exports["default"];
 
-},{"react":195}],202:[function(require,module,exports){
+},{"react":195}],203:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23350,7 +23403,7 @@ Inventory.defaultProps = {
 exports['default'] = Inventory;
 module.exports = exports['default'];
 
-},{"./Card.jsx":196,"./CardNew.jsx":197,"react":195}],203:[function(require,module,exports){
+},{"./Card.jsx":197,"./CardNew.jsx":198,"react":195}],204:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23411,7 +23464,7 @@ var Layout = (function (_React$Component) {
 exports['default'] = Layout;
 module.exports = exports['default'];
 
-},{"./Chat.jsx":198,"./Inventory.jsx":202,"./Menu.jsx":204,"react":195}],204:[function(require,module,exports){
+},{"./Chat.jsx":199,"./Inventory.jsx":203,"./Menu.jsx":205,"react":195}],205:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23499,7 +23552,7 @@ var Menu = (function (_React$Component) {
 exports['default'] = Menu;
 module.exports = exports['default'];
 
-},{"./Icon.jsx":201,"react":195}],205:[function(require,module,exports){
+},{"./Icon.jsx":202,"react":195}],206:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23568,7 +23621,7 @@ Message.defaultProps = {
 exports['default'] = Message;
 module.exports = exports['default'];
 
-},{"./Icon.jsx":201,"react":195}],206:[function(require,module,exports){
+},{"./Icon.jsx":202,"react":195}],207:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23604,7 +23657,7 @@ var NotFound = (function (_React$Component) {
       return _react2["default"].createElement(
         "div",
         { className: "404" },
-        "404 :)"
+        "Bonjour quatre cent quatre"
       );
     }
   }]);
@@ -23615,20 +23668,18 @@ var NotFound = (function (_React$Component) {
 exports["default"] = NotFound;
 module.exports = exports["default"];
 
-},{"react":195}],207:[function(require,module,exports){
+},{"react":195}],208:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _componentsAppJsx = require('./components/App.jsx');
+
+var _componentsAppJsx2 = _interopRequireDefault(_componentsAppJsx);
 
 var _componentsLayoutJsx = require('./components/Layout.jsx');
 
@@ -23642,33 +23693,10 @@ var _reactRouter = require('react-router');
 
 var _reactRouter2 = _interopRequireDefault(_reactRouter);
 
-var App = (function (_React$Component) {
-  function App() {
-    _classCallCheck(this, App);
-
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
-  }
-
-  _inherits(App, _React$Component);
-
-  _createClass(App, [{
-    key: 'render',
-    value: function render() {
-      return _react2['default'].createElement(_reactRouter.RouteHandler, null);
-    }
-  }]);
-
-  return App;
-})(_react2['default'].Component);
-
 var routes = _react2['default'].createElement(
   _reactRouter.Route,
-  { path: '/', handler: _componentsLayoutJsx2['default'] },
-  '/* ',
+  { path: '/', handler: _componentsAppJsx2['default'] },
   _react2['default'].createElement(_reactRouter.DefaultRoute, { handler: _componentsLayoutJsx2['default'] }),
-  '*/',
   _react2['default'].createElement(_reactRouter.NotFoundRoute, { handler: _componentsNotFoundJsx2['default'] })
 );
 
@@ -23676,4 +23704,4 @@ _reactRouter2['default'].run(routes, _reactRouter2['default'].HistoryLocation, f
   _react2['default'].render(_react2['default'].createElement(Handler, null), document.getElementById('mountNode'));
 });
 
-},{"./components/Layout.jsx":203,"./components/NotFound.jsx":206,"react":195,"react-router":26}]},{},[207]);
+},{"./components/App.jsx":196,"./components/Layout.jsx":204,"./components/NotFound.jsx":207,"react":195,"react-router":26}]},{},[208]);

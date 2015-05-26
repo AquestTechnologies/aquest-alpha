@@ -120,6 +120,7 @@ gulp.task('fb-flo', function (done) {
     .once('ready', done);
 });
 
+//DEGEU!!!!
 function resolver(filepath, callback) {
   gutil.log('Reloading "', filepath, '" with flo...');
 
