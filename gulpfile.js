@@ -1,15 +1,15 @@
 var gulp          = require('gulp');
 var gutil         = require('gulp-util');
 var less          = require('gulp-less');
-var wait          = require('gulp-wait');
-var path          = require('path');
 var htmlmin       = require('gulp-htmlmin');
 var nodemon       = require('gulp-nodemon');
 var browserify    = require('browserify');
 var babel         = require('babelify');
-var livereload    = require('gulp-livereload');
-var del           = require('del');  // Deletes files.
 var source        = require('vinyl-source-stream'); // Use conventional text streams at the start of your gulp or vinyl pipelines, making for nicer interoperability with the existing npm stream ecosystem.
+var del           = require('del');  // Deletes files.
+var path          = require('path');
+var flo = require('fb-flo');
+var fs = require('fs');
 
 // Quelques variables pour modifier la structure des fichiers facilement
 var paths = {
@@ -25,7 +25,7 @@ var paths = {
 var dist = [
   'dist/app.js',
   'dist/app.css'
-  ];
+];
  
  
 // Une tache qui sera appellée par les autres taches
@@ -76,16 +76,15 @@ gulp.task('build', ['compileless','bundlejs','minifyhtml'], function() {
 
 
 gulp.task('default', ['build'], function() {
-  
-  livereload.listen({ port: 3001, basePath: 'dist' });
+  gulp.start('fb-flo'); //c'est degeu!!!!
   nodemon({
     script:   paths.server,
     execMap: {
-      'js': 'node_modules/babel/bin/babel-node' //ES6 côté server
+      'js': 'node_modules/babel/bin/babel-node' //ES6 cote server
     },
     delay:    '0ms',
     ext:      'jsx js less',
-    ignore:   ["_misc", "node_modules", "dist"],
+    ignore:   ['_misc', 'node_modules', 'dist', 'gulpfile.js'],
     tasks: function (changedFiles) {
       var tasks = [];
       changedFiles.forEach(function (file) {
@@ -95,10 +94,43 @@ gulp.task('default', ['build'], function() {
       return tasks;
     }
   }).on('restart', function(){
-		// when the app has restarted, run livereload.
+/*		// when the app has restarted, run livereload.
 		gulp.src(dist)
 		  .pipe(wait(500))
 			.pipe(livereload());
 		gutil.log(gutil.colors.bgYellow('Livereload'));
-	});
+*/	});
 });
+
+
+//Degeu !!!
+gulp.task('fb-flo', function (done) {
+  var server = flo(
+    './dist', {
+      port: 8888,
+      host: 'localhost',
+      verbose: false,
+      glob: [
+        '**/*.{js,css,html}',
+        '!**/*.{tmp,log,jpg,png,gif}'
+      ]
+    },
+    resolver
+  )
+    .once('ready', done);
+});
+
+function resolver(filepath, callback) {
+  gutil.log('Reloading "', filepath, '" with flo...');
+
+  var file = './dist/' + filepath;
+
+  callback({
+    resourceURL: filepath,
+    contents: fs.readFileSync(file),
+    update: function (_window, _resourceURL) {
+      console.log('Resource ' + _resourceURL + ' has just been updated with new content');
+    },
+    reload: filepath.match(/\.(js|html)$/)
+  });
+}
