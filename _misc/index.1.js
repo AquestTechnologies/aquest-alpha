@@ -1,8 +1,8 @@
-import Hapi from 'hapi';
-import Path from 'path'; //This module contains utilities for handling and transforming file paths. 
+var Hapi = require('hapi');
+var Path = require('path'); //This module contains utilities for handling and transforming file paths. 
 
-let port = process.env.PORT || 8080;
-let server = new Hapi.Server();
+var port = process.env.PORT || 8080;
+var server = new Hapi.Server();
 
 server.connection({
   port: port

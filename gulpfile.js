@@ -1,10 +1,13 @@
 var gulp          = require('gulp');
 var gutil         = require('gulp-util');
 var less          = require('gulp-less');
+var wait          = require('gulp-wait');
+var path          = require('path');
 var htmlmin       = require('gulp-htmlmin');
 var nodemon       = require('gulp-nodemon');
 var browserify    = require('browserify');
 var babel         = require('babelify');
+var livereload    = require('gulp-livereload');
 var del           = require('del');  // Deletes files.
 var source        = require('vinyl-source-stream'); // Use conventional text streams at the start of your gulp or vinyl pipelines, making for nicer interoperability with the existing npm stream ecosystem.
 
@@ -18,6 +21,11 @@ var paths = {
   app_less:   ['src/client/less/app.less'],
   less_files: ['src/client/less/*.less']
 };
+
+var dist = [
+  'dist/app.js',
+  'dist/app.css'
+  ];
  
  
 // Une tache qui sera appellée par les autres taches
@@ -69,12 +77,28 @@ gulp.task('build', ['compileless','bundlejs','minifyhtml'], function() {
 
 gulp.task('default', ['build'], function() {
   
+  livereload.listen({ port: 3001, basePath: 'dist' });
   nodemon({
-    script:   paths.server, 
+    script:   paths.server,
+    execMap: {
+      'js': 'node_modules/babel/bin/babel-node' //ES6 côté server
+    },
     delay:    '0ms',
     ext:      'jsx js less',
-    env:      { 'NODE_ENV': 'development' },
     ignore:   ["_misc", "node_modules", "dist"],
-    tasks:    ['compileless','bundlejs'],
-  });
+    tasks: function (changedFiles) {
+      var tasks = [];
+      changedFiles.forEach(function (file) {
+        if (path.extname(file) === '.jsx' && !~tasks.indexOf('bundlejs')) tasks.push('bundlejs');
+        if (path.extname(file) === '.less' && !~tasks.indexOf('compileless')) tasks.push('compileless');
+      });
+      return tasks;
+    }
+  }).on('restart', function(){
+		// when the app has restarted, run livereload.
+		gulp.src(dist)
+		  .pipe(wait(500))
+			.pipe(livereload());
+		gutil.log(gutil.colors.bgYellow('Livereload'));
+	});
 });

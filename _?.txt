@@ -1,0 +1,10 @@
+aquest == http://[nom de l'app].com
+
+aquest/ --> landing page, avec redirection vers aquest/[univers préféré] en cas de connection
+aquest/?="truc" --> landing page spécial truc (notament ProductHunt et n'importe quel univers)
+
+aquest/@[user]           --> profil de l'utilisateur en question
+aquest/[univers]         --> univers en question
+aquest/[univers]/[post]  --> le post en question. Utiliser un id donnera ça : aquest/startups/15358665546, ce qui est moche et ne donne pas d'info sur le post
+                                                         Pk pas une route comme comme medium ? https://medium.com/@monicawestin/a-tale-of-two-gift-economies-8ee08e461fb5
+
