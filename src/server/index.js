@@ -56,14 +56,12 @@ server.decorate('reply', 'prerenderer', function (elementprops) {
   console.log("Starting prerendering.");
   //on intercepte la réponse
   let response = this.response().hold();
-  
   //les routes sont partagées et react router prend le relai pour /*
   Router.run(routes, this.request.url.path, function(Handler){
     //sérialisation de l'app
     let mount_me_im_famous = React.renderToString(React.createElement(Handler, elementprops));
-    
     //le fichier html est partagé
-    //penser a le mettre en cache en prod, et a prendre une version minifée
+    //penser a le mettre en cache en prod et a prendre une version minifée
     fs.readFile('src/shared/index.html', 'utf8', function read(err, data) {
         if (err || !data) {
           response.source = '500'; //correct?
@@ -73,14 +71,11 @@ server.decorate('reply', 'prerenderer', function (elementprops) {
         //si le fichier html est chargé on extrait le contenu du mountNode
         let placeholder = data.split("<div id=\"mountNode\">")[1].split("</div>")[0];
         //puis on cale notre élément dans le mount node.
-        response.source = data.split(placeholder)[0] + mount_me_im_famous + data.split(placeholder)[1]
+        response.source = data.split(placeholder)[0] + mount_me_im_famous + data.split(placeholder)[1];
         response.send();
         return; //utile?
     });
-    //response.source = '<html><head><meta charset="utf-8"><link rel="icon" href="data:;base64,iVBORw0KGgo="><link rel="stylesheet" type="text/css" href="app.css"><title>Aquest</title></head><body>'+ mount_me_im_famous +'<script src="app.js"></script></body></html>';
-    
   });
-  
   return true;//this.response({ status: 'ok' });
 });
 

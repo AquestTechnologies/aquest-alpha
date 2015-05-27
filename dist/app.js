@@ -22804,6 +22804,7 @@ var App = (function (_React$Component) {
     key: 'render',
 
     //ici plein de belles choses
+
     value: function render() {
       return _react2['default'].createElement(RouteHandler, null);
     }
@@ -23081,7 +23082,7 @@ var Chat = (function (_React$Component) {
 exports['default'] = Chat;
 module.exports = exports['default'];
 
-},{"./ChatFooter.jsx":200,"./ChatHeader.jsx":201,"./Message.jsx":206,"react":195}],200:[function(require,module,exports){
+},{"./ChatFooter.jsx":200,"./ChatHeader.jsx":201,"./Message.jsx":207,"react":195}],200:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23200,7 +23201,79 @@ var ChatHeader = (function (_React$Component) {
 exports['default'] = ChatHeader;
 module.exports = exports['default'];
 
-},{"./Icon.jsx":202,"react":195}],202:[function(require,module,exports){
+},{"./Icon.jsx":203,"react":195}],202:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouter = require('react-router');
+
+var Explore = (function (_React$Component) {
+  function Explore() {
+    _classCallCheck(this, Explore);
+
+    if (_React$Component != null) {
+      _React$Component.apply(this, arguments);
+    }
+  }
+
+  _inherits(Explore, _React$Component);
+
+  _createClass(Explore, [{
+    key: 'render',
+    value: function render() {
+      var universeNodes = this.props.universes.map(function (universe) {
+        return _react2['default'].createElement(
+          'div',
+          { key: universe.id },
+          _react2['default'].createElement(
+            _reactRouter.Link,
+            { to: 'home', params: { universe: universe.name } },
+            universe.name
+          ),
+          _react2['default'].createElement('br', null),
+          universe.description
+        );
+      });
+
+      var divStyle = {
+        width: '60%',
+        margin: 'auto',
+        fontSize: '2rem'
+      };
+
+      return _react2['default'].createElement(
+        'div',
+        { className: 'explore', style: divStyle },
+        universeNodes
+      );
+    }
+  }]);
+
+  return Explore;
+})(_react2['default'].Component);
+
+Explore.defaultProps = {
+  universes: [{ id: 0, name: 'Startups', description: 'Lorem Ipsum' }, { id: 1, name: 'Design', description: 'Lorem Design Ipsum' }] };
+
+exports['default'] = Explore;
+module.exports = exports['default'];
+
+},{"react":195,"react-router":26}],203:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23302,7 +23375,7 @@ Icon.defaultProps = {
 exports["default"] = Icon;
 module.exports = exports["default"];
 
-},{"react":195}],203:[function(require,module,exports){
+},{"react":195}],204:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23401,7 +23474,7 @@ Inventory.defaultProps = {
 exports['default'] = Inventory;
 module.exports = exports['default'];
 
-},{"./Card.jsx":197,"./CardNew.jsx":198,"react":195}],204:[function(require,module,exports){
+},{"./Card.jsx":197,"./CardNew.jsx":198,"react":195}],205:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23462,7 +23535,7 @@ var Layout = (function (_React$Component) {
 exports['default'] = Layout;
 module.exports = exports['default'];
 
-},{"./Chat.jsx":199,"./Inventory.jsx":203,"./Menu.jsx":205,"react":195}],205:[function(require,module,exports){
+},{"./Chat.jsx":199,"./Inventory.jsx":204,"./Menu.jsx":206,"react":195}],206:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23481,9 +23554,15 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _reactRouter = require('react-router');
+
+var _reactRouter2 = _interopRequireDefault(_reactRouter);
+
 var _IconJsx = require('./Icon.jsx');
 
 var _IconJsx2 = _interopRequireDefault(_IconJsx);
+
+var Link = _reactRouter2['default'].Link;
 
 var Menu = (function (_React$Component) {
   function Menu() {
@@ -23518,11 +23597,15 @@ var Menu = (function (_React$Component) {
           _react2['default'].createElement(
             'li',
             null,
-            _react2['default'].createElement(_IconJsx2['default'], { name: 'globe', cssclass: 'menu_icon' }),
             _react2['default'].createElement(
-              'span',
-              { className: 'st_hide' },
-              'Explore'
+              Link,
+              { to: 'explore' },
+              _react2['default'].createElement(_IconJsx2['default'], { name: 'globe', cssclass: 'menu_icon' }),
+              _react2['default'].createElement(
+                'span',
+                { className: 'st_hide' },
+                'Explore'
+              )
             )
           )
         ),
@@ -23550,7 +23633,7 @@ var Menu = (function (_React$Component) {
 exports['default'] = Menu;
 module.exports = exports['default'];
 
-},{"./Icon.jsx":202,"react":195}],206:[function(require,module,exports){
+},{"./Icon.jsx":203,"react":195,"react-router":26}],207:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23619,7 +23702,7 @@ Message.defaultProps = {
 exports['default'] = Message;
 module.exports = exports['default'];
 
-},{"./Icon.jsx":202,"react":195}],207:[function(require,module,exports){
+},{"./Icon.jsx":203,"react":195}],208:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23666,7 +23749,7 @@ var NotFound = (function (_React$Component) {
 exports["default"] = NotFound;
 module.exports = exports["default"];
 
-},{"react":195}],208:[function(require,module,exports){
+},{"react":195}],209:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23695,6 +23778,10 @@ var _componentsNotFoundJsx = require('./components/NotFound.jsx');
 
 var _componentsNotFoundJsx2 = _interopRequireDefault(_componentsNotFoundJsx);
 
+var _componentsExploreJsx = require('./components/Explore.jsx');
+
+var _componentsExploreJsx2 = _interopRequireDefault(_componentsExploreJsx);
+
 var Route = _reactRouter2['default'].Route;
 var DefaultRoute = _reactRouter2['default'].DefaultRoute;
 var NotFoundRoute = _reactRouter2['default'].NotFoundRoute;
@@ -23703,13 +23790,15 @@ var routes = _react2['default'].createElement(
   Route,
   { path: '/', handler: _componentsAppJsx2['default'] },
   _react2['default'].createElement(DefaultRoute, { handler: _componentsLayoutJsx2['default'] }),
+  _react2['default'].createElement(Route, { name: 'home', path: '/_:universe', handler: _componentsLayoutJsx2['default'] }),
+  _react2['default'].createElement(Route, { name: 'explore', path: '/Explore', handler: _componentsExploreJsx2['default'] }),
   _react2['default'].createElement(NotFoundRoute, { handler: _componentsNotFoundJsx2['default'] })
 );
 
 exports['default'] = routes;
 module.exports = exports['default'];
 
-},{"./components/App.jsx":196,"./components/Layout.jsx":204,"./components/NotFound.jsx":207,"react":195,"react-router":26}],209:[function(require,module,exports){
+},{"./components/App.jsx":196,"./components/Explore.jsx":202,"./components/Layout.jsx":205,"./components/NotFound.jsx":208,"react":195,"react-router":26}],210:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -23742,4 +23831,4 @@ _reactRouter2['default'].run(_routesJsx2['default'], _reactRouter2['default'].Hi
   _react2['default'].render(_react2['default'].createElement(Handler, null), document.getElementById('mountNode'));
 });
 
-},{"./components/App.jsx":196,"./components/Layout.jsx":204,"./components/NotFound.jsx":207,"./routes.jsx":208,"react":195,"react-router":26}]},{},[209]);
+},{"./components/App.jsx":196,"./components/Layout.jsx":205,"./components/NotFound.jsx":208,"./routes.jsx":209,"react":195,"react-router":26}]},{},[210]);

@@ -3,7 +3,7 @@ import Menu from './Menu.jsx';
 import Inventory from './Inventory.jsx';
 import Chat from './Chat.jsx';
 
-class Layout extends React.Component {
+class UniverseHome extends React.Component {
   render() {
     return (
       <div>
@@ -15,4 +15,4 @@ class Layout extends React.Component {
   }
 }
 
-export default Layout;
+export default UniverseHome;

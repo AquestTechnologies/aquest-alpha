@@ -13,14 +13,19 @@ nav ul {
 }
 
 nav li {
+    .txt_menu_item();
     width: @doubleMargin_w;
     cursor: pointer;
     overflow-x: visible;
-    .txt_menu_item();
 }
 
 nav li:hover {
     color: @green_color;
+}
+
+nav li a {
+    color: inherit;
+    text-decoration: none;
 }
 
 nav li span {

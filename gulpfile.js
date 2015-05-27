@@ -93,9 +93,7 @@ gulp.task('default', ['build'], function() {
       });
       return tasks;
     }
-  }).on('restart', function(){
-		gutil.log(gutil.colors.black.bgYellow('Server restarted'));
-	});
+  });
 });
 
 
@@ -113,7 +111,7 @@ gulp.task('fb-flo', function (done) {
     },
     resolver
   )
-    .once('ready', done);
+  .once('ready', done);
 });
 
 //DEGEU!!!!

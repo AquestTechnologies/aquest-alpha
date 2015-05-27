@@ -437,14 +437,18 @@ nav ul {
   margin: 0;
 }
 nav li {
+  color: #ffffff;
+  font-size: 1.7rem;
   width: 4rem;
   cursor: pointer;
   overflow-x: visible;
-  color: #ffffff;
-  font-size: 1.7rem;
 }
 nav li:hover {
   color: #2fd359;
+}
+nav li a {
+  color: inherit;
+  text-decoration: none;
 }
 nav li span {
   display: none;

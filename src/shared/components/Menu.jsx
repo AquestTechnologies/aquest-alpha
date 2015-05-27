@@ -1,4 +1,6 @@
 import React from 'react';
+import Router from 'react-router';
+let Link = Router.Link;
 import Icon from './Icon.jsx';
 
 class Menu extends React.Component {
@@ -12,8 +14,10 @@ class Menu extends React.Component {
             <span className="st_hide">{"currentUser"}</span>
           </li>
           <li>
-            <Icon name="globe" cssclass="menu_icon" />
-            <span className="st_hide">{"Explore"}</span>
+            <Link to="explore">
+              <Icon name="globe" cssclass="menu_icon" />
+              <span className="st_hide">{"Explore"}</span>
+            </Link>
           </li>          
         </ul>
         

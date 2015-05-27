@@ -4,6 +4,7 @@ let RouteHandler = Router.RouteHandler;
 
 class App extends React.Component {
   //ici plein de belles choses
+  
   render() {
     return (
       <RouteHandler />
