@@ -1,6 +1,7 @@
 import alt from '../alt';
 
 class UniverseActions {
+  
   updateCurrentUniverse(universe) {
     this.dispatch(universe);
   }

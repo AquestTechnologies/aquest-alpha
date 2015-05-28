@@ -2,9 +2,8 @@ import React from 'react';
 import Router from 'react-router';
 let RouteHandler = Router.RouteHandler;
 
-class App extends React.Component {
-  //ici plein de belles choses
-  
+class _App extends React.Component {
+  //ici plein de belles choses ?
   render() {
     return (
       <RouteHandler />
@@ -12,4 +11,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default _App;

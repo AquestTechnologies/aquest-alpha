@@ -1,21 +1,24 @@
 import React        from 'react';
 import Router       from 'react-router';  
 
-import App          from './components/App.jsx';
-import UniverseHome from './components/UniverseHome.jsx';
-import NotFound     from './components/NotFound.jsx';
-import Explore      from './components/Explore.jsx';
+import _App          from './components/_App.jsx';
+import _Universe     from './components/_Universe.jsx';
+import _NotFound     from './components/_NotFound.jsx';
+import _Explore      from './components/_Explore.jsx';
 
-var Route         = Router.Route;
-var DefaultRoute  = Router.DefaultRoute;
-var NotFoundRoute = Router.NotFoundRoute;
+var Route           = Router.Route;
+var DefaultRoute    = Router.DefaultRoute;
+var NotFoundRoute   = Router.NotFoundRoute;
 
+//Seuls les components layouts (_truc.jsx) peuvent communiquer avec les stores
+//Leur state devient alors les props de leurs enfants
+//Les composants layouts sont les seuls à être appellés par le routeur.
 var routes = (
-  <Route path='/' handler={App}>
-    <DefaultRoute handler={UniverseHome} />
-    <Route name='home' path='/_:universe' handler={UniverseHome} />
-    <Route name='explore' path='/Explore' handler={Explore} />
-    <NotFoundRoute handler={NotFound}/>
+  <Route path='/' handler={_App}>
+    <DefaultRoute handler={_Universe} />
+    <Route name='home' path='/_:universe' handler={_Universe} />
+    <Route name='explore' path='/Explore' handler={_Explore} />
+    <NotFoundRoute handler={_NotFound}/>
   </Route>
 );
 

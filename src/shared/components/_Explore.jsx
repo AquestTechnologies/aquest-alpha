@@ -1,10 +1,31 @@
 import React from 'react';
 import {Link} from 'react-router';
+import UniverseStore  from '../stores/UniverseStore.js';
+import UniverseActions  from '../actions/UniverseActions.js';
 
-class Explore extends React.Component {
+class _Explore extends React.Component {
   
+  constructor(props) {
+    super(props);
+    this.state = UniverseStore.getState();
+  }
+  
+  componentWillMount() {
+  }
+
+  componentDidMount() {
+    UniverseStore.listen(this.onChange);
+  }
+
+  componentWillUnmount() {
+    UniverseStore.unlisten(this.onChange);
+  }
+
+  onChange(state) {
+    this.setState(state);
+  }
   render() {
-    var universeNodes = this.props.universes.map(function (universe) {
+    var renderItems = this.props.universes.map(function (universe) {
       return (
         <div key={universe.id}>
           <Link to='home' params={{universe: universe.name}}>
@@ -25,14 +46,14 @@ class Explore extends React.Component {
     return (
       
       <div className="explore" style={divStyle}>
-        {universeNodes}
+        {renderItems}
       </div>
     );
   }
 }
 
-Explore.defaultProps = {
+_Explore.defaultProps = {
   universes: [{id: 0, name: 'Startups', description: 'Lorem Ipsum'}, {id: 1, name: 'Design', description: 'Lorem Design Ipsum'}],
 };
 
-export default Explore;
+export default _Explore;
