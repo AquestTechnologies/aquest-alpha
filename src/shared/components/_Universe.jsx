@@ -2,10 +2,10 @@ import React          from 'react';
 import Inventory      from './Inventory.jsx';
 import Menu           from './Menu.jsx';
 import Chat           from './Chat.jsx';
-import UniverseStore  from '../stores/UniverseStore.js';
+//import UniverseStore  from '../stores/UniverseStore.js';
 
 class _Universe extends React.Component {
-  constructor(props) {
+  /*constructor(props) {
     super(props);
     this.state = UniverseStore.getState();
   }
@@ -20,7 +20,7 @@ class _Universe extends React.Component {
 
   onChange(state) {
     this.setState(state);
-  }
+  }*/
   
   render() {
     return (

@@ -1,26 +1,24 @@
-import alt from '../alt.js';
-import UniverseActions from '../actions/UniverseActions.js';
-import Fetch from '../utils/fetchers.js';
+import { Store } from 'flummox';
 
-class UniverseStore {
-  
-  constructor() {
-    //Instance variables defined anywhere in the store will become the state.
-    this.currentUniverse = {name: "Startup", description: "Lorem ipsum."};
-    
-    //we bind our action handlers to our actions.
-    this.bindListeners({
-      handleUpdateCurrentUniverse:  UniverseActions.UPDATE_CURRENT_UNIVERSE,
+class UniverseStore extends Store {
+
+  constructor(flux) {
+    super(); // Don't forget this step
+
+    const universeActionIds = flux.getActionIds('universes');
+    //this.register(universeActionIds.createMessage, this.handleNewMessage);
+
+    this.state = {
+      //messages: [],
+    };
+  }
+/*
+  handleNewMessage(message) {
+    this.setState({
+      messages: this.state.messages.concat([message]),
     });
-    //c'est pas mieux de faire 
-    //this.bindActions(UniverseActions);
-    //?
-  }
-  
-  handleUpdateCurrentUniverse(universe) {
-    this.currentUniverse = universe;
-    // optionally return false to suppress the store change event
-  }
+  }*/
+
 }
 
-export default alt.createStore(UniverseStore, 'UniverseStore');
+export default UniverseStore;

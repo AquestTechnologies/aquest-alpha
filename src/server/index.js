@@ -1,6 +1,4 @@
 import fs     from 'fs';
-import Alt    from 'alt';
-import Iso    from 'iso';
 import Hapi   from 'hapi';
 import React  from 'react';
 import Router from 'react-router';
@@ -78,9 +76,6 @@ server.decorate('reply', 'prerenderer', function (elementprops) {
     //A priori Handler est donc un component layout.
     
     //sérialisation de l'app
-    let alt = new Alt();
-    let data = {/* fetch data ici */};
-    alt.bootstrap(JSON.stringify(data));
     let mount_me_im_famous = React.renderToString(React.createElement(Handler, elementprops));
     
     //le fichier html est partagé
@@ -95,15 +90,3 @@ server.decorate('reply', 'prerenderer', function (elementprops) {
   });
   return true;//this.response({ status: 'ok' });
 });
-
-class ResponseAlt extends Alt {
-  constructor(config = {}) {
-    super(config);
-
-    //this.addActions('myActions', ActionCreators);
-    //this.addStore('storeName', Store);
-    
-  }
-}
-//http://alt.js.org/docs/altInstances/
-var flux = new ResponseAlt();

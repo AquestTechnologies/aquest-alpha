@@ -1,11 +1,11 @@
 import React from 'react';
 import {Link} from 'react-router';
-import UniverseStore  from '../stores/UniverseStore.js';
-import UniverseActions  from '../actions/UniverseActions.js';
+//import UniverseStore  from '../stores/UniverseStore.js';
+//import UniverseActions  from '../actions/UniverseActions.js';
 
 class _Explore extends React.Component {
   
-  constructor(props) {
+  /*constructor(props) {
     super(props);
     this.state = UniverseStore.getState();
   }
@@ -23,7 +23,7 @@ class _Explore extends React.Component {
 
   onChange(state) {
     this.setState(state);
-  }
+  }*/
   render() {
     var renderItems = this.props.universes.map(function (universe) {
       return (

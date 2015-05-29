@@ -18,18 +18,16 @@
     "gulp-babel": "^5.1.0",
     "gulp-htmlmin": "^1.1.1",
     "gulp-less": "^3.0.3",
-    "gulp-livereload": "^3.8.0",
     "gulp-nodemon": "^2.0.3",
     "gulp-util": "^3.0.4",
     "gulp-wait": "0.0.2",
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "alt": "^0.16.5",
     "babel": "^5.4.7",
+    "flummox": "^3.5.2",
     "hapi": "^8.4.0",
     "immutable": "^3.7.3",
-    "iso": "^4.1.0",
     "react": "^0.13.3",
     "react-router": "^0.13.3"
   }
