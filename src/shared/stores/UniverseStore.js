@@ -12,12 +12,14 @@ class UniverseStore extends Store {
       //messages: [],
     };
   }
-/*
-  handleNewMessage(message) {
-    this.setState({
-      messages: this.state.messages.concat([message]),
-    });
-  }*/
+
+  getAllUniverses() {
+    //async fetch
+    return [{id: 0, name: 'Startups', description: 'Lorem Ipsum'}, {id: 1, name: 'Design', description: 'Lorem Design Ipsum'}, {id: 3, name: 'Dev', description: 'Lorem Dev Ipsum'}];
+    /*this.setState({
+      universes: this.state.messages.concat([message]),
+    });*/
+  }
 
 }
 

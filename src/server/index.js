@@ -3,6 +3,9 @@ import Hapi   from 'hapi';
 import React  from 'react';
 import Router from 'react-router';
 import routes from '../shared/routes.jsx';
+import Flux from '../shared/flux.js';
+import FluxComponent from 'flummox/component';
+import performRouteHandlerStaticMethod from '../shared/utils/performRouteHandlerStaticMethod.js';
 
 let port = process.env.PORT || 8080;
 let server = new Hapi.Server();
@@ -58,7 +61,6 @@ server.route({
 server.decorate('reply', 'prerenderer', function (elementprops) {
   //on intercepte la réponse
   console.log("Starting prerendering.");
-  console.log(this.request.getLog());
   let response = this.response().hold();
   
   function readFile (filename, enc) {
@@ -70,13 +72,21 @@ server.decorate('reply', 'prerenderer', function (elementprops) {
     });
   }
   
+  const flux = new Flux();
+  
   //les routes sont partagées et react router prend le relai pour /*
-  Router.run(routes, this.request.url.path, function(Handler){
-    //Le Router ne prend que des components layout comme route
-    //A priori Handler est donc un component layout.
-    
+  Router.run(routes, this.request.url.path, async (Handler, state) => {
+    const routeHandlerInfo = { state, flux };
+    await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
+  
     //sérialisation de l'app
-    let mount_me_im_famous = React.renderToString(React.createElement(Handler, elementprops));
+    let mount_me_im_famous = React.renderToString(
+      <FluxComponent flux={flux}>
+        <Handler {...state} />
+      </FluxComponent>,
+      document.getElementById('mountNode')
+    );
+    
     
     //le fichier html est partagé
     //penser a le mettre en cache en prod et a prendre une version minifée
@@ -87,6 +97,7 @@ server.decorate('reply', 'prerenderer', function (elementprops) {
       response.source = html.split(placeholder)[0] + mount_me_im_famous + html.split(placeholder)[1];
       response.send();
     });
+    
   });
-  return true;//this.response({ status: 'ok' });
+  return true;//inutile?
 });

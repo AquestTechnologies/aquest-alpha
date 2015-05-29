@@ -1,7 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router';
-//import UniverseStore  from '../stores/UniverseStore.js';
-//import UniverseActions  from '../actions/UniverseActions.js';
+import connectToStores from 'flummox/connect';
 
 class _Explore extends React.Component {
   
@@ -46,6 +45,7 @@ class _Explore extends React.Component {
     return (
       
       <div className="explore" style={divStyle}>
+        <Link to='root'>Cancel</Link>
         {renderItems}
       </div>
     );
@@ -53,7 +53,13 @@ class _Explore extends React.Component {
 }
 
 _Explore.defaultProps = {
-  universes: [{id: 0, name: 'Startups', description: 'Lorem Ipsum'}, {id: 1, name: 'Design', description: 'Lorem Design Ipsum'}],
+  //universes: [{id: 0, name: 'Startups', description: 'Lorem Ipsum'}, {id: 1, name: 'Design', description: 'Lorem Design Ipsum'}],
 };
+
+_Explore = connectToStores(_Explore, {
+  universe: store => ({
+    universes: store.getAllUniverses()
+  })
+});
 
 export default _Explore;

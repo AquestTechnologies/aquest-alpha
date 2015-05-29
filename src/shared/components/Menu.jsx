@@ -1,8 +1,6 @@
 import React from 'react';
-import Router from 'react-router';
-let Link = Router.Link;
+import {Link} from 'react-router';
 import Icon from './Icon.jsx';
-
 class Menu extends React.Component {
   render() {
     return (

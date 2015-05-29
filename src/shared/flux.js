@@ -1,17 +1,12 @@
-import { Flux } from 'flummox';
+import { Flummox } from 'flummox';
 import UniverseActions from './actions/UniverseActions.js'
 import UniverseStore from './stores/UniverseStore.js'
 
-export default class extends Flux {
-
+export default class Flux extends Flummox {
   constructor() {
     super();
-
-    this.createActions('universes', UniverseActions);
-
+    this.createActions('universe', UniverseActions);
     // The extra argument(s) are passed to the UniverseStore constructor
-    this.createStore('universes', UniverseStore, this);
+    this.createStore('universe', UniverseStore, this);
   }
-
 }
-//You can access a Flux instance’s actions and stores using getActions(key) and getStore(key).

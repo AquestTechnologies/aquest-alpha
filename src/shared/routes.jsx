@@ -9,12 +9,13 @@ import _Explore      from './components/_Explore.jsx';
 let Route           = Router.Route;
 let DefaultRoute    = Router.DefaultRoute;
 let NotFoundRoute   = Router.NotFoundRoute;
+let RouteHandler   = Router.RouteHandler;
 
 //Seuls les components layouts (_truc.jsx) peuvent communiquer avec les stores
 //Leur state devient alors les props de leurs enfants
 //Les composants layouts sont les seuls à être appellés par le routeur.
 let routes = (
-  <Route path='/' handler={_App}>
+  <Route name='root' path='/'> 
     <DefaultRoute handler={_Universe} />
     <Route name='home' path='/_:universe' handler={_Universe} />
     <Route name='explore' path='/Explore' handler={_Explore} />

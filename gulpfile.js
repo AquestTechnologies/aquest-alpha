@@ -50,9 +50,10 @@ gulp.task('compileless', ['clean'], function() {
 
 // ES6 jsx -> ES5 js puis browserify app.js
 gulp.task('bundlejs', ['clean'], function() {
-  
   browserify(paths.app_jsx)
-    .transform(babel)
+    .transform(babel.configure({
+      stage: 1 //ES7
+    }))
     .bundle()
     .pipe(source('app.js'))
     .pipe(gulp.dest(paths.dist));
@@ -80,7 +81,7 @@ gulp.task('default', ['build'], function() {
   nodemon({
     script:   paths.server,
     execMap: {
-      'js': 'node_modules/babel/bin/babel-node' //ES6 cote server
+      'js': 'node_modules/babel/bin/babel-node --stage 1' //ES7 cote server
     },
     delay:    '0ms',
     ext:      'jsx js less',

@@ -9,6 +9,10 @@ class UniverseActions extends Actions {
     };
   }*/
   
+  clickExplore() {
+    return;
+  }
+  
   /*async createMessage(messageContent) {
     try {
       return await serverCreateMessage(messageContent);

@@ -2,7 +2,6 @@ import React          from 'react';
 import Inventory      from './Inventory.jsx';
 import Menu           from './Menu.jsx';
 import Chat           from './Chat.jsx';
-//import UniverseStore  from '../stores/UniverseStore.js';
 
 class _Universe extends React.Component {
   /*constructor(props) {
@@ -32,5 +31,6 @@ class _Universe extends React.Component {
     );
   }
 }
+
 
 export default _Universe;
