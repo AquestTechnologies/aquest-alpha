@@ -22,7 +22,7 @@ server.route({
   method: 'GET',
   path: '/',
   handler: function (request, reply) {
-    reply.file('dist/index.html');
+    reply.prerenderer(request.url);
   }
 });
 
@@ -54,13 +54,13 @@ server.route({
     method: 'GET',
     path: '/{filename}',
     handler: function (request, reply) {
-        reply.prerenderer();
+        reply.prerenderer(request.url);
     }
 });
 
-server.decorate('reply', 'prerenderer', function (elementprops) {
+server.decorate('reply', 'prerenderer', function (url) {
   //on intercepte la réponse
-  console.log("Starting prerendering.");
+  console.log("Starting prerendering " + url.path);
   let response = this.response().hold();
   
   function readFile (filename, enc) {
@@ -74,17 +74,20 @@ server.decorate('reply', 'prerenderer', function (elementprops) {
   
   const flux = new Flux();
   
-  //les routes sont partagées et react router prend le relai pour /*
-  Router.run(routes, this.request.url.path, async (Handler, state) => {
+  //les routes sont partagées et react router prend le relai pour /*7
+  const router = Router.create({
+    routes: routes,
+    location: url.path
+  });
+  // Render app
+  router.run(async (Handler, state) => {
     const routeHandlerInfo = { state, flux };
     await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
-  
     //sérialisation de l'app
     let mount_me_im_famous = React.renderToString(
       <FluxComponent flux={flux}>
         <Handler {...state} />
-      </FluxComponent>,
-      document.getElementById('mountNode')
+      </FluxComponent>
     );
     
     
@@ -99,5 +102,6 @@ server.decorate('reply', 'prerenderer', function (elementprops) {
     });
     
   });
-  return true;//inutile?
+  console.log("Served "+ url.path);
+  return;//inutile?
 });
