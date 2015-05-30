@@ -13,7 +13,7 @@ class UniverseStore extends Store {
     };
   }
 
-  getAllUniverses() {
+  getAllUniverses() { 
     //async fetch
     return [{id: 0, name: 'Startups', description: 'Lorem Ipsum'}, {id: 1, name: 'Design', description: 'Lorem Design Ipsum'}, {id: 3, name: 'Dev', description: 'Lorem Dev Ipsum'}];
     /*this.setState({

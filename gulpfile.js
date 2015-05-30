@@ -80,12 +80,14 @@ gulp.task('default', ['build'], function() {
   gulp.start('fb-flo'); //c'est degeu!!!!
   nodemon({
     script:   paths.server,
+    env: { 'NODE_ENV': 'development' },
     execMap: {
       'js': 'node_modules/babel/bin/babel-node --stage 1' //ES7 cote server
     },
     delay:    '0ms',
     ext:      'jsx js less',
-    ignore:   ['_misc', 'node_modules', 'dist', 'gulpfile.js'],
+    watch:    ['src/shared/', 'src/server/'],
+    ignore:   ['src/shared/components'],
     tasks: function (changedFiles) {
       var tasks = [];
       changedFiles.forEach(function (file) {

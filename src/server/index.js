@@ -99,9 +99,9 @@ server.decorate('reply', 'prerenderer', function (url) {
       //puis on cale notre élément dans le mount node.
       response.source = html.split(placeholder)[0] + mount_me_im_famous + html.split(placeholder)[1];
       response.send();
+      console.log("Served "+ url.path);
     });
     
   });
-  console.log("Served "+ url.path);
   return;//inutile?
 });
