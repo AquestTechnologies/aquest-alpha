@@ -8,4 +8,5 @@ Todo :
 - Immutable
 - Base store + loading bar
 - Iso fetch
+- Wensockets
 - API...
