@@ -16,6 +16,16 @@ server.connection({
 
 server.start(function() {
   console.log('Make it rain! Server started at %s', server.info.uri);
+  console.log(' _____ _     _       _        ___                        _   \n' + // B)
+              '|_   _| |   (_)     (_)      / _ \\                      | |  \n' +
+              '  | | | |__  _ ___   _ ___  / /_\\ \\ __ _ _   _  ___  ___| |_ \n' +
+              "  | | | '_ \\| / __| | / __| |  _  |/ _` | | | |/ _ \\/ __| __|\n" +
+              '  | | | | | | \\__ \\ | \\__ \\ | | | | (_| | |_| |  __/\\__ \\ |_ \n' +
+              '  \\_/ |_| |_|_|___/ |_|___/ \\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
+              '                                      | |\n' +
+              '                                      |_|'
+             );
+
 });
 
 server.route({
@@ -54,57 +64,70 @@ server.route({
     method: 'GET',
     path: '/{filename}',
     handler: function (request, reply) {
-        reply.prerenderer(request.url);
+      reply.prerenderer(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
     }
 });
 
-server.decorate('reply', 'prerenderer', function (url) {
-  //on intercepte la réponse
-  console.log("Starting prerendering " + url.path);
-  let response = this.response().hold();
-  
-  function readFile (filename, enc) {
-    return new Promise(function (ohyes, ohno){
-      fs.readFile(filename, enc, function (err, res){
-        if (err) ohno(err);
-        else ohyes(res);
+//Prerendering
+(function() {
+  let c = 0; //Compte le nombre d'appels
+  server.decorate('reply', 'prerenderer', function (url, ip, port, method) {
+    //Intercepte la réponse
+    let response = this.response().hold();
+    //Affiche les infos de la requete
+    let d = new Date(),
+        h = d.getHours() + 2, //heure française / GTM
+        m = d.getMinutes(),
+        s = d.getSeconds();
+    h = ('' + h).length == 2 ? h : '0' + h;
+    m = ('' + m).length == 2 ? m : '0' + m;
+    s = ('' + s).length == 2 ? s : '0' + s;
+    c++;
+    console.log('\n[' + c + '] ' + h + ':' + m + ':' + s + ' ' + this.request.info.remoteAddress + ':' + this.request.info.remotePort + ' ' + this.request.method + ' ' + this.request.url.path);
+
+    function readFile (filename, enc) {
+      return new Promise(function (ohyes, ohno){
+        fs.readFile(filename, enc, function (err, res){
+          if (err) ohno(err);
+          else ohyes(res);
+        });
       });
-    });
-  }
-  
-  const flux = new Flux();
-  
-  //les routes sont partagées et react router prend le relai pour /*7
-  const router = Router.create({
-    routes: routes,
-    location: url.path
-  });
-  // Render app
-  router.run(async (Handler, state) => {
-    const routeHandlerInfo = { state, flux };
-    await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
-    console.log("... performRouteHandlerStaticMethod done");
-    //sérialisation de l'app
-    let mount_me_im_famous = React.renderToString(
-      <FluxComponent flux={flux}>
-        <Handler {...state} />
-      </FluxComponent>
-    );
-    console.log("... React.renderToString done");
-    
-    
-    //le fichier html est partagé
-    //penser a le mettre en cache en prod et a prendre une version minifée
-    readFile('src/shared/index.html', 'utf8').then(function (html){
-      console.log("... HTML file read");
-      //si le fichier html est chargé on extrait le contenu du mountNode
-      let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
-      //puis on cale notre élément dans le mount node.
-      response.source = html.split(placeholder)[0] + mount_me_im_famous + html.split(placeholder)[1];
-      response.send();
-      console.log("Served "+ url.path);
+    }
+
+    //Initialize le router
+    const router = Router.create({
+      routes: routes,
+      location: url.path
     });
     
+    //Match la location et les routes, et renvoie le bon layout (Handler) et le state
+    router.run(async (Handler, state) => {
+      //On initialise une nouvelle instance flux
+      const flux = new Flux();
+      const routeHandlerInfo = { state, flux };
+      //On lie les stores et autres fluxeries au state react
+      await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
+      console.log('... performRouteHandlerStaticMethod done');
+      //sérialisation de l'app fluxée
+      let mount_me_im_famous = React.renderToString(
+        <FluxComponent flux={flux}>
+          <Handler {...state} />
+        </FluxComponent>
+      );
+      console.log('... React.renderToString done');
+      
+      //le fichier html est partagé, penser a prendre une version minifée en cache en prod
+      readFile('src/shared/index.html', 'utf8').then(function (html){
+        //on extrait le contenu du mountNode 
+        let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
+        //puis on cale notre élément dans le mountNode.
+        response.source = html.split(placeholder)[0] + mount_me_im_famous + html.split(placeholder)[1];
+        console.log('... Response ready');
+        response.send();
+        console.log('Served '+ url.path + '\n');
+      });
+      
+    });
+    return;//inutile?
   });
-  return;//inutile?
-});
+})();

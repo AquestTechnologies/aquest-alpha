@@ -1,5 +1,6 @@
 var gulp          = require('gulp');
 var gutil         = require('gulp-util');
+var exit          = require('gulp-exit');
 var less          = require('gulp-less');
 var htmlmin       = require('gulp-htmlmin');
 var nodemon       = require('gulp-nodemon');
@@ -78,10 +79,11 @@ gulp.task('build', ['compileless','bundlejs','minifyhtml'], function() {
 
 
 gulp.task('serve', ['build'], function() {
-  
+  gulp.start('fb-flo');
   nodemon({
     script:   paths.server,
     env: { 'NODE_ENV': 'development' },
+    // env: { 'NODE_ENV': 'production' },
     execMap: {
       'js': 'node_modules/babel/bin/babel-node --stage 1' //ES7 cote server
     },
@@ -97,10 +99,15 @@ gulp.task('serve', ['build'], function() {
       });
       return tasks;
     }
-  }).on('start', function(){
+  });/*.on('exit', function(){
+    console.log('hello');
+    process.once('SIGUSR2', function () {
+      process.kill(process.pid, 'SIGUSR2');
+    });
+  });*//*.on('start', function(){
     gulp.start('fb-flo');
   });
-  
+  */
 });
 
 
@@ -125,14 +132,15 @@ gulp.task('fb-flo', function (done) {
 function resolver(filepath, callback) {
   gutil.log('Reloading "', filepath, '" with flo...');
 
-  var file = './dist/' + filepath;
+  // var file = './dist/' + filepath;
 
   callback({
     resourceURL: filepath,
-    contents: fs.readFileSync(file),
+    contents: fs.readFileSync('./dist/' + filepath),
     update: function (_window, _resourceURL) {
       console.log('Resource ' + _resourceURL + ' has just been updated with new content');
     },
-    reload: filepath.match(/\.(js|html)$/)
+    // reload: filepath.match(/\.(js|html)$/)
+    reload: filepath.match(/\.(html)$/)
   });
 }
