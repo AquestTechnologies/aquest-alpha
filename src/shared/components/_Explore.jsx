@@ -1,4 +1,5 @@
 import React from 'react';
+import ExploreItem from './ExploreItem.jsx';
 import {Link} from 'react-router';
 import connectToStores from 'flummox/connect';
 
@@ -24,15 +25,9 @@ class _Explore extends React.Component {
     this.setState(state);
   }*/
   render() {
-    var renderItems = this.props.universes.map(function (universe) {
+    var renderedItems = this.props.universes.map(function (universe) {
       return (
-        <div key={universe.id}>
-          <Link to='home' params={{universe: universe.name}}>
-            {universe.name}
-          </Link>
-          <br />
-          {universe.description}
-        </div>
+        <ExploreItem universe={universe} key={universe.id}/>
       );
     });
     
@@ -45,8 +40,8 @@ class _Explore extends React.Component {
     return (
       
       <div className="explore" style={divStyle}>
-        <Link to='root'>Cancel</Link>
-        {renderItems}
+        <Link to='root'>Back</Link>
+        {renderedItems}
       </div>
     );
   }

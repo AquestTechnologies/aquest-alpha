@@ -5,8 +5,10 @@ Rock'n'Roll
 Aquest Technologies © 2015
 
 Todo :
-- Immutable
 - Base store + loading bar
 - Iso fetch
-- Wensockets
-- API...
+- Immutable
+- Websockets
+- API... https://github.com/gaearon/normalizr
+
+ça vaut le coup de 'use strict' ? https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Strict_mode

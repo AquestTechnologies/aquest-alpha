@@ -1,17 +1,24 @@
 import React from 'react';
+import {Link} from 'react-router';
 
-class Item extends React.Component {
+class ExploreItem extends React.Component {
   
   render() {
+    let universe = this.props.universe;
     return (
-      <div className="card">
-          <div className="card_title">{this.props.title}</div>
-          <div className="card_author">{"By " + this.props.author + ", " + this.props.timestamp + " ago."}</div>
-          {this.setPreview()}
-          {this.setFooter()}
+      <div /*key={universe.id}*/>
+          <Link to='home' params={{universe: universe.name}}>
+            {universe.name}
+          </Link>
+          <br />
+          {universe.description}
       </div>
     );
   }
 }
 
-export default Item;
+ExploreItem.defaultProps = {
+  universe: {id: 0, name: 'Startups', description: 'Lorem Ipsum'}
+};
+
+export default ExploreItem;

@@ -83,17 +83,20 @@ server.decorate('reply', 'prerenderer', function (url) {
   router.run(async (Handler, state) => {
     const routeHandlerInfo = { state, flux };
     await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
+    console.log("... performRouteHandlerStaticMethod done");
     //sérialisation de l'app
     let mount_me_im_famous = React.renderToString(
       <FluxComponent flux={flux}>
         <Handler {...state} />
       </FluxComponent>
     );
+    console.log("... React.renderToString done");
     
     
     //le fichier html est partagé
     //penser a le mettre en cache en prod et a prendre une version minifée
     readFile('src/shared/index.html', 'utf8').then(function (html){
+      console.log("... HTML file read");
       //si le fichier html est chargé on extrait le contenu du mountNode
       let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
       //puis on cale notre élément dans le mount node.

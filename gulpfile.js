@@ -8,8 +8,8 @@ var babel         = require('babelify');
 var source        = require('vinyl-source-stream'); // Use conventional text streams at the start of your gulp or vinyl pipelines, making for nicer interoperability with the existing npm stream ecosystem.
 var del           = require('del');  // Deletes files.
 var path          = require('path');
-var flo = require('fb-flo');
-var fs = require('fs');
+var flo           = require('fb-flo');
+var fs            = require('fs');
 
 // Quelques variables pour modifier la structure des fichiers facilement
 var paths = {
@@ -22,18 +22,14 @@ var paths = {
   less_files: ['src/client/less/*.less']
 };
 
-var dist = [
-  'dist/app.js',
-  'dist/app.css'
-];
- 
- 
-// Une tache qui sera appellée par les autres taches
+gulp.task('default', ['serve']); 
+
 // reset le build en le supprimant
 gulp.task('clean', function(done) {
-  
+
   del(['build'], done);
   gutil.log(gutil.colors.inverse('Build deleted.'));
+  
 });
 
 
@@ -43,41 +39,46 @@ gulp.task('compileless', ['clean'], function() {
   gulp.src(paths.app_less)
     .pipe(less())
     .pipe(gulp.dest(paths.dist));
-    
   gutil.log(gutil.colors.bgGreen('We have CSS!'));
+
 });
 
 
 // ES6 jsx -> ES5 js puis browserify app.js
 gulp.task('bundlejs', ['clean'], function() {
+  
   browserify(paths.app_jsx)
     .transform(babel.configure({
-      stage: 1 //ES7
+      stage: 1, //ES7 async wait
+      optional: ['runtime'] //Regenerator en runtime et d'autre petites choses https://babeljs.io/docs/usage/runtime/
     }))
     .bundle()
     .pipe(source('app.js'))
     .pipe(gulp.dest(paths.dist));
-    
   gutil.log(gutil.colors.bgGreen('JS bundled!'));
+  
 });
 
 
 gulp.task('minifyhtml', ['clean'], function() {
-  gutil.log(gutil.colors.bgGreen('index.html looks so small!'));
   
+  gutil.log(gutil.colors.bgGreen('index.html looks so small!'));
   return gulp.src(paths.index_html)
     .pipe(htmlmin({collapseWhitespace: true}))
     .pipe(gulp.dest(paths.dist));
+    
 });
 
 
 gulp.task('build', ['compileless','bundlejs','minifyhtml'], function() {
+  
   gutil.log(gutil.colors.bgBlue('Build complete!'));
+  
 });
 
 
-gulp.task('default', ['build'], function() {
-  gulp.start('fb-flo'); //c'est degeu!!!!
+gulp.task('serve', ['build'], function() {
+  
   nodemon({
     script:   paths.server,
     env: { 'NODE_ENV': 'development' },
@@ -96,7 +97,10 @@ gulp.task('default', ['build'], function() {
       });
       return tasks;
     }
+  }).on('start', function(){
+    gulp.start('fb-flo');
   });
+  
 });
 
 

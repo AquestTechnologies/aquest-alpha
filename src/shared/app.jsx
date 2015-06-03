@@ -1,5 +1,6 @@
 //Doit etre deplacée dans le dossier client
-require("babelify/polyfill"); //ne devrai pas se trouver là mais notre compilation ES7 ne semble pas inclure de regenerator...
+//require("babel/polyfill"); //ne devrai pas se trouver là mais notre compilation ES7 ne semble pas inclure de regenerator...
+//require("babel-runtime/regenerator");
 import React  from 'react';
 import Router from 'react-router';  
 import routes from './routes.jsx';
@@ -38,6 +39,7 @@ router.run(async (Handler, state) => {
 });
 
 // Intercept local route changes
+// ca sert a quelque cose cette merde?
 document.onclick = event => {
   const { toElement: target } = event;
 
