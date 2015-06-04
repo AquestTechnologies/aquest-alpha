@@ -6,22 +6,6 @@ import Chat           from './Chat.jsx';
 import connectToStores from 'flummox/connect';
 
 class _Universe extends React.Component {
-  /*constructor(props) {
-    super(props);
-    this.state = UniverseStore.getState();
-  }
-
-  componentDidMount() {
-    UniverseStore.listen(this.onChange);
-  }
-
-  componentWillUnmount() {
-    UniverseStore.unlisten(this.onChange);
-  }
-
-  onChange(state) {
-    this.setState(state);
-  }*/
   
   render() {
     return (
@@ -42,6 +26,12 @@ _Universe = connectToStores(_Universe, {
     topics: store.getAllTopics() //renomer cette fonction
   })*/
 });
+
+_Universe.routerWillRun = async function({flux}) {
+  console.log('... _Universe.routerWillRun');
+  const universeActions = flux.getActions('universeActions');
+  return await universeActions.getStartUniverse();
+}
 
 
 export default _Universe;

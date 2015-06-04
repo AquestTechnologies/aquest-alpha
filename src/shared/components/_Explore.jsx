@@ -1,22 +1,16 @@
 import React from 'react';
-import ExploreItem from './ExploreItem.jsx';
-import {Link} from 'react-router';
+import { Link } from 'react-router';
 import connectToStores from 'flummox/connect';
 
 class _Explore extends React.Component {
   
   constructor() {
     super();
-    //this.handleSwitchUniverse = this.handleSwitchUniverse.bind(this);
     this.handleSwitchUniverse = (id) => {
-      console.log('click');
+      console.log('click ' + id);
       this.props.flux.getActions('universeActions').switchUniverse(id);
     };
   }
-  
-  /*handleSwitchUniverse(id) {
-    this.props.flux.getActions('universeActions').switchUniverse(id);
-  }*/
   
   render() {
     

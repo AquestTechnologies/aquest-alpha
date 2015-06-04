@@ -16,14 +16,14 @@ server.connection({
 
 server.start(function() {
   console.log('Make it rain! Server started at %s', server.info.uri);
-  console.log(' _____ _     _       _        ___                        _   \n' + // B)
-              '|_   _| |   (_)     (_)      / _ \\                      | |  \n' +
-              '  | | | |__  _ ___   _ ___  / /_\\ \\ __ _ _   _  ___  ___| |_ \n' +
-              "  | | | '_ \\| / __| | / __| |  _  |/ _` | | | |/ _ \\/ __| __|\n" +
-              '  | | | | | | \\__ \\ | \\__ \\ | | | | (_| | |_| |  __/\\__ \\ |_ \n' +
-              '  \\_/ |_| |_|_|___/ |_|___/ \\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
-              '                                      | |\n' +
-              '                                      |_|'
+  console.log('  ___                        _   \n' + // B)
+              ' / _ \\                      | |  \n' +
+              '/ /_\\ \\ __ _ _   _  ___  ___| |_ \n' +
+              "|  _  |/ _` | | | |/ _ \\/ __| __|\n" +
+              '| | | | (_| | |_| |  __/\\__ \\ |_ \n' +
+              '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
+              '          | |\n' +
+              '          |_|'
              );
 
 });
@@ -70,10 +70,13 @@ server.route({
 
 //Prerendering
 (function() {
-  let c = 0; //Compte le nombre d'appels
+  let c = 0;
+  
   server.decorate('reply', 'prerenderer', function (url, ip, port, method) {
+    
     //Intercepte la réponse
     let response = this.response().hold();
+    
     //Affiche les infos de la requete
     let d = new Date(),
         h = d.getHours() + 2, //heure française / GTM
@@ -101,15 +104,24 @@ server.route({
     });
     
     //Match la location et les routes, et renvoie le bon layout (Handler) et le state
-    // router.run(async (Handler, state) => {
-    router.run( (Handler, state) => {
+    router.run(async (Handler, state) => {
+      
       //On initialise une nouvelle instance flux
       const flux = new Flux();
       const routeHandlerInfo = { state, flux };
-      //On lie les stores et autres fluxeries au state react
-      //await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
-      //console.log('... performRouteHandlerStaticMethod done');
+      
+      //On initialise les stores
+      // await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
+      await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
+      console.log('... performRouteHandlerStaticMethod done');
+      // console.log(Handler);
+      // console.log('state_________________________________________________');
+      // console.log(state);
+      // console.log('flux_________________________________________________');
+      // console.log(flux);
+      
       //sérialisation de l'app fluxée
+      //Doc React pour info : If you call React.render() on a node that already has this server-rendered markup, React will preserve it and only attach event handlers, allowing you to have a very performant first-load experience.
       let mount_me_im_famous = React.renderToString(
         <FluxComponent flux={flux}>
           <Handler {...state} />
@@ -119,11 +131,12 @@ server.route({
       
       //le fichier html est partagé, penser a prendre une version minifée en cache en prod
       readFile('src/shared/index.html', 'utf8').then(function (html){
+        
         //on extrait le contenu du mountNode 
         let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
+        
         //puis on cale notre élément dans le mountNode.
         response.source = html.split(placeholder)[0] + mount_me_im_famous + html.split(placeholder)[1];
-        console.log('... Response ready');
         response.send();
         console.log('Served '+ url.path + '\n');
       });

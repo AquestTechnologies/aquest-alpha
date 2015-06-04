@@ -1,16 +1,20 @@
-import { Actions } from 'flummox';
+import BaseActions from '../utils/BaseActions.js';
 
-class UniverseActions extends Actions {
-
-  /*createUniverse(messageContent) {
-    return {
-      content: messageContent,
-      date: Date.now(),
-    };
-  }*/
+class UniverseActions extends BaseActions {
   
   switchUniverse(id) {
     return id;
+  }
+  
+  async getStartUniverse(userId) {
+    console.log('... UniverseActions.getStartUniverse');
+    
+    return await this.fetch.startUniverse();
+   /* try {
+      return await IsoFetch.startUniverse();
+    } catch (error) {
+      // handle error somehow
+    }*/
   }
   
   /*async createMessage(messageContent) {

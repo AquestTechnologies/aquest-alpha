@@ -28439,56 +28439,79 @@ var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default
 
 var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
 
+var _regeneratorRuntime = require('babel-runtime/regenerator')['default'];
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
 _Object$defineProperty(exports, '__esModule', {
   value: true
 });
 
-var _flummox = require('flummox');
+var _utilsBaseActionsJs = require('../utils/BaseActions.js');
 
-var UniverseActions = (function (_Actions) {
+var _utilsBaseActionsJs2 = _interopRequireDefault(_utilsBaseActionsJs);
+
+var UniverseActions = (function (_BaseActions) {
   function UniverseActions() {
     _classCallCheck(this, UniverseActions);
 
-    if (_Actions != null) {
-      _Actions.apply(this, arguments);
+    if (_BaseActions != null) {
+      _BaseActions.apply(this, arguments);
     }
   }
 
-  _inherits(UniverseActions, _Actions);
+  _inherits(UniverseActions, _BaseActions);
 
   _createClass(UniverseActions, [{
     key: 'switchUniverse',
-
-    /*createUniverse(messageContent) {
-      return {
-        content: messageContent,
-        date: Date.now(),
-      };
-    }*/
-
     value: function switchUniverse(id) {
       return id;
     }
+  }, {
+    key: 'getStartUniverse',
+    value: function getStartUniverse(userId) {
+      return _regeneratorRuntime.async(function getStartUniverse$(context$2$0) {
+        while (1) switch (context$2$0.prev = context$2$0.next) {
+          case 0:
+            console.log('... UniverseActions.getStartUniverse');
 
-    /*async createMessage(messageContent) {
-      try {
-        return await serverCreateMessage(messageContent);
-      } catch (error) {
-        // handle error somehow
-      }
-    }*/
+            context$2$0.next = 3;
+            return this.fetch.startUniverse();
 
-    //The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
+          case 3:
+            return context$2$0.abrupt('return', context$2$0.sent);
 
+          case 4:
+          case 'end':
+            return context$2$0.stop();
+        }
+      }, null, this);
+    }
   }]);
 
   return UniverseActions;
-})(_flummox.Actions);
+})(_utilsBaseActionsJs2['default']);
 
 exports['default'] = UniverseActions;
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"flummox":56}],281:[function(require,module,exports){
+/* try {
+   return await IsoFetch.startUniverse();
+ } catch (error) {
+   // handle error somehow
+ }*/
+
+/*async createMessage(messageContent) {
+  try {
+    return await serverCreateMessage(messageContent);
+  } catch (error) {
+    // handle error somehow
+  }
+}*/
+
+//The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
+
+},{"../utils/BaseActions.js":297,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50}],281:[function(require,module,exports){
 "use strict";
 
 var _inherits = require("babel-runtime/helpers/inherits")["default"];
@@ -28760,7 +28783,7 @@ var Chat = (function (_React$Component) {
 exports['default'] = Chat;
 module.exports = exports['default'];
 
-},{"./ChatFooter.jsx":284,"./ChatHeader.jsx":285,"./Message.jsx":290,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],284:[function(require,module,exports){
+},{"./ChatFooter.jsx":284,"./ChatHeader.jsx":285,"./Message.jsx":289,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],284:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -28883,78 +28906,7 @@ var ChatHeader = (function (_React$Component) {
 exports['default'] = ChatHeader;
 module.exports = exports['default'];
 
-},{"./Icon.jsx":287,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],286:[function(require,module,exports){
-'use strict';
-
-var _inherits = require('babel-runtime/helpers/inherits')['default'];
-
-var _createClass = require('babel-runtime/helpers/create-class')['default'];
-
-var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
-
-var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-_Object$defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactRouter = require('react-router');
-
-var ExploreItem = (function (_React$Component) {
-  function ExploreItem() {
-    _classCallCheck(this, ExploreItem);
-
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
-  }
-
-  _inherits(ExploreItem, _React$Component);
-
-  _createClass(ExploreItem, [{
-    key: 'render',
-    value: function render() {
-      var universe = this.props.universe;
-      var switchUniverse = this.props.switchUniverse;
-      console.log(this.props);
-      return _react2['default'].createElement(
-        'div',
-        null,
-        '/*',
-        _react2['default'].createElement(
-          _reactRouter.Link,
-          { to: 'home', params: { universe: universe.name } },
-          universe.name
-        ),
-        '*/',
-        _react2['default'].createElement(
-          'div',
-          { onClick: switchUniverse(universe.id) },
-          universe.name
-        ),
-        _react2['default'].createElement('br', null),
-        universe.description
-      );
-    }
-  }]);
-
-  return ExploreItem;
-})(_react2['default'].Component);
-
-ExploreItem.defaultProps = {
-  universe: { id: 0, name: 'Startups', description: 'Lorem Ipsum' }
-};
-
-exports['default'] = ExploreItem;
-module.exports = exports['default'];
-
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278,"react-router":91}],287:[function(require,module,exports){
+},{"./Icon.jsx":286,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],286:[function(require,module,exports){
 "use strict";
 
 var _inherits = require("babel-runtime/helpers/inherits")["default"];
@@ -29058,7 +29010,7 @@ Icon.defaultProps = {
 exports["default"] = Icon;
 module.exports = exports["default"];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],288:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],287:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -29162,7 +29114,7 @@ univName: "STARTUPS",
 univDesc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris non nisi ex. Pellentesque at semper metus, sit amet dignissim dui. Proin semper malesuada mauris porttitor laoreet. Ut malesuada libero massa, in dapibus lorem ullamcorper eu. Vestibulum vel convallis lorem.",
 */
 
-},{"./Card.jsx":281,"./CardNew.jsx":282,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],289:[function(require,module,exports){
+},{"./Card.jsx":281,"./CardNew.jsx":282,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],288:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -29258,7 +29210,7 @@ var Menu = (function (_React$Component) {
 exports['default'] = Menu;
 module.exports = exports['default'];
 
-},{"./Icon.jsx":287,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278,"react-router":91}],290:[function(require,module,exports){
+},{"./Icon.jsx":286,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278,"react-router":91}],289:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -29329,7 +29281,7 @@ Message.defaultProps = {
 exports['default'] = Message;
 module.exports = exports['default'];
 
-},{"./Icon.jsx":287,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],291:[function(require,module,exports){
+},{"./Icon.jsx":286,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],290:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -29352,10 +29304,6 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _ExploreItemJsx = require('./ExploreItem.jsx');
-
-var _ExploreItemJsx2 = _interopRequireDefault(_ExploreItemJsx);
-
 var _reactRouter = require('react-router');
 
 var _flummoxConnect = require('flummox/connect');
@@ -29369,9 +29317,8 @@ var _Explore = (function (_React$Component) {
     _classCallCheck(this, _Explore);
 
     _get(Object.getPrototypeOf(_Explore.prototype), 'constructor', this).call(this);
-    //this.handleSwitchUniverse = this.handleSwitchUniverse.bind(this);
     this.handleSwitchUniverse = function (id) {
-      console.log('click');
+      console.log('click ' + id);
       _this.props.flux.getActions('universeActions').switchUniverse(id);
     };
   }
@@ -29380,11 +29327,6 @@ var _Explore = (function (_React$Component) {
 
   _createClass(_Explore, [{
     key: 'render',
-
-    /*handleSwitchUniverse(id) {
-      this.props.flux.getActions('universeActions').switchUniverse(id);
-    }*/
-
     value: function render() {
       var _this2 = this;
 
@@ -29436,7 +29378,7 @@ module.exports = exports['default'];
 
 //universes: [{id: 0, name: 'Startups', description: 'Lorem Ipsum'}, {id: 1, name: 'Design', description: 'Lorem Design Ipsum'}],
 
-},{"./ExploreItem.jsx":286,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox/connect":54,"react":278,"react-router":91}],292:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox/connect":54,"react":278,"react-router":91}],291:[function(require,module,exports){
 "use strict";
 
 var _inherits = require("babel-runtime/helpers/inherits")["default"];
@@ -29485,7 +29427,7 @@ var _NotFound = (function (_React$Component) {
 exports["default"] = _NotFound;
 module.exports = exports["default"];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],293:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":278}],292:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -29495,6 +29437,8 @@ var _createClass = require('babel-runtime/helpers/create-class')['default'];
 var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
 var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
+
+var _regeneratorRuntime = require('babel-runtime/regenerator')['default'];
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
@@ -29535,21 +29479,6 @@ var _Universe = (function (_React$Component) {
 
   _createClass(_Universe, [{
     key: 'render',
-
-    /*constructor(props) {
-      super(props);
-      this.state = UniverseStore.getState();
-    }
-     componentDidMount() {
-      UniverseStore.listen(this.onChange);
-    }
-     componentWillUnmount() {
-      UniverseStore.unlisten(this.onChange);
-    }
-     onChange(state) {
-      this.setState(state);
-    }*/
-
     value: function render() {
       return _react2['default'].createElement(
         'div',
@@ -29575,10 +29504,31 @@ _Universe = (0, _flummoxConnect2['default'])(_Universe, {
     })*/
 });
 
+_Universe.routerWillRun = function callee$0$0(_ref) {
+  var flux = _ref.flux;
+  var universeActions;
+  return _regeneratorRuntime.async(function callee$0$0$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        console.log('... _Universe.routerWillRun');
+        universeActions = flux.getActions('universeActions');
+        context$1$0.next = 4;
+        return universeActions.getStartUniverse();
+
+      case 4:
+        return context$1$0.abrupt('return', context$1$0.sent);
+
+      case 5:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, this);
+};
+
 exports['default'] = _Universe;
 module.exports = exports['default'];
 
-},{"./Chat.jsx":283,"./Inventory.jsx":288,"./Menu.jsx":289,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox/connect":54,"react":278}],294:[function(require,module,exports){
+},{"./Chat.jsx":283,"./Inventory.jsx":287,"./Menu.jsx":288,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"flummox/connect":54,"react":278}],293:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -29638,7 +29588,7 @@ var Flux = (function (_Flummox) {
 exports['default'] = Flux;
 module.exports = exports['default'];
 
-},{"./actions/TopicActions.js":279,"./actions/UniverseActions.js":280,"./stores/TopicStore.js":296,"./stores/UniverseStore.js":297,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox":56}],295:[function(require,module,exports){
+},{"./actions/TopicActions.js":279,"./actions/UniverseActions.js":280,"./stores/TopicStore.js":295,"./stores/UniverseStore.js":296,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox":56}],294:[function(require,module,exports){
 'use strict';
 
 var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
@@ -29682,7 +29632,7 @@ var routes = _react2['default'].createElement(
 exports['default'] = routes;
 module.exports = exports['default'];
 
-},{"./components/_Explore.jsx":291,"./components/_NotFound.jsx":292,"./components/_Universe.jsx":293,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/interop-require-default":11,"react":278,"react-router":91}],296:[function(require,module,exports){
+},{"./components/_Explore.jsx":290,"./components/_NotFound.jsx":291,"./components/_Universe.jsx":292,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/interop-require-default":11,"react":278,"react-router":91}],295:[function(require,module,exports){
 // import { Store } from 'flummox';
 'use strict';
 
@@ -29736,7 +29686,7 @@ module.exports = exports['default'];
 
 //messages: [],
 
-},{"../utils/BaseStore.js":298,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],297:[function(require,module,exports){
+},{"../utils/BaseStore.js":298,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],296:[function(require,module,exports){
 // import { Store } from 'flummox';
 'use strict';
 
@@ -29768,10 +29718,12 @@ var UniverseStore = (function (_BaseStore) {
 
     var universeActionIds = flux.getActionIds('universeActions');
     this.register(universeActionIds.switchUniverse, this.handleSwitchUniverse);
+    this.registerAsync(universeActionIds.getStartUniverse, this.handleBeginAsyncRequest, this.handleGetStartUniverse, this.handleErrorAsyncRequest);
 
     this.state = {
       currentUniverse: { id: 0, name: 'Default', description: 'This ain\'t good Joe' }
     };
+    console.log('... UniverseStore initialized');
   }
 
   _inherits(UniverseStore, _BaseStore);
@@ -29782,13 +29734,23 @@ var UniverseStore = (function (_BaseStore) {
       return this.state.currentUniverse;
     }
   }, {
+    key: 'setCurrentUniverse',
+    value: function setCurrentUniverse(universe) {
+      this.setState({
+        currentUniverse: universe
+      });
+    }
+  }, {
+    key: 'handleGetStartUniverse',
+    value: function handleGetStartUniverse(startUniverse) {
+      this.setCurrentUniverse(startUniverse);
+    }
+  }, {
     key: 'handleSwitchUniverse',
 
-    //Synchrone
+    //Synchrone?
     value: function handleSwitchUniverse(id) {
-      this.setState({
-        currentUniverse: { id: 0, name: 'Startups', description: 'Lorem Ipsum' }
-      });
+      this.setCurrentUniverse({ id: 0, name: 'Startups', description: 'Lorem Ipsum' });
     }
   }, {
     key: 'getAllUniverses',
@@ -29804,7 +29766,46 @@ var UniverseStore = (function (_BaseStore) {
 exports['default'] = UniverseStore;
 module.exports = exports['default'];
 
-},{"../utils/BaseStore.js":298,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],298:[function(require,module,exports){
+},{"../utils/BaseStore.js":298,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],297:[function(require,module,exports){
+'use strict';
+
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
+
+var _get = require('babel-runtime/helpers/get')['default'];
+
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
+
+var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+_Object$defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _flummox = require('flummox');
+
+var _utilsIsoFetchJs = require('../utils/IsoFetch.js');
+
+var _utilsIsoFetchJs2 = _interopRequireDefault(_utilsIsoFetchJs);
+
+var BaseActions = (function (_Actions) {
+  function BaseActions() {
+    _classCallCheck(this, BaseActions);
+
+    _get(Object.getPrototypeOf(BaseActions.prototype), 'constructor', this).call(this);
+    this.fetch = new _utilsIsoFetchJs2['default']();
+  }
+
+  _inherits(BaseActions, _Actions);
+
+  return BaseActions;
+})(_flummox.Actions);
+
+exports['default'] = BaseActions;
+module.exports = exports['default'];
+
+},{"../utils/IsoFetch.js":299,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox":56}],298:[function(require,module,exports){
 //copié depuis https://github.com/vesparny/flux-immutable-example/blob/master/src/utils/BaseStore.js
 
 'use strict';
@@ -29860,6 +29861,77 @@ exports['default'] = BaseStore;
 module.exports = exports['default'];
 
 },{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"flummox":56}],299:[function(require,module,exports){
+"use strict";
+
+var _createClass = require("babel-runtime/helpers/create-class")["default"];
+
+var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
+
+var _Object$defineProperty = require("babel-runtime/core-js/object/define-property")["default"];
+
+var _Promise = require("babel-runtime/core-js/promise")["default"];
+
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var IsoFetch = (function () {
+  function IsoFetch() {
+    _classCallCheck(this, IsoFetch);
+  }
+
+  _createClass(IsoFetch, [{
+    key: "startUniverse",
+    value: function startUniverse() {
+      console.log("... Fetching startUniverse");
+      // returning a Promise because that is what fetch does.
+      return new _Promise(function (resolve, reject) {
+        // simulate an asynchronous action where data is fetched on
+        // a remote server somewhere.
+        setTimeout(function () {
+          // resolve with some mock data
+          resolve({
+            id: "1",
+            name: "Startups",
+            description: "This is a place where stuff gets done."
+          });
+        }, 500);
+      });
+    }
+  }, {
+    key: "allUniverses",
+    value: function allUniverses() {
+      // returning a Promise because that is what fetch does.
+      return new _Promise(function (resolve, reject) {
+        // simulate an asynchronous action where data is fetched on
+        // a remote server somewhere.
+        setTimeout(function () {
+          // resolve with some mock data
+          resolve([{
+            id: "1",
+            name: "Startups",
+            description: "This is a place where stuff gets done."
+          }, {
+            id: "2",
+            name: "Design",
+            description: "This is a place where stuff gets designed."
+          }, {
+            id: "3",
+            name: "Dev",
+            description: "This is a place where stuff gets developped."
+          }]);
+        }, 500);
+      });
+    }
+  }]);
+
+  return IsoFetch;
+})();
+
+exports["default"] = IsoFetch;
+module.exports = exports["default"];
+
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/core-js/promise":4,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8}],300:[function(require,module,exports){
 /**
  * Accepts an array of matched routes as returned from react-router's
  * `Router.run()` and calls the given static method on each. The methods may
@@ -29895,6 +29967,7 @@ function performRouteHandlerStaticMethod(routes, methodName) {
   return _regeneratorRuntime.async(function performRouteHandlerStaticMethod$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
+        console.log('... entering performRouteHandlerStaticMethod');
         return context$1$0.abrupt('return', _Promise.all(routes.map(function (route) {
           return route.handler[methodName];
         }).filter(function (method) {
@@ -29903,7 +29976,7 @@ function performRouteHandlerStaticMethod(routes, methodName) {
           return method.apply(undefined, args);
         })));
 
-      case 1:
+      case 2:
       case 'end':
         return context$1$0.stop();
     }
@@ -29912,13 +29985,15 @@ function performRouteHandlerStaticMethod(routes, methodName) {
 
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/core-js/promise":4,"babel-runtime/regenerator":50}],300:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/core-js/promise":4,"babel-runtime/regenerator":50}],301:[function(require,module,exports){
 //Doit etre deplacée dans le dossier client
-//require("babel/polyfill"); //ne devrai pas se trouver là mais notre compilation ES7 ne semble pas inclure de regenerator...
-//require("babel-runtime/regenerator");
 'use strict';
 
+var _regeneratorRuntime = require('babel-runtime/regenerator')['default'];
+
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+var _this = this;
 
 var _react = require('react');
 
@@ -29944,13 +30019,8 @@ var _utilsPerformRouteHandlerStaticMethodJs = require('./utils/performRouteHandl
 
 var _utilsPerformRouteHandlerStaticMethodJs2 = _interopRequireDefault(_utilsPerformRouteHandlerStaticMethodJs);
 
-/*Router.run(routes, Router.HistoryLocation, function (Handler) {  
-  React.render(<Handler/>, document.getElementById('mountNode'));
-});
-*/
-
 //Copié depuis la doc de flummox
-// Initialize flux
+//Initialize flux
 var flux = new _fluxJs2['default']();
 
 var router = _reactRouter2['default'].create({
@@ -29958,18 +30028,29 @@ var router = _reactRouter2['default'].create({
   location: _reactRouter2['default'].HistoryLocation
 });
 
-// Render app
-//router.run(async (Handler, state) => {
-router.run(function (Handler, state) {
-  var routeHandlerInfo = { state: state, flux: flux };
+//Render app
+router.run(function callee$0$0(Handler, state) {
+  var routeHandlerInfo;
+  return _regeneratorRuntime.async(function callee$0$0$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        routeHandlerInfo = { state: state, flux: flux };
+        context$1$0.next = 3;
+        return (0, _utilsPerformRouteHandlerStaticMethodJs2['default'])(state.routes, 'routerWillRun', routeHandlerInfo);
 
-  //await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
+      case 3:
 
-  _react2['default'].render(_react2['default'].createElement(
-    _flummoxComponent2['default'],
-    { flux: flux },
-    _react2['default'].createElement(Handler, state)
-  ), document.getElementById('mountNode'));
+        _react2['default'].render(_react2['default'].createElement(
+          _flummoxComponent2['default'],
+          { flux: flux },
+          _react2['default'].createElement(Handler, state)
+        ), document.getElementById('mountNode'));
+
+      case 4:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
 });
 
-},{"./flux.js":294,"./routes.jsx":295,"./utils/performRouteHandlerStaticMethod.js":299,"babel-runtime/helpers/interop-require-default":11,"flummox/component":53,"react":278,"react-router":91}]},{},[300]);
+},{"./flux.js":293,"./routes.jsx":294,"./utils/performRouteHandlerStaticMethod.js":300,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"flummox/component":53,"react":278,"react-router":91}]},{},[301]);
