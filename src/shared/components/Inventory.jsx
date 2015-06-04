@@ -10,6 +10,7 @@ class Inventory extends React.Component {
   }
   
   render() {
+    let currentUniverse = this.props.currentUniverse;
     return (
       
       <div className="inventory">
@@ -18,7 +19,7 @@ class Inventory extends React.Component {
           
             <div className="inventory_header">
               <div className={this.state.univNameVisible ? "inventory_header_name" : "inventory_header_desc"} onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
-                  {this.state.univNameVisible ? this.props.univName : this.props.univDesc}
+                  {this.state.univNameVisible ? currentUniverse.name : currentUniverse.description}
               </div>
             </div>
             
@@ -46,9 +47,9 @@ class Inventory extends React.Component {
   }
 }
 
-Inventory.defaultProps = {
+Inventory.defaultProps = {/*
     univName: "STARTUPS",
     univDesc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris non nisi ex. Pellentesque at semper metus, sit amet dignissim dui. Proin semper malesuada mauris porttitor laoreet. Ut malesuada libero massa, in dapibus lorem ullamcorper eu. Vestibulum vel convallis lorem.",
-};
+*/};
 
 export default Inventory;

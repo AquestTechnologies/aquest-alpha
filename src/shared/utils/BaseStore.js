@@ -2,7 +2,7 @@
 
 import { Store } from 'flummox';
 
-class BaseStore extends Store {
+export default class BaseStore extends Store {
   constructor(flux, initialState) {
     super();
     this.state = initialState;
@@ -21,5 +21,3 @@ class BaseStore extends Store {
     return this.state.isLoading;
   }
 }
-
-export default BaseStore;

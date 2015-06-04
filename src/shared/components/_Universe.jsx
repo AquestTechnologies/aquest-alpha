@@ -3,6 +3,8 @@ import Inventory      from './Inventory.jsx';
 import Menu           from './Menu.jsx';
 import Chat           from './Chat.jsx';
 
+import connectToStores from 'flummox/connect';
+
 class _Universe extends React.Component {
   /*constructor(props) {
     super(props);
@@ -25,12 +27,21 @@ class _Universe extends React.Component {
     return (
       <div>
         <Menu />
-        <Inventory />
+        <Inventory currentUniverse={this.props.currentUniverse}/>
         <Chat />
       </div>
     );
   }
 }
+
+_Universe = connectToStores(_Universe, {
+  universeStore: store => ({
+    currentUniverse: store.getCurrentUniverse()
+  })/*,
+  topicStore: store => ({
+    topics: store.getAllTopics() //renomer cette fonction
+  })*/
+});
 
 
 export default _Universe;

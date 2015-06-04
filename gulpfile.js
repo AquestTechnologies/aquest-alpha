@@ -29,7 +29,6 @@ gulp.task('default', ['serve']);
 gulp.task('clean', function(done) {
 
   del(['build'], done);
-  gutil.log(gutil.colors.inverse('Build deleted.'));
   
 });
 
@@ -40,7 +39,6 @@ gulp.task('compileless', ['clean'], function() {
   gulp.src(paths.app_less)
     .pipe(less())
     .pipe(gulp.dest(paths.dist));
-  gutil.log(gutil.colors.bgGreen('We have CSS!'));
 
 });
 
@@ -56,14 +54,12 @@ gulp.task('bundlejs', ['clean'], function() {
     .bundle()
     .pipe(source('app.js'))
     .pipe(gulp.dest(paths.dist));
-  gutil.log(gutil.colors.bgGreen('JS bundled!'));
   
 });
 
 
 gulp.task('minifyhtml', ['clean'], function() {
   
-  gutil.log(gutil.colors.bgGreen('index.html looks so small!'));
   return gulp.src(paths.index_html)
     .pipe(htmlmin({collapseWhitespace: true}))
     .pipe(gulp.dest(paths.dist));

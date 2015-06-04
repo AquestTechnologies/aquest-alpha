@@ -2,10 +2,11 @@
   "name": "Aquest-alpha",
   "version": "0.0.1",
   "description": "Version alpha",
+  "author": "Aquest Technologies",
   "main": "index.js",
   "private": true,
   "scripts": {
-    "start": "gulp liveserver",
+    "start": "gulp serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -13,10 +14,8 @@
     "hapi": "^8.4.0",
     "immutable": "^3.7.3",
     "react": "^0.13.3",
-    "react-router": "^0.13.3",
-    "url": "^0.10.3"
+    "react-router": "^0.13.3"
   },
-  "author": "Aquest Technologies",
   "devDependencies": {
     "babel": "^5.4.7",
     "babel-runtime": "^5.4.7",

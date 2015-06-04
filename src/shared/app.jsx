@@ -8,7 +8,6 @@ import routes from './routes.jsx';
 import Flux from './flux.js';
 import FluxComponent from 'flummox/component';
 import performRouteHandlerStaticMethod from './utils/performRouteHandlerStaticMethod.js';
-import url from 'url';
 
 /*Router.run(routes, Router.HistoryLocation, function (Handler) {  
   React.render(<Handler/>, document.getElementById('mountNode'));
@@ -25,10 +24,11 @@ const router = Router.create({
 });
 
 // Render app
-router.run(async (Handler, state) => {
+//router.run(async (Handler, state) => {
+router.run( (Handler, state) => {
   const routeHandlerInfo = { state, flux };
 
-  await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
+  //await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
 
   React.render(
     <FluxComponent flux={flux}>
@@ -37,25 +37,3 @@ router.run(async (Handler, state) => {
     document.getElementById('mountNode')
   );
 });
-
-// Intercept local route changes
-// ca sert a quelque cose cette merde?
-document.onclick = event => {
-  const { toElement: target } = event;
-
-  if (!target) return;
-
-  if (target.tagName !== 'A') return;
-
-  const href = target.getAttribute('href');
-
-  if (!href) return;
-
-  const resolvedHref = url.resolve(window.location.href, href);
-  const { host, path } = url.parse(resolvedHref);
-
-  if (host === window.location.host) {
-    event.preventDefault();
-    router.transitionTo(path);
-  }
-};

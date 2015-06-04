@@ -1,6 +1,6 @@
 import { Actions } from 'flummox';
 
-class UniverseActions extends Actions {
+class TopicActions extends Actions {
 
   /*createUniverse(messageContent) {
     return {
@@ -8,10 +8,6 @@ class UniverseActions extends Actions {
       date: Date.now(),
     };
   }*/
-  
-  switchUniverse(id) {
-    return id;
-  }
   
   /*async createMessage(messageContent) {
     try {
@@ -25,4 +21,4 @@ class UniverseActions extends Actions {
 
 }
 
-export default UniverseActions;
+export default TopicActions;

@@ -101,13 +101,14 @@ server.route({
     });
     
     //Match la location et les routes, et renvoie le bon layout (Handler) et le state
-    router.run(async (Handler, state) => {
+    // router.run(async (Handler, state) => {
+    router.run( (Handler, state) => {
       //On initialise une nouvelle instance flux
       const flux = new Flux();
       const routeHandlerInfo = { state, flux };
       //On lie les stores et autres fluxeries au state react
-      await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
-      console.log('... performRouteHandlerStaticMethod done');
+      //await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
+      //console.log('... performRouteHandlerStaticMethod done');
       //sérialisation de l'app fluxée
       let mount_me_im_famous = React.renderToString(
         <FluxComponent flux={flux}>
@@ -128,6 +129,5 @@ server.route({
       });
       
     });
-    return;//inutile?
   });
 })();

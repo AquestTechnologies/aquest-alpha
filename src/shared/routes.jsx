@@ -1,15 +1,9 @@
 import React        from 'react';
-import Router       from 'react-router';  
+import {Route, DefaultRoute, NotFoundRoute } from 'react-router';
 
-import _App          from './components/_App.jsx';
-import _Universe     from './components/_Universe.jsx';
-import _NotFound     from './components/_NotFound.jsx';
-import _Explore      from './components/_Explore.jsx';
-
-let Route           = Router.Route;
-let DefaultRoute    = Router.DefaultRoute;
-let NotFoundRoute   = Router.NotFoundRoute;
-let RouteHandler   = Router.RouteHandler;
+import _Universe    from './components/_Universe.jsx';
+import _NotFound    from './components/_NotFound.jsx';
+import _Explore     from './components/_Explore.jsx';
 
 //Seuls les components layouts (_truc.jsx) peuvent communiquer avec les stores
 //Leur state devient alors les props de leurs enfants

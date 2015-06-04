@@ -4,12 +4,17 @@ import {Link} from 'react-router';
 class ExploreItem extends React.Component {
   
   render() {
-    let universe = this.props.universe;
+    const universe = this.props.universe;
+    const switchUniverse = this.props.switchUniverse;
+    console.log(this.props);
     return (
-      <div /*key={universe.id}*/>
+      <div>/*
           <Link to='home' params={{universe: universe.name}}>
             {universe.name}
-          </Link>
+          </Link>*/
+          <div onClick={switchUniverse(universe.id)}>
+            {universe.name}
+          </div>
           <br />
           {universe.description}
       </div>

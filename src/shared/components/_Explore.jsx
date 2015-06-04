@@ -5,43 +5,42 @@ import connectToStores from 'flummox/connect';
 
 class _Explore extends React.Component {
   
-  /*constructor(props) {
-    super(props);
-    this.state = UniverseStore.getState();
+  constructor() {
+    super();
+    //this.handleSwitchUniverse = this.handleSwitchUniverse.bind(this);
+    this.handleSwitchUniverse = (id) => {
+      console.log('click');
+      this.props.flux.getActions('universeActions').switchUniverse(id);
+    };
   }
   
-  componentWillMount() {
-  }
-
-  componentDidMount() {
-    UniverseStore.listen(this.onChange);
-  }
-
-  componentWillUnmount() {
-    UniverseStore.unlisten(this.onChange);
-  }
-
-  onChange(state) {
-    this.setState(state);
+  /*handleSwitchUniverse(id) {
+    this.props.flux.getActions('universeActions').switchUniverse(id);
   }*/
+  
   render() {
-    var renderedItems = this.props.universes.map(function (universe) {
-      return (
-        <ExploreItem universe={universe} key={universe.id}/>
-      );
-    });
     
-    var divStyle = {
+    let divStyle = {
       width: '60%',
       margin: 'auto',
       fontSize: '2rem'
     };
-
+    
     return (
-      
       <div className="explore" style={divStyle}>
         <Link to='root'>Back</Link>
-        {renderedItems}
+        {
+          this.props.universes.map( (universe) => {
+            return (
+              <div key={universe.id}>
+                <div onClick={this.handleSwitchUniverse.bind(null, universe.id)}>
+                  {universe.name}
+                </div>
+                {universe.description}
+              </div>
+            );
+          })
+        }
       </div>
     );
   }
@@ -52,7 +51,7 @@ _Explore.defaultProps = {
 };
 
 _Explore = connectToStores(_Explore, {
-  universe: store => ({
+  universeStore: store => ({
     universes: store.getAllUniverses()
   })
 });
