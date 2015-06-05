@@ -27,6 +27,7 @@ class UniverseStore extends BaseStore {
   }
   
   handleGetStartUniverse(startUniverse) {
+    console.log('... UniverseStore handleGetStartUniverse');
     this.setCurrentUniverse(startUniverse);
   }
   

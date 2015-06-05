@@ -7,25 +7,32 @@ import Flux from '../shared/flux.js';
 import FluxComponent from 'flummox/component';
 import performRouteHandlerStaticMethod from '../shared/utils/performRouteHandlerStaticMethod.js';
 
-let port = process.env.PORT || 8080;
+
 let server = new Hapi.Server();
 
-server.connection({
-  port: port
-});
+let portApi = process.env.PORT || 8080;
+let portWs = process.env.PORT ? Number(portApi) + 1 : 8081;
+server.connection({ port: portApi, labels: ['api'] });
+server.connection({ port: portWs, labels: ['ws'] });
 
-server.start(function() {
-  console.log('Make it rain! Server started at %s', server.info.uri);
-  console.log('  ___                        _   \n' + // B)
-              ' / _ \\                      | |  \n' +
-              '/ /_\\ \\ __ _ _   _  ___  ___| |_ \n' +
-              "|  _  |/ _` | | | |/ _ \\/ __| __|\n" +
-              '| | | | (_| | |_| |  __/\\__ \\ |_ \n' +
-              '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
-              '          | |\n' +
-              '          |_|'
-             );
-
+server.register(require('./websocket'), function (err) {
+  if (err) {
+      throw err;
+  }
+  server.start(function() {
+    console.log('Make it rain! API server started at ' + server.info.uri);
+    console.log('              ws  server started at ' + server.select('ws').info.uri);
+    console.log('  ___                        _   \n' + // B)
+                ' / _ \\                      | |  \n' +
+                '/ /_\\ \\ __ _ _   _  ___  ___| |_ \n' +
+                "|  _  |/ _` | | | |/ _ \\/ __| __|\n" +
+                '| | | | (_| | |_| |  __/\\__ \\ |_ \n' +
+                '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
+                '          | |\n' +
+                '          |_|'
+               );
+  
+  });
 });
 
 server.route({
@@ -97,21 +104,20 @@ server.route({
       });
     }
 
-    //Initialize le router
+    // Initialize le router
     const router = Router.create({
       routes: routes,
       location: url.path
     });
     
-    //Match la location et les routes, et renvoie le bon layout (Handler) et le state
+    // Match la location et les routes, et renvoie le bon layout (Handler) et le state
     router.run(async (Handler, state) => {
       
-      //On initialise une nouvelle instance flux
+      // On initialise une nouvelle instance flux
       const flux = new Flux();
       const routeHandlerInfo = { state, flux };
       
-      //On initialise les stores
-      // await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
+      // On initialise les stores
       await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);
       console.log('... performRouteHandlerStaticMethod done');
       // console.log(Handler);
@@ -119,9 +125,19 @@ server.route({
       // console.log(state);
       // console.log('flux_________________________________________________');
       // console.log(flux);
+      // console.log('_________________________________________________');
+      // console.log(flux._stores.universeStore.state);
+      function functionReplacer(key, value) {
+        if (typeof(value) === 'function') {
+            return value.toString();
+        }
+        return value;
+      }
+      let serializedFlux = JSON.stringify(flux, functionReplacer);
+      // console.log(serializedFlux);
       
-      //sérialisation de l'app fluxée
-      //Doc React pour info : If you call React.render() on a node that already has this server-rendered markup, React will preserve it and only attach event handlers, allowing you to have a very performant first-load experience.
+      // sérialisation de l'app fluxée
+      // Doc React pour info : If you call React.render() on a node that already has this server-rendered markup, React will preserve it and only attach event handlers, allowing you to have a very performant first-load experience.
       let mount_me_im_famous = React.renderToString(
         <FluxComponent flux={flux}>
           <Handler {...state} />
@@ -129,14 +145,16 @@ server.route({
       );
       console.log('... React.renderToString done');
       
-      //le fichier html est partagé, penser a prendre une version minifée en cache en prod
+      // le fichier html est partagé, penser a prendre une version minifée en cache en prod
       readFile('src/shared/index.html', 'utf8').then(function (html){
         
-        //on extrait le contenu du mountNode 
+        // on extrait le contenu du mountNode 
         let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
-        
-        //puis on cale notre élément dans le mountNode.
-        response.source = html.split(placeholder)[0] + mount_me_im_famous + html.split(placeholder)[1];
+        // puis on cale notre élément dans le mountNode.
+        // let htmlWithoutFlux = html.split(placeholder)[0] + mount_me_im_famous + html.split(placeholder)[1];
+        let htmlWithoutFlux = html.replace(placeholder, mount_me_im_famous);
+        let htmlWithFlux = htmlWithoutFlux.replace('id="mountNode"', 'id="mountNode" flux-from-server=\'' + serializedFlux + '\'');
+        response.source  = htmlWithFlux;
         response.send();
         console.log('Served '+ url.path + '\n');
       });

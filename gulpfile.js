@@ -22,7 +22,7 @@ var paths = {
   app_less:   ['src/client/less/app.less'],
   less_files: ['src/client/less/*.less']
 };
-
+ 
 gulp.task('default', ['serve']); 
 
 // reset le build en le supprimant
@@ -78,13 +78,12 @@ gulp.task('serve', ['build'], function() {
   gulp.start('fb-flo');
   nodemon({
     script:   paths.server,
-    env: { 'NODE_ENV': 'development' },
+    env:      { 'NODE_ENV': 'development' },
     // env: { 'NODE_ENV': 'production' },
-    execMap: {
+    execMap:  {
       'js': 'node_modules/babel/bin/babel-node --stage 1' //ES7 cote server
     },
     delay:    '0ms',
-    ext:      'jsx js less',
     watch:    ['src/shared/', 'src/server/'],
     ignore:   ['src/shared/components'],
     tasks: function (changedFiles) {
@@ -95,15 +94,10 @@ gulp.task('serve', ['build'], function() {
       });
       return tasks;
     }
-  });/*.on('exit', function(){
-    console.log('hello');
-    process.once('SIGUSR2', function () {
-      process.kill(process.pid, 'SIGUSR2');
-    });
-  });*//*.on('start', function(){
-    gulp.start('fb-flo');
-  });
-  */
+  })/*.on('start', function(){
+    console.clear();
+  })*/;
+  
 });
 
 
