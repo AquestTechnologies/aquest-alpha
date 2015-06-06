@@ -1,14 +1,16 @@
-var Handlers = require('./handlers');
-var Socketio = require('socket.io');
+let Handlers = require('./handlers');
+let SocketIo = require('socket.io');
 
+// Le plugin Websocket pour Hapi
 exports.register = function (server, options, next) {
     
-    var io = new Socketio(server.select('ws').listener);
-
+    // On cree un nouveau server websocket derriere le port attribué
+    const io = new SocketIo(server.select('ws').listener);
+    let c = 0;
     io.on('connection', function (socket) {
-
-        console.log('New connection!');
-
+        c++;
+        console.log('___ [' + c + '] New client connected');
+        
         socket.on('hello', Handlers.hello);
         socket.on('newMessage', Handlers.newMessage);
         socket.on('goodbye', Handlers.goodbye);

@@ -5,7 +5,7 @@ exports.hello = function () {
 
 exports.newMessage = function (newMessage) {
 
-    console.log('Got message', newMessage);
+    console.log('___ Got message', newMessage);
 };
 
 exports.goodbye = function () {

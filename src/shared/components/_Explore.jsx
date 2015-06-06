@@ -1,23 +1,24 @@
+import FluxComponent from 'flummox/component';
 import React from 'react';
 import { Link } from 'react-router';
-import connectToStores from 'flummox/connect';
-import FluxComponent from 'flummox/component';
 
 import Graph from './explore/Graph.jsx';
 
 class _Explore extends React.Component {
   
-  static async routerWillRun({flux}) {
+  // Load les données initiales, doit être appelé avant FluxComponent.connectToStores
+  static async populateFluxState({flux}) {
     if(!flux._stores.universeStore.state.allUniverses) {
-      console.log('... _Explore.routerWillRun running');
+      console.log('.c. Initializing _Explore');
       const universeActions = flux.getActions('universeActions');
       await universeActions.loadAllUniverses();
     } else {
-      console.log('... _Explore.routerWillRun not running');
+      console.log('.c. _Explore already initialized');
     }
   }
   
   render() {
+    // CSS temporaire
     let divStyle = {
       width: '60%',
       margin: 'auto',
@@ -25,6 +26,9 @@ class _Explore extends React.Component {
     };
     
     return (
+      // Synchronise le state flux et le state react
+      // FluxComponent dispose du state flux dans son state react
+      // Ses enfants directs disposent du state flux dans leurs props
       <FluxComponent connectToStores={{
         universeStore: store => ({
           universes: store.getAllUniverses()
@@ -38,8 +42,5 @@ class _Explore extends React.Component {
     );
   }
 }
-
-_Explore.defaultProps = {
-};
 
 export default _Explore;

@@ -6,22 +6,24 @@ export default class UniverseStore extends BaseStore {
     super();
 
     const universeActionIds = flux.getActionIds('universeActions');
-    //loadUniverse et loadStartUniverse partage le même handler
     this.registerAsync(universeActionIds.loadUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadStartUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadAllUniverses, this.handleBeginAsyncRequest, this.handleLoadAllUniverses, this.handleErrorAsyncRequest);
-
-    this.state = {}; //Reset le state, important (?)
+    // this.register(universeActionIds.syncAction, this.syncAction);
+    
+    this.state = {}; // Reset le state, important (?)
     console.log('.S. UniverseStore initialized');
   }
   
   // Les getters servent principalement à FluxComponent.connectToStores
   // ils fetch le state flux pour qu'il soit injecté dans le state React
   getCurrentUniverse() {
+    console.log('.S. UniverseStore.getCurrentUniverse');
     return this.state.currentUniverse;
   }
   
   getAllUniverses() { 
+    console.log('.S. UniverseStore.getAllUniverses');
     return this.state.allUniverses;
   }
   
@@ -39,6 +41,7 @@ export default class UniverseStore extends BaseStore {
       allUniverses: universes,
       isLoading: false
     });
-    console.log('.S. UniverseStore.handleLoadAllUniverses set ');
+    console.log('.S. UniverseStore.handleLoadAllUniverses');
   }
+  
 }

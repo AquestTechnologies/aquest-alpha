@@ -6,7 +6,7 @@ class Node extends React.Component {
     super();
     
     this.handleSelectUniverse = (id) => {
-      console.log('___ Node.handleSelectUniverse ' + id);
+      console.log('-c- Node.handleSelectUniverse ' + id);
       this.props.loadUniverse(id);
       this.context.router.transitionTo('/');
     };
