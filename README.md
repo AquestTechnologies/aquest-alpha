@@ -22,11 +22,13 @@ Aquest Technologies © 2015
 - Pure rendering (performance) https://github.com/gaearon/react-pure-render
 
 ### Convention de nommage des console.log :
-- !!!   erreur
-- ...   App client ou index server
-- +++   Fetcher
-- ___   Websocket
-- .S.   Stores
-- .A.   Actions
-- .c.   Composant React
-- -c-   Action de l'utilisateur dans composant React
+| Préfixe | Signification |
+| :-----: | :------------ | |
+| !!! | erreur |
+| ... | App client ou index server |
+| +++ | Fetcher |
+| ___ | Websocket |
+| .S. | Stores |
+| .A. | Actions |
+| .c. | Composant React |
+| -c- | Action de l'utilisateur dans composant React |
