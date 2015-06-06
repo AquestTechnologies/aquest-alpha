@@ -6,17 +6,26 @@ class TopicStore extends BaseStore {
   constructor(flux) {
     super(); // Don't forget this step
 
-    const topicActionIds = flux.getActionIds('topic');
+    const topicActionIds = flux.getActionIds('topicActions');
+    this.registerAsync(topicActionIds.loadCurrentTopics, this.handleBeginAsyncRequest, this.handleLoadCurrentTopics, this.handleErrorAsyncRequest);
     //this.register(universeActionIds.createMessage, this.handleNewMessage);
 
     this.state = {
       //messages: [],
     };
+    console.log('... TopicStore initialized');
   }
 
-  getAllTopics(universe) { 
-    //async fetch 
-    return [];
+  handleLoadCurrentTopics(topics) { 
+    console.log('... TopicStore handleLoadCurrentTopics');
+    this.setState({
+      currentTopics: topics,
+      isLoading: false
+    });
+  }
+  
+  getCurrentTopics() {
+    return this.state.currentTopics;
   }
 
 }

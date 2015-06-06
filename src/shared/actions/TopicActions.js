@@ -1,21 +1,15 @@
-import { Actions } from 'flummox';
+import BaseActions from '../utils/BaseActions.js';
 
-class TopicActions extends Actions {
-
-  /*createUniverse(messageContent) {
-    return {
-      content: messageContent,
-      date: Date.now(),
-    };
-  }*/
+class TopicActions extends BaseActions {
   
-  /*async createMessage(messageContent) {
+  async loadCurrentTopics(universeId) {
+    console.log('... TopicActions.loadCurrentTopics');
     try {
-      return await serverCreateMessage(messageContent);
+      return await this.fetch.currentTopics(universeId);
     } catch (error) {
       // handle error somehow
     }
-  }*/
+  }
   
   //The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
 

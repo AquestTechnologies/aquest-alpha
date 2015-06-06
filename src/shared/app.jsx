@@ -10,38 +10,27 @@ import performRouteHandlerStaticMethod from './utils/performRouteHandlerStaticMe
 import Websocket from 'socket.io-client';
 var io = Websocket('http://130.211.68.244:8081');
 
-let functionReviver = function (key, value) {
-    if (key === "") return value;
-    
-    if (typeof value === 'string') {
-        var rfunc = /function[^\(]*\(([^\)]*)\)[^\{]*{([^\}]*)\}/,
-            match = value.match(rfunc);
-        
-        if (match) {
-            var args = match[1].split(',').map(function(arg) { return arg.replace(/\s+/, ''); });
-            return new Function(args, match[2]);
-        }
-    }
-    return value;
-};
-//Initialize flux
-let fluxFromServer = document.getElementById('mountNode').getAttribute("flux-from-server");
-if (fluxFromServer) {
-  var flux = JSON.parse(fluxFromServer, functionReviver);  
-} else {
-  var flux = new Flux();
+// Initialize flux
+const flux = new Flux();
+// On extrait le state serialisé du DOM
+let serializedState = document.getElementById('mountNode').getAttribute("state-from-server");
+if (serializedState) {
+  document.getElementById('mountNode').removeAttribute("state-from-server");
+  var stateFromServer = JSON.parse(serializedState);  
+  console.log(stateFromServer);
+  // On l'injecte dans flux, Les attr d'une const ne sont pas protégés
+  for (let store in flux._stores) {
+    flux._stores[store].state = stateFromServer[store];
+  }
 }
-var flux2 = new Flux();
 console.log(flux);
-console.log(flux2);
-console.log(flux === flux2);
 
 const router = Router.create({ 
   routes: routes,
   location: Router.HistoryLocation
 });
 
-//Render app
+// Render app
 router.run(async (Handler, state) => {
   const routeHandlerInfo = { state, flux };
   

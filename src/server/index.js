@@ -127,14 +127,14 @@ server.route({
       // console.log(flux);
       // console.log('_________________________________________________');
       // console.log(flux._stores.universeStore.state);
-      function functionReplacer(key, value) {
-        if (typeof(value) === 'function') {
-            return value.toString();
-        }
-        return value;
+      let fluxState = {};
+      for (let store in flux._stores) { 
+        fluxState[store] = flux._stores[store].state;
       }
-      let serializedFlux = JSON.stringify(flux, functionReplacer);
-      // console.log(serializedFlux);
+      let serializedState = JSON.stringify(fluxState);
+      // On escape le charactere '
+      serializedState = serializedState.replace(/'/g, '&apos;');
+      // console.log(serializedState);
       
       // sérialisation de l'app fluxée
       // Doc React pour info : If you call React.render() on a node that already has this server-rendered markup, React will preserve it and only attach event handlers, allowing you to have a very performant first-load experience.
@@ -153,7 +153,7 @@ server.route({
         // puis on cale notre élément dans le mountNode.
         // let htmlWithoutFlux = html.split(placeholder)[0] + mount_me_im_famous + html.split(placeholder)[1];
         let htmlWithoutFlux = html.replace(placeholder, mount_me_im_famous);
-        let htmlWithFlux = htmlWithoutFlux.replace('id="mountNode"', 'id="mountNode" flux-from-server=\'' + serializedFlux + '\'');
+        let htmlWithFlux = htmlWithoutFlux.replace('id="mountNode"', 'id="mountNode" state-from-server=\'' + serializedState + '\'');
         response.source  = htmlWithFlux;
         response.send();
         console.log('Served '+ url.path + '\n');

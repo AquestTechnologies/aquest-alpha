@@ -9,18 +9,23 @@ class _Universe extends React.Component {
   
   static async routerWillRun({flux}) {
     console.log('... _Universe.routerWillRun');
-    const universeActions = flux.getActions('universeActions');
-    return await universeActions.getStartUniverse();
+    if(!flux._stores.universeStore.state.currentUniverse) {
+      console.log('... _Universe.routerWillRun running');
+      const universeActions = flux.getActions('universeActions');
+      await universeActions.loadStartUniverse();
+      const topicActions = flux.getActions('topicActions');
+      await topicActions.loadCurrentTopics(flux._stores.universeStore.state.currentUniverse.id);
+    }
   }
   
   render() {
     return (
       <FluxComponent connectToStores={{
         universeStore: store => ({
-          currentUniverse: store.getCurrentUniverse()
+          universe: store.getCurrentUniverse()
         }),
         topicStore: store => ({
-          topics: store.getAllTopics() //renomer cette fonction
+          topics: store.getCurrentTopics()
         })
       }}>
         <Menu />

@@ -10,7 +10,7 @@ class Inventory extends React.Component {
   }
   
   render() {
-    let currentUniverse = this.props.currentUniverse;
+    let universe = this.props.universe;
     return (
       
       <div className="inventory">
@@ -19,25 +19,19 @@ class Inventory extends React.Component {
           
             <div className="inventory_header">
               <div className={this.state.univNameVisible ? "inventory_header_name" : "inventory_header_desc"} onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
-                  {this.state.univNameVisible ? currentUniverse.name : currentUniverse.description}
+                  {this.state.univNameVisible ? universe.name : universe.description}
               </div>
             </div>
             
             <div className="inventory_list">
               <CardNew />
-              <Card imgPath="img/image1.png"/>
-              <Card />
-              <Card />
-              <Card imgPath="img/image2.png"/>
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
+              {
+                this.props.topics.map( (topic) => {
+                  return (
+                    <Card key={topic.id} title={topic.title} author={topic.author} desc={topic.desc} imgPath={topic.imgPath} timestamp={topic.timestamp} />
+                  );
+                })
+              }
             </div>
             
           </div>

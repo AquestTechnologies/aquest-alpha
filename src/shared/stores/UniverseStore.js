@@ -8,10 +8,10 @@ class UniverseStore extends BaseStore {
 
     const universeActionIds = flux.getActionIds('universeActions');
     this.register(universeActionIds.switchUniverse, this.handleSwitchUniverse);
-    this.registerAsync(universeActionIds.getStartUniverse, this.handleBeginAsyncRequest, this.handleGetStartUniverse, this.handleErrorAsyncRequest);
+    this.registerAsync(universeActionIds.loadStartUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
 
     this.state = {
-      currentUniverse: {id: 0, name: 'Default', description: 'This ain\'t good Joe'}
+      //currentUniverse: {id: 0, name: 'Default', description: 'This ain\'t good Joe'}
     };
     console.log('... UniverseStore initialized');
   }
@@ -20,15 +20,12 @@ class UniverseStore extends BaseStore {
     return this.state.currentUniverse;
   }
   
-  setCurrentUniverse(universe) {
+  handleLoadUniverse(universe) {
+    console.log('... UniverseStore handleLoadUniverse');
     this.setState({
-      currentUniverse: universe
+      currentUniverse: universe,
+      isLoading: false
     });
-  }
-  
-  handleGetStartUniverse(startUniverse) {
-    console.log('... UniverseStore handleGetStartUniverse');
-    this.setCurrentUniverse(startUniverse);
   }
   
   //Synchrone?

@@ -6,24 +6,14 @@ class UniverseActions extends BaseActions {
     return id;
   }
   
-  async getStartUniverse(userId) {
-    console.log('... UniverseActions.getStartUniverse');
-    
-    return await this.fetch.startUniverse();
-   /* try {
-      return await IsoFetch.startUniverse();
-    } catch (error) {
-      // handle error somehow
-    }*/
-  }
-  
-  /*async createMessage(messageContent) {
+  async loadStartUniverse(userId) {
+    console.log('... UniverseActions.LoadStartUniverse');
     try {
-      return await serverCreateMessage(messageContent);
+      return await this.fetch.startUniverse();
     } catch (error) {
       // handle error somehow
     }
-  }*/
+  }
   
   //The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
 

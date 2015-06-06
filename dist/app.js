@@ -35381,51 +35381,72 @@ function toArray(list, index) {
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
 
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
+
 var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
 var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
+
+var _regeneratorRuntime = require('babel-runtime/regenerator')['default'];
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
 _Object$defineProperty(exports, '__esModule', {
   value: true
 });
 
-var _flummox = require('flummox');
+var _utilsBaseActionsJs = require('../utils/BaseActions.js');
 
-var TopicActions = (function (_Actions) {
+var _utilsBaseActionsJs2 = _interopRequireDefault(_utilsBaseActionsJs);
+
+var TopicActions = (function (_BaseActions) {
   function TopicActions() {
     _classCallCheck(this, TopicActions);
 
-    if (_Actions != null) {
-      _Actions.apply(this, arguments);
+    if (_BaseActions != null) {
+      _BaseActions.apply(this, arguments);
     }
   }
 
-  _inherits(TopicActions, _Actions);
+  _inherits(TopicActions, _BaseActions);
+
+  _createClass(TopicActions, [{
+    key: 'loadCurrentTopics',
+    value: function loadCurrentTopics(universeId) {
+      return _regeneratorRuntime.async(function loadCurrentTopics$(context$2$0) {
+        while (1) switch (context$2$0.prev = context$2$0.next) {
+          case 0:
+            console.log('... TopicActions.loadCurrentTopics');
+            context$2$0.prev = 1;
+            context$2$0.next = 4;
+            return this.fetch.currentTopics(universeId);
+
+          case 4:
+            return context$2$0.abrupt('return', context$2$0.sent);
+
+          case 7:
+            context$2$0.prev = 7;
+            context$2$0.t0 = context$2$0['catch'](1);
+
+          case 9:
+          case 'end':
+            return context$2$0.stop();
+        }
+      }, null, this, [[1, 7]]);
+    }
+  }]);
 
   return TopicActions;
-})(_flummox.Actions);
+})(_utilsBaseActionsJs2['default']);
 
 exports['default'] = TopicActions;
 module.exports = exports['default'];
 
-/*createUniverse(messageContent) {
-  return {
-    content: messageContent,
-    date: Date.now(),
-  };
-}*/
-
-/*async createMessage(messageContent) {
-  try {
-    return await serverCreateMessage(messageContent);
-  } catch (error) {
-    // handle error somehow
-  }
-}*/
+// handle error somehow
 
 //The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/inherits":10,"flummox":56}],330:[function(require,module,exports){
+},{"../utils/BaseActions.js":347,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50}],330:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -35465,24 +35486,28 @@ var UniverseActions = (function (_BaseActions) {
       return id;
     }
   }, {
-    key: 'getStartUniverse',
-    value: function getStartUniverse(userId) {
-      return _regeneratorRuntime.async(function getStartUniverse$(context$2$0) {
+    key: 'loadStartUniverse',
+    value: function loadStartUniverse(userId) {
+      return _regeneratorRuntime.async(function loadStartUniverse$(context$2$0) {
         while (1) switch (context$2$0.prev = context$2$0.next) {
           case 0:
-            console.log('... UniverseActions.getStartUniverse');
-
-            context$2$0.next = 3;
+            console.log('... UniverseActions.LoadStartUniverse');
+            context$2$0.prev = 1;
+            context$2$0.next = 4;
             return this.fetch.startUniverse();
 
-          case 3:
+          case 4:
             return context$2$0.abrupt('return', context$2$0.sent);
 
-          case 4:
+          case 7:
+            context$2$0.prev = 7;
+            context$2$0.t0 = context$2$0['catch'](1);
+
+          case 9:
           case 'end':
             return context$2$0.stop();
         }
-      }, null, this);
+      }, null, this, [[1, 7]]);
     }
   }]);
 
@@ -35492,19 +35517,7 @@ var UniverseActions = (function (_BaseActions) {
 exports['default'] = UniverseActions;
 module.exports = exports['default'];
 
-/* try {
-   return await IsoFetch.startUniverse();
- } catch (error) {
-   // handle error somehow
- }*/
-
-/*async createMessage(messageContent) {
-  try {
-    return await serverCreateMessage(messageContent);
-  } catch (error) {
-    // handle error somehow
-  }
-}*/
+// handle error somehow
 
 //The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
 
@@ -36056,7 +36069,7 @@ var Inventory = (function (_React$Component) {
   _createClass(Inventory, [{
     key: 'render',
     value: function render() {
-      var currentUniverse = this.props.currentUniverse;
+      var universe = this.props.universe;
       return _react2['default'].createElement(
         'div',
         { className: 'inventory' },
@@ -36072,26 +36085,16 @@ var Inventory = (function (_React$Component) {
               _react2['default'].createElement(
                 'div',
                 { className: this.state.univNameVisible ? 'inventory_header_name' : 'inventory_header_desc', onMouseOver: this.handleHeaderHover, onMouseOut: this.handleHeaderHover },
-                this.state.univNameVisible ? currentUniverse.name : currentUniverse.description
+                this.state.univNameVisible ? universe.name : universe.description
               )
             ),
             _react2['default'].createElement(
               'div',
               { className: 'inventory_list' },
               _react2['default'].createElement(_CardNewJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], { imgPath: 'img/image1.png' }),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], { imgPath: 'img/image2.png' }),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], null),
-              _react2['default'].createElement(_CardJsx2['default'], null)
+              this.props.topics.map(function (topic) {
+                return _react2['default'].createElement(_CardJsx2['default'], { key: topic.id, title: topic.title, author: topic.author, desc: topic.desc, imgPath: topic.imgPath, timestamp: topic.timestamp });
+              })
             )
           )
         )
@@ -36482,12 +36485,12 @@ var _Universe = (function (_React$Component) {
         { connectToStores: {
             universeStore: function universeStore(store) {
               return {
-                currentUniverse: store.getCurrentUniverse()
+                universe: store.getCurrentUniverse()
               };
             },
             topicStore: function topicStore(store) {
               return {
-                topics: store.getAllTopics() //renomer cette fonction
+                topics: store.getCurrentTopics()
               };
             }
           } },
@@ -36500,19 +36503,28 @@ var _Universe = (function (_React$Component) {
     key: 'routerWillRun',
     value: function routerWillRun(_ref) {
       var flux = _ref.flux;
-      var universeActions;
+      var universeActions, topicActions;
       return _regeneratorRuntime.async(function routerWillRun$(context$2$0) {
         while (1) switch (context$2$0.prev = context$2$0.next) {
           case 0:
             console.log('... _Universe.routerWillRun');
+
+            if (flux._stores.universeStore.state.currentUniverse) {
+              context$2$0.next = 9;
+              break;
+            }
+
+            console.log('... _Universe.routerWillRun running');
             universeActions = flux.getActions('universeActions');
-            context$2$0.next = 4;
-            return universeActions.getStartUniverse();
+            context$2$0.next = 6;
+            return universeActions.loadStartUniverse();
 
-          case 4:
-            return context$2$0.abrupt('return', context$2$0.sent);
+          case 6:
+            topicActions = flux.getActions('topicActions');
+            context$2$0.next = 9;
+            return topicActions.loadCurrentTopics(flux._stores.universeStore.state.currentUniverse.id);
 
-          case 5:
+          case 9:
           case 'end':
             return context$2$0.stop();
         }
@@ -36669,19 +36681,29 @@ var TopicStore = (function (_BaseStore) {
 
     _get(Object.getPrototypeOf(TopicStore.prototype), 'constructor', this).call(this); // Don't forget this step
 
-    var topicActionIds = flux.getActionIds('topic');
+    var topicActionIds = flux.getActionIds('topicActions');
+    this.registerAsync(topicActionIds.loadCurrentTopics, this.handleBeginAsyncRequest, this.handleLoadCurrentTopics, this.handleErrorAsyncRequest);
     //this.register(universeActionIds.createMessage, this.handleNewMessage);
 
     this.state = {};
+    console.log('... TopicStore initialized');
   }
 
   _inherits(TopicStore, _BaseStore);
 
   _createClass(TopicStore, [{
-    key: 'getAllTopics',
-    value: function getAllTopics(universe) {
-      //async fetch
-      return [];
+    key: 'handleLoadCurrentTopics',
+    value: function handleLoadCurrentTopics(topics) {
+      console.log('... TopicStore handleLoadCurrentTopics');
+      this.setState({
+        currentTopics: topics,
+        isLoading: false
+      });
+    }
+  }, {
+    key: 'getCurrentTopics',
+    value: function getCurrentTopics() {
+      return this.state.currentTopics;
     }
   }]);
 
@@ -36725,11 +36747,9 @@ var UniverseStore = (function (_BaseStore) {
 
     var universeActionIds = flux.getActionIds('universeActions');
     this.register(universeActionIds.switchUniverse, this.handleSwitchUniverse);
-    this.registerAsync(universeActionIds.getStartUniverse, this.handleBeginAsyncRequest, this.handleGetStartUniverse, this.handleErrorAsyncRequest);
+    this.registerAsync(universeActionIds.loadStartUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
 
-    this.state = {
-      currentUniverse: { id: 0, name: 'Default', description: 'This ain\'t good Joe' }
-    };
+    this.state = {};
     console.log('... UniverseStore initialized');
   }
 
@@ -36741,17 +36761,13 @@ var UniverseStore = (function (_BaseStore) {
       return this.state.currentUniverse;
     }
   }, {
-    key: 'setCurrentUniverse',
-    value: function setCurrentUniverse(universe) {
+    key: 'handleLoadUniverse',
+    value: function handleLoadUniverse(universe) {
+      console.log('... UniverseStore handleLoadUniverse');
       this.setState({
-        currentUniverse: universe
+        currentUniverse: universe,
+        isLoading: false
       });
-    }
-  }, {
-    key: 'handleGetStartUniverse',
-    value: function handleGetStartUniverse(startUniverse) {
-      console.log('... UniverseStore handleGetStartUniverse');
-      this.setCurrentUniverse(startUniverse);
     }
   }, {
     key: 'handleSwitchUniverse',
@@ -36773,6 +36789,8 @@ var UniverseStore = (function (_BaseStore) {
 
 exports['default'] = UniverseStore;
 module.exports = exports['default'];
+
+//currentUniverse: {id: 0, name: 'Default', description: 'This ain\'t good Joe'}
 
 },{"../utils/BaseStore.js":348,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],347:[function(require,module,exports){
 'use strict';
@@ -36899,16 +36917,17 @@ var IsoFetch = (function () {
         setTimeout(function () {
           // resolve with some mock data
           resolve({
-            id: "1",
+            id: 1,
             name: "Startups",
             description: "This is a place where stuff gets done."
           });
-        }, 500);
+        }, 250);
       });
     }
   }, {
     key: "allUniverses",
     value: function allUniverses() {
+      console.log("... Fetching allUniverses");
       // returning a Promise because that is what fetch does.
       return new _Promise(function (resolve, reject) {
         // simulate an asynchronous action where data is fetched on
@@ -36916,19 +36935,79 @@ var IsoFetch = (function () {
         setTimeout(function () {
           // resolve with some mock data
           resolve([{
-            id: "1",
+            id: 1,
             name: "Startups",
             description: "This is a place where stuff gets done."
           }, {
-            id: "2",
+            id: 2,
             name: "Design",
             description: "This is a place where stuff gets designed."
           }, {
-            id: "3",
+            id: 3,
             name: "Dev",
             description: "This is a place where stuff gets developped."
           }]);
-        }, 500);
+        }, 250);
+      });
+    }
+  }, {
+    key: "currentTopics",
+    value: function currentTopics(universeId) {
+      console.log("... Fetching currentTopics");
+
+      return new _Promise(function (resolve, reject) {
+        setTimeout(function () {
+          resolve([{
+            id: 1,
+            title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
+            author: "Cicero",
+            desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+            imgPath: "img/image1.png",
+            timestamp: "a long time"
+          }, {
+            id: 2,
+            title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
+            author: "Cicero",
+            desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+            imgPath: "",
+            timestamp: "a long time"
+          }, {
+            id: 3,
+            title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
+            author: "Cicero",
+            desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+            imgPath: "",
+            timestamp: "a long time"
+          }, {
+            id: 4,
+            title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
+            author: "Cicero",
+            desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+            imgPath: "img/image2.png",
+            timestamp: "a long time"
+          }, {
+            id: 5,
+            title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
+            author: "Cicero",
+            desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+            imgPath: "",
+            timestamp: "a long time"
+          }, {
+            id: 6,
+            title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
+            author: "Cicero",
+            desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+            imgPath: "",
+            timestamp: "a long time"
+          }, {
+            id: 7,
+            title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
+            author: "Cicero",
+            desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+            imgPath: "img/image1.png",
+            timestamp: "a long time"
+          }]);
+        }, 250);
       });
     }
   }]);
@@ -37033,40 +37112,27 @@ var _socketIoClient2 = _interopRequireDefault(_socketIoClient);
 
 var io = (0, _socketIoClient2['default'])('http://130.211.68.244:8081');
 
-var functionReviver = function functionReviver(key, value) {
-  if (key === '') return value;
-
-  if (typeof value === 'string') {
-    var rfunc = /function[^\(]*\(([^\)]*)\)[^\{]*{([^\}]*)\}/,
-        match = value.match(rfunc);
-
-    if (match) {
-      var args = match[1].split(',').map(function (arg) {
-        return arg.replace(/\s+/, '');
-      });
-      return new Function(args, match[2]);
-    }
+// Initialize flux
+var flux = new _fluxJs2['default']();
+// On extrait le state serialisé du DOM
+var serializedState = document.getElementById('mountNode').getAttribute('state-from-server');
+if (serializedState) {
+  document.getElementById('mountNode').removeAttribute('state-from-server');
+  var stateFromServer = JSON.parse(serializedState);
+  console.log(stateFromServer);
+  // On l'injecte dans flux, Les attr d'une const ne sont pas protégés
+  for (var store in flux._stores) {
+    flux._stores[store].state = stateFromServer[store];
   }
-  return value;
-};
-//Initialize flux
-var fluxFromServer = document.getElementById('mountNode').getAttribute('flux-from-server');
-if (fluxFromServer) {
-  var flux = JSON.parse(fluxFromServer, functionReviver);
-} else {
-  var flux = new _fluxJs2['default']();
 }
-var flux2 = new _fluxJs2['default']();
 console.log(flux);
-console.log(flux2);
-console.log(flux === flux2);
 
 var router = _reactRouter2['default'].create({
   routes: _routesJsx2['default'],
   location: _reactRouter2['default'].HistoryLocation
 });
 
-//Render app
+// Render app
 router.run(function callee$0$0(Handler, state) {
   var routeHandlerInfo;
   return _regeneratorRuntime.async(function callee$0$0$(context$1$0) {
