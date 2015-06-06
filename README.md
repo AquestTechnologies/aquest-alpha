@@ -1,31 +1,32 @@
 # aquest-alpha
 
-Rock'n'Roll
+*Rock'n'Roll*
 
 Aquest Technologies © 2015
 
 ça vaut le coup de 'use strict' ? https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Strict_mode
 
-## Todo :
-- ~~Base store~~ + loading bar
+### Todo :
+- API
 - Iso fetch
 - Immutable
-- ~~Websockets~~
-- API
+- Loading bar
 - Supprimer tous les async await et remplacer par des promises classiques
+- Enlever `this.state = {};` dans les stores ?
+- ~~Websockets~~
 - ~~Flux state from server on client bootstrap~~
-- Enlever this.state = {}; dans les stores ?
+- ~~BaseStore et BaseAction~~
 
-## Optimisation possible : 
+### Optimisations possibles : 
 - Serialisation des données en provenance de l'API https://github.com/gaearon/normalizr
 - Pure rendering (performance) https://github.com/gaearon/react-pure-render
 
-## Convention de nommage des console.log :
-- !!! erreur
-- ... App client ou index server
-- +++ Fetcher
-- ___ Websocket
-- .S. Stores
-- .A. Actions
-- .c. Composant React
-- -c- action utilisateur dans composant React
+### Convention de nommage des console.log :
+- !!!   erreur
+- ...   App client ou index server
+- +++   Fetcher
+- ___   Websocket
+- .S.   Stores
+- .A.   Actions
+- .c.   Composant React
+- -c-   Action de l'utilisateur dans composant React
