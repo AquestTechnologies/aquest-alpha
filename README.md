@@ -14,6 +14,7 @@ Todo :
 - API
 - Supprimer tous les async await et remplacer par des promises classiques
 - ~~Flux state from server on client bootstrap~~
+- Enlever this.state = {}; dans les stores ?
 
 Optimisation possible : 
 - Serialisation des données en provenance de l'API https://github.com/gaearon/normalizr

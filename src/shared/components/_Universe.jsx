@@ -1,20 +1,21 @@
 import React          from 'react';
-import Inventory      from './Inventory.jsx';
-import Menu           from './Menu.jsx';
-import Chat           from './Chat.jsx';
+import Inventory      from './universe/Inventory.jsx';
+import Menu           from './universe/Menu.jsx';
+import Chat           from './universe/Chat.jsx';
 
 import FluxComponent from 'flummox/component';
 
 class _Universe extends React.Component {
   
   static async routerWillRun({flux}) {
-    console.log('... _Universe.routerWillRun');
     if(!flux._stores.universeStore.state.currentUniverse) {
       console.log('... _Universe.routerWillRun running');
       const universeActions = flux.getActions('universeActions');
       await universeActions.loadStartUniverse();
       const topicActions = flux.getActions('topicActions');
       await topicActions.loadCurrentTopics(flux._stores.universeStore.state.currentUniverse.id);
+    } else {
+      console.log('... _Universe.routerWillRun not running');
     }
   }
   

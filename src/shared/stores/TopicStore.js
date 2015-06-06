@@ -13,11 +13,11 @@ class TopicStore extends BaseStore {
     this.state = {
       //messages: [],
     };
-    console.log('... TopicStore initialized');
+    console.log('.S. TopicStore initialized');
   }
 
   handleLoadCurrentTopics(topics) { 
-    console.log('... TopicStore handleLoadCurrentTopics');
+    console.log('.S. TopicStore handleLoadCurrentTopics');
     this.setState({
       currentTopics: topics,
       isLoading: false

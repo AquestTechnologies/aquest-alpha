@@ -17,13 +17,11 @@ let serializedState = document.getElementById('mountNode').getAttribute("state-f
 if (serializedState) {
   document.getElementById('mountNode').removeAttribute("state-from-server");
   var stateFromServer = JSON.parse(serializedState);  
-  console.log(stateFromServer);
   // On l'injecte dans flux, Les attr d'une const ne sont pas protégés
   for (let store in flux._stores) {
     flux._stores[store].state = stateFromServer[store];
   }
 }
-console.log(flux);
 
 const router = Router.create({ 
   routes: routes,
@@ -31,7 +29,10 @@ const router = Router.create({
 });
 
 // Render app
+let counter = 0;
 router.run(async (Handler, state) => {
+  counter++;
+  console.log('__________ ' + counter + ' router.run __________');
   const routeHandlerInfo = { state, flux };
   
   await performRouteHandlerStaticMethod(state.routes, 'routerWillRun', routeHandlerInfo);

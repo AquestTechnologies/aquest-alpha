@@ -134,6 +134,7 @@ server.route({
       let serializedState = JSON.stringify(fluxState);
       // On escape le charactere '
       serializedState = serializedState.replace(/'/g, '&apos;');
+      console.log('... Flux state serialized');
       // console.log(serializedState);
       
       // sérialisation de l'app fluxée

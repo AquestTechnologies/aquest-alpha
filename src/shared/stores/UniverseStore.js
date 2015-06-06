@@ -1,43 +1,44 @@
-// import { Store } from 'flummox';
 import BaseStore from '../utils/BaseStore.js';
 
-class UniverseStore extends BaseStore {
+export default class UniverseStore extends BaseStore {
   
   constructor(flux) {
-    super(); // Don't forget this step
+    super();
 
     const universeActionIds = flux.getActionIds('universeActions');
-    this.register(universeActionIds.switchUniverse, this.handleSwitchUniverse);
+    //loadUniverse et loadStartUniverse partage le même handler
+    this.registerAsync(universeActionIds.loadUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadStartUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
+    this.registerAsync(universeActionIds.loadAllUniverses, this.handleBeginAsyncRequest, this.handleLoadAllUniverses, this.handleErrorAsyncRequest);
 
-    this.state = {
-      //currentUniverse: {id: 0, name: 'Default', description: 'This ain\'t good Joe'}
-    };
-    console.log('... UniverseStore initialized');
+    this.state = {}; //Reset le state, important (?)
+    console.log('.S. UniverseStore initialized');
   }
   
+  // Les getters servent principalement à FluxComponent.connectToStores
+  // ils fetch le state flux pour qu'il soit injecté dans le state React
   getCurrentUniverse() {
     return this.state.currentUniverse;
   }
   
+  getAllUniverses() { 
+    return this.state.allUniverses;
+  }
+  
+  // Les handlers correspondent au traitement du state après avoir executé une action
   handleLoadUniverse(universe) {
-    console.log('... UniverseStore handleLoadUniverse');
     this.setState({
       currentUniverse: universe,
       isLoading: false
     });
+    console.log('.S. UniverseStore.handleLoadUniverse set ' + universe.name);
   }
   
-  //Synchrone?
-  handleSwitchUniverse(id) {
-    this.setCurrentUniverse({id: 0, name: 'Startups', description: 'Lorem Ipsum'});
+  handleLoadAllUniverses(universes) {
+    this.setState({
+      allUniverses: universes,
+      isLoading: false
+    });
+    console.log('.S. UniverseStore.handleLoadAllUniverses set ');
   }
-
-  getAllUniverses() { 
-    //async fetch 
-    return [{id: 0, name: 'Startups', description: 'Lorem Ipsum'}, {id: 1, name: 'Design', description: 'Lorem Design Ipsum'}, {id: 3, name: 'Dev', description: 'Lorem Dev Ipsum'}];
-  }
-
 }
-
-export default UniverseStore;

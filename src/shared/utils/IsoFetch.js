@@ -1,7 +1,47 @@
 export default class IsoFetch {
   
+  universe(universeId) {
+    console.log('+++ Fetching universe ' + universeId);
+    // returning a Promise because that is what fetch does.
+    return new Promise(function (resolve, reject) {
+      // simulate an asynchronous action where data is fetched on
+      // a remote server somewhere.
+      setTimeout(function () {
+        // resolve with some mock data
+        switch (universeId) {
+          case 1:
+           resolve({
+            id: 1,
+            name: "Startups",
+            description: "This is a place where stuff gets done."
+          });
+          break;
+          case 2:
+           resolve({
+            id: 2,
+            name: "Design",
+            description: "This is a place where stuff gets designed."
+          });
+          break;
+          case 3:
+           resolve({
+            id: 3,
+            name: "Dev",
+            description: "This is a place where stuff gets developped."
+          });
+          break;
+        default:
+          resolve({
+            id: 1,
+            name: "Startups",
+            description: "This is a place where stuff gets done."
+          });
+        }
+      }, 250);
+    });
+  }
   startUniverse() {
-    console.log('... Fetching startUniverse');
+    console.log('+++ Fetching startUniverse');
     // returning a Promise because that is what fetch does.
     return new Promise(function (resolve, reject) {
       // simulate an asynchronous action where data is fetched on
@@ -9,16 +49,16 @@ export default class IsoFetch {
       setTimeout(function () {
         // resolve with some mock data
         resolve({
-            id: 1,
-            name: "Startups",
-            description: "This is a place where stuff gets done."
-          });
-      }, 250);
+          id: 1,
+          name: "Startups",
+          description: "This is a place where stuff gets done."
+        });
+      }, 700);
     });
   }
   
   allUniverses() {
-    console.log('... Fetching allUniverses');
+    console.log('+++ Fetching allUniverses');
     // returning a Promise because that is what fetch does.
     return new Promise(function (resolve, reject) {
       // simulate an asynchronous action where data is fetched on
@@ -42,12 +82,12 @@ export default class IsoFetch {
             description: "This is a place where stuff gets developped."
           }
         ]);
-      }, 250);
+      }, 700);
     });
   }
   
   currentTopics(universeId) {
-    console.log('... Fetching currentTopics');
+    console.log('+++ Fetching currentTopics for universe ' + universeId);
     
     return new Promise(function (resolve, reject) {
       setTimeout(function () {
@@ -109,7 +149,7 @@ export default class IsoFetch {
             timestamp:"a long time"
           }
         ]);
-      }, 250);
+      }, 700);
     });
   }
 }

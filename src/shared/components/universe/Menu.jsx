@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router';
-import Icon from './Icon.jsx';
+import Icon from '../common/Icon.jsx';
 class Menu extends React.Component {
   render() {
     return (
