@@ -11,6 +11,8 @@ exports.register = function (server, options, next) {
         c++;
         console.log('___ [' + c + '] New client connected');
         
+        socket.emit('message', 'hi');
+        
         socket.on('hello', Handlers.hello);
         socket.on('newMessage', Handlers.newMessage);
         socket.on('goodbye', Handlers.goodbye);

@@ -10,6 +10,12 @@ import routes from './routes.jsx';
 import Websocket from 'socket.io-client';
 const io = Websocket('http://130.211.68.244:8081');
 
+ io.on('message', function (message) {
+    console.log('___ Server says ' + message);
+ });
+
+console.log('Welcome to Aquest v0!');
+console.log('... Initializing flux');
 // Initialize flux
 const flux = new Flux();
 
@@ -23,6 +29,7 @@ try {
     for (let store in flux._stores) {
       flux._stores[store].state = stateFromServer[store];
     }
+    console.log('... State from server injected');
   }
 } catch(err) {
     console.log('!!! Error while serializing state.');
@@ -37,23 +44,23 @@ const router = Router.create({
 
 // Render app
 let counter = 0;
-router.run(async (Handler, state) => {
+router.run( async (Handler, routerState) => {
   counter++;
-  console.log('__________ ' + counter + ' router.run __________');
+  console.log('__________ ' + counter + ' router.run ' + routerState.pathname + ' __________');
   
-  const routeHandlerInfo = { state, flux };
-  await performRouteHandlerStaticMethod(state.routes, 'populateFluxState', routeHandlerInfo);
+  await performRouteHandlerStaticMethod(routerState.routes, 'populateFluxState', { flux, routerState } );
   console.log('... Exiting performRouteHandlerStaticMethod');
   
+  console.log('... Entering React.render');
   React.render(
     
     <FluxComponent flux={flux}>
-      <Handler {...state} />
+      <Handler {...routerState} />
     </FluxComponent>,
     document.getElementById('mountNode'),
     function() {
       // Callback
-      console.log('... React.render Done');
+      console.log('... App rendered');
     }
   );
 });

@@ -15,6 +15,16 @@ export default class UniverseActions extends BaseActions {
     }
   }
   
+  async loadUniverseByName(universeName) {
+    console.log('.A. UniverseActions.loadUniverseByName ' + universeName);
+    try {
+      return await this.fetch.universeByName(universeName);
+    } catch (err) {
+      console.log('!!! Error while UniverseActions.loadUniverseByName.');
+      console.log(err);
+    }
+  }
+  
   async loadStartUniverse(userId) {
     console.log('.A. UniverseActions.LoadStartUniverse ' + userId);
     try {

@@ -113,15 +113,14 @@ server.route({
     });
     
     // Match la location et les routes, et renvoie le bon layout (Handler) et le state
-    router.run(async (Handler, state) => {
-      console.log('__________ router.run __________');
+    router.run( async (Handler, routerState) => {
+      console.log('_____________ router.run _____________');
       
       // Initialise une nouvelle instance flux
       const flux = new Flux();
-      const routeHandlerInfo = { state, flux };
       
       // Initialise les stores
-      await performRouteHandlerStaticMethod(state.routes, 'populateFluxState', routeHandlerInfo);
+      await performRouteHandlerStaticMethod(routerState.routes, 'populateFluxState', { flux, routerState } );
       console.log('... Exiting performRouteHandlerStaticMethod');
       
       // console.log(Handler);
@@ -149,7 +148,7 @@ server.route({
       try {
         var mount_me_im_famous = React.renderToString(
           <FluxComponent flux={flux}>
-            <Handler {...state} />
+            <Handler {...routerState} />
           </FluxComponent>
         );
       } catch(err) {

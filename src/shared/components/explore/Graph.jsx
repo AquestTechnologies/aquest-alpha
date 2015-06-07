@@ -15,7 +15,7 @@ class Graph extends React.Component {
         {
           this.props.universes.map( (universe) => {
             return (
-              <Node key={universe.id} universe={universe} loadUniverse={this.props.flux.getActions('universeActions').loadUniverse}/>
+              <Node key={universe.id} universe={universe} loadUniverse={this.props.loadUniverse} loadTopics={this.props.loadTopics}/>
             );
           })
         }

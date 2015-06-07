@@ -1,4 +1,4 @@
-# aquest-alpha
+# Aquest alpha
 
 *Rock'n'Roll*
 
@@ -13,6 +13,8 @@ Aquest Technologies © 2015
 - Loading bar
 - Supprimer tous les async await et remplacer par des promises classiques
 - Enlever `this.state = {};` dans les stores ?
+- Empecher que FluxComponent fasse des get* lorsque isLoading change ou lorsque le router s'apprete à render
+- FluxComponent refetch tout le state flux a chaque changement dans les stores. Il faudrait qu'il ne fetch que celui qui a changé
 - ~~Websockets~~
 - ~~Flux state from server on client bootstrap~~
 - ~~BaseStore et BaseAction~~
