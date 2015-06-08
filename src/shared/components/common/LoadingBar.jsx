@@ -12,7 +12,7 @@ class LoadingBar extends React.Component {
       top: '0',
       zIndex: '1000',
       // backgroundColor: '#fff',
-      fontSize: '1.5rem',
+      fontSize: '1.7rem',
       fontWeight: '700'
     };
     
@@ -26,8 +26,9 @@ class LoadingBar extends React.Component {
     
     return (
       <div style={divStyle}>
-          <span style={this.props.universeIsLoading ? nowYouSeeMe : nowYouDont}> universeStore</span>
-          <span style={this.props.topicIsLoading ? nowYouSeeMe : nowYouDont}> topicStore</span>
+          <div style={this.props.universeIsLoading ? nowYouSeeMe : nowYouDont}> universeStore</div>
+          <div style={this.props.topicIsLoading ? nowYouSeeMe : nowYouDont}> topicStore</div>
+          <div style={this.props.chatIsLoading ? nowYouSeeMe : nowYouDont}> chatStore</div>
       </div>
     );
   }

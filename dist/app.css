@@ -498,11 +498,45 @@ nav li:hover span {
 .inventory_scrolled {
   width: 119rem;
 }
-.inventory_list {
+.inventory_list_hidden {
+  display: none;
+}
+.inventory_list_visible {
   padding: 0 4rem 0 4rem;
+  -webkit-animation: fadein 1.2s;
+  /* Safari, Chrome and Opera > 12.1 */
+  animation: fadein 1.2s;
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;
+}
+.no_animation {
+  /*
+    -o-transition-property: none !important;
+    -moz-transition-property: none !important;
+    -ms-transition-property: none !important;
+    -webkit-transition-property: none !important;
+    transition-property: none !important;
+    
+    -o-transform: none !important;
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -webkit-transform: none !important;
+    transform: none !important;
+    */
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -o-animation: none !important;
+  -ms-animation: none !important;
+  animation: none !important;
+}
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .inventory_header {
   height: 14rem;
@@ -606,9 +640,18 @@ nav li:hover span {
   width: 111%;
   overflow-Y: scroll;
 }
-.chat_list {
+.chat_list_hidden {
   width: 73rem;
   min-height: 100%;
+  padding: 0 4rem 0 2rem;
+  display: none;
+}
+.chat_list_visible {
+  width: 73rem;
+  min-height: 100%;
+  -webkit-animation: fadein 1.2s;
+  /* Safari, Chrome and Opera > 12.1 */
+  animation: fadein 1.2s;
   padding: 0 4rem 0 2rem;
   display: flex;
   flex-flow: column nowrap;

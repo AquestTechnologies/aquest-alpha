@@ -5,11 +5,15 @@ class Node extends React.Component {
   constructor() {
     super();
     
-    this.handleSelectUniverse = async (id, name) => {
-      console.log('-c- Node.handleSelectUniverse ' + id);
-      await this.props.loadUniverse(id);
-      this.props.loadTopics(id);
-      this.context.router.transitionTo('/_' + name);
+    this.handleSelectUniverse = async (universe) => {
+      console.log('-c- Node.handleSelectUniverse ' + universe);
+      await this.props.actions.loadUniverse(universe.id);
+      // this.props.setUniverse(universe);
+      this.props.actions.flushTopics();
+      this.props.actions.flushChat();
+      this.context.router.transitionTo('/_' + universe.name);
+      this.props.actions.loadTopics(universe.id);
+      this.props.actions.loadChat(universe.chatId);
     };
   }
   
@@ -18,7 +22,7 @@ class Node extends React.Component {
     
     return (
       <div>
-          <div onClick={ this.handleSelectUniverse.bind(null, universe.id, universe.name) }>
+          <div onClick={ this.handleSelectUniverse.bind(null, universe) }>
             { universe.name }
           </div>
           { universe.description }

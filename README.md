@@ -15,6 +15,7 @@ Aquest Technologies © 2015
 - Enlever `this.state = {};` dans les stores ?
 - Empecher que FluxComponent fasse des get* lorsque isLoading change ou lorsque le router s'apprete à render
 - FluxComponent refetch tout le state flux a chaque changement dans les stores. Il faudrait qu'il ne fetch que celui qui a changé
+- L'implementation actuelle de IsoFetch cree une instance de la classe par Action, l'instance devrait être partagée.
 - ~~Websockets~~
 - ~~Flux state from server on client bootstrap~~
 - ~~BaseStore et BaseAction~~

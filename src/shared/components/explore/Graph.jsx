@@ -5,17 +5,15 @@ class Graph extends React.Component {
   
   render() {
     let divStyle = {
-      width: '60%',
-      margin: 'auto',
-      fontSize: '2rem'
+      marginBottom: '1rem',
     };
     
     return (
-      <div style={divStyle}>
+      <div>
         {
           this.props.universes.map( (universe) => {
             return (
-              <Node key={universe.id} universe={universe} loadUniverse={this.props.loadUniverse} loadTopics={this.props.loadTopics}/>
+              <Node key={universe.id} universe={universe} actions={this.props.actions} style={divStyle}/>
             );
           })
         }

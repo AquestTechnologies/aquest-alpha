@@ -24,10 +24,17 @@ class Explore extends React.Component {
       fontSize: '2rem'
     };
     
+    let actions = {
+       loadUniverse: this.props.flux.getActions('universeActions').loadUniverse,
+       flushTopics: this.props.flux.getActions('topicActions').flushTopics,
+       loadTopics: this.props.flux.getActions('topicActions').loadTopics,
+       flushChat: this.props.flux.getActions('chatActions').flushChat,
+       loadChat: this.props.flux.getActions('chatActions').loadChat
+    };
     return (
       <div style={divStyle}>
         <Link to='root'>Back</Link>
-        <Graph universes={this.props.universes} loadUniverse={this.props.flux.getActions('universeActions').loadUniverse} loadTopics={this.props.flux.getActions('topicActions').loadTopics} />
+        <Graph universes={this.props.universes} actions={actions}/>
       </div>
     );
   }

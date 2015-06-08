@@ -43,24 +43,23 @@ const router = Router.create({
 });
 
 // Render app
-let counter = 0;
+let c = 0;
 router.run( async (Handler, routerState) => {
-  counter++;
-  console.log('__________ ' + counter + ' router.run ' + routerState.pathname + ' __________');
+  c++;
+  console.log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
   
   await performRouteHandlerStaticMethod(routerState.routes, 'populateFluxState', { flux, routerState } );
   console.log('... Exiting performRouteHandlerStaticMethod');
   
   console.log('... Entering React.render');
   React.render(
-    
     <FluxComponent flux={flux}>
       <Handler {...routerState} />
     </FluxComponent>,
     document.getElementById('mountNode'),
     function() {
       // Callback
-      console.log('... App rendered');
+      console.log(flux.firstAppRender ? '... App rendered for the first time' : '... App rendered');
     }
   );
 });

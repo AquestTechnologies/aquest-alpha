@@ -10,7 +10,7 @@ export default class UniverseStore extends BaseStore {
     this.registerAsync(universeActionIds.loadUniverseByName, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadStartUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadAllUniverses, this.handleBeginAsyncRequest, this.handleLoadAllUniverses, this.handleErrorAsyncRequest);
-    // this.register(universeActionIds.syncAction, this.syncAction);
+    this.register(universeActionIds.setUniverse, this.handleSetUniverse);
     
     this.state = {}; // Reset le state, important (?)
     console.log('.S. UniverseStore initialized');
@@ -43,6 +43,13 @@ export default class UniverseStore extends BaseStore {
       isLoading: false
     });
     console.log('.S. UniverseStore.handleLoadAllUniverses');
+  }
+  
+  handleSetUniverse(universe) {
+    this.setState({
+      universe: universe
+    });
+    console.log('.S. UniverseStore.handleSetUniverse');
   }
   
 }

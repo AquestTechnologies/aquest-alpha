@@ -7,7 +7,7 @@ export default class ChatStore extends BaseStore {
 
     const chatActionIds = flux.getActionIds('chatActions');
     this.registerAsync(chatActionIds.loadChat, this.handleBeginAsyncRequest, this.handleLoadChat, this.handleErrorAsyncRequest);
-    // this.register(chatActionIds.syncAction, this.syncAction);
+    this.register(chatActionIds.flushChat, this.handleFlushChat);
     
     this.state = {}; // Reset le state, important (?)
     console.log('.S. ChatStore initialized');
@@ -22,11 +22,22 @@ export default class ChatStore extends BaseStore {
     
   // Les handlers correspondent au traitement du state après avoir executé une action
   handleLoadChat(chat) {
+    console.log('.S. ChatStore.handleLoadChat set ' + chat.name);
     this.setState({
       chat: chat,
       isLoading: false
     });
-    console.log('.S. ChatStore.handleLoadChat set ' + chat.name);
+  }
+  
+  handleFlushChat() {
+    console.log('.S. ChatStore.handleFlushChat');
+    this.setState({
+      chat: {
+        id: 0,
+        name: '...',
+        messages: []
+      }
+    });
   }
   
 }

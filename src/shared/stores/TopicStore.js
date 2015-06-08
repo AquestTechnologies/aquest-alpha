@@ -7,7 +7,7 @@ export default class TopicStore extends BaseStore {
 
     const topicActionIds = flux.getActionIds('topicActions');
     this.registerAsync(topicActionIds.loadTopics, this.handleBeginAsyncRequest, this.handleLoadTopics, this.handleErrorAsyncRequest);
-    // this.register(universeActionIds.syncAction, this.syncAction);
+    this.register(topicActionIds.flushTopics, this.handleFlushTopics);
 
     this.state = {}; // Reset le state, important (?)
     console.log('.S. TopicStore initialized');
@@ -26,6 +26,13 @@ export default class TopicStore extends BaseStore {
     this.setState({
       topics: topics,
       isLoading: false
+    });
+  }
+  
+  handleFlushTopics() {
+    console.log('.S. TopicStore.handleFlushTopics');
+    this.setState({
+      topics: []
     });
   }
 

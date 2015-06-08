@@ -1,23 +1,23 @@
 import BaseActions from '../utils/BaseActions.js';
 
-export default class TopicActions extends BaseActions {
+export default class ChatActions extends BaseActions {
   
   // Pour info doc Flummox : 
   // [Dans une action] The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
   
-  async loadTopics(universeId) {
-    console.log('.A. TopicActions.loadTopics');
+  async loadChat(chatId) {
+    console.log('.A. ChatActions.loadChat ' + chatId);
     try {
-      return await this.fetch.topics(universeId);
+      return await this.fetch.chat(chatId);
     } catch (err) {
-      console.log('!!! Error while UniverseActions.loadTopics.');
+      console.log('!!! Error while ChatActions.loadChat.');
       console.log(err);
     }
   }
   
-  flushTopics() {
-    console.log('.A. TopicActions.flushTopics');
+  flushChat() {
+    console.log('.A. ChatActions.flushChat');
     return true;
   }
-
+  
 }

@@ -6,11 +6,12 @@ import Inventory  from './universe/Inventory.jsx';
 
 class Universe extends React.Component {
   
-  // Load les données initiales, doit être appelé avant FluxComponent.connectToStores
+  // Load les données initiales
   static async populateFluxState( { flux, routerState } ) {
     let a = flux._stores.universeStore.state.universe;
     let b = flux._stores.topicStore.state.topics;
-    if ( !a || !b ) {
+    let c = flux._stores.chatStore.state.chat;
+    if ( !a || !b || !c) {
       console.log('.c. Initializing Universe');
       
       if ( !a ) {
@@ -22,23 +23,35 @@ class Universe extends React.Component {
         const topicActions    = flux.getActions('topicActions');
         await topicActions.loadTopics(flux._stores.universeStore.state.universe.id); //Très mauvais, passe undifined si la promise précedante à échouée
       } 
+      
+      if ( !c ) {
+        const chatActions    = flux.getActions('chatActions');
+        await chatActions.loadChat(flux._stores.universeStore.state.universe.chatId); //Très mauvais, passe undifined si la promise précedante à échouée
+      }
     } else {
       console.log('.c. Universe already initialized');
     }
   }
   
-  
   render() {
-    let topics = this.props.topics ? this.props.topics : [];
     return (
       <div>
         <Menu />
-        <Inventory universe={this.props.universe} topics={topics} />
-        <Chat />
+        <Inventory universe={this.props.universe} topics={this.props.topics} c={this.props.c}/>
+        <Chat chat={this.props.chat} c={this.props.c} />
       </div>
     );
   }
 }
+
+Universe.defaultProps = {
+    topics: [],
+    chat: {
+      id: 0,
+      name: 'Default prop chat',
+      messages: []
+    }
+};
 
 // Permet d'acceder a this.context.router
 Universe.contextTypes = {

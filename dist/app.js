@@ -35344,6 +35344,85 @@ var _utilsBaseActionsJs = require('../utils/BaseActions.js');
 
 var _utilsBaseActionsJs2 = _interopRequireDefault(_utilsBaseActionsJs);
 
+var ChatActions = (function (_BaseActions) {
+  function ChatActions() {
+    _classCallCheck(this, ChatActions);
+
+    if (_BaseActions != null) {
+      _BaseActions.apply(this, arguments);
+    }
+  }
+
+  _inherits(ChatActions, _BaseActions);
+
+  _createClass(ChatActions, [{
+    key: 'loadChat',
+
+    // Pour info doc Flummox :
+    // [Dans une action] The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
+
+    value: function loadChat(chatId) {
+      return _regeneratorRuntime.async(function loadChat$(context$2$0) {
+        while (1) switch (context$2$0.prev = context$2$0.next) {
+          case 0:
+            console.log('.A. ChatActions.loadChat ' + chatId);
+            context$2$0.prev = 1;
+            context$2$0.next = 4;
+            return this.fetch.chat(chatId);
+
+          case 4:
+            return context$2$0.abrupt('return', context$2$0.sent);
+
+          case 7:
+            context$2$0.prev = 7;
+            context$2$0.t0 = context$2$0['catch'](1);
+
+            console.log('!!! Error while ChatActions.loadChat.');
+            console.log(context$2$0.t0);
+
+          case 11:
+          case 'end':
+            return context$2$0.stop();
+        }
+      }, null, this, [[1, 7]]);
+    }
+  }, {
+    key: 'flushChat',
+    value: function flushChat() {
+      console.log('.A. ChatActions.flushChat');
+      return true;
+    }
+  }]);
+
+  return ChatActions;
+})(_utilsBaseActionsJs2['default']);
+
+exports['default'] = ChatActions;
+module.exports = exports['default'];
+
+},{"../utils/BaseActions.js":351,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50}],328:[function(require,module,exports){
+'use strict';
+
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
+
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
+
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
+
+var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
+
+var _regeneratorRuntime = require('babel-runtime/regenerator')['default'];
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+_Object$defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _utilsBaseActionsJs = require('../utils/BaseActions.js');
+
+var _utilsBaseActionsJs2 = _interopRequireDefault(_utilsBaseActionsJs);
+
 var TopicActions = (function (_BaseActions) {
   function TopicActions() {
     _classCallCheck(this, TopicActions);
@@ -35386,6 +35465,12 @@ var TopicActions = (function (_BaseActions) {
         }
       }, null, this, [[1, 7]]);
     }
+  }, {
+    key: 'flushTopics',
+    value: function flushTopics() {
+      console.log('.A. TopicActions.flushTopics');
+      return true;
+    }
   }]);
 
   return TopicActions;
@@ -35394,7 +35479,7 @@ var TopicActions = (function (_BaseActions) {
 exports['default'] = TopicActions;
 module.exports = exports['default'];
 
-},{"../utils/BaseActions.js":349,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50}],328:[function(require,module,exports){
+},{"../utils/BaseActions.js":351,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50}],329:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -35540,6 +35625,12 @@ var UniverseActions = (function (_BaseActions) {
         }
       }, null, this, [[1, 7]]);
     }
+  }, {
+    key: 'setUniverse',
+    value: function setUniverse(universe) {
+      console.log('.A. UniverseActions.SetUniverse');
+      return universe;
+    }
   }]);
 
   return UniverseActions;
@@ -35548,10 +35639,12 @@ var UniverseActions = (function (_BaseActions) {
 exports['default'] = UniverseActions;
 module.exports = exports['default'];
 
-},{"../utils/BaseActions.js":349,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50}],329:[function(require,module,exports){
+},{"../utils/BaseActions.js":351,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50}],330:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
+
+var _get = require('babel-runtime/helpers/get')['default'];
 
 var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
@@ -35580,25 +35673,30 @@ var _commonLoadingBarJsx = require('./common/LoadingBar.jsx');
 var _commonLoadingBarJsx2 = _interopRequireDefault(_commonLoadingBarJsx);
 
 var App = (function (_React$Component) {
-  function App() {
+  //ici plein de belles choses ?
+
+  function App(props) {
     _classCallCheck(this, App);
 
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(App.prototype), 'constructor', this).call(this, props);
+    // this.state = {c: 0}; //Provoque une boucle infinie coté client avec les getters de FluxComponent
+    this.c = 0;
   }
 
   _inherits(App, _React$Component);
 
   _createClass(App, [{
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps() {
+      // Ne s'incrémente pas lorsque l'utilisateur navigue vers "back"
+      this.c += 1;
+    }
+  }, {
     key: 'render',
-
-    //ici plein de belles choses ?
     value: function render() {
-
       return _react2['default'].createElement(
         _flummoxComponent2['default'],
-        { connectToStores: {
+        { c: this.c, connectToStores: {
             universeStore: function universeStore(store) {
               return {
                 universeIsLoading: store.isLoading(),
@@ -35610,6 +35708,12 @@ var App = (function (_React$Component) {
               return {
                 topicIsLoading: store.isLoading(),
                 topics: store.getTopics()
+              };
+            },
+            chatStore: function chatStore(store) {
+              return {
+                chatIsLoading: store.isLoading(),
+                chat: store.getChat()
               };
             }
           } },
@@ -35625,7 +35729,7 @@ var App = (function (_React$Component) {
 exports['default'] = App;
 module.exports = exports['default'];
 
-},{"./common/LoadingBar.jsx":334,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox/component":53,"react":276,"react-router":89}],330:[function(require,module,exports){
+},{"./common/LoadingBar.jsx":335,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox/component":53,"react":276,"react-router":89}],331:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -35675,6 +35779,13 @@ var Explore = (function (_React$Component) {
         fontSize: '2rem'
       };
 
+      var actions = {
+        loadUniverse: this.props.flux.getActions('universeActions').loadUniverse,
+        flushTopics: this.props.flux.getActions('topicActions').flushTopics,
+        loadTopics: this.props.flux.getActions('topicActions').loadTopics,
+        flushChat: this.props.flux.getActions('chatActions').flushChat,
+        loadChat: this.props.flux.getActions('chatActions').loadChat
+      };
       return _react2['default'].createElement(
         'div',
         { style: divStyle },
@@ -35683,7 +35794,7 @@ var Explore = (function (_React$Component) {
           { to: 'root' },
           'Back'
         ),
-        _react2['default'].createElement(_exploreGraphJsx2['default'], { universes: this.props.universes, loadUniverse: this.props.flux.getActions('universeActions').loadUniverse, loadTopics: this.props.flux.getActions('topicActions').loadTopics })
+        _react2['default'].createElement(_exploreGraphJsx2['default'], { universes: this.props.universes, actions: actions })
       );
     }
   }], [{
@@ -35728,7 +35839,7 @@ var Explore = (function (_React$Component) {
 exports['default'] = Explore;
 module.exports = exports['default'];
 
-},{"./explore/Graph.jsx":335,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"react":276,"react-router":89}],331:[function(require,module,exports){
+},{"./explore/Graph.jsx":336,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"react":276,"react-router":89}],332:[function(require,module,exports){
 "use strict";
 
 var _inherits = require("babel-runtime/helpers/inherits")["default"];
@@ -35777,7 +35888,7 @@ var NotFound = (function (_React$Component) {
 exports["default"] = NotFound;
 module.exports = exports["default"];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],332:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],333:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -35826,77 +35937,87 @@ var Universe = (function (_React$Component) {
   _createClass(Universe, [{
     key: 'render',
     value: function render() {
-      var topics = this.props.topics ? this.props.topics : [];
       return _react2['default'].createElement(
         'div',
         null,
         _react2['default'].createElement(_universeMenuJsx2['default'], null),
-        _react2['default'].createElement(_universeInventoryJsx2['default'], { universe: this.props.universe, topics: topics }),
-        _react2['default'].createElement(_universeChatJsx2['default'], null)
+        _react2['default'].createElement(_universeInventoryJsx2['default'], { universe: this.props.universe, topics: this.props.topics, c: this.props.c }),
+        _react2['default'].createElement(_universeChatJsx2['default'], { chat: this.props.chat, c: this.props.c })
       );
     }
   }], [{
     key: 'populateFluxState',
 
-    // Load les données initiales, doit être appelé avant FluxComponent.connectToStores
+    // Load les données initiales
     value: function populateFluxState(_ref) {
       var flux = _ref.flux;
       var routerState = _ref.routerState;
-      var a, b, universeActions, topicActions;
+      var a, b, c, universeActions, topicActions, chatActions;
       return _regeneratorRuntime.async(function populateFluxState$(context$2$0) {
         while (1) switch (context$2$0.prev = context$2$0.next) {
           case 0:
             a = flux._stores.universeStore.state.universe;
             b = flux._stores.topicStore.state.topics;
+            c = flux._stores.chatStore.state.chat;
 
-            if (!(!a || !b)) {
-              context$2$0.next = 19;
+            if (!(!a || !b || !c)) {
+              context$2$0.next = 24;
               break;
             }
 
             console.log('.c. Initializing Universe');
 
             if (a) {
-              context$2$0.next = 13;
+              context$2$0.next = 14;
               break;
             }
 
             universeActions = flux.getActions('universeActions');
 
             if (!(routerState.pathname === '/')) {
-              context$2$0.next = 11;
+              context$2$0.next = 12;
               break;
             }
 
-            context$2$0.next = 9;
+            context$2$0.next = 10;
             return universeActions.loadStartUniverse(0);
 
-          case 9:
-            context$2$0.next = 13;
+          case 10:
+            context$2$0.next = 14;
             break;
 
-          case 11:
-            context$2$0.next = 13;
+          case 12:
+            context$2$0.next = 14;
             return universeActions.loadUniverseByName(routerState.params.universeName);
 
-          case 13:
+          case 14:
             if (!(!b && !flux._stores.topicStore.state.isLoading)) {
-              context$2$0.next = 17;
+              context$2$0.next = 18;
               break;
             }
 
             topicActions = flux.getActions('topicActions');
-            context$2$0.next = 17;
+            context$2$0.next = 18;
             return topicActions.loadTopics(flux._stores.universeStore.state.universe.id);
 
-          case 17:
-            context$2$0.next = 20;
+          case 18:
+            if (c) {
+              context$2$0.next = 22;
+              break;
+            }
+
+            chatActions = flux.getActions('chatActions');
+            context$2$0.next = 22;
+            return chatActions.loadChat(flux._stores.universeStore.state.universe.chatId);
+
+          case 22:
+            context$2$0.next = 25;
             break;
 
-          case 19:
+          case 24:
             console.log('.c. Universe already initialized');
 
-          case 20:
+          case 25:
           case 'end':
             return context$2$0.stop();
         }
@@ -35906,6 +36027,15 @@ var Universe = (function (_React$Component) {
 
   return Universe;
 })(_react2['default'].Component);
+
+Universe.defaultProps = {
+  topics: [],
+  chat: {
+    id: 0,
+    name: 'Default prop chat',
+    messages: []
+  }
+};
 
 // Permet d'acceder a this.context.router
 Universe.contextTypes = {
@@ -35917,8 +36047,9 @@ module.exports = exports['default'];
 
 // Si Universe n'a jamais été chargé et que la route est / alors on charge l'univers préféré de l'utilisateur
 //Très mauvais, passe undifined si la promise précedante à échouée
+//Très mauvais, passe undifined si la promise précedante à échouée
 
-},{"./universe/Chat.jsx":339,"./universe/Inventory.jsx":342,"./universe/Menu.jsx":343,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"react":276}],333:[function(require,module,exports){
+},{"./universe/Chat.jsx":340,"./universe/Inventory.jsx":343,"./universe/Menu.jsx":344,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"react":276}],334:[function(require,module,exports){
 "use strict";
 
 var _inherits = require("babel-runtime/helpers/inherits")["default"];
@@ -36022,7 +36153,7 @@ Icon.defaultProps = {
 exports["default"] = Icon;
 module.exports = exports["default"];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],334:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],335:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36067,7 +36198,7 @@ var LoadingBar = (function (_React$Component) {
         top: '0',
         zIndex: '1000',
         // backgroundColor: '#fff',
-        fontSize: '1.5rem',
+        fontSize: '1.7rem',
         fontWeight: '700'
       };
 
@@ -36082,14 +36213,19 @@ var LoadingBar = (function (_React$Component) {
         'div',
         { style: divStyle },
         _react2['default'].createElement(
-          'span',
+          'div',
           { style: this.props.universeIsLoading ? nowYouSeeMe : nowYouDont },
           ' universeStore'
         ),
         _react2['default'].createElement(
-          'span',
+          'div',
           { style: this.props.topicIsLoading ? nowYouSeeMe : nowYouDont },
           ' topicStore'
+        ),
+        _react2['default'].createElement(
+          'div',
+          { style: this.props.chatIsLoading ? nowYouSeeMe : nowYouDont },
+          ' chatStore'
         )
       );
     }
@@ -36101,7 +36237,7 @@ var LoadingBar = (function (_React$Component) {
 exports['default'] = LoadingBar;
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],335:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],336:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36143,16 +36279,13 @@ var Graph = (function (_React$Component) {
       var _this = this;
 
       var divStyle = {
-        width: '60%',
-        margin: 'auto',
-        fontSize: '2rem'
-      };
+        marginBottom: '1rem' };
 
       return _react2['default'].createElement(
         'div',
-        { style: divStyle },
+        null,
         this.props.universes.map(function (universe) {
-          return _react2['default'].createElement(_NodeJsx2['default'], { key: universe.id, universe: universe, loadUniverse: _this.props.loadUniverse, loadTopics: _this.props.loadTopics });
+          return _react2['default'].createElement(_NodeJsx2['default'], { key: universe.id, universe: universe, actions: _this.props.actions, style: divStyle });
         })
       );
     }
@@ -36166,7 +36299,7 @@ Graph.defaultProps = {};
 exports['default'] = Graph;
 module.exports = exports['default'];
 
-},{"./Node.jsx":336,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],336:[function(require,module,exports){
+},{"./Node.jsx":337,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],337:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36199,19 +36332,23 @@ var Node = (function (_React$Component) {
 
     _get(Object.getPrototypeOf(Node.prototype), 'constructor', this).call(this);
 
-    this.handleSelectUniverse = function callee$2$0(id, name) {
+    this.handleSelectUniverse = function callee$2$0(universe) {
       return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
         while (1) switch (context$3$0.prev = context$3$0.next) {
           case 0:
-            console.log('-c- Node.handleSelectUniverse ' + id);
+            console.log('-c- Node.handleSelectUniverse ' + universe);
             context$3$0.next = 3;
-            return this.props.loadUniverse(id);
+            return this.props.actions.loadUniverse(universe.id);
 
           case 3:
-            this.props.loadTopics(id);
-            this.context.router.transitionTo('/_' + name);
+            // this.props.setUniverse(universe);
+            this.props.actions.flushTopics();
+            this.props.actions.flushChat();
+            this.context.router.transitionTo('/_' + universe.name);
+            this.props.actions.loadTopics(universe.id);
+            this.props.actions.loadChat(universe.chatId);
 
-          case 5:
+          case 8:
           case 'end':
             return context$3$0.stop();
         }
@@ -36231,7 +36368,7 @@ var Node = (function (_React$Component) {
         null,
         _react2['default'].createElement(
           'div',
-          { onClick: this.handleSelectUniverse.bind(null, universe.id, universe.name) },
+          { onClick: this.handleSelectUniverse.bind(null, universe) },
           universe.name
         ),
         universe.description
@@ -36252,7 +36389,7 @@ Node.contextTypes = {
 exports['default'] = Node;
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"react":276}],337:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"react":276}],338:[function(require,module,exports){
 "use strict";
 
 var _inherits = require("babel-runtime/helpers/inherits")["default"];
@@ -36341,7 +36478,7 @@ Card.defaultProps = {
 exports["default"] = Card;
 module.exports = exports["default"];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],338:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],339:[function(require,module,exports){
 "use strict";
 
 var _inherits = require("babel-runtime/helpers/inherits")["default"];
@@ -36426,7 +36563,7 @@ CardNew.defaultProps = {
 exports["default"] = CardNew;
 module.exports = exports["default"];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],339:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],340:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36473,44 +36610,41 @@ var Chat = (function (_React$Component) {
   _createClass(Chat, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      //permet de scroller les messages tout en bas.
+      //permet de scroller les messages tout en bas après le mount.
+      var objDiv = document.getElementById('getlow');
+      objDiv.scrollTop = objDiv.scrollHeight;
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      //permet de scroller les messages tout en bas après avoir reçu de nouveaux props.
       var objDiv = document.getElementById('getlow');
       objDiv.scrollTop = objDiv.scrollHeight;
     }
   }, {
     key: 'render',
     value: function render() {
-
       var samuel = 'The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother\'s keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.';
+      var messagesList = this.props.chat.messages.length === 0 ? 'chat_list_hidden' : 'chat_list_visible';
+      if (this.props.c === 0) {
+        messagesList += ' no_animation';
+      }
       return _react2['default'].createElement(
         'div',
         { className: 'chat' },
-        _react2['default'].createElement(_ChatHeaderJsx2['default'], { chatTitle: 'Global Startup chat' }),
+        _react2['default'].createElement(_ChatHeaderJsx2['default'], { chatTitle: this.props.chat.name }),
         _react2['default'].createElement(
           'div',
           { id: 'getlow', className: 'chat_scrollable' },
           _react2['default'].createElement(
             'div',
-            { className: 'chat_list' },
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
+            { className: messagesList },
+            _react2['default'].createElement(_MessageJsx2['default'], { author: 'Extreme firster', content: 'First!' }),
+            this.props.chat.messages.map(function (message) {
+              return _react2['default'].createElement(_MessageJsx2['default'], { key: message.id, author: message.author, content: message.content });
+            }),
             _react2['default'].createElement(_MessageJsx2['default'], { author: 'Jackie Chan', content: 'I live in the USA' }),
-            _react2['default'].createElement(_MessageJsx2['default'], { author: 'Jackie Chan', content: 'I live in the USA' }),
-            _react2['default'].createElement(_MessageJsx2['default'], null),
-            _react2['default'].createElement(_MessageJsx2['default'], { author: 'Samuel L. Jackson', content: samuel }),
-            _react2['default'].createElement(_MessageJsx2['default'], null)
+            _react2['default'].createElement(_MessageJsx2['default'], { author: this.props.chat.name + ' L. Jackson', content: samuel })
           )
         ),
         _react2['default'].createElement(_ChatFooterJsx2['default'], null)
@@ -36524,7 +36658,7 @@ var Chat = (function (_React$Component) {
 exports['default'] = Chat;
 module.exports = exports['default'];
 
-},{"./ChatFooter.jsx":340,"./ChatHeader.jsx":341,"./Message.jsx":344,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],340:[function(require,module,exports){
+},{"./ChatFooter.jsx":341,"./ChatHeader.jsx":342,"./Message.jsx":345,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],341:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36580,7 +36714,7 @@ var ChatFooter = (function (_React$Component) {
 exports['default'] = ChatFooter;
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],341:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],342:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36647,7 +36781,7 @@ var ChatHeader = (function (_React$Component) {
 exports['default'] = ChatHeader;
 module.exports = exports['default'];
 
-},{"../common/Icon.jsx":333,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],342:[function(require,module,exports){
+},{"../common/Icon.jsx":334,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],343:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36697,6 +36831,10 @@ var Inventory = (function (_React$Component) {
     key: 'render',
     value: function render() {
       var universe = this.props.universe;
+      var inventoryList = this.props.topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
+      if (this.props.c === 0) {
+        inventoryList += ' no_animation';
+      }
       return _react2['default'].createElement(
         'div',
         { className: 'inventory' },
@@ -36717,7 +36855,7 @@ var Inventory = (function (_React$Component) {
             ),
             _react2['default'].createElement(
               'div',
-              { className: 'inventory_list' },
+              { className: inventoryList },
               _react2['default'].createElement(_CardNewJsx2['default'], null),
               this.props.topics.map(function (topic) {
                 return _react2['default'].createElement(_CardJsx2['default'], { key: topic.id, title: topic.title, author: topic.author, desc: topic.desc, imgPath: topic.imgPath, timestamp: topic.timestamp });
@@ -36741,7 +36879,7 @@ univName: "STARTUPS",
 univDesc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris non nisi ex. Pellentesque at semper metus, sit amet dignissim dui. Proin semper malesuada mauris porttitor laoreet. Ut malesuada libero massa, in dapibus lorem ullamcorper eu. Vestibulum vel convallis lorem.",
 */
 
-},{"./Card.jsx":337,"./CardNew.jsx":338,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],343:[function(require,module,exports){
+},{"./Card.jsx":338,"./CardNew.jsx":339,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],344:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36837,7 +36975,7 @@ var Menu = (function (_React$Component) {
 exports['default'] = Menu;
 module.exports = exports['default'];
 
-},{"../common/Icon.jsx":333,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276,"react-router":89}],344:[function(require,module,exports){
+},{"../common/Icon.jsx":334,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276,"react-router":89}],345:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36908,7 +37046,7 @@ Message.defaultProps = {
 exports['default'] = Message;
 module.exports = exports['default'];
 
-},{"../common/Icon.jsx":333,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],345:[function(require,module,exports){
+},{"../common/Icon.jsx":334,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"react":276}],346:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36943,11 +37081,20 @@ var _actionsTopicActionsJs = require('./actions/TopicActions.js');
 
 var _actionsTopicActionsJs2 = _interopRequireDefault(_actionsTopicActionsJs);
 
+var _storesChatStoreJs = require('./stores/ChatStore.js');
+
+var _storesChatStoreJs2 = _interopRequireDefault(_storesChatStoreJs);
+
+var _actionsChatActionsJs = require('./actions/ChatActions.js');
+
+var _actionsChatActionsJs2 = _interopRequireDefault(_actionsChatActionsJs);
+
 var Flux = (function (_Flummox) {
   function Flux() {
     _classCallCheck(this, Flux);
 
     _get(Object.getPrototypeOf(Flux.prototype), 'constructor', this).call(this);
+
     //il faut declarer les actions avant les stores.
     //car this.createStore appelle le constructor du store en question
     //dans lequel se trouve une reference aux Actions
@@ -36957,6 +37104,10 @@ var Flux = (function (_Flummox) {
 
     this.createActions('topicActions', _actionsTopicActionsJs2['default']);
     this.createStore('topicStore', _storesTopicStoreJs2['default'], this);
+
+    this.createActions('chatActions', _actionsChatActionsJs2['default']);
+    this.createStore('chatStore', _storesChatStoreJs2['default'], this);
+
     console.log('... Flux initialized');
   }
 
@@ -36968,7 +37119,7 @@ var Flux = (function (_Flummox) {
 exports['default'] = Flux;
 module.exports = exports['default'];
 
-},{"./actions/TopicActions.js":327,"./actions/UniverseActions.js":328,"./stores/TopicStore.js":347,"./stores/UniverseStore.js":348,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox":55}],346:[function(require,module,exports){
+},{"./actions/ChatActions.js":327,"./actions/TopicActions.js":328,"./actions/UniverseActions.js":329,"./stores/ChatStore.js":348,"./stores/TopicStore.js":349,"./stores/UniverseStore.js":350,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox":55}],347:[function(require,module,exports){
 'use strict';
 
 var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
@@ -37013,7 +37164,86 @@ var routes = _react2['default'].createElement(
 exports['default'] = routes;
 module.exports = exports['default'];
 
-},{"./components/App.jsx":329,"./components/Explore.jsx":330,"./components/NotFound.jsx":331,"./components/Universe.jsx":332,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/interop-require-default":11,"react":276,"react-router":89}],347:[function(require,module,exports){
+},{"./components/App.jsx":330,"./components/Explore.jsx":331,"./components/NotFound.jsx":332,"./components/Universe.jsx":333,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/interop-require-default":11,"react":276,"react-router":89}],348:[function(require,module,exports){
+'use strict';
+
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
+
+var _get = require('babel-runtime/helpers/get')['default'];
+
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
+
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
+
+var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+_Object$defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _utilsBaseStoreJs = require('../utils/BaseStore.js');
+
+var _utilsBaseStoreJs2 = _interopRequireDefault(_utilsBaseStoreJs);
+
+var ChatStore = (function (_BaseStore) {
+  function ChatStore(flux) {
+    _classCallCheck(this, ChatStore);
+
+    _get(Object.getPrototypeOf(ChatStore.prototype), 'constructor', this).call(this);
+
+    var chatActionIds = flux.getActionIds('chatActions');
+    this.registerAsync(chatActionIds.loadChat, this.handleBeginAsyncRequest, this.handleLoadChat, this.handleErrorAsyncRequest);
+    this.register(chatActionIds.flushChat, this.handleFlushChat);
+
+    this.state = {}; // Reset le state, important (?)
+    console.log('.S. ChatStore initialized');
+  }
+
+  _inherits(ChatStore, _BaseStore);
+
+  _createClass(ChatStore, [{
+    key: 'getChat',
+
+    // Les getters servent principalement à FluxComponent.connectToStores
+    // ils fetch le state flux pour qu'il soit injecté dans le state React
+    value: function getChat() {
+      console.log('.S. ChatStore.getChat');
+      return this.state.chat;
+    }
+  }, {
+    key: 'handleLoadChat',
+
+    // Les handlers correspondent au traitement du state après avoir executé une action
+    value: function handleLoadChat(chat) {
+      console.log('.S. ChatStore.handleLoadChat set ' + chat.name);
+      this.setState({
+        chat: chat,
+        isLoading: false
+      });
+    }
+  }, {
+    key: 'handleFlushChat',
+    value: function handleFlushChat() {
+      console.log('.S. ChatStore.handleFlushChat');
+      this.setState({
+        chat: {
+          id: 0,
+          name: '...',
+          messages: []
+        }
+      });
+    }
+  }]);
+
+  return ChatStore;
+})(_utilsBaseStoreJs2['default']);
+
+exports['default'] = ChatStore;
+module.exports = exports['default'];
+
+},{"../utils/BaseStore.js":352,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],349:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37044,7 +37274,7 @@ var TopicStore = (function (_BaseStore) {
 
     var topicActionIds = flux.getActionIds('topicActions');
     this.registerAsync(topicActionIds.loadTopics, this.handleBeginAsyncRequest, this.handleLoadTopics, this.handleErrorAsyncRequest);
-    // this.register(universeActionIds.syncAction, this.syncAction);
+    this.register(topicActionIds.flushTopics, this.handleFlushTopics);
 
     this.state = {}; // Reset le state, important (?)
     console.log('.S. TopicStore initialized');
@@ -37072,6 +37302,14 @@ var TopicStore = (function (_BaseStore) {
         isLoading: false
       });
     }
+  }, {
+    key: 'handleFlushTopics',
+    value: function handleFlushTopics() {
+      console.log('.S. TopicStore.handleFlushTopics');
+      this.setState({
+        topics: []
+      });
+    }
   }]);
 
   return TopicStore;
@@ -37080,7 +37318,7 @@ var TopicStore = (function (_BaseStore) {
 exports['default'] = TopicStore;
 module.exports = exports['default'];
 
-},{"../utils/BaseStore.js":350,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],348:[function(require,module,exports){
+},{"../utils/BaseStore.js":352,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],350:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37114,7 +37352,7 @@ var UniverseStore = (function (_BaseStore) {
     this.registerAsync(universeActionIds.loadUniverseByName, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadStartUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadAllUniverses, this.handleBeginAsyncRequest, this.handleLoadAllUniverses, this.handleErrorAsyncRequest);
-    // this.register(universeActionIds.syncAction, this.syncAction);
+    this.register(universeActionIds.setUniverse, this.handleSetUniverse);
 
     this.state = {}; // Reset le state, important (?)
     console.log('.S. UniverseStore initialized');
@@ -37157,6 +37395,14 @@ var UniverseStore = (function (_BaseStore) {
       });
       console.log('.S. UniverseStore.handleLoadAllUniverses');
     }
+  }, {
+    key: 'handleSetUniverse',
+    value: function handleSetUniverse(universe) {
+      this.setState({
+        universe: universe
+      });
+      console.log('.S. UniverseStore.handleSetUniverse');
+    }
   }]);
 
   return UniverseStore;
@@ -37165,7 +37411,7 @@ var UniverseStore = (function (_BaseStore) {
 exports['default'] = UniverseStore;
 module.exports = exports['default'];
 
-},{"../utils/BaseStore.js":350,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],349:[function(require,module,exports){
+},{"../utils/BaseStore.js":352,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11}],351:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37204,7 +37450,7 @@ var BaseActions = (function (_Actions) {
 exports['default'] = BaseActions;
 module.exports = exports['default'];
 
-},{"../utils/IsoFetch.js":351,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox":55}],350:[function(require,module,exports){
+},{"../utils/IsoFetch.js":353,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox":55}],352:[function(require,module,exports){
 //copié depuis https://github.com/vesparny/flux-immutable-example/blob/master/src/utils/BaseStore.js
 
 'use strict';
@@ -37259,7 +37505,7 @@ var BaseStore = (function (_Store) {
 exports['default'] = BaseStore;
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"flummox":55}],351:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"flummox":55}],353:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -37277,6 +37523,17 @@ _Object$defineProperty(exports, "__esModule", {
 var IsoFetch = (function () {
   function IsoFetch() {
     _classCallCheck(this, IsoFetch);
+
+    this.messages = (function () {
+      var messages = [];
+      for (var i = 0; i < 100; i++) {
+        messages.push({
+          id: i,
+          author: "Cicero",
+          content: i + " Lorem ipsum dolor sit amet." });
+      }
+      return messages;
+    })();
   }
 
   _createClass(IsoFetch, [{
@@ -37293,6 +37550,7 @@ var IsoFetch = (function () {
             case 1:
               resolve({
                 id: 1,
+                chatId: 1,
                 name: "Startups",
                 description: "This is a place where stuff gets done."
               });
@@ -37300,6 +37558,7 @@ var IsoFetch = (function () {
             case 2:
               resolve({
                 id: 2,
+                chatId: 2,
                 name: "Design",
                 description: "This is a place where stuff gets designed."
               });
@@ -37307,6 +37566,7 @@ var IsoFetch = (function () {
             case 3:
               resolve({
                 id: 3,
+                chatId: 3,
                 name: "Dev",
                 description: "This is a place where stuff gets developped."
               });
@@ -37314,6 +37574,7 @@ var IsoFetch = (function () {
             default:
               resolve({
                 id: 1,
+                chatId: 1,
                 name: "Startups",
                 description: "This is a place where stuff gets done."
               });
@@ -37335,6 +37596,7 @@ var IsoFetch = (function () {
             case "Startups":
               resolve({
                 id: 1,
+                chatId: 1,
                 name: "Startups",
                 description: "This is a place where stuff gets done."
               });
@@ -37342,6 +37604,7 @@ var IsoFetch = (function () {
             case "Design":
               resolve({
                 id: 2,
+                chatId: 2,
                 name: "Design",
                 description: "This is a place where stuff gets designed."
               });
@@ -37349,6 +37612,7 @@ var IsoFetch = (function () {
             case "Dev":
               resolve({
                 id: 3,
+                chatId: 3,
                 name: "Dev",
                 description: "This is a place where stuff gets developped."
               });
@@ -37356,6 +37620,7 @@ var IsoFetch = (function () {
             default:
               resolve({
                 id: 1,
+                chatId: 1,
                 name: "ByName Default",
                 description: "This is a place where stuff gets done."
               });
@@ -37375,10 +37640,11 @@ var IsoFetch = (function () {
           // resolve with some mock data
           resolve({
             id: 0,
+            chatId: 0,
             name: "User's starting universe",
             description: "This is a place where stuff gets done."
           });
-        }, 1300);
+        }, 250);
       });
     }
   }, {
@@ -37393,18 +37659,21 @@ var IsoFetch = (function () {
           // resolve with some mock data
           resolve([{
             id: 1,
+            chatId: 1,
             name: "Startups",
             description: "This is a place where stuff gets done."
           }, {
             id: 2,
+            chatId: 2,
             name: "Design",
             description: "This is a place where stuff gets designed."
           }, {
             id: 3,
+            chatId: 3,
             name: "Dev",
             description: "This is a place where stuff gets developped."
           }]);
-        }, 1300);
+        }, 700);
       });
     }
   }, {
@@ -37466,7 +37735,50 @@ var IsoFetch = (function () {
             imgPath: "img/image1.png",
             timestamp: "a long time"
           }].concat(pasCustom));
-        }, 1300);
+        }, 750);
+      });
+    }
+  }, {
+    key: "chat",
+    value: function chat(chatId) {
+      console.log("+++ Fetching chat " + chatId);
+      var messages = this.messages;
+      // returning a Promise because that is what fetch does.
+      return new _Promise(function (resolve, reject) {
+        // simulate an asynchronous action where data is fetched on
+        // a remote server somewhere.
+        setTimeout(function () {
+          // resolve with some mock data
+          switch (chatId) {
+            case 1:
+              resolve({
+                id: 1,
+                name: "Global Startups chat",
+                messages: messages
+              });
+              break;
+            case 2:
+              resolve({
+                id: 2,
+                name: "Global Design chat",
+                messages: messages
+              });
+              break;
+            case 3:
+              resolve({
+                id: 3,
+                name: "Global Dev chat",
+                messages: messages
+              });
+              break;
+            default:
+              resolve({
+                id: 0,
+                name: "Global Default chat",
+                messages: messages
+              });
+          }
+        }, 750);
       });
     }
   }]);
@@ -37477,7 +37789,7 @@ var IsoFetch = (function () {
 exports["default"] = IsoFetch;
 module.exports = exports["default"];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/core-js/promise":4,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8}],352:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/core-js/promise":4,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8}],354:[function(require,module,exports){
 // Depuis la source de la doc de Flummox
 /**
  * Accepts an array of matched routes as returned from react-router's
@@ -37532,7 +37844,7 @@ function performRouteHandlerStaticMethod(routes, methodName) {
 
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/core-js/promise":4,"babel-runtime/regenerator":50}],353:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":2,"babel-runtime/core-js/promise":4,"babel-runtime/regenerator":50}],355:[function(require,module,exports){
 //Doit etre deplacée dans le dossier client !!!
 'use strict';
 
@@ -37573,7 +37885,7 @@ var _socketIoClient2 = _interopRequireDefault(_socketIoClient);
 var io = (0, _socketIoClient2['default'])('http://130.211.68.244:8081');
 
 io.on('message', function (message) {
-  console.log('___ server says ' + message);
+  console.log('___ Server says ' + message);
 });
 
 console.log('Welcome to Aquest v0!');
@@ -37605,13 +37917,13 @@ var router = _reactRouter2['default'].create({
 });
 
 // Render app
-var counter = 0;
+var c = 0;
 router.run(function callee$0$0(Handler, routerState) {
   return _regeneratorRuntime.async(function callee$0$0$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        counter++;
-        console.log('__________ ' + counter + ' router.run ' + routerState.pathname + ' __________');
+        c++;
+        console.log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
 
         context$1$0.next = 4;
         return (0, _utilsPerformRouteHandlerStaticMethodJs2['default'])(routerState.routes, 'populateFluxState', { flux: flux, routerState: routerState });
@@ -37626,7 +37938,7 @@ router.run(function callee$0$0(Handler, routerState) {
           _react2['default'].createElement(Handler, routerState)
         ), document.getElementById('mountNode'), function () {
           // Callback
-          console.log('... App rendered');
+          console.log(flux.firstAppRender ? '... App rendered for the first time' : '... App rendered');
         });
 
       case 7:
@@ -37636,4 +37948,4 @@ router.run(function callee$0$0(Handler, routerState) {
   }, null, _this);
 });
 
-},{"./flux.js":345,"./routes.jsx":346,"./utils/performRouteHandlerStaticMethod.js":352,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"flummox/component":53,"react":276,"react-router":89,"socket.io-client":277}]},{},[353]);
+},{"./flux.js":346,"./routes.jsx":347,"./utils/performRouteHandlerStaticMethod.js":354,"babel-runtime/helpers/interop-require-default":11,"babel-runtime/regenerator":50,"flummox/component":53,"react":276,"react-router":89,"socket.io-client":277}]},{},[355]);
