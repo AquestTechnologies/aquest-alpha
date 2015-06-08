@@ -115,7 +115,8 @@ server.route({
     // Match la location et les routes, et renvoie le bon layout (Handler) et le state
     router.run( async (Handler, routerState) => {
       console.log('_____________ router.run _____________');
-      
+      // Pour l'application naissante c'est son premier router.run
+      routerState.c = 1;
       // Initialise une nouvelle instance flux
       const flux = new Flux();
       

@@ -35644,8 +35644,6 @@ module.exports = exports['default'];
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
 
-var _get = require('babel-runtime/helpers/get')['default'];
-
 var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
 var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
@@ -35673,30 +35671,25 @@ var _commonLoadingBarJsx = require('./common/LoadingBar.jsx');
 var _commonLoadingBarJsx2 = _interopRequireDefault(_commonLoadingBarJsx);
 
 var App = (function (_React$Component) {
-  //ici plein de belles choses ?
-
-  function App(props) {
+  function App() {
     _classCallCheck(this, App);
 
-    _get(Object.getPrototypeOf(App.prototype), 'constructor', this).call(this, props);
-    // this.state = {c: 0}; //Provoque une boucle infinie coté client avec les getters de FluxComponent
-    this.c = 0;
+    if (_React$Component != null) {
+      _React$Component.apply(this, arguments);
+    }
   }
 
   _inherits(App, _React$Component);
 
   _createClass(App, [{
-    key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps() {
-      // Ne s'incrémente pas lorsque l'utilisateur navigue vers "back"
-      this.c += 1;
-    }
-  }, {
     key: 'render',
+
+    //ici plein de belles choses ?
+
     value: function render() {
       return _react2['default'].createElement(
         _flummoxComponent2['default'],
-        { c: this.c, connectToStores: {
+        { c: this.props.c, connectToStores: {
             universeStore: function universeStore(store) {
               return {
                 universeIsLoading: store.isLoading(),
@@ -35729,7 +35722,7 @@ var App = (function (_React$Component) {
 exports['default'] = App;
 module.exports = exports['default'];
 
-},{"./common/LoadingBar.jsx":335,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/get":9,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox/component":53,"react":276,"react-router":89}],331:[function(require,module,exports){
+},{"./common/LoadingBar.jsx":335,"babel-runtime/core-js/object/define-property":2,"babel-runtime/helpers/class-call-check":7,"babel-runtime/helpers/create-class":8,"babel-runtime/helpers/inherits":10,"babel-runtime/helpers/interop-require-default":11,"flummox/component":53,"react":276,"react-router":89}],331:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36626,7 +36619,7 @@ var Chat = (function (_React$Component) {
     value: function render() {
       var samuel = 'The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother\'s keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.';
       var messagesList = this.props.chat.messages.length === 0 ? 'chat_list_hidden' : 'chat_list_visible';
-      if (this.props.c === 0) {
+      if (this.props.c === 1) {
         messagesList += ' no_animation';
       }
       return _react2['default'].createElement(
@@ -36832,7 +36825,7 @@ var Inventory = (function (_React$Component) {
     value: function render() {
       var universe = this.props.universe;
       var inventoryList = this.props.topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
-      if (this.props.c === 0) {
+      if (this.props.c === 1) {
         inventoryList += ' no_animation';
       }
       return _react2['default'].createElement(
@@ -37923,12 +37916,13 @@ router.run(function callee$0$0(Handler, routerState) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         c++;
+        routerState.c = c;
         console.log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
 
-        context$1$0.next = 4;
+        context$1$0.next = 5;
         return (0, _utilsPerformRouteHandlerStaticMethodJs2['default'])(routerState.routes, 'populateFluxState', { flux: flux, routerState: routerState });
 
-      case 4:
+      case 5:
         console.log('... Exiting performRouteHandlerStaticMethod');
 
         console.log('... Entering React.render');
@@ -37938,10 +37932,10 @@ router.run(function callee$0$0(Handler, routerState) {
           _react2['default'].createElement(Handler, routerState)
         ), document.getElementById('mountNode'), function () {
           // Callback
-          console.log(flux.firstAppRender ? '... App rendered for the first time' : '... App rendered');
+          console.log('... App rendered');
         });
 
-      case 7:
+      case 8:
       case 'end':
         return context$1$0.stop();
     }

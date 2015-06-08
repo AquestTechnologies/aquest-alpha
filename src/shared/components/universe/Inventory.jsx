@@ -12,7 +12,7 @@ class Inventory extends React.Component {
   render() {
     let universe = this.props.universe;
     let inventoryList = this.props.topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
-    if ( this.props.c === 0 ) { inventoryList += ' no_animation'; }
+    if ( this.props.c === 1 ) { inventoryList += ' no_animation'; }
     return (
       
       <div className="inventory">

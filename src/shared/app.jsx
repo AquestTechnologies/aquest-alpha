@@ -46,6 +46,7 @@ const router = Router.create({
 let c = 0;
 router.run( async (Handler, routerState) => {
   c++;
+  routerState.c = c;
   console.log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
   
   await performRouteHandlerStaticMethod(routerState.routes, 'populateFluxState', { flux, routerState } );
@@ -59,7 +60,7 @@ router.run( async (Handler, routerState) => {
     document.getElementById('mountNode'),
     function() {
       // Callback
-      console.log(flux.firstAppRender ? '... App rendered for the first time' : '... App rendered');
+      console.log('... App rendered');
     }
   );
 });
