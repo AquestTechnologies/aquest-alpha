@@ -41,7 +41,7 @@ Aquest Technologies © 2015
 - Groupe Utilisateur : users, Utilisateur : aquestuser
 - Base de données : aquestdb
 
-### Créer la Base de données
+### Créer la base de données
 - cd /home/aquest/createDB
 - psql posgres < create_aquestdb.sql  (l'idéale serai un seul fichier, j'y travaille)
 - psql aquestdb < create_tables.sql
