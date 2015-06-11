@@ -6,6 +6,33 @@ import routes from '../shared/routes.jsx';
 import Flux from '../shared/flux.js';
 import FluxComponent from 'flummox/component';
 import performRouteHandlerStaticMethod from '../shared/utils/performRouteHandlerStaticMethod.js';
+import winston from 'winston';
+import pg from 'pg';
+
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({
+      name: 'info-file',
+      filename: '/home/dherault_gmail_com/yolo/aquest-alpha/src/logs/info.log',
+      level: 'info'
+    }),
+    new (winston.transports.File)({
+      name: 'error-file',
+      filename: '/home/dherault_gmail_com/yolo/aquest-alpha/src/logs/error.log',
+      level: 'error'
+    })
+  ]
+});
+
+const bdUser = 'aquestuser';
+const bdPassword = 'aquestuser';
+const bdIp = '146.148.13.18'; 
+const bdPort = '5432'; 
+const bdName = 'aquestdb';
+const postgresurl = 'postgres://'+bdUser+':'+bdPassword+'@'+bdIp+':'+bdPort+'/'+bdName;
+
+let client = new pg.Client(postgresurl);
 
 let server = new Hapi.Server();
 // Distribution des ports pour l'API et les websockets
@@ -19,8 +46,8 @@ server.register(require('./websocket'), function (err) {
   if (err) { throw err; }
   // Si le server websocket est bien démarré, on lance le serveur API
   server.start(function() {
-    console.log('Make it rain! API server started at ' + server.info.uri);
-    console.log('              ws  server started at ' + server.select('ws').info.uri);
+    logger.info('Make it rain! API server started at ' + server.info.uri);
+    logger.info('              ws  server started at ' + server.select('ws').info.uri);
     console.log('  ___                        _        \n' + // !
                 ' / _ \\                      | |      \n' +
                 '/ /_\\ \\ __ _ _   _  ___  ___| |_    \n' +
@@ -32,23 +59,6 @@ server.register(require('./websocket'), function (err) {
                );
   
   });
-});
-
-
-server.route({
-  method: 'GET',
-  path: '/',
-  handler: function (request, reply) {
-    reply.prerenderer(request.url);
-  }
-});
-
-server.route({
-    method: 'GET',
-    path: '/{filename}',
-    handler: function (request, reply) {
-      reply.prerenderer(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
-    }
 });
 
 //Routage des assets, inutile en production car derriere un CDN
@@ -76,6 +86,53 @@ server.route({
     }
 });
 
+
+server.route({
+  method: 'GET',
+  path: '/',
+  handler: function (request, reply) {
+    reply.prerenderer(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
+  }
+});
+
+server.route({
+  method: 'GET',
+  path: '/{p*}',
+  handler: function (request, reply) {
+    reply.prerenderer(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
+  }
+});
+
+
+server.route({
+  method: 'GET',
+  path: '/api/universe/{id}',
+  handler: function (request, reply) {
+    logger.info('request params : ' + request.params.universeName);
+    var universeName = request.params.universeName;
+    // il faudra créer une classe qui vérifie les users inputs de l'utilisateur
+    if (typeof universeName === 'string'){
+      client.connect(function(err) {
+        if(err) {
+          return logger.info('could not connect to postgres', err);
+        }
+        let queryUniverse = 'SELECT * FROM aquest_schema.universe WHERE name = \'' + universeName + '\'';
+  
+        client.query(queryUniverse, function(err, result) {
+          if(err) {
+            return logger.info('error running query', err);
+          }
+          logger.info(result.rows[0].description);
+          client.end();
+        });
+      });
+    } else {
+      logger.info('is not a string');
+    }
+  }
+});
+
+
 // Prerendering
 (function() {
   let c = 0;
@@ -94,7 +151,7 @@ server.route({
     m = ('' + m).length == 2 ? m : '0' + m;
     s = ('' + s).length == 2 ? s : '0' + s;
     c++;
-    console.log('\n[' + c + '] ' + h + ':' + m + ':' + s + ' ' + this.request.info.remoteAddress + ':' + this.request.info.remotePort + ' ' + this.request.method + ' ' + this.request.url.path);
+    logger.info('\n[' + c + '] ' + h + ':' + m + ':' + s + ' ' + this.request.info.remoteAddress + ':' + this.request.info.remotePort + ' ' + this.request.method + ' ' + this.request.url.path);
     
     // Servira à lire le fichier HTML
     function readFile (filename, enc) {
@@ -114,7 +171,7 @@ server.route({
     
     // Match la location et les routes, et renvoie le bon layout (Handler) et le state
     router.run( async (Handler, routerState) => {
-      console.log('_____________ router.run _____________');
+      logger.info('_____________ router.run _____________');
       // Pour l'application naissante c'est son premier router.run
       routerState.c = 1;
       // Initialise une nouvelle instance flux
@@ -122,15 +179,15 @@ server.route({
       
       // Initialise les stores
       await performRouteHandlerStaticMethod(routerState.routes, 'populateFluxState', { flux, routerState } );
-      console.log('... Exiting performRouteHandlerStaticMethod');
+      logger.info('... Exiting performRouteHandlerStaticMethod');
       
-      // console.log(Handler);
-      // console.log('state_________________________________________________');
-      // console.log(state);
-      // console.log('flux_________________________________________________');
-      // console.log(flux);
-      // console.log('_________________________________________________');
-      // console.log(flux._stores.universeStore.state);
+      // logger.info(Handler);
+      // logger.info('state_________________________________________________');
+      // logger.info(state);
+      // logger.info('flux_________________________________________________');
+      // logger.info(flux);
+      // logger.info('_________________________________________________');
+      // logger.info(flux._stores.universeStore.state);
       
       // On extrait le state de l'instance flux
       let fluxState = {};
@@ -140,12 +197,12 @@ server.route({
       let serializedState = JSON.stringify(fluxState);
       // On escape le charactere ' du state serialisé
       serializedState = serializedState.replace(/'/g, '&apos;');
-      console.log('... Flux state serialized');
-      // console.log(serializedState);
+      logger.info('... Flux state serialized');
+      // logger.info(serializedState);
       
       // rendering de l'app fluxée
       // Doc React pour info : If you call React.render() on a node that already has this server-rendered markup, React will preserve it and only attach event handlers, allowing you to have a very performant first-load experience.
-      console.log('... Entering React.renderToString');
+      logger.info('... Entering React.renderToString');
       try {
         var mount_me_im_famous = React.renderToString(
           <FluxComponent flux={flux}>
@@ -153,10 +210,10 @@ server.route({
           </FluxComponent>
         );
       } catch(err) {
-        console.log('!!! Error while React.renderToString.');
-        console.log(err);
+        logger.error('!!! Error while React.renderToString.');
+        logger.error(err);
       }
-      console.log('... Exiting React.renderToString');
+      logger.info('... Exiting React.renderToString');
       
       // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
       readFile('src/shared/index.html', 'utf8').then(function (html){
@@ -169,10 +226,10 @@ server.route({
         let htmlWithFlux = htmlWithoutFlux.replace('id="mountNode"', 'id="mountNode" state-from-server=\'' + serializedState + '\'');
         response.source  = htmlWithFlux;
         response.send();
-        console.log('Served '+ url.path + '\n');
+        logger.info('Served '+ url.path + '\n');
       }).catch(function (err) {
-        console.log('!!! Error while reading HTML.');
-        console.log(err);
+        logger.error('!!! Error while reading HTML.');
+        logger.error(err);
       });
       
     });

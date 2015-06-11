@@ -33,12 +33,19 @@ class Universe extends React.Component {
     }
   }
   
+  componentWillMount () {
+    if (this.props.params.universeName !== this.props.universe.name) {
+      console.log('.c. Initializing Universe bad match');
+      //A faire
+    }
+  }
+  
   render() {
     return (
       <div>
         <Menu />
-        <Inventory universe={this.props.universe} topics={this.props.topics} c={this.props.c}/>
-        <Chat chat={this.props.chat} c={this.props.c} />
+        <Inventory universe={this.props.universe} topics={this.props.topics} />
+        <Chat chat={this.props.chat} />
       </div>
     );
   }

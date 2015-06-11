@@ -45,8 +45,8 @@ export default class UniverseActions extends BaseActions {
     }
   }
   
-  setUniverse(universe) {
-    console.log('.A. UniverseActions.SetUniverse');
+  newUniverse(newUniverseName, newUniverseDescription) {
+    console.log('.A. UniverseActions.newUniverse');
     return universe;
   }
   
