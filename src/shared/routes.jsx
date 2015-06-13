@@ -5,6 +5,7 @@ import App         from './components/App.jsx';
 import Universe    from './components/Universe.jsx';
 import Inventory   from './components/universe/Inventory.jsx';
 import Topic       from './components/universe/Topic.jsx';
+import NewTopic    from './components/universe/NewTopic.jsx';
 import Explore     from './components/Explore.jsx';
 import NotFound    from './components/NotFound.jsx';
 
@@ -18,6 +19,7 @@ let routes = (
     <Route name='universe' path='/_:universeName' handler={Universe}>
       <DefaultRoute handler={Inventory} />
       <Route name='topic' path=':topicHandle' handler={Topic} />
+      <Route name='newTopic' path='new_topic' handler={NewTopic} />
     </Route>
     
     <Route name='explore' path='/Explore' handler={Explore} />

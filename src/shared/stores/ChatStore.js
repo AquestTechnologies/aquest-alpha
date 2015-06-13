@@ -16,7 +16,7 @@ export default class ChatStore extends BaseStore {
   // Les getters servent principalement à FluxComponent.connectToStores
   // ils fetch le state flux pour qu'il soit injecté dans le state React
   getChat() {
-    console.log('.S. ChatStore.getChat');
+    // console.log('.S. ChatStore.getChat');
     return this.state.chat;
   }
     

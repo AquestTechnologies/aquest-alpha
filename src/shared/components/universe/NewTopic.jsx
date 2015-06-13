@@ -2,7 +2,7 @@ import React from 'react';
 
 import Chat from './Chat.jsx';
 
-class Topic extends React.Component {
+class NewTopic extends React.Component {
   
   render() {
     return (
@@ -10,7 +10,7 @@ class Topic extends React.Component {
         <div className="universe_left">
           <div className="universe_left_scrollable">
             <div className="universe_left_scrolled">
-              <div className="topic">
+              <div className="">
                 yo
               </div>
             </div>
@@ -22,9 +22,7 @@ class Topic extends React.Component {
   }
 }
 
-Topic.defaultProps = {
-  universe: {},
-  topic: {}
+NewTopic.defaultProps = {
 };
 
-export default Topic;
+export default NewTopic;

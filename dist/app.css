@@ -426,61 +426,7 @@ div {
   display: block;
   box-sizing: border-box;
 }
-nav {
-  position: fixed;
-  width: 111rem;
-  z-index: 100;
-  padding: 2rem 4rem 0 4rem;
-}
-nav ul {
-  padding: 0;
-  margin: 0;
-}
-nav li {
-  color: #ffffff;
-  font-size: 1.7rem;
-  width: 4rem;
-  cursor: pointer;
-  overflow-x: visible;
-}
-nav li:hover {
-  color: #2fd359;
-}
-nav li a {
-  color: inherit;
-  text-decoration: none;
-}
-nav li span {
-  display: none;
-}
-nav li:hover span {
-  display: block !important;
-}
-.menu_left {
-  float: left;
-}
-.menu_right {
-  float: right;
-}
-.menu_left li {
-  float: left;
-  margin-right: 2rem;
-}
-.menu_right li {
-  float: right;
-  margin-left: 2rem;
-}
-.menu_right li span {
-  text-align: right;
-  float: right;
-  white-space: nowrap;
-}
-.menu_icon {
-  width: 3.6rem;
-  height: 3.6rem;
-  margin-bottom: 0.5rem;
-}
-.inventory {
+.universe_left {
   position: fixed;
   width: 119rem;
   height: 100%;
@@ -490,25 +436,26 @@ nav li:hover span {
   box-shadow: 0.4rem 0 0.5rem 0 rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
-.inventory_scrollable {
+.universe_left_scrollable {
   height: 100%;
   overflow-Y: scroll;
   width: 111%;
 }
-.inventory_scrolled {
+.universe_left_scrolled {
   width: 119rem;
-}
-.inventory_list_hidden {
-  display: none;
-}
-.inventory_list_visible {
   padding: 0 4rem 0 4rem;
-  -webkit-animation: fadein 1.2s;
-  /* Safari, Chrome and Opera > 12.1 */
-  animation: fadein 1.2s;
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
+}
+.st_visible {
+  visibility: visible;
+}
+.st_hidden {
+  visibility: hidden;
+}
+.st_show {
+  display: block;
+}
+.st_hide {
+  display: none;
 }
 .no_animation {
   /*
@@ -530,36 +477,6 @@ nav li:hover span {
   -ms-animation: none !important;
   animation: none !important;
 }
-@keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-.inventory_header {
-  height: 14rem;
-  padding: 0 4rem 0 4rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.inventory_header_name {
-  color: #ffffff;
-  font-size: 3rem;
-  letter-spacing: 0.15rem;
-  text-align: center;
-  font-weight: 700;
-  display: inline-block;
-}
-.inventory_header_desc {
-  color: #ffffff;
-  font-size: 1.7rem;
-  line-height: 2rem;
-  text-align: center;
-  width: 60rem;
-}
 .card {
   position: relative;
   width: 54.5rem;
@@ -568,6 +485,7 @@ nav li:hover span {
   background-color: #ffffff;
   box-shadow: 0.3rem 0.4rem 0.5rem 0 rgba(0, 0, 0, 0.5);
   overflow: hidden;
+  cursor: pointer;
 }
 .card_title {
   letter-spacing: 0rem;
@@ -609,6 +527,7 @@ nav li:hover span {
   border-width: 0.5rem;
   border-style: dashed;
   border-color: #ffffff;
+  cursor: pointer;
 }
 .cardNew_author {
   color: #535353;
@@ -649,9 +568,6 @@ nav li:hover span {
 .chat_list_visible {
   width: 73rem;
   min-height: 100%;
-  -webkit-animation: fadein 1.2s;
-  /* Safari, Chrome and Opera > 12.1 */
-  animation: fadein 1.2s;
   padding: 0 4rem 0 2rem;
   display: flex;
   flex-flow: column nowrap;
@@ -706,6 +622,89 @@ nav li:hover span {
   border-top: 0.1rem solid #2fd359;
   padding-top: 1.9rem;
 }
+.inventory_list_hidden {
+  display: none;
+}
+.inventory_list_visible {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}
+.inventory_header {
+  height: 14rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.inventory_header_name {
+  color: #ffffff;
+  font-size: 3rem;
+  letter-spacing: 0.15rem;
+  text-align: center;
+  font-weight: 700;
+  display: inline-block;
+}
+.inventory_header_desc {
+  color: #ffffff;
+  font-size: 1.7rem;
+  line-height: 2rem;
+  text-align: center;
+  width: 60rem;
+}
+nav {
+  position: fixed;
+  width: 111rem;
+  z-index: 100;
+  padding: 2rem 4rem 0 4rem;
+}
+nav ul {
+  padding: 0;
+  margin: 0;
+}
+nav li {
+  color: #ffffff;
+  font-size: 1.7rem;
+  width: 4rem;
+  cursor: pointer;
+  overflow-x: visible;
+}
+nav li:hover {
+  color: #2fd359;
+}
+nav li a {
+  color: inherit;
+  text-decoration: none;
+}
+nav li span {
+  display: none;
+}
+nav li:hover span {
+  display: block !important;
+}
+.menu_left {
+  float: left;
+}
+.menu_right {
+  float: right;
+}
+.menu_left li {
+  float: left;
+  margin-right: 2rem;
+}
+.menu_right li {
+  float: right;
+  margin-left: 2rem;
+}
+.menu_right li span {
+  text-align: right;
+  float: right;
+  white-space: nowrap;
+}
+.menu_icon {
+  width: 3.6rem;
+  height: 3.6rem;
+  margin-bottom: 0.5rem;
+}
 .message {
   width: 100%;
   margin-bottom: 2rem;
@@ -730,15 +729,8 @@ nav li:hover span {
   width: 3.6rem;
   height: 3.6rem;
 }
-.st_visible {
-  visibility: visible;
-}
-.st_hidden {
-  visibility: hidden;
-}
-.st_show {
-  display: block;
-}
-.st_hide {
-  display: none;
+.topic {
+  margin: 8rem 0 8rem 0;
+  background-color: #ffffff;
+  min-height: 10%;
 }

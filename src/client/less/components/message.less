@@ -1,0 +1,25 @@
+//__Message__
+.message {
+    width: 100%;
+    margin-bottom: @margin_w;
+}
+
+.message_body {
+    float: left;
+    max-width: @chat_w - 6 * @margin_w;
+    margin-left: @margin_w;
+}
+
+.message_author {
+    .txt_message_author();
+}
+.message_content {
+    .txt_message_content();
+}
+
+.message_icon {
+    color: @lightGrey_color;
+    float: left;
+    width: 3.6*@col_w;
+    height: 3.6*@col_w; //ne devrait pas être nécessaire, mais sans ça IE définit la hauteur du svg à 100% de l'écran...
+}

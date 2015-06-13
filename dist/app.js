@@ -926,6 +926,14 @@ var useNative = function(){
     if(!(P2.resolve(5).then(function(){}) instanceof P2)){
       works = false;
     }
+    // actual V8 bug, https://code.google.com/p/v8/issues/detail?id=4162
+    if(works && $.DESC){
+      var thenableThenGotten = false;
+      P.resolve($.setDesc({}, 'then', {
+        get: function(){ thenableThenGotten = true; }
+      }));
+      works = thenableThenGotten;
+    }
   } catch(e){ works = false; }
   return works;
 }();
@@ -1011,21 +1019,27 @@ function $reject(value){
 }
 function $resolve(value){
   var record = this
-    , then, wrapper;
+    , then;
   if(record.d)return;
   record.d = true;
   record = record.r || record; // unwrap
   try {
     if(then = isThenable(value)){
-      wrapper = {r: record, d: false}; // wrap
-      then.call(value, ctx($resolve, wrapper, 1), ctx($reject, wrapper, 1));
+      asap(function(){
+        var wrapper = {r: record, d: false}; // wrap
+        try {
+          then.call(value, ctx($resolve, wrapper, 1), ctx($reject, wrapper, 1));
+        } catch(e){
+          $reject.call(wrapper, e);
+        }
+      });
     } else {
       record.v = value;
       record.s = 1;
       notify(record);
     }
-  } catch(err){
-    $reject.call(wrapper || {r: record, d: false}, err); // wrap
+  } catch(e){
+    $reject.call({r: record, d: false}, e); // wrap
   }
 }
 
@@ -35566,7 +35580,7 @@ router.run(function callee$0$0(Handler, routerState) {
   }, null, _this);
 });
 
-},{"../shared/flux.js":355,"../shared/routes.jsx":356,"../shared/utils/performRouteHandlerStaticMethod.js":363,"babel-runtime/helpers/extends":10,"babel-runtime/helpers/interop-require-default":13,"babel-runtime/regenerator":57,"react":283,"react-router":96,"socket.io-client":284}],335:[function(require,module,exports){
+},{"../shared/flux.js":356,"../shared/routes.jsx":357,"../shared/utils/performRouteHandlerStaticMethod.js":364,"babel-runtime/helpers/extends":10,"babel-runtime/helpers/interop-require-default":13,"babel-runtime/regenerator":57,"react":283,"react-router":96,"socket.io-client":284}],335:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -35645,7 +35659,7 @@ var ChatActions = (function (_BaseActions) {
 exports['default'] = ChatActions;
 module.exports = exports['default'];
 
-},{"../utils/BaseActions.js":360,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"babel-runtime/regenerator":57}],336:[function(require,module,exports){
+},{"../utils/BaseActions.js":361,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"babel-runtime/regenerator":57}],336:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -35728,7 +35742,7 @@ var TopicActions = (function (_BaseActions) {
 exports['default'] = TopicActions;
 module.exports = exports['default'];
 
-},{"../utils/BaseActions.js":360,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"babel-runtime/regenerator":57}],337:[function(require,module,exports){
+},{"../utils/BaseActions.js":361,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"babel-runtime/regenerator":57}],337:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -35888,7 +35902,7 @@ var UniverseActions = (function (_BaseActions) {
 exports['default'] = UniverseActions;
 module.exports = exports['default'];
 
-},{"../utils/BaseActions.js":360,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"babel-runtime/regenerator":57}],338:[function(require,module,exports){
+},{"../utils/BaseActions.js":361,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"babel-runtime/regenerator":57}],338:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -36564,8 +36578,6 @@ var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default
 
 var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
 
-var _regeneratorRuntime = require('babel-runtime/regenerator')['default'];
-
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
 _Object$defineProperty(exports, '__esModule', {
@@ -36584,18 +36596,9 @@ var Node = (function (_React$Component) {
 
     _get(Object.getPrototypeOf(Node.prototype), 'constructor', this).call(this);
 
-    this.handleSelectUniverse = function callee$2$0(universe) {
-      return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
-        while (1) switch (context$3$0.prev = context$3$0.next) {
-          case 0:
-            console.log('-c- Node.handleSelectUniverse ' + universe.name);
-            this.context.router.transitionTo('universe', { universeName: universe.name });
-
-          case 2:
-          case 'end':
-            return context$3$0.stop();
-        }
-      }, null, _this);
+    this.handleSelectUniverse = function (universe) {
+      console.log('-c- Node.handleSelectUniverse ' + universe.name);
+      _this.context.router.transitionTo('universe', { universeName: universe.name });
     };
   }
 
@@ -36632,7 +36635,7 @@ Node.contextTypes = {
 exports['default'] = Node;
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"babel-runtime/regenerator":57,"react":283}],346:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],346:[function(require,module,exports){
 "use strict";
 
 var _inherits = require("babel-runtime/helpers/inherits")["default"];
@@ -36722,68 +36725,75 @@ exports["default"] = Card;
 module.exports = exports["default"];
 
 },{"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],347:[function(require,module,exports){
-"use strict";
+'use strict';
 
-var _inherits = require("babel-runtime/helpers/inherits")["default"];
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
 
-var _createClass = require("babel-runtime/helpers/create-class")["default"];
+var _get = require('babel-runtime/helpers/get')['default'];
 
-var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-var _Object$defineProperty = require("babel-runtime/core-js/object/define-property")["default"];
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
+var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
 
-_Object$defineProperty(exports, "__esModule", {
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+_Object$defineProperty(exports, '__esModule', {
   value: true
 });
 
-var _react = require("react");
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
 var CardNew = (function (_React$Component) {
   function CardNew() {
+    var _this = this;
+
     _classCallCheck(this, CardNew);
 
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(CardNew.prototype), 'constructor', this).call(this);
+    //utiliser router.replaceWith ???
+    this.handleClick = function () {
+      // console.log(Object.getOwnPropertyNames(this.context.router));
+      _this.context.router.transitionTo('newTopic', { universeName: _this.context.router.getCurrentParams().universeName });
+    };
   }
 
   _inherits(CardNew, _React$Component);
 
   _createClass(CardNew, [{
-    key: "render",
+    key: 'render',
     value: function render() {
-      return _react2["default"].createElement(
-        "div",
-        { className: "cardNew" },
-        _react2["default"].createElement(
-          "div",
-          { className: "card_content" },
-          _react2["default"].createElement(
-            "div",
-            { className: "card_title" },
-            _react2["default"].createElement(
-              "div",
+      return _react2['default'].createElement(
+        'div',
+        { className: 'cardNew', onClick: this.handleClick },
+        _react2['default'].createElement(
+          'div',
+          { className: 'card_content' },
+          _react2['default'].createElement(
+            'div',
+            { className: 'card_title' },
+            _react2['default'].createElement(
+              'div',
               null,
               this.props.title
             ),
-            _react2["default"].createElement(
-              "div",
+            _react2['default'].createElement(
+              'div',
               null,
               this.props.title2
             )
           ),
-          _react2["default"].createElement(
-            "div",
-            { className: "cardNew_author" },
+          _react2['default'].createElement(
+            'div',
+            { className: 'cardNew_author' },
             this.props.author
           ),
-          _react2["default"].createElement(
-            "div",
-            { className: "cardNew_description" },
+          _react2['default'].createElement(
+            'div',
+            { className: 'cardNew_description' },
             this.props.desc
           )
         )
@@ -36792,21 +36802,26 @@ var CardNew = (function (_React$Component) {
   }]);
 
   return CardNew;
-})(_react2["default"].Component);
+})(_react2['default'].Component);
 
 CardNew.defaultProps = {
-  title: "Tell them what you love,",
-  title2: "Ask for the impossible.",
-  author: "By you, in a minute.",
-  desc: "Start a revolution, or a new topic, or both!",
-  imgPath: "",
-  timestamp: "timestamp"
+  title: 'Tell them what you love,',
+  title2: 'Ask for the impossible.',
+  author: 'By you, in a minute.',
+  desc: 'Start a revolution, or a new topic, or both!',
+  imgPath: '',
+  timestamp: 'timestamp'
 };
 
-exports["default"] = CardNew;
-module.exports = exports["default"];
+// Permet d'acceder a this.context.router
+CardNew.contextTypes = {
+  router: _react2['default'].PropTypes.func.isRequired
+};
 
-},{"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],348:[function(require,module,exports){
+exports['default'] = CardNew;
+module.exports = exports['default'];
+
+},{"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],348:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37078,10 +37093,10 @@ var Inventory = (function (_React$Component) {
 
     _get(Object.getPrototypeOf(Inventory.prototype), 'constructor', this).call(this);
     this.state = {
-      univNameVisible: true
+      nameVisible: true
     };
     this.handleHeaderHover = function () {
-      return _this.setState({ univNameVisible: !_this.state.univNameVisible });
+      return _this.setState({ nameVisible: !_this.state.nameVisible });
     };
   }
 
@@ -37090,6 +37105,7 @@ var Inventory = (function (_React$Component) {
   _createClass(Inventory, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
+      // Fetch des dépendances après le mount, cf. _?.txt
       var universeId = this.props.universe.id;
       if (universeId !== this.props.inventory.universeId) {
         this.props.actions.loadInventory(universeId);
@@ -37103,27 +37119,27 @@ var Inventory = (function (_React$Component) {
       var inventoryListClassName = topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
       if (true) {
         inventoryListClassName += ' no_animation';
-      }
+      } //On verra plus tard pour d'eventuelles animations
 
       return _react2['default'].createElement(
         'div',
         null,
         _react2['default'].createElement(
           'div',
-          { className: 'inventory' },
+          { className: 'universe_left' },
           _react2['default'].createElement(
             'div',
-            { className: 'inventory_scrollable' },
+            { className: 'universe_left_scrollable' },
             _react2['default'].createElement(
               'div',
-              { className: 'inventory_scrolled' },
+              { className: 'universe_left_scrolled' },
               _react2['default'].createElement(
                 'div',
                 { className: 'inventory_header' },
                 _react2['default'].createElement(
                   'div',
-                  { className: this.state.univNameVisible ? 'inventory_header_name' : 'inventory_header_desc', onMouseOver: this.handleHeaderHover, onMouseOut: this.handleHeaderHover },
-                  this.state.univNameVisible ? universe.name : universe.description
+                  { className: this.state.nameVisible ? 'inventory_header_name' : 'inventory_header_desc', onMouseOver: this.handleHeaderHover, onMouseOut: this.handleHeaderHover },
+                  this.state.nameVisible ? universe.name : universe.description
                 )
               ),
               _react2['default'].createElement(
@@ -37155,6 +37171,9 @@ Inventory.defaultProps = {
 
 exports['default'] = Inventory;
 module.exports = exports['default'];
+
+// On peut surement passer tout ca avec un spreadattribute {...topic}
+// Par contre topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu et votes detaillés)
 
 },{"./Card.jsx":346,"./CardNew.jsx":347,"./Chat.jsx":348,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],352:[function(require,module,exports){
 'use strict';
@@ -37345,6 +37364,82 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _ChatJsx = require('./Chat.jsx');
+
+var _ChatJsx2 = _interopRequireDefault(_ChatJsx);
+
+var NewTopic = (function (_React$Component) {
+  function NewTopic() {
+    _classCallCheck(this, NewTopic);
+
+    if (_React$Component != null) {
+      _React$Component.apply(this, arguments);
+    }
+  }
+
+  _inherits(NewTopic, _React$Component);
+
+  _createClass(NewTopic, [{
+    key: 'render',
+    value: function render() {
+      return _react2['default'].createElement(
+        'div',
+        null,
+        _react2['default'].createElement(
+          'div',
+          { className: 'universe_left' },
+          _react2['default'].createElement(
+            'div',
+            { className: 'universe_left_scrollable' },
+            _react2['default'].createElement(
+              'div',
+              { className: 'universe_left_scrolled' },
+              _react2['default'].createElement(
+                'div',
+                { className: '' },
+                'yo'
+              )
+            )
+          )
+        ),
+        _react2['default'].createElement(_ChatJsx2['default'], { chatId: this.props.universe.chatId, chat: this.props.chat, actions: this.props.actions })
+      );
+    }
+  }]);
+
+  return NewTopic;
+})(_react2['default'].Component);
+
+NewTopic.defaultProps = {};
+
+exports['default'] = NewTopic;
+module.exports = exports['default'];
+
+},{"./Chat.jsx":348,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],355:[function(require,module,exports){
+'use strict';
+
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
+
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
+
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
+
+var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+_Object$defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _ChatJsx = require('./Chat.jsx');
+
+var _ChatJsx2 = _interopRequireDefault(_ChatJsx);
+
 var Topic = (function (_React$Component) {
   function Topic() {
     _classCallCheck(this, Topic);
@@ -37362,7 +37457,24 @@ var Topic = (function (_React$Component) {
       return _react2['default'].createElement(
         'div',
         null,
-        'yo!'
+        _react2['default'].createElement(
+          'div',
+          { className: 'universe_left' },
+          _react2['default'].createElement(
+            'div',
+            { className: 'universe_left_scrollable' },
+            _react2['default'].createElement(
+              'div',
+              { className: 'universe_left_scrolled' },
+              _react2['default'].createElement(
+                'div',
+                { className: 'topic' },
+                'yo'
+              )
+            )
+          )
+        ),
+        _react2['default'].createElement(_ChatJsx2['default'], { chatId: this.props.universe.chatId, chat: this.props.chat, actions: this.props.actions })
       );
     }
   }]);
@@ -37378,7 +37490,7 @@ Topic.defaultProps = {
 exports['default'] = Topic;
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],355:[function(require,module,exports){
+},{"./Chat.jsx":348,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],356:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37451,7 +37563,7 @@ var Flux = (function (_Flummox) {
 exports['default'] = Flux;
 module.exports = exports['default'];
 
-},{"./actions/ChatActions.js":335,"./actions/TopicActions.js":336,"./actions/UniverseActions.js":337,"./stores/ChatStore.js":357,"./stores/TopicStore.js":358,"./stores/UniverseStore.js":359,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"flummox":62}],356:[function(require,module,exports){
+},{"./actions/ChatActions.js":335,"./actions/TopicActions.js":336,"./actions/UniverseActions.js":337,"./stores/ChatStore.js":358,"./stores/TopicStore.js":359,"./stores/UniverseStore.js":360,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"flummox":62}],357:[function(require,module,exports){
 'use strict';
 
 var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
@@ -37484,6 +37596,10 @@ var _componentsUniverseTopicJsx = require('./components/universe/Topic.jsx');
 
 var _componentsUniverseTopicJsx2 = _interopRequireDefault(_componentsUniverseTopicJsx);
 
+var _componentsUniverseNewTopicJsx = require('./components/universe/NewTopic.jsx');
+
+var _componentsUniverseNewTopicJsx2 = _interopRequireDefault(_componentsUniverseNewTopicJsx);
+
 var _componentsExploreJsx = require('./components/Explore.jsx');
 
 var _componentsExploreJsx2 = _interopRequireDefault(_componentsExploreJsx);
@@ -37504,7 +37620,8 @@ var routes = _react2['default'].createElement(
     _reactRouter.Route,
     { name: 'universe', path: '/_:universeName', handler: _componentsUniverseJsx2['default'] },
     _react2['default'].createElement(_reactRouter.DefaultRoute, { handler: _componentsUniverseInventoryJsx2['default'] }),
-    _react2['default'].createElement(_reactRouter.Route, { name: 'topic', path: ':topicHandle', handler: _componentsUniverseTopicJsx2['default'] })
+    _react2['default'].createElement(_reactRouter.Route, { name: 'topic', path: ':topicHandle', handler: _componentsUniverseTopicJsx2['default'] }),
+    _react2['default'].createElement(_reactRouter.Route, { name: 'newTopic', path: 'new_topic', handler: _componentsUniverseNewTopicJsx2['default'] })
   ),
   _react2['default'].createElement(_reactRouter.Route, { name: 'explore', path: '/Explore', handler: _componentsExploreJsx2['default'] }),
   _react2['default'].createElement(_reactRouter.NotFoundRoute, { handler: _componentsNotFoundJsx2['default'] })
@@ -37513,7 +37630,7 @@ var routes = _react2['default'].createElement(
 exports['default'] = routes;
 module.exports = exports['default'];
 
-},{"./components/App.jsx":338,"./components/Explore.jsx":339,"./components/NotFound.jsx":340,"./components/Universe.jsx":341,"./components/universe/Inventory.jsx":351,"./components/universe/Topic.jsx":354,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/interop-require-default":13,"react":283,"react-router":96}],357:[function(require,module,exports){
+},{"./components/App.jsx":338,"./components/Explore.jsx":339,"./components/NotFound.jsx":340,"./components/Universe.jsx":341,"./components/universe/Inventory.jsx":351,"./components/universe/NewTopic.jsx":354,"./components/universe/Topic.jsx":355,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/interop-require-default":13,"react":283,"react-router":96}],358:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37558,7 +37675,7 @@ var ChatStore = (function (_BaseStore) {
     // Les getters servent principalement à FluxComponent.connectToStores
     // ils fetch le state flux pour qu'il soit injecté dans le state React
     value: function getChat() {
-      console.log('.S. ChatStore.getChat');
+      // console.log('.S. ChatStore.getChat');
       return this.state.chat;
     }
   }, {
@@ -37592,7 +37709,7 @@ var ChatStore = (function (_BaseStore) {
 exports['default'] = ChatStore;
 module.exports = exports['default'];
 
-},{"../utils/BaseStore.js":361,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13}],358:[function(require,module,exports){
+},{"../utils/BaseStore.js":362,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13}],359:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37637,7 +37754,7 @@ var TopicStore = (function (_BaseStore) {
     // Les getters servent principalement à FluxComponent.connectToStores
     // ils fetch le state flux pour qu'il soit injecté dans le state React
     value: function getInventory() {
-      console.log('.S. TopicStore.getTopics');
+      // console.log('.S. TopicStore.getTopics');
       return this.state.inventory;
     }
   }, {
@@ -37669,7 +37786,7 @@ var TopicStore = (function (_BaseStore) {
 exports['default'] = TopicStore;
 module.exports = exports['default'];
 
-},{"../utils/BaseStore.js":361,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13}],359:[function(require,module,exports){
+},{"../utils/BaseStore.js":362,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13}],360:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37717,13 +37834,13 @@ var UniverseStore = (function (_BaseStore) {
     // Les getters servent principalement à FluxComponent.connectToStores
     // ils fetch le state flux pour qu'il soit injecté dans le state React
     value: function getUniverse() {
-      console.log('.S. UniverseStore.getUniverse');
+      // console.log('.S. UniverseStore.getUniverse');
       return this.state.universe;
     }
   }, {
     key: 'getAllUniverses',
     value: function getAllUniverses() {
-      console.log('.S. UniverseStore.getAllUniverses');
+      // console.log('.S. UniverseStore.getAllUniverses');
       return this.state.allUniverses;
     }
   }, {
@@ -37762,7 +37879,7 @@ var UniverseStore = (function (_BaseStore) {
 exports['default'] = UniverseStore;
 module.exports = exports['default'];
 
-},{"../utils/BaseStore.js":361,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13}],360:[function(require,module,exports){
+},{"../utils/BaseStore.js":362,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13}],361:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37801,7 +37918,7 @@ var BaseActions = (function (_Actions) {
 exports['default'] = BaseActions;
 module.exports = exports['default'];
 
-},{"../utils/IsoFetch.js":362,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"flummox":62}],361:[function(require,module,exports){
+},{"../utils/IsoFetch.js":363,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"flummox":62}],362:[function(require,module,exports){
 //copié depuis https://github.com/vesparny/flux-immutable-example/blob/master/src/utils/BaseStore.js
 
 'use strict';
@@ -37856,7 +37973,7 @@ var BaseStore = (function (_Store) {
 exports['default'] = BaseStore;
 module.exports = exports['default'];
 
-},{"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"flummox":62}],362:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"flummox":62}],363:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -38141,7 +38258,7 @@ var IsoFetch = (function () {
 exports["default"] = IsoFetch;
 module.exports = exports["default"];
 
-},{"babel-runtime/core-js/object/define-property":3,"babel-runtime/core-js/promise":5,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9}],363:[function(require,module,exports){
+},{"babel-runtime/core-js/object/define-property":3,"babel-runtime/core-js/promise":5,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9}],364:[function(require,module,exports){
 // Depuis la source de la doc de Flummox
 /**
  * Accepts an array of matched routes as returned from react-router's

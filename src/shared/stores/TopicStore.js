@@ -16,7 +16,7 @@ export default class TopicStore extends BaseStore {
   // Les getters servent principalement à FluxComponent.connectToStores
   // ils fetch le state flux pour qu'il soit injecté dans le state React
   getInventory() {
-    console.log('.S. TopicStore.getTopics');
+    // console.log('.S. TopicStore.getTopics');
     return this.state.inventory;
   }
   

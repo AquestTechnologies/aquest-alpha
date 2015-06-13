@@ -14,7 +14,7 @@ aquest/[univers]         --> univers en question
 aquest/[univers]/[post]  --> le post en question. Utiliser un id donnera ça : aquest/startups/15358665546, ce qui est moche et ne donne pas d'info sur le post
                                                          Pk pas une route comme comme medium ? https://medium.com/@monicawestin/a-tale-of-two-gift-economies-8ee08e461fb5
 
-
+ 
 Dépendances :
 
 bir = before initial rendering

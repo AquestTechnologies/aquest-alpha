@@ -5,7 +5,7 @@ class Node extends React.Component {
   constructor() {
     super();
     
-    this.handleSelectUniverse = async (universe) => {
+    this.handleSelectUniverse = (universe) => {
       console.log('-c- Node.handleSelectUniverse ' + universe.name);
       this.context.router.transitionTo('universe', {universeName: universe.name});
     };

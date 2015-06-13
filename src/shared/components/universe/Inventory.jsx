@@ -8,12 +8,13 @@ class Inventory extends React.Component {
   constructor() {
     super();
     this.state = {
-      univNameVisible: true
+      nameVisible: true
     };
-    this.handleHeaderHover = () => this.setState({ univNameVisible: !this.state.univNameVisible });
+    this.handleHeaderHover = () => this.setState({ nameVisible: !this.state.nameVisible });
   }
   
   componentDidMount() {
+    // Fetch des dépendances après le mount, cf. _?.txt
     let universeId = this.props.universe.id;
     if(universeId !== this.props.inventory.universeId) {
       this.props.actions.loadInventory(universeId);
@@ -24,23 +25,25 @@ class Inventory extends React.Component {
     let universe = this.props.universe;
     let topics = this.props.inventory ? this.props.inventory.topics : [];
     let inventoryListClassName = topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
-    if (true) { inventoryListClassName += ' no_animation'; }
+    if (true) { inventoryListClassName += ' no_animation'; } //On verra plus tard pour d'eventuelles animations
     
     return (
       <div>
-        <div className="inventory">
-          <div className="inventory_scrollable">
-            <div className="inventory_scrolled">
+        <div className="universe_left">
+          <div className="universe_left_scrollable">
+            <div className="universe_left_scrolled">
             
               <div className="inventory_header">
-                <div className={this.state.univNameVisible ? 'inventory_header_name' : 'inventory_header_desc'} onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
-                    {this.state.univNameVisible ? universe.name : universe.description}
+                <div className={this.state.nameVisible ? 'inventory_header_name' : 'inventory_header_desc'} onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
+                    {this.state.nameVisible ? universe.name : universe.description}
                 </div>
               </div>
               <div className={inventoryListClassName} >
                 <CardNew />
                 {topics.map( (topic) => {
-                    return <Card key={topic.id} title={topic.title} author={topic.author} desc={topic.desc} imgPath={topic.imgPath} timestamp={topic.timestamp} />;
+                  // On peut surement passer tout ca avec un spreadattribute {...topic}
+                  // Par contre topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu et votes detaillés)
+                  return <Card key={topic.id} title={topic.title} author={topic.author} desc={topic.desc} imgPath={topic.imgPath} timestamp={topic.timestamp} />;
                 })}
               </div>
               

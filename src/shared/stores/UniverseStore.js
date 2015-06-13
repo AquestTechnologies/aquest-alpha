@@ -19,12 +19,12 @@ export default class UniverseStore extends BaseStore {
   // Les getters servent principalement à FluxComponent.connectToStores
   // ils fetch le state flux pour qu'il soit injecté dans le state React
   getUniverse() {
-    console.log('.S. UniverseStore.getUniverse');
+    // console.log('.S. UniverseStore.getUniverse');
     return this.state.universe;
   }
     
   getAllUniverses() { 
-    console.log('.S. UniverseStore.getAllUniverses');
+    // console.log('.S. UniverseStore.getAllUniverses');
     return this.state.allUniverses;
   }
   

@@ -10,6 +10,30 @@ div {
     box-sizing: border-box; //bitch please
 }
 
+.universe_left {
+    position: fixed;
+    width: @inventory_w;
+    height: 100%;
+    z-index: 50;
+    
+    background-image: url("img/pillars_compressed.png");
+    background-size: cover;
+    box-shadow: 0.4rem 0 0.5rem 0 rgba(0, 0, 0, 0.5);
+    
+    overflow: hidden;
+}
+    
+.universe_left_scrollable {
+    height: 100%;
+    overflow-Y: scroll;
+    width: 111%;
+}
+
+.universe_left_scrolled {
+    width: @inventory_w;
+    padding: 0 @doubleMargin_w 0 @doubleMargin_w;
+}
+
 
 
     
