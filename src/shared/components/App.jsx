@@ -16,7 +16,7 @@ class App extends React.Component {
         }),
         topicStore: store => ({
           topicIsLoading: store.isLoading(),
-          topics: store.getTopics()
+          inventory: store.getInventory()
         }),
         chatStore: store => ({
           chatIsLoading: store.isLoading(),
@@ -24,7 +24,7 @@ class App extends React.Component {
         })
       }}>
         <LoadingBar />        
-        <RouteHandler c={this.props.c}/>
+        <RouteHandler />
       </FluxComponent>
     );
   }

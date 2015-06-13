@@ -9,11 +9,23 @@ class Universe extends React.Component {
   
   // Load les données initiales
   static async populateFluxState( { flux, routerState } ) {
-    if (!flux._stores.universeStore.state.universe) {
+    let storeUniverse       = flux._stores.universeStore.state.universe;
+    let storeUniverseName   = storeUniverse? storeUniverse.name : '';
+    let desiredUniverseName = routerState.params.universeName;
+    
+    if (!storeUniverse) {
       console.log('.c. Initializing Universe');
       // Si Universe n'a jamais été chargé et que la route est / alors on charge l'univers préféré de l'utilisateur
       const universeActions = flux.getActions('universeActions');
-      routerState.pathname === '/' ? await universeActions.loadStartUniverse(0) : await universeActions.loadUniverseByName(routerState.params.universeName);
+      routerState.pathname === '/' ? await universeActions.loadStartUniverse(0) : await universeActions.loadUniverseByName(desiredUniverseName);
+    
+    } else if (desiredUniverseName !== storeUniverseName) {
+      console.log('.c. Initializing Universe');
+      const topicActions = flux.getActions('topicActions');
+      const chatActions = flux.getActions('chatActions');
+      topicActions.flushTopics();
+      chatActions.flushChat();
+      
     } else {
       console.log('.c. Universe already initialized');
     }
@@ -32,12 +44,18 @@ class Universe extends React.Component {
     
     let actions = {
        loadTopics: topicActions.loadTopics,
+       loadChat: chatActions.loadChat,
     };
     
     return (
       <div>
         <Menu />
-        <RouteHandler universe={this.props.universe} actions={actions} topics={this.props.topics} />
+        <RouteHandler 
+          universe={this.props.universe} 
+          inventory={this.props.inventory} 
+          chat={this.props.chat} 
+          actions={actions} 
+        />
       </div>
     );
   }

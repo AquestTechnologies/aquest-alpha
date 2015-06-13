@@ -6,6 +6,10 @@ import ChatFooter from './ChatFooter.jsx';
 class Chat extends React.Component {
   
   componentDidMount() {
+    let chatId = this.props.chatId;
+    if(chatId !== this.props.chat.id) {
+      this.props.actions.loadChat(chatId);
+    }
     //permet de scroller les messages tout en bas après le mount.
     var scrollable = document.getElementById("scrollMeDown");
     scrollable.scrollTop = scrollable.scrollHeight;
@@ -20,7 +24,7 @@ class Chat extends React.Component {
   render() {
     let samuel = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
     let messagesList = this.props.chat.messages.length === 0 ? 'chat_list_hidden' : 'chat_list_visible';
-    if ( this.props.c === 1 ) { messagesList += ' no_animation'; }
+    if (true) { messagesList += ' no_animation'; }
     
     return (
       <div className="chat">
@@ -46,7 +50,9 @@ class Chat extends React.Component {
 }
 
 Chat.defaultProps = {
-  chat: {}
+  chat: {
+    messages: []
+  }
 };
 
 export default Chat;

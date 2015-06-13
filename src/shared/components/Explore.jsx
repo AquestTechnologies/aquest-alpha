@@ -17,6 +17,14 @@ class Explore extends React.Component {
     }
   }
   
+  setBackLink() {
+    if(this.props.universe) {
+      return <Link to='universe' params={{universeName: this.props.universe.name}}>Back</Link>;
+    } else {
+      return <Link to='home'>Starting Universe</Link>;
+    }
+  }
+  
   render() {
     // CSS temporaire
     let divStyle = {
@@ -25,21 +33,9 @@ class Explore extends React.Component {
       fontSize: '2rem'
     };
     
-    let universeActions = this.props.flux.getActions('universeActions');
-    let topicActions = this.props.flux.getActions('topicActions');
-    let chatActions = this.props.flux.getActions('chatActions');
-    
-    let actions = {
-       loadUniverse: universeActions.loadUniverse,
-       newUniverse: universeActions.newUniverse,
-       flushTopics: topicActions.flushTopics,
-       loadTopics: topicActions.loadTopics,
-       flushChat: chatActions.flushChat,
-       loadChat: chatActions.loadChat
-    };
     return (
       <div style={divStyle}>
-        <Link to='root'>Back</Link>
+        {this.setBackLink()}
         <Graph universes={this.props.universes} currentUniverse={this.props.universe} actions={actions} />
         <NewUniverse actions={actions} />
       </div>

@@ -35680,40 +35680,44 @@ var TopicActions = (function (_BaseActions) {
   _inherits(TopicActions, _BaseActions);
 
   _createClass(TopicActions, [{
-    key: 'loadTopics',
+    key: 'loadInventory',
 
     // Pour info doc Flummox :
     // [Dans une action] The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
 
-    value: function loadTopics(universeId) {
-      return _regeneratorRuntime.async(function loadTopics$(context$2$0) {
+    value: function loadInventory(universeId) {
+      return _regeneratorRuntime.async(function loadInventory$(context$2$0) {
         while (1) switch (context$2$0.prev = context$2$0.next) {
           case 0:
-            console.log('.A. TopicActions.loadTopics');
+            console.log('.A. TopicActions.loadInventory');
             context$2$0.prev = 1;
             context$2$0.next = 4;
             return _regeneratorRuntime.awrap(this.fetch.topics(universeId));
 
           case 4:
-            return context$2$0.abrupt('return', context$2$0.sent);
+            context$2$0.t0 = context$2$0.sent;
+            return context$2$0.abrupt('return', {
+              forUniverseId: universeId,
+              topics: context$2$0.t0
+            });
 
-          case 7:
-            context$2$0.prev = 7;
-            context$2$0.t0 = context$2$0['catch'](1);
+          case 8:
+            context$2$0.prev = 8;
+            context$2$0.t1 = context$2$0['catch'](1);
 
             console.log('!!! Error while UniverseActions.loadTopics.');
-            console.log(context$2$0.t0);
+            console.log(context$2$0.t1);
 
-          case 11:
+          case 12:
           case 'end':
             return context$2$0.stop();
         }
-      }, null, this, [[1, 7]]);
+      }, null, this, [[1, 8]]);
     }
   }, {
-    key: 'flushTopics',
-    value: function flushTopics() {
-      console.log('.A. TopicActions.flushTopics');
+    key: 'flushInventory',
+    value: function flushInventory() {
+      console.log('.A. TopicActions.flushInventory');
       return true;
     }
   }]);
@@ -35945,7 +35949,7 @@ var App = (function (_React$Component) {
             topicStore: function topicStore(store) {
               return {
                 topicIsLoading: store.isLoading(),
-                topics: store.getTopics()
+                inventory: store.getInventory()
               };
             },
             chatStore: function chatStore(store) {
@@ -35956,7 +35960,7 @@ var App = (function (_React$Component) {
             }
           } },
         _react2['default'].createElement(_commonLoadingBarJsx2['default'], null),
-        _react2['default'].createElement(_reactRouter.RouteHandler, { c: this.props.c })
+        _react2['default'].createElement(_reactRouter.RouteHandler, null)
       );
     }
   }]);
@@ -36012,6 +36016,23 @@ var Explore = (function (_React$Component) {
   _inherits(Explore, _React$Component);
 
   _createClass(Explore, [{
+    key: 'setBackLink',
+    value: function setBackLink() {
+      if (this.props.universe) {
+        return _react2['default'].createElement(
+          _reactRouter.Link,
+          { to: 'universe', params: { universeName: this.props.universe.name } },
+          'Back'
+        );
+      } else {
+        return _react2['default'].createElement(
+          _reactRouter.Link,
+          { to: 'home' },
+          'Starting Universe'
+        );
+      }
+    }
+  }, {
     key: 'render',
     value: function render() {
       // CSS temporaire
@@ -36021,26 +36042,10 @@ var Explore = (function (_React$Component) {
         fontSize: '2rem'
       };
 
-      var universeActions = this.props.flux.getActions('universeActions');
-      var topicActions = this.props.flux.getActions('topicActions');
-      var chatActions = this.props.flux.getActions('chatActions');
-
-      var actions = {
-        loadUniverse: universeActions.loadUniverse,
-        newUniverse: universeActions.newUniverse,
-        flushTopics: topicActions.flushTopics,
-        loadTopics: topicActions.loadTopics,
-        flushChat: chatActions.flushChat,
-        loadChat: chatActions.loadChat
-      };
       return _react2['default'].createElement(
         'div',
         { style: divStyle },
-        _react2['default'].createElement(
-          _reactRouter.Link,
-          { to: 'root' },
-          'Back'
-        ),
+        this.setBackLink(),
         _react2['default'].createElement(_exploreGraphJsx2['default'], { universes: this.props.universes, currentUniverse: this.props.universe, actions: actions }),
         _react2['default'].createElement(_exploreNewUniverseJsx2['default'], { actions: actions })
       );
@@ -36199,14 +36204,20 @@ var Universe = (function (_React$Component) {
       var chatActions = this.props.flux.getActions('chatActions');
 
       var actions = {
-        loadTopics: topicActions.loadTopics
+        loadTopics: topicActions.loadTopics,
+        loadChat: chatActions.loadChat
       };
 
       return _react2['default'].createElement(
         'div',
         null,
         _react2['default'].createElement(_universeMenuJsx2['default'], null),
-        _react2['default'].createElement(_reactRouter.RouteHandler, { universe: this.props.universe, actions: actions, topics: this.props.topics })
+        _react2['default'].createElement(_reactRouter.RouteHandler, {
+          universe: this.props.universe,
+          inventory: this.props.inventory,
+          chat: this.props.chat,
+          actions: actions
+        })
       );
     }
   }], [{
@@ -36216,12 +36227,16 @@ var Universe = (function (_React$Component) {
     value: function populateFluxState(_ref) {
       var flux = _ref.flux;
       var routerState = _ref.routerState;
-      var universeActions;
+      var storeUniverse, storeUniverseName, desiredUniverseName, universeActions, topicActions, chatActions;
       return _regeneratorRuntime.async(function populateFluxState$(context$2$0) {
         while (1) switch (context$2$0.prev = context$2$0.next) {
           case 0:
-            if (flux._stores.universeStore.state.universe) {
-              context$2$0.next = 12;
+            storeUniverse = flux._stores.universeStore.state.universe;
+            storeUniverseName = storeUniverse ? storeUniverse.name : '';
+            desiredUniverseName = routerState.params.universeName;
+
+            if (storeUniverse) {
+              context$2$0.next = 15;
               break;
             }
 
@@ -36229,29 +36244,38 @@ var Universe = (function (_React$Component) {
             universeActions = flux.getActions('universeActions');
 
             if (!(routerState.pathname === '/')) {
-              context$2$0.next = 8;
+              context$2$0.next = 11;
               break;
             }
 
-            context$2$0.next = 6;
+            context$2$0.next = 9;
             return _regeneratorRuntime.awrap(universeActions.loadStartUniverse(0));
 
-          case 6:
-            context$2$0.next = 10;
-            break;
-
-          case 8:
-            context$2$0.next = 10;
-            return _regeneratorRuntime.awrap(universeActions.loadUniverseByName(routerState.params.universeName));
-
-          case 10:
+          case 9:
             context$2$0.next = 13;
             break;
 
-          case 12:
-            console.log('.c. Universe already initialized');
+          case 11:
+            context$2$0.next = 13;
+            return _regeneratorRuntime.awrap(universeActions.loadUniverseByName(desiredUniverseName));
 
           case 13:
+            context$2$0.next = 16;
+            break;
+
+          case 15:
+            if (desiredUniverseName !== storeUniverseName) {
+              console.log('.c. Initializing Universe');
+              topicActions = flux.getActions('topicActions');
+              chatActions = flux.getActions('chatActions');
+
+              topicActions.flushTopics();
+              chatActions.flushChat();
+            } else {
+              console.log('.c. Universe already initialized');
+            }
+
+          case 16:
           case 'end':
             return context$2$0.stop();
         }
@@ -36669,30 +36693,10 @@ var Node = (function (_React$Component) {
       return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
         while (1) switch (context$3$0.prev = context$3$0.next) {
           case 0:
-            console.log('-c- Node.handleSelectUniverse ' + universe);
+            console.log('-c- Node.handleSelectUniverse ' + universe.name);
+            this.context.router.transitionTo('universe', { universeName: universe.name });
 
-            if (!(universe.id === this.props.currentUniverse.id)) {
-              context$3$0.next = 5;
-              break;
-            }
-
-            this.context.router.transitionTo('/_' + universe.name);
-            context$3$0.next = 12;
-            break;
-
-          case 5:
-            context$3$0.next = 7;
-            return _regeneratorRuntime.awrap(this.props.actions.loadUniverse(universe.id));
-
-          case 7:
-            // this.props.setUniverse(universe);
-            this.props.actions.flushTopics();
-            this.props.actions.flushChat();
-            this.context.router.transitionTo('/_' + universe.name);
-            this.props.actions.loadTopics(universe.id);
-            this.props.actions.loadChat(universe.chatId);
-
-          case 12:
+          case 2:
           case 'end':
             return context$3$0.stop();
         }
@@ -36954,6 +36958,10 @@ var Chat = (function (_React$Component) {
   _createClass(Chat, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
+      var chatId = this.props.chatId;
+      if (chatId !== this.props.chat.id) {
+        this.props.actions.loadChat(chatId);
+      }
       //permet de scroller les messages tout en bas après le mount.
       var scrollable = document.getElementById('scrollMeDown');
       scrollable.scrollTop = scrollable.scrollHeight;
@@ -36970,7 +36978,7 @@ var Chat = (function (_React$Component) {
     value: function render() {
       var samuel = 'The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother\'s keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.';
       var messagesList = this.props.chat.messages.length === 0 ? 'chat_list_hidden' : 'chat_list_visible';
-      if (this.props.c === 1) {
+      if (true) {
         messagesList += ' no_animation';
       }
 
@@ -37001,7 +37009,9 @@ var Chat = (function (_React$Component) {
 })(_react2['default'].Component);
 
 Chat.defaultProps = {
-  chat: {}
+  chat: {
+    messages: []
+  }
 };
 
 exports['default'] = Chat;
@@ -37153,6 +37163,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _ChatJsx = require('./Chat.jsx');
+
+var _ChatJsx2 = _interopRequireDefault(_ChatJsx);
+
 var _CardJsx = require('./Card.jsx');
 
 var _CardJsx2 = _interopRequireDefault(_CardJsx);
@@ -37169,8 +37183,7 @@ var Inventory = (function (_React$Component) {
 
     _get(Object.getPrototypeOf(Inventory.prototype), 'constructor', this).call(this);
     this.state = {
-      univNameVisible: true,
-      topicsAreLoading: false
+      univNameVisible: true
     };
     this.handleHeaderHover = function () {
       return _this.setState({ univNameVisible: !_this.state.univNameVisible });
@@ -37182,52 +37195,54 @@ var Inventory = (function (_React$Component) {
   _createClass(Inventory, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      this.props.actions.loadTopics(this.props.universe.id);
-    }
-  }, {
-    key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(nextProps) {
-      this.setState({
-        topicsAreLoading: nextProps.topics.length === 0 ? true : false
-      });
+      var universeId = this.props.universe.id;
+      if (universeId !== this.props.inventory.universeId) {
+        this.props.actions.loadTopics(universeId);
+      }
     }
   }, {
     key: 'render',
     value: function render() {
       var universe = this.props.universe;
-      var inventoryListClassName = this.props.topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
-      if (!this.state.topicsAreLoading) {
+      var topics = this.props.inventory ? this.props.inventory.topics : [];
+      var inventoryListClassName = topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
+      if (true) {
         inventoryListClassName += ' no_animation';
       }
 
       return _react2['default'].createElement(
         'div',
-        { className: 'inventory' },
+        null,
         _react2['default'].createElement(
           'div',
-          { className: 'inventory_scrollable' },
+          { className: 'inventory' },
           _react2['default'].createElement(
             'div',
-            { className: 'inventory_scrolled' },
+            { className: 'inventory_scrollable' },
             _react2['default'].createElement(
               'div',
-              { className: 'inventory_header' },
+              { className: 'inventory_scrolled' },
               _react2['default'].createElement(
                 'div',
-                { className: this.state.univNameVisible ? 'inventory_header_name' : 'inventory_header_desc', onMouseOver: this.handleHeaderHover, onMouseOut: this.handleHeaderHover },
-                this.state.univNameVisible ? universe.name : universe.description
+                { className: 'inventory_header' },
+                _react2['default'].createElement(
+                  'div',
+                  { className: this.state.univNameVisible ? 'inventory_header_name' : 'inventory_header_desc', onMouseOver: this.handleHeaderHover, onMouseOut: this.handleHeaderHover },
+                  this.state.univNameVisible ? universe.name : universe.description
+                )
+              ),
+              _react2['default'].createElement(
+                'div',
+                { className: inventoryListClassName },
+                _react2['default'].createElement(_CardNewJsx2['default'], null),
+                topics.map(function (topic) {
+                  return _react2['default'].createElement(_CardJsx2['default'], { key: topic.id, title: topic.title, author: topic.author, desc: topic.desc, imgPath: topic.imgPath, timestamp: topic.timestamp });
+                })
               )
-            ),
-            _react2['default'].createElement(
-              'div',
-              { className: inventoryListClassName },
-              _react2['default'].createElement(_CardNewJsx2['default'], null),
-              this.props.topics.map(function (topic) {
-                return _react2['default'].createElement(_CardJsx2['default'], { key: topic.id, title: topic.title, author: topic.author, desc: topic.desc, imgPath: topic.imgPath, timestamp: topic.timestamp });
-              })
             )
           )
-        )
+        ),
+        _react2['default'].createElement(_ChatJsx2['default'], { chatId: this.props.universe.chatId, chat: this.props.chat, actions: this.props.actions })
       );
     }
   }]);
@@ -37237,13 +37252,16 @@ var Inventory = (function (_React$Component) {
 
 Inventory.defaultProps = {
   universe: {},
-  topics: []
+  inventory: {
+    universeId: 111,
+    topics: []
+  }
 };
 
 exports['default'] = Inventory;
 module.exports = exports['default'];
 
-},{"./Card.jsx":347,"./CardNew.jsx":348,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],353:[function(require,module,exports){
+},{"./Card.jsx":347,"./CardNew.jsx":348,"./Chat.jsx":349,"babel-runtime/core-js/object/define-property":3,"babel-runtime/helpers/class-call-check":8,"babel-runtime/helpers/create-class":9,"babel-runtime/helpers/get":11,"babel-runtime/helpers/inherits":12,"babel-runtime/helpers/interop-require-default":13,"react":283}],353:[function(require,module,exports){
 'use strict';
 
 var _inherits = require('babel-runtime/helpers/inherits')['default'];
@@ -37709,8 +37727,8 @@ var TopicStore = (function (_BaseStore) {
     _get(Object.getPrototypeOf(TopicStore.prototype), 'constructor', this).call(this); // Don't forget this step
 
     var topicActionIds = flux.getActionIds('topicActions');
-    this.registerAsync(topicActionIds.loadTopics, this.handleBeginAsyncRequest, this.handleLoadTopics, this.handleErrorAsyncRequest);
-    this.register(topicActionIds.flushTopics, this.handleFlushTopics);
+    this.registerAsync(topicActionIds.loadInventory, this.handleBeginAsyncRequest, this.handleLoadInventory, this.handleErrorAsyncRequest);
+    this.register(topicActionIds.flushInventory, this.handleFlushInventory);
 
     this.state = {}; // Reset le state, important (?)
     console.log('.S. TopicStore initialized');
@@ -37719,31 +37737,33 @@ var TopicStore = (function (_BaseStore) {
   _inherits(TopicStore, _BaseStore);
 
   _createClass(TopicStore, [{
-    key: 'getTopics',
+    key: 'getInventory',
 
     // Les getters servent principalement à FluxComponent.connectToStores
     // ils fetch le state flux pour qu'il soit injecté dans le state React
-    value: function getTopics() {
+    value: function getInventory() {
       console.log('.S. TopicStore.getTopics');
-      return this.state.topics;
+      return this.state.inventory;
     }
   }, {
-    key: 'handleLoadTopics',
+    key: 'handleLoadInventory',
 
     // Les handlers correspondent au traitement du state après avoir executé une action
-    value: function handleLoadTopics(topics) {
-      console.log('.S. TopicStore.handleLoadTopics');
+    value: function handleLoadInventory(inventory) {
+      console.log('.S. TopicStore.handleLoadInventory');
       this.setState({
-        topics: topics,
+        inventory: inventory,
         isLoading: false
       });
     }
   }, {
-    key: 'handleFlushTopics',
-    value: function handleFlushTopics() {
-      console.log('.S. TopicStore.handleFlushTopics');
+    key: 'handleFlushInventory',
+    value: function handleFlushInventory() {
+      console.log('.S. TopicStore.handleFlushInventory');
+      var inventory = this.state.inventory;
+      inventory.topics = [];
       this.setState({
-        topics: []
+        inventory: inventory
       });
     }
   }]);

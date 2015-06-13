@@ -5,18 +5,18 @@ export default class TopicActions extends BaseActions {
   // Pour info doc Flummox : 
   // [Dans une action] The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
   
-  async loadTopics(universeId) {
-    console.log('.A. TopicActions.loadTopics');
+  async loadInventory(universeId) {
+    console.log('.A. TopicActions.loadInventory');
     try {
-      return await this.fetch.topics(universeId);
+      return {universeId: universeId, topics: await this.fetch.topics(universeId)};
     } catch (err) {
       console.log('!!! Error while UniverseActions.loadTopics.');
       console.log(err);
     }
   }
   
-  flushTopics() {
-    console.log('.A. TopicActions.flushTopics');
+  flushInventory() {
+    console.log('.A. TopicActions.flushInventory');
     return true;
   }
 
