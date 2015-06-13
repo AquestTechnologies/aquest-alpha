@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router';
 
 import Graph from './explore/Graph.jsx';
-import NewUniverse from './explore/NewUniverse.jsx';
 
 class Explore extends React.Component {
   
@@ -36,8 +35,7 @@ class Explore extends React.Component {
     return (
       <div style={divStyle}>
         {this.setBackLink()}
-        <Graph universes={this.props.universes} currentUniverse={this.props.universe} actions={actions} />
-        <NewUniverse actions={actions} />
+        <Graph universes={this.props.universes} currentUniverse={this.props.universe} />
       </div>
     );
   }

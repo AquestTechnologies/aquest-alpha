@@ -9,6 +9,7 @@ class Universe extends React.Component {
   
   // Load les données initiales
   static async populateFluxState( { flux, routerState } ) {
+    let currentPath         = routerState.pathname;
     let storeUniverse       = flux._stores.universeStore.state.universe;
     let storeUniverseName   = storeUniverse? storeUniverse.name : '';
     let desiredUniverseName = routerState.params.universeName;
@@ -17,24 +18,19 @@ class Universe extends React.Component {
       console.log('.c. Initializing Universe');
       // Si Universe n'a jamais été chargé et que la route est / alors on charge l'univers préféré de l'utilisateur
       const universeActions = flux.getActions('universeActions');
-      routerState.pathname === '/' ? await universeActions.loadStartUniverse(0) : await universeActions.loadUniverseByName(desiredUniverseName);
+      currentPath === '/' ? await universeActions.loadStartUniverse(0) : await universeActions.loadUniverseByName(desiredUniverseName);
     
     } else if (desiredUniverseName !== storeUniverseName) {
       console.log('.c. Initializing Universe');
       const topicActions = flux.getActions('topicActions');
       const chatActions = flux.getActions('chatActions');
-      topicActions.flushTopics();
+      const universeActions = flux.getActions('universeActions');
+      topicActions.flushInventory();
       chatActions.flushChat();
+      await universeActions.loadUniverseByName(desiredUniverseName);
       
     } else {
       console.log('.c. Universe already initialized');
-    }
-  }
-  
-  componentWillMount () {
-    if (this.props.params.universeName !== this.props.universe.name) {
-      console.log('.c. Universe bad match !');
-      //A faire, attention à user's starting universe
     }
   }
   
@@ -43,7 +39,7 @@ class Universe extends React.Component {
     let chatActions = this.props.flux.getActions('chatActions');
     
     let actions = {
-       loadTopics: topicActions.loadTopics,
+       loadInventory: topicActions.loadInventory,
        loadChat: chatActions.loadChat,
     };
     
