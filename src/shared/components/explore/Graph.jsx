@@ -6,14 +6,20 @@ class Graph extends React.Component {
   render() {
     let divStyle = {
       marginBottom: '1rem',
-    };
+    }; 
     
     return (
       <div>
         {
           this.props.universes.map( (universe) => {
             return (
-              <Node key={universe.id} universe={universe} actions={this.props.actions} style={divStyle}/>
+              <Node 
+                key={universe.id} 
+                universe={universe} 
+                currentUniverse={this.props.currentUniverse} 
+                actions={this.props.actions} 
+                style={divStyle}
+              />
             );
           })
         }

@@ -14,3 +14,23 @@ aquest/[univers]         --> univers en question
 aquest/[univers]/[post]  --> le post en question. Utiliser un id donnera ça : aquest/startups/15358665546, ce qui est moche et ne donne pas d'info sur le post
                                                          Pk pas une route comme comme medium ? https://medium.com/@monicawestin/a-tale-of-two-gift-economies-8ee08e461fb5
 
+
+Dépendances :
+
+bir = before initial rendering
+air = after initial rendering
+
+Universe      bir : universeStore.universe + picture, populateFluxState
+|             air : -
+|           
+\--Inventory  bir : props.universe[name,desc,picture]
+| |           air : topicStore.topics, action(universeId)
+| |
+| \--Chat     bir : props.chatId
+|             air : chatStore.chat, action(chatId)
+|              
+\--Topic      bir : props.universe[picture]
+  |           air : topicStore.topic, action(handle)
+  |           
+  \--Chat     bir : props.chatId
+              air : chatStore.chat, action(chatId)

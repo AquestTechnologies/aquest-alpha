@@ -8,7 +8,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <FluxComponent connectToStores={{
+      <FluxComponent flux={this.props.flux} connectToStores={{
         universeStore: store => ({
           universeIsLoading: store.isLoading(),
           universe: store.getUniverse(),
@@ -24,7 +24,7 @@ class App extends React.Component {
         })
       }}>
         <LoadingBar />        
-        <RouteHandler />
+        <RouteHandler c={this.props.c}/>
       </FluxComponent>
     );
   }

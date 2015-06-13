@@ -7,13 +7,17 @@ class Node extends React.Component {
     
     this.handleSelectUniverse = async (universe) => {
       console.log('-c- Node.handleSelectUniverse ' + universe);
-      await this.props.actions.loadUniverse(universe.id);
-      // this.props.setUniverse(universe);
-      this.props.actions.flushTopics();
-      this.props.actions.flushChat();
-      this.context.router.transitionTo('/_' + universe.name);
-      this.props.actions.loadTopics(universe.id);
-      this.props.actions.loadChat(universe.chatId);
+      if (universe.id === this.props.currentUniverse.id) {
+        this.context.router.transitionTo('/_' + universe.name);
+      } else {
+        await this.props.actions.loadUniverse(universe.id);
+        // this.props.setUniverse(universe);
+        this.props.actions.flushTopics();
+        this.props.actions.flushChat();
+        this.context.router.transitionTo('/_' + universe.name);
+        this.props.actions.loadTopics(universe.id);
+        this.props.actions.loadChat(universe.chatId);
+      }
     };
   }
   

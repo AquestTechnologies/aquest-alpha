@@ -40,7 +40,7 @@ class Explore extends React.Component {
     return (
       <div style={divStyle}>
         <Link to='root'>Back</Link>
-        <Graph universes={this.props.universes} actions={actions} />
+        <Graph universes={this.props.universes} currentUniverse={this.props.universe} actions={actions} />
         <NewUniverse actions={actions} />
       </div>
     );

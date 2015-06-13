@@ -3,15 +3,27 @@ import {Route, DefaultRoute, NotFoundRoute } from 'react-router';
 
 import App         from './components/App.jsx';
 import Universe    from './components/Universe.jsx';
+import Inventory   from './components/universe/Inventory.jsx';
+import Topic       from './components/universe/Topic.jsx';
 import Explore     from './components/Explore.jsx';
 import NotFound    from './components/NotFound.jsx';
 
 let routes = (
-  <Route name='root' handler={App} path='/'> 
-    <DefaultRoute handler={Universe} />
-    <Route name='home' path='/_:universeName' handler={Universe} />
+  <Route handler={App}> 
+  
+    <Route name='home' path='/' handler={Universe}>
+      <DefaultRoute handler={Inventory} />
+    </Route>
+    
+    <Route name='universe' path='/_:universeName' handler={Universe}>
+      <DefaultRoute handler={Inventory} />
+      <Route name='topic' path=':topicHandle' handler={Topic} />
+    </Route>
+    
     <Route name='explore' path='/Explore' handler={Explore} />
+    
     <NotFoundRoute handler={NotFound}/>
+    
   </Route>
 );
 

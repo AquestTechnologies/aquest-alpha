@@ -1,18 +1,16 @@
-//Doit etre deplacée dans le dossier client !!!
-import Flux from './flux.js';
-import FluxComponent from 'flummox/component';
-import performRouteHandlerStaticMethod from './utils/performRouteHandlerStaticMethod.js';
+import Flux from '../shared/flux.js';
+import performRouteHandlerStaticMethod from '../shared/utils/performRouteHandlerStaticMethod.js';
 
 import React  from 'react';
 import Router from 'react-router';  
-import routes from './routes.jsx';
+import routes from '../shared/routes.jsx';
 
 import Websocket from 'socket.io-client';
 const io = Websocket('http://130.211.68.244:8081');
 
- io.on('message', function (message) {
-    console.log('___ Server says ' + message);
- });
+io.on('message', function (message) {
+  console.log('___ Server says ' + message);
+});
 
 console.log('Welcome to Aquest v0!');
 console.log('... Initializing flux');
@@ -54,12 +52,9 @@ router.run( async (Handler, routerState) => {
   
   console.log('... Entering React.render');
   React.render(
-    <FluxComponent flux={flux}>
-      <Handler {...routerState} />
-    </FluxComponent>,
+    <Handler {...routerState} flux={flux} />,
     document.getElementById('mountNode'),
-    function() {
-      // Callback
+    function() { // Callback
       console.log('... App rendered');
     }
   );

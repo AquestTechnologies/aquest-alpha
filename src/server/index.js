@@ -9,18 +9,22 @@ import performRouteHandlerStaticMethod from '../shared/utils/performRouteHandler
 import winston from 'winston';
 import pg from 'pg';
 
-var logger = new (winston.Logger)({
+let logger = new (winston.Logger)({
   transports: [
-    new (winston.transports.Console)(),
+    new (winston.transports.Console)({
+      showLevel: false
+    }),
     new (winston.transports.File)({
       name: 'info-file',
-      filename: '/home/dherault_gmail_com/yolo/aquest-alpha/src/logs/info.log',
-      level: 'info'
+      filename: '/home/dherault_gmail_com/aquest-alpha/log/info.log',
+      level: 'info',
+      showLevel: false
     }),
     new (winston.transports.File)({
       name: 'error-file',
-      filename: '/home/dherault_gmail_com/yolo/aquest-alpha/src/logs/error.log',
-      level: 'error'
+      filename: '/home/dherault_gmail_com/aquest-alpha/log/error.log',
+      level: 'error',
+      showLevel: false
     })
   ]
 });
