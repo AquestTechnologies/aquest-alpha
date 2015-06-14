@@ -1,18 +1,14 @@
 {
-  "name": "davidfaitdeschoses",
+  "name": "profile_pictures_generator",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "server.js --harmony",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Aquest Technologies",
+  "license": "copyrighted",
   "dependencies": {
-    "asyncawait": "^0.7.4",
-    "babel": "^5.5.8",
-    "canvas": "^1.2.3",
-    "fibers": "^1.0.5",
     "fs": "0.0.2",
     "gm": "^1.18.1",
     "hapi": "^8.6.1",

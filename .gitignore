@@ -1,3 +1,5 @@
 node_modules
 *.log*
 _misc/davidfaitdeschoses/img
+_misc/profile_pictures_generator/img
+_misc/profile_pictures_generator/node_modules
