@@ -190,6 +190,19 @@ server.decorate('reply', 'prerenderer', function (url, ip, port, method) {
     });
   }
   
+  function formatImageInfo(info) {
+    var formated = '<table style="width:50%; text-align: left;"><tr><th>Channel</th><th>Min</th><th>Max</th><th>x</th><th>s</th></tr>';
+    var stats = info["Channel Statistics"];
+    var red = stats.Red;
+    var green = stats.Green;
+    var blue = stats.Blue;
+    formated += '<tr><td>Red</td><td>' + red.Minimum + '</td><td>' + red.Maximum + '</td><td>' + red.Mean + '</td><td>' + red['Standard Deviation'] + '</td></tr>';
+    formated += '<tr><td>Green</td><td>' + green.Minimum + '</td><td>' + green.Maximum + '</td><td>' + green.Mean + '</td><td>' + green['Standard Deviation'] + '</td></tr>';
+    formated += '<tr><td>Blue</td><td>' + blue.Minimum + '</td><td>' + blue.Maximum + '</td><td>' + blue.Mean + '</td><td>' + blue['Standard Deviation'] + '</td></tr>';
+    formated += '</table>'
+    return formated;
+  }
+  
   var html = '<html><head><meta charset="utf-8" /><link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAD///8A+Pj4AP7+/gDj4+MA1dXVAP39/QDi4uIA7+/vAPz8/ADh4eEA9fX1AO7u7gDn5+cA+/v7AMXFxQDZ2dkA7e3tAMTExADl5eUA3t7eAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAIAAAAAAAIAAAAAAAAAABAPCwAAAAAAAAAAAAAAAAAAABADAAAAAAAAABAQDg4OAwkNDgwAAAAAABAODhAAAQ4OBQMDAAAAABAOAQACAAAODgUQDgAAAAAQDgAGDg4ODg4AAA4AAAAADhAADg4ODg4RAAAOAAAAAA4AAA4ODg4OAAoDDgAAAAAOAgIODg4RCAUQDgMAAAAAEwAADg4CBRALDgMQAAAAABMDAgoOAhIODgcAAAAAAAAQExAQDw4OBAAAAAAAAAAAChADEQoKCgAAAAAAAAAAAgAAAAATExMQAAAAAAAACAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" /><title>Photos de profile</title></head><body><div id="mountNode">Hello World!</div></body></html>';
   var placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
   
@@ -206,7 +219,7 @@ server.decorate('reply', 'prerenderer', function (url, ip, port, method) {
 
     var profileImgTag = '<img src="/' + pictureData.info.path + '">';
     var baseImgTag = '<img src="/' + baseDir + pickedAtRandom + '">';
-    var content = profileImgTag + '<br><br> Number of colors : ' + pictureData.colors + '<br><br>' + JSON.stringify(pictureData.info) + '<br><br>' + baseImgTag + '<br>' + displayList(arrangeFileList(imageList));
+    var content = profileImgTag + '<br><br> Number of colors : ' + pictureData.colors + '<br><br>' + formatImageInfo(pictureData.info) + '<br>' + baseImgTag + '<br><br>' + displayList(arrangeFileList(imageList));
     
     // On injecte le DOM dans le fichier html, puis on source la response
     response.source  = html.replace(placeholder, content);
