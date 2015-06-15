@@ -5,15 +5,21 @@ import Graph from './explore/Graph.jsx';
 
 class Explore extends React.Component {
   
-  // Load les données initiales, doit être appelé avant FluxComponent.connectToStores
-  static async populateFluxState({ flux, routerState }) {
-    if(!flux._stores.universeStore.state.allUniverses) {
-      console.log('.c. Initializing Explore');
-      const universeActions = flux.getActions('universeActions');
-      await universeActions.loadAllUniverses();
-    } else {
-      console.log('.c. Explore already initialized');
-    }
+  static runPhidippides(routerState) {
+    return [{
+      taskName: 'explore',
+      dependency: null,
+      shouldBePresent: {
+        store: 'universeStore',
+        data: 'allUniverses',
+        shouldHaveValue: null
+      },
+      ifNot: {
+        actions: 'universeActions',
+        creator: 'loadAllUniverses',
+        args : []
+      }
+    }];
   }
   
   setBackLink() {

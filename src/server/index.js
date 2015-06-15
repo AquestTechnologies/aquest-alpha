@@ -5,7 +5,7 @@ import Router from 'react-router';
 import routes from '../shared/routes.jsx';
 import Flux from '../shared/flux.js';
 import FluxComponent from 'flummox/component';
-import performRouteHandlerStaticMethod from '../shared/utils/performRouteHandlerStaticMethod.js';
+import phidippides from '../shared/utils/phidippides.js';
 import winston from 'winston';
 import pg from 'pg';
 
@@ -107,34 +107,67 @@ server.route({
   }
 });
 
-
 server.route({
   method: 'GET',
-  path: '/api/universe/{id}',
+  path: '/favicon.ico',
   handler: function (request, reply) {
-    logger.info('request params : ' + request.params.universeName);
-    var universeName = request.params.universeName;
+    return reply({});
+  }
+});
+
+/*server.register({register: require('./plugin/restAPI')}, {
+    select: ['api'],
+    routes: {
+        prefix: '/api'
+    }
+}, function (err) {
+  logger.error('Plugin register error', err)
+});*/
+
+/*server.route({
+  method: 'GET',
+  path: '/api/universe/{universeId}',
+  handler: function (request, reply) {
+    logger.info('request params : ' + request.params.universeId);
+    let universeId = request.params.universeId;
     // il faudra créer une classe qui vérifie les users inputs de l'utilisateur
-    if (typeof universeName === 'string'){
+    if (typeof universeId === 'string'){
       client.connect(function(err) {
         if(err) {
           return logger.info('could not connect to postgres', err);
         }
-        let queryUniverse = 'SELECT * FROM aquest_schema.universe WHERE name = \'' + universeName + '\'';
+        let queryUniverse = 'SELECT universeId, name, description, chatId FROM aquest_schema.universe WHERE universeId=\'' + universeId + '\'';
   
         client.query(queryUniverse, function(err, result) {
           if(err) {
             return logger.info('error running query', err);
           }
-          logger.info(result.rows[0].description);
-          client.end();
+          
+          logger.info('universe : '+ result.rows[0]);
+          
+          if(result.rows[0] !== undefined){
+          
+            let universeData = {
+              id:          result.rows[0].universeId,
+              name:        result.rows[0].name,
+              description: result.rows[0].description,
+              chatId:      result.rows[0].chatId,
+            };
+            
+            logger.info('universe : '+ JSON.stringify(universeData));
+            //client.end();
+          
+            return reply(universeData);
+          } else {
+            return reply('No universe');
+          }
         });
       });
     } else {
       logger.info('is not a string');
     }
   }
-});
+});*/
 
 
 // Prerendering
@@ -174,7 +207,7 @@ server.route({
     });
     
     // Match la location et les routes, et renvoie le bon layout (Handler) et le state
-    router.run( async (Handler, routerState) => {
+    router.run( (Handler, routerState) => {
       logger.info('_____________ router.run _____________');
       // Pour l'application naissante c'est son premier router.run
       routerState.c = 1;
@@ -182,60 +215,60 @@ server.route({
       const flux = new Flux();
       
       // Initialise les stores
-      await performRouteHandlerStaticMethod(routerState.routes, 'populateFluxState', { flux, routerState } );
-      logger.info('... Exiting performRouteHandlerStaticMethod');
-      
-      // logger.info(Handler);
-      // logger.info('state_________________________________________________');
-      // logger.info(state);
-      // logger.info('flux_________________________________________________');
-      // logger.info(flux);
-      // logger.info('_________________________________________________');
-      // logger.info(flux._stores.universeStore.state);
-      
-      // On extrait le state de l'instance flux
-      let fluxState = {};
-      for (let store in flux._stores) { 
-        fluxState[store] = flux._stores[store].state;
-      }
-      let serializedState = JSON.stringify(fluxState);
-      // On escape le charactere ' du state serialisé
-      serializedState = serializedState.replace(/'/g, '&apos;');
-      logger.info('... Flux state serialized');
-      // logger.info(serializedState);
-      
-      // rendering de l'app fluxée
-      // Doc React pour info : If you call React.render() on a node that already has this server-rendered markup, React will preserve it and only attach event handlers, allowing you to have a very performant first-load experience.
-      logger.info('... Entering React.renderToString');
-      try {
-        var mount_me_im_famous = React.renderToString(
-          <FluxComponent flux={flux}>
-            <Handler {...routerState} />
-          </FluxComponent>
-        );
-      } catch(err) {
-        logger.error('!!! Error while React.renderToString.');
-        logger.error(err);
-      }
-      logger.info('... Exiting React.renderToString');
-      
-      // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
-      readFile('src/shared/index.html', 'utf8').then(function (html){
+      logger.info('... Entering phidippides');
+      phidippides(routerState, flux).then(function() {
+        logger.info('... Exiting phidippides');
+        // logger.info(Handler);
+        // logger.info('state_________________________________________________');
+        // logger.info(state);
+        // logger.info('flux_________________________________________________');
+        // logger.info(flux);
+        // logger.info('_________________________________________________');
+        // logger.info(flux._stores.universeStore.state);
         
-        // On extrait le contenu du mountNode 
-        // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
-        let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
-        // Enfin on cale notre élément dans le mountNode.
-        let htmlWithoutFlux = html.replace(placeholder, mount_me_im_famous);
-        let htmlWithFlux = htmlWithoutFlux.replace('id="mountNode"', 'id="mountNode" state-from-server=\'' + serializedState + '\'');
-        response.source  = htmlWithFlux;
-        response.send();
-        logger.info('Served '+ url.path + '\n');
-      }).catch(function (err) {
-        logger.error('!!! Error while reading HTML.');
-        logger.error(err);
+        // On extrait le state de l'instance flux
+        let fluxState = {};
+        for (let store in flux._stores) { 
+          fluxState[store] = flux._stores[store].state;
+        }
+        let serializedState = JSON.stringify(fluxState);
+        // On escape le charactere ' du state serialisé
+        serializedState = serializedState.replace(/'/g, '&apos;');
+        logger.info('... Flux state serialized');
+        // logger.info(serializedState);
+        
+        // rendering de l'app fluxée
+        // Doc React pour info : If you call React.render() on a node that already has this server-rendered markup, React will preserve it and only attach event handlers, allowing you to have a very performant first-load experience.
+        logger.info('... Entering React.renderToString');
+        try {
+          var mount_me_im_famous = React.renderToString(
+            <FluxComponent flux={flux}>
+              <Handler {...routerState} />
+            </FluxComponent>
+          );
+        } catch(err) {
+          logger.error('!!! Error while React.renderToString.');
+          logger.error(err);
+        }
+        logger.info('... Exiting React.renderToString');
+        
+        // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
+        readFile('src/shared/index.html', 'utf8').then(function (html){
+          
+          // On extrait le contenu du mountNode 
+          // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
+          let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
+          // Enfin on cale notre élément dans le mountNode.
+          let htmlWithoutFlux = html.replace(placeholder, mount_me_im_famous);
+          let htmlWithFlux = htmlWithoutFlux.replace('id="mountNode"', 'id="mountNode" state-from-server=\'' + serializedState + '\'');
+          response.source  = htmlWithFlux;
+          response.send();
+          logger.info('Served '+ url.path + '\n');
+        }).catch(function (err) {
+          logger.error('!!! Error while reading HTML.');
+          logger.error(err);
+        });
       });
-      
     });
   });
 })();

@@ -13,6 +13,42 @@ class Inventory extends React.Component {
     this.handleHeaderHover = () => this.setState({ nameVisible: !this.state.nameVisible });
   }
   
+  // Load les données initiales
+  static runPhidippides(routerState) {
+    if (routerState.c === 1) {
+      let correctDependency = routerState.params.topicHandle ? 'topic' : 'universe';
+      return [{
+        taskName: 'inventory',
+        dependency: 'universe',
+        shouldBePresent: {
+          store: 'topicStore',
+          data: 'inventory',
+          shouldHaveValue: null
+        },
+        ifNot:  {
+          actions: 'topicActions',
+          creator: 'loadInventory',
+          args : ['__dependency.id']
+        }
+      }, {
+        taskName: 'chat',
+        dependency: correctDependency,
+        shouldBePresent: {
+          store: 'chatStore',
+          data: 'chat',
+          shouldHaveValue: null
+        },
+        ifNot:  {
+          actions: 'chatActions',
+          creator: 'loadChat',
+          args : ['__dependency.chatId']
+        }
+      }];
+    } else {
+      return;
+    }
+  }
+  
   componentDidMount() {
     // Fetch des dépendances après le mount, cf. _?.txt
     let universeId = this.props.universe.id;

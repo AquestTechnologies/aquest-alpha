@@ -1,5 +1,5 @@
 import Flux from '../shared/flux.js';
-import performRouteHandlerStaticMethod from '../shared/utils/performRouteHandlerStaticMethod.js';
+import phidippides from '../shared/utils/phidippides.js';
 
 import React  from 'react';
 import Router from 'react-router';  
@@ -41,21 +41,23 @@ const router = Router.create({
 });
 
 // Render app
-let c = 0;
-router.run( async (Handler, routerState) => {
+let c = 1; //L'app a déjà été render par le server une fois
+router.run( (Handler, routerState) => {
   c++;
   routerState.c = c;
   console.log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
   
-  await performRouteHandlerStaticMethod(routerState.routes, 'populateFluxState', { flux, routerState } );
-  console.log('... Exiting performRouteHandlerStaticMethod');
-  
-  console.log('... Entering React.render');
-  React.render(
-    <Handler {...routerState} flux={flux} />,
-    document.getElementById('mountNode'),
-    function() { // Callback
-      console.log('... App rendered');
-    }
-  );
+  console.log('... Entering phidippides');
+  phidippides(routerState, flux).then(function() {
+    console.log('... Exiting phidippides');
+    
+    console.log('... Entering React.render');
+    React.render(
+      <Handler {...routerState} flux={flux} />,
+      document.getElementById('mountNode'),
+      function() { // Callback
+        console.log('... App rendered');
+      }
+    );
+  });
 });

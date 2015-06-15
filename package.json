@@ -32,6 +32,7 @@
     "gulp-less": "^3.0.3",
     "gulp-shell": "^0.4.2",
     "gulp-util": "^3.0.4",
+    "underscore": "^1.8.3",
     "vinyl-source-stream": "^1.1.0",
     "winston": "^1.0.0"
   }

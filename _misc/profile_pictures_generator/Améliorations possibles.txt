@@ -1,0 +1,13 @@
+Améliorations possibles :
+
+- Gestion des erreurs
+- Lectures de fichier async
+- écrire dans un fichier le nombre d'acceptations et de rejets de chaque photo de base
+- transformer un attribut de la photo (vibrance, saturation, exposition, ...)
+- trancher entre une sauvegarde dans le buffer ou dans un stream
+- conditions d'acceptation : 
+    min(ecartsTypes) > 225/10 (algo en place)
+    ET/OU (tester les 2) 
+    moyenne(moyennes) comprise entre 50 et 200 (pour ne pas avoir d'image trop noire ou trop blanche)
+    OU ALORS
+    conjecturer correctement les criteres d'acceptation

@@ -1,5 +1,3 @@
-// node_modules/babel/bin/babel-node --stage 1 server.js
-
 var Hapi = require('hapi');
 var fs = require('fs');
 var uuid = require('node-uuid');
@@ -24,23 +22,15 @@ server.route({
   method: 'GET',
   path: '/many',
   handler: function (request, reply) {
-    reply.withManyPicture(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
+    reply.withManyPictures(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
   }
 });
 
 server.route({
     method: 'GET',
-    path: '/{filename}',
+    path: '/img/generated/{filename}',
     handler: function (request, reply) {
-        reply.file('./bundle/' + request.params.filename);
-    }
-});
-
-server.route({
-    method: 'GET',
-    path: '/img/{filename}',
-    handler: function (request, reply) {
-        reply.file('./img/' + request.params.filename);
+        reply.file('./img/generated/' + request.params.filename);
     }
 });
 
@@ -71,7 +61,7 @@ server.decorate('reply', 'withOnePicture', function (url, ip, port, method) {
   
   var desiredSize = 40; //px
   var baseDir = 'img/base/';
-  var saveDir = 'img/';
+  var saveDir = 'img/generated/';
   
   // Récupère la liste des fichier dans baseDir puis en choisi un au hasard
   var imageList = getFilesList(baseDir);
@@ -92,7 +82,7 @@ server.decorate('reply', 'withOnePicture', function (url, ip, port, method) {
   });
 });
 
-server.decorate('reply', 'withManyPicture', function (url, ip, port, method) {
+server.decorate('reply', 'withManyPictures', function (url, ip, port, method) {
   // Intercepte la réponse
   var response = this.response().hold();
   
@@ -111,7 +101,7 @@ server.decorate('reply', 'withManyPicture', function (url, ip, port, method) {
   
   var desiredSize = 40; //px
   var baseDir = 'img/base/';
-  var saveDir = 'img/';
+  var saveDir = 'img/generated/';
   
   var manyPicturePaths = [];
   

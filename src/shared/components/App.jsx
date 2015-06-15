@@ -8,7 +8,8 @@ class App extends React.Component {
 
   render() {
     return (
-      <FluxComponent flux={this.props.flux} connectToStores={{
+      <FluxComponent flux={this.props.flux}
+      connectToStores={{
         universeStore: store => ({
           universeIsLoading: store.isLoading(),
           universe: store.getUniverse(),
