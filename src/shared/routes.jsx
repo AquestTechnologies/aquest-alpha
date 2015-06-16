@@ -14,12 +14,12 @@ let routes = (
   
     <Route name='home' path='/' handler={Universe}>
       <DefaultRoute handler={Inventory} />
-    </Route>
+    </Route> 
     
     <Route name='universe' path='/_:universeName' handler={Universe}>
       <DefaultRoute handler={Inventory} />
       <Route name='topic' path=':topicHandle' handler={Topic} />
-      <Route name='newTopic' path='new_topic' handler={NewTopic} />
+      <Route name='newTopic' path='new' handler={NewTopic} />
     </Route>
     
     <Route name='explore' path='/Explore' handler={Explore} />

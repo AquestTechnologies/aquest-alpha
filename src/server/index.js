@@ -199,11 +199,13 @@ server.route({
         });
       });
     }
-
+    
+    // transforme coco.com/truc/ en coco.com/truc
+    let correctUrl = url.path.slice(-1) === '/' ? url.path.slice(0, -1) : url.path;
     // Initialise le router
     const router = Router.create({
       routes: routes,
-      location: url.path
+      location: correctUrl
     });
     
     // Match la location et les routes, et renvoie le bon layout (Handler) et le state
@@ -263,11 +265,14 @@ server.route({
           let htmlWithFlux = htmlWithoutFlux.replace('id="mountNode"', 'id="mountNode" state-from-server=\'' + serializedState + '\'');
           response.source  = htmlWithFlux;
           response.send();
-          logger.info('Served '+ url.path + '\n');
+          logger.info('Served '+ correctUrl + '\n');
         }).catch(function (err) {
           logger.error('!!! Error while reading HTML.');
           logger.error(err);
         });
+      }).catch(function(err) {
+        logger.error('!!! Error while Phidippides.');
+        logger.error(err);
       });
     });
   });

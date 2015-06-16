@@ -1,7 +1,8 @@
-import WinstonLogger from '/home/dherault_gmail_com/aquest-alpha/src/server/logger/Winstonlogger.js';
+import LogTailor from '/home/dherault_gmail_com/aquest-alpha/src/server/logger/LogTailor.js';
 import DbCaller from '/home/dherault_gmail_com/aquest-alpha/src/server/DbCaller/Dbcaller.js';
 
-let logger = new WinstonLogger();
+let logger = new LogTailor();
+logger.default();
 
 let restAPI = {
     register: function (server, options, next) {
@@ -10,7 +11,7 @@ let restAPI = {
           method: 'GET',
           path: '/universe/{universeId}',
           handler: function (request, reply) {
-            logger.info('request params : ' + request.params.universeId);
+            logger.tail('request params : ' + request.params.universeId);
             DbCaller.connect();
             DbCaller.query('SELECT universeId, name, description, chatId FROM aquest_schema.universe WHERE universeId=\'' + request.params.universeId + '\'');
           }
@@ -20,7 +21,7 @@ let restAPI = {
           method: 'POST',
           path: '/universe/{universeId}',
           handler: function (request, reply) {
-            logger.info('request params : ' + request.params.universeId);
+            logger.tail('request params : ' + request.params.universeId);
           }
         });
         

@@ -43,13 +43,19 @@
 
 .cardNew {
     width: @card_w;
-    height: @card_h;
+    height: @card_h; 
     color: @text_inverted_color;
     margin-bottom: @margin_w;
     border-width: 0.5rem;	
     border-style: dashed;
     border-color: @white_color;
     cursor: pointer;
+}
+
+.cardNew_title {
+    .txt_card_title;
+    padding: @margin_w @margin_w 0 @margin_w;
+    margin-bottom: @halfMargin_w;
 }
 
 .cardNew_author {

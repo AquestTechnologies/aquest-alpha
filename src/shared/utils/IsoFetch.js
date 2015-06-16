@@ -28,7 +28,8 @@ export default class IsoFetch {
             id: 1,
             chatId: 1,
             name: "Startups",
-            description: "This is a place where stuff gets done."
+            description: "This is a place where stuff gets done.",
+            picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
           });
           break;
           case 2:
@@ -36,7 +37,8 @@ export default class IsoFetch {
             id: 2,
             chatId: 2,
             name: "Design",
-            description: "This is a place where stuff gets designed."
+            description: "This is a place where stuff gets designed.",
+            picturePath: "http://130.211.68.244:8080/img/designer_compressed.png"
           });
           break;
           case 3:
@@ -44,7 +46,8 @@ export default class IsoFetch {
             id: 3,
             chatId: 3,
             name: "Dev",
-            description: "This is a place where stuff gets developped."
+            description: "This is a place where stuff gets developped.",
+            picturePath: "http://130.211.68.244:8080/img/forest-compressed.png"
           });
           break;
         default:
@@ -52,7 +55,8 @@ export default class IsoFetch {
             id: 0,
             chatId: 0,
             name: "Start universe",
-            description: "This is a place where stuff gets started."
+            description: "This is a place where stuff gets started.",
+            picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
           });
         }
       }, 250);
@@ -73,7 +77,8 @@ export default class IsoFetch {
             id: 1,
             chatId: 1,
             name: "Startups",
-            description: "This is a place where stuff gets done."
+            description: "This is a place where stuff gets done.",
+            picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
           });
           break;
           case "Design":
@@ -81,7 +86,8 @@ export default class IsoFetch {
             id: 2,
             chatId: 2,
             name: "Design",
-            description: "This is a place where stuff gets designed."
+            description: "This is a place where stuff gets designed.",
+            picturePath: "http://130.211.68.244:8080/img/designer_compressed.png"
           });
           break;
           case "Dev":
@@ -89,7 +95,8 @@ export default class IsoFetch {
             id: 3,
             chatId: 3,
             name: "Dev",
-            description: "This is a place where stuff gets developped."
+            description: "This is a place where stuff gets developped.",
+            picturePath: "http://130.211.68.244:8080/img/forest-compressed.png"
           });
           break;
         default:
@@ -97,7 +104,8 @@ export default class IsoFetch {
             id: 1,
             chatId: 1,
             name: "ByName Default",
-            description: "This is a place where stuff gets done."
+            description: "This is a place where stuff gets done.",
+            picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
           });
         }
       }, 250);
@@ -135,19 +143,22 @@ export default class IsoFetch {
             id: 1,
             chatId: 1,
             name: "Startups",
-            description: "This is a place where stuff gets done."
+            description: "This is a place where stuff gets done.",
+            picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
           },
           {
             id: 2,
             chatId: 2,
             name: "Design",
-            description: "This is a place where stuff gets designed."
+            description: "This is a place where stuff gets designed.",
+            picturePath: "http://130.211.68.244:8080/img/designer_compressed.png"
           },
           {
             id: 3,
             chatId: 3,
             name: "Dev",
-            description: "This is a place where stuff gets developped."
+            description: "This is a place where stuff gets developped.",
+            picturePath: "http://130.211.68.244:8080/img/forest-compressed.png"
           }
         ]);
       }, 700);
@@ -180,7 +191,7 @@ export default class IsoFetch {
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
-            imgPath: "img/image2.png",
+            imgPath: "http://130.211.68.244:8080/img/image2.png",
             timestamp:"a long time"
           },
           {
@@ -204,7 +215,7 @@ export default class IsoFetch {
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
-            imgPath: "img/image1.png",
+            imgPath: "http://130.211.68.244:8080/img/image1.png",
             timestamp:"a long time"
           }];
           
@@ -214,7 +225,7 @@ export default class IsoFetch {
             title: universeId + " ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
-            imgPath: "img/image1.png",
+            imgPath: "http://130.211.68.244:8080/img/image1.png",
             timestamp:"a long time"
           },
         ].concat(pasCustom));

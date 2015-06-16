@@ -7,7 +7,8 @@ class CardNew extends React.Component {
     //utiliser router.replaceWith ???
     this.handleClick = () => {
       // console.log(Object.getOwnPropertyNames(this.context.router));
-      this.context.router.transitionTo('newTopic', {universeName: this.context.router.getCurrentParams().universeName} );
+      // this.context.router.transitionTo('newTopic', {universeName: this.context.router.getCurrentParams().universeName} );
+      this.context.router.transitionTo('newTopic', {universeName: this.props.universe.name} );
     };
   }
   
@@ -15,7 +16,7 @@ class CardNew extends React.Component {
     return (
       <div className="cardNew" onClick={this.handleClick}>
         <div className="card_content">
-          <div className="card_title">
+          <div className="cardNew_title">
             <div>{this.props.title}</div>
             <div>{this.props.title2}</div>
           </div>

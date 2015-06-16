@@ -33544,6 +33544,10 @@ var router = _reactRouter2['default'].create({
 // Render app
 var c = 1; //L'app a déjà été render par le server une fois
 router.run(function (Handler, routerState) {
+  if (routerState.pathname.slice(-1) === '/') {
+    router.replaceWith(routerState.pathname.slice(0, -1), null, routerState.query);
+    return;
+  }
   c++;
   routerState.c = c;
   console.log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
@@ -33557,6 +33561,8 @@ router.run(function (Handler, routerState) {
       // Callback
       console.log('... App rendered');
     });
+  })['catch'](function (err) {
+    console.log('!!! Phidippides ' + err);
   });
 });
 
@@ -34059,6 +34065,11 @@ var Universe = (function (_React$Component) {
           inventory: this.props.inventory,
           chat: this.props.chat,
           actions: actions
+        }),
+        _react2['default'].createElement(_universeChatJsx2['default'], {
+          chatId: this.props.universe.chatId,
+          chat: this.props.chat,
+          actions: actions
         })
       );
     }
@@ -34072,20 +34083,31 @@ var Universe = (function (_React$Component) {
       var correctCreator = root ? 'loadUniverse' : 'loadUniverseByName';
       var correctArgs = root ? [userStartUniverseId] : [routerState.params.universeName];
       var correctValue = root ? { id: userStartUniverseId } : { name: routerState.params.universeName };
-      return [{
+
+      var tasks = [{
         taskName: 'universe',
         dependency: null,
-        shouldBePresent: {
-          store: 'universeStore',
+        shouldBePresent: { store: 'universeStore',
           data: 'universe',
-          shouldHaveValue: correctValue
-        },
-        ifNot: {
-          actions: 'universeActions',
+          shouldHaveValue: correctValue },
+        ifNot: { actions: 'universeActions',
           creator: correctCreator,
-          args: correctArgs
-        }
+          args: correctArgs }
       }];
+      if (routerState.c === 1) {
+        var correctDependency = routerState.params.topicHandle ? 'topic' : 'universe';
+        tasks.push({
+          taskName: 'chat',
+          dependency: correctDependency,
+          shouldBePresent: { store: 'chatStore',
+            data: 'chat',
+            shouldHaveValue: null },
+          ifNot: { actions: 'chatActions',
+            creator: 'loadChat',
+            args: ['__dependency.chatId'] }
+        });
+      }
+      return tasks;
     }
   }]);
 
@@ -34537,7 +34559,8 @@ var CardNew = (function (_React$Component) {
     //utiliser router.replaceWith ???
     this.handleClick = function () {
       // console.log(Object.getOwnPropertyNames(this.context.router));
-      _this.context.router.transitionTo('newTopic', { universeName: _this.context.router.getCurrentParams().universeName });
+      // this.context.router.transitionTo('newTopic', {universeName: this.context.router.getCurrentParams().universeName} );
+      _this.context.router.transitionTo('newTopic', { universeName: _this.props.universe.name });
     };
   }
 
@@ -34554,7 +34577,7 @@ var CardNew = (function (_React$Component) {
           { className: 'card_content' },
           _react2['default'].createElement(
             'div',
-            { className: 'card_title' },
+            { className: 'cardNew_title' },
             _react2['default'].createElement(
               'div',
               null,
@@ -34610,6 +34633,8 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
@@ -34636,20 +34661,29 @@ var Chat = (function (_React$Component) {
   function Chat() {
     _classCallCheck(this, Chat);
 
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(Chat.prototype), 'constructor', this).call(this);
+    this.state = { chat: {} };
   }
 
   _inherits(Chat, _React$Component);
 
   _createClass(Chat, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      if (this.props.chatId !== this.props.chat.id) {
+        this.props.actions.loadChat(this.props.chatId);
+      } else {
+        this.setState({ chat: this.props.chat });
+      }
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      if (nextProps.chatId === nextProps.chat.id) this.setState({ chat: nextProps.chat });
+    }
+  }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var chatId = this.props.chatId;
-      if (chatId !== this.props.chat.id) {
-        this.props.actions.loadChat(chatId);
-      }
       //permet de scroller les messages tout en bas après le mount.
       var scrollable = document.getElementById('scrollMeDown');
       scrollable.scrollTop = scrollable.scrollHeight;
@@ -34664,8 +34698,11 @@ var Chat = (function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
+      var chat = this.state.chat;
+      var messages = chat.messages || [];
+
       var samuel = 'The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother\'s keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.';
-      var messagesList = this.props.chat.messages.length === 0 ? 'chat_list_hidden' : 'chat_list_visible';
+      var messagesList = messages.length === 0 ? 'chat_list_hidden' : 'chat_list_visible';
       if (true) {
         messagesList += ' no_animation';
       }
@@ -34673,7 +34710,7 @@ var Chat = (function (_React$Component) {
       return _react2['default'].createElement(
         'div',
         { className: 'chat' },
-        _react2['default'].createElement(_ChatHeaderJsx2['default'], { chatTitle: this.props.chat.name }),
+        _react2['default'].createElement(_ChatHeaderJsx2['default'], { chatTitle: chat.name }),
         _react2['default'].createElement(
           'div',
           { id: 'scrollMeDown', className: 'chat_scrollable' },
@@ -34681,11 +34718,11 @@ var Chat = (function (_React$Component) {
             'div',
             { className: messagesList },
             _react2['default'].createElement(_MessageJsx2['default'], { author: 'Extreme firster', content: 'First!' }),
-            this.props.chat.messages.map(function (message) {
+            messages.map(function (message) {
               return _react2['default'].createElement(_MessageJsx2['default'], { key: message.id, author: message.author, content: message.content });
             }),
             _react2['default'].createElement(_MessageJsx2['default'], { author: 'Jackie Chan', content: 'I live in the USA' }),
-            _react2['default'].createElement(_MessageJsx2['default'], { author: this.props.chat.name + ' L. Jackson', content: samuel })
+            _react2['default'].createElement(_MessageJsx2['default'], { author: chat.name + ' L. Jackson', content: samuel })
           )
         ),
         _react2['default'].createElement(_ChatFooterJsx2['default'], null)
@@ -34865,6 +34902,7 @@ var Inventory = (function (_React$Component) {
 
     _get(Object.getPrototypeOf(Inventory.prototype), 'constructor', this).call(this);
     this.state = {
+      inventory: {},
       nameVisible: true
     };
     this.handleHeaderHover = function () {
@@ -34875,19 +34913,26 @@ var Inventory = (function (_React$Component) {
   _inherits(Inventory, _React$Component);
 
   _createClass(Inventory, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      // Fetch des dépendances après le mount, cf. _?.txt
-      var universeId = this.props.universe.id;
-      if (universeId !== this.props.inventory.universeId) {
-        this.props.actions.loadInventory(universeId);
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      if (this.props.universe.id !== this.props.inventory.universeId) {
+        this.props.actions.loadInventory(this.props.universe.id);
+      } else {
+        this.setState({ inventory: this.props.inventory });
       }
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      if (nextProps.universe.id === nextProps.inventory.universeId) this.setState({ inventory: this.props.inventory });
     }
   }, {
     key: 'render',
     value: function render() {
       var universe = this.props.universe;
-      var topics = this.props.inventory ? this.props.inventory.topics : [];
+      var inventory = this.state.inventory;
+      var topics = inventory.topics || [];
+
       var inventoryListClassName = topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
       if (true) {
         inventoryListClassName += ' no_animation';
@@ -34895,37 +34940,32 @@ var Inventory = (function (_React$Component) {
 
       return _react2['default'].createElement(
         'div',
-        null,
+        { className: 'universe_left', style: { backgroundImage: 'url(' + universe.picturePath + ')' } },
         _react2['default'].createElement(
           'div',
-          { className: 'universe_left' },
+          { className: 'universe_left_scrollable' },
           _react2['default'].createElement(
             'div',
-            { className: 'universe_left_scrollable' },
+            { className: 'universe_left_scrolled' },
             _react2['default'].createElement(
               'div',
-              { className: 'universe_left_scrolled' },
+              { className: 'inventory_header' },
               _react2['default'].createElement(
                 'div',
-                { className: 'inventory_header' },
-                _react2['default'].createElement(
-                  'div',
-                  { className: this.state.nameVisible ? 'inventory_header_name' : 'inventory_header_desc', onMouseOver: this.handleHeaderHover, onMouseOut: this.handleHeaderHover },
-                  this.state.nameVisible ? universe.name : universe.description
-                )
-              ),
-              _react2['default'].createElement(
-                'div',
-                { className: inventoryListClassName },
-                _react2['default'].createElement(_CardNewJsx2['default'], null),
-                topics.map(function (topic) {
-                  return _react2['default'].createElement(_CardJsx2['default'], { key: topic.id, title: topic.title, author: topic.author, desc: topic.desc, imgPath: topic.imgPath, timestamp: topic.timestamp });
-                })
+                { className: this.state.nameVisible ? 'inventory_header_name' : 'inventory_header_desc', onMouseOver: this.handleHeaderHover, onMouseOut: this.handleHeaderHover },
+                this.state.nameVisible ? universe.name : universe.description
               )
+            ),
+            _react2['default'].createElement(
+              'div',
+              { className: inventoryListClassName },
+              _react2['default'].createElement(_CardNewJsx2['default'], { universe: this.props.universe }),
+              topics.map(function (topic) {
+                return _react2['default'].createElement(_CardJsx2['default'], { key: topic.id, title: topic.title, author: topic.author, desc: topic.desc, imgPath: topic.imgPath, timestamp: topic.timestamp });
+              })
             )
           )
-        ),
-        _react2['default'].createElement(_ChatJsx2['default'], { chatId: this.props.universe.chatId, chat: this.props.chat, actions: this.props.actions })
+        )
       );
     }
   }], [{
@@ -34933,38 +34973,20 @@ var Inventory = (function (_React$Component) {
 
     // Load les données initiales
     value: function runPhidippides(routerState) {
-      if (routerState.c === 1) {
-        var correctDependency = routerState.params.topicHandle ? 'topic' : 'universe';
-        return [{
-          taskName: 'inventory',
-          dependency: 'universe',
-          shouldBePresent: {
-            store: 'topicStore',
-            data: 'inventory',
-            shouldHaveValue: null
-          },
-          ifNot: {
-            actions: 'topicActions',
-            creator: 'loadInventory',
-            args: ['__dependency.id']
-          }
-        }, {
-          taskName: 'chat',
-          dependency: correctDependency,
-          shouldBePresent: {
-            store: 'chatStore',
-            data: 'chat',
-            shouldHaveValue: null
-          },
-          ifNot: {
-            actions: 'chatActions',
-            creator: 'loadChat',
-            args: ['__dependency.chatId']
-          }
-        }];
-      } else {
-        return;
-      }
+      if (routerState.c === 1) return [{
+        taskName: 'inventory',
+        dependency: 'universe',
+        shouldBePresent: {
+          store: 'topicStore',
+          data: 'inventory',
+          shouldHaveValue: null
+        },
+        ifNot: {
+          actions: 'topicActions',
+          creator: 'loadInventory',
+          args: ['__dependency.id']
+        }
+      }];
     }
   }]);
 
@@ -35188,25 +35210,20 @@ var NewTopic = (function (_React$Component) {
     value: function render() {
       return _react2['default'].createElement(
         'div',
-        null,
+        { className: 'universe_left', style: { backgroundImage: 'url(' + this.props.universe.picturePath + ')' } },
         _react2['default'].createElement(
           'div',
-          { className: 'universe_left' },
+          { className: 'universe_left_scrollable' },
           _react2['default'].createElement(
             'div',
-            { className: 'universe_left_scrollable' },
+            { className: 'universe_left_scrolled' },
             _react2['default'].createElement(
               'div',
-              { className: 'universe_left_scrolled' },
-              _react2['default'].createElement(
-                'div',
-                { className: '' },
-                'yo'
-              )
+              { className: '' },
+              'yo'
             )
           )
-        ),
-        _react2['default'].createElement(_ChatJsx2['default'], { chatId: this.props.universe.chatId, chat: this.props.chat, actions: this.props.actions })
+        )
       );
     }
   }]);
@@ -35258,25 +35275,20 @@ var Topic = (function (_React$Component) {
     value: function render() {
       return _react2['default'].createElement(
         'div',
-        null,
+        { className: 'universe_left' },
         _react2['default'].createElement(
           'div',
-          { className: 'universe_left' },
+          { className: 'universe_left_scrollable' },
           _react2['default'].createElement(
             'div',
-            { className: 'universe_left_scrollable' },
+            { className: 'universe_left_scrolled' },
             _react2['default'].createElement(
               'div',
-              { className: 'universe_left_scrolled' },
-              _react2['default'].createElement(
-                'div',
-                { className: 'topic' },
-                'yo'
-              )
+              { className: 'topic' },
+              'yo'
             )
           )
-        ),
-        _react2['default'].createElement(_ChatJsx2['default'], { chatId: this.props.universe.chatId, chat: this.props.chat, actions: this.props.actions })
+        )
       );
     }
   }]);
@@ -35419,7 +35431,7 @@ var routes = _react2['default'].createElement(
     { name: 'universe', path: '/_:universeName', handler: _componentsUniverseJsx2['default'] },
     _react2['default'].createElement(_reactRouter.DefaultRoute, { handler: _componentsUniverseInventoryJsx2['default'] }),
     _react2['default'].createElement(_reactRouter.Route, { name: 'topic', path: ':topicHandle', handler: _componentsUniverseTopicJsx2['default'] }),
-    _react2['default'].createElement(_reactRouter.Route, { name: 'newTopic', path: 'new_topic', handler: _componentsUniverseNewTopicJsx2['default'] })
+    _react2['default'].createElement(_reactRouter.Route, { name: 'newTopic', path: 'new', handler: _componentsUniverseNewTopicJsx2['default'] })
   ),
   _react2['default'].createElement(_reactRouter.Route, { name: 'explore', path: '/Explore', handler: _componentsExploreJsx2['default'] }),
   _react2['default'].createElement(_reactRouter.NotFoundRoute, { handler: _componentsNotFoundJsx2['default'] })
@@ -35805,7 +35817,8 @@ var IsoFetch = (function () {
                 id: 1,
                 chatId: 1,
                 name: "Startups",
-                description: "This is a place where stuff gets done."
+                description: "This is a place where stuff gets done.",
+                picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
               });
               break;
             case 2:
@@ -35813,7 +35826,8 @@ var IsoFetch = (function () {
                 id: 2,
                 chatId: 2,
                 name: "Design",
-                description: "This is a place where stuff gets designed."
+                description: "This is a place where stuff gets designed.",
+                picturePath: "http://130.211.68.244:8080/img/designer_compressed.png"
               });
               break;
             case 3:
@@ -35821,7 +35835,8 @@ var IsoFetch = (function () {
                 id: 3,
                 chatId: 3,
                 name: "Dev",
-                description: "This is a place where stuff gets developped."
+                description: "This is a place where stuff gets developped.",
+                picturePath: "http://130.211.68.244:8080/img/forest-compressed.png"
               });
               break;
             default:
@@ -35829,7 +35844,8 @@ var IsoFetch = (function () {
                 id: 0,
                 chatId: 0,
                 name: "Start universe",
-                description: "This is a place where stuff gets started."
+                description: "This is a place where stuff gets started.",
+                picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
               });
           }
         }, 250);
@@ -35851,7 +35867,8 @@ var IsoFetch = (function () {
                 id: 1,
                 chatId: 1,
                 name: "Startups",
-                description: "This is a place where stuff gets done."
+                description: "This is a place where stuff gets done.",
+                picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
               });
               break;
             case "Design":
@@ -35859,7 +35876,8 @@ var IsoFetch = (function () {
                 id: 2,
                 chatId: 2,
                 name: "Design",
-                description: "This is a place where stuff gets designed."
+                description: "This is a place where stuff gets designed.",
+                picturePath: "http://130.211.68.244:8080/img/designer_compressed.png"
               });
               break;
             case "Dev":
@@ -35867,7 +35885,8 @@ var IsoFetch = (function () {
                 id: 3,
                 chatId: 3,
                 name: "Dev",
-                description: "This is a place where stuff gets developped."
+                description: "This is a place where stuff gets developped.",
+                picturePath: "http://130.211.68.244:8080/img/forest-compressed.png"
               });
               break;
             default:
@@ -35875,7 +35894,8 @@ var IsoFetch = (function () {
                 id: 1,
                 chatId: 1,
                 name: "ByName Default",
-                description: "This is a place where stuff gets done."
+                description: "This is a place where stuff gets done.",
+                picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
               });
           }
         }, 250);
@@ -35914,17 +35934,20 @@ var IsoFetch = (function () {
             id: 1,
             chatId: 1,
             name: "Startups",
-            description: "This is a place where stuff gets done."
+            description: "This is a place where stuff gets done.",
+            picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
           }, {
             id: 2,
             chatId: 2,
             name: "Design",
-            description: "This is a place where stuff gets designed."
+            description: "This is a place where stuff gets designed.",
+            picturePath: "http://130.211.68.244:8080/img/designer_compressed.png"
           }, {
             id: 3,
             chatId: 3,
             name: "Dev",
-            description: "This is a place where stuff gets developped."
+            description: "This is a place where stuff gets developped.",
+            picturePath: "http://130.211.68.244:8080/img/forest-compressed.png"
           }]);
         }, 700);
       });
@@ -35955,7 +35978,7 @@ var IsoFetch = (function () {
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
-            imgPath: "img/image2.png",
+            imgPath: "http://130.211.68.244:8080/img/image2.png",
             timestamp: "a long time"
           }, {
             id: 5,
@@ -35976,7 +35999,7 @@ var IsoFetch = (function () {
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
-            imgPath: "img/image1.png",
+            imgPath: "http://130.211.68.244:8080/img/image1.png",
             timestamp: "a long time"
           }];
 
@@ -35985,7 +36008,7 @@ var IsoFetch = (function () {
             title: universeId + " ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
-            imgPath: "img/image1.png",
+            imgPath: "http://130.211.68.244:8080/img/image1.png",
             timestamp: "a long time"
           }].concat(pasCustom));
         }, 750);
@@ -36258,7 +36281,6 @@ function phidippides(routerState, flux) {
   var completedTasks = []; // Les taches terminée
   var failedTasks = []; // Les taches non terminées car il manque les dépendances
   var displayOnConsole = []; // Permet d'afficher les taches à effectuer sur la console
-
   // Appel de runPhidippides dans chaque handler
   var runPhidippides = routerState.routes.map(function (route) {
     return route.handler['runPhidippides'];
@@ -36277,6 +36299,7 @@ function phidippides(routerState, flux) {
     });
   });
 
+  if (whatToFetch.length === 0) return Promise.resolve();
   if (!checkFormat(whatToFetch)) return Promise.reject('*** Error, invalid markup found.');
 
   // Mieux vaut le faire après checkFormat

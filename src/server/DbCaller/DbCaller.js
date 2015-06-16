@@ -1,5 +1,5 @@
 import pg from 'pg';
-import winstonLogger from '/home/dherault_gmail_com/aquest-alpha/src/server/logger/Winstonlogger.js';
+import LogTailor from '/home/dherault_gmail_com/aquest-alpha/src/server/logger/LogTaillor.js';
 
 class DbCaller {
   
@@ -12,7 +12,8 @@ class DbCaller {
     this.bdName = 'aquestdb';
     this.client;
     
-    this.logger = new winstonLogger().logger;
+    this.logger = new LogTailor();
+    this.logger.default();
   }
   
   connect(){
@@ -27,14 +28,14 @@ class DbCaller {
   query(aquery){
     this.client.connect(function(err) {
         if(err) {
-          return this.logger.info('could not connect to postgres', err);
+          return this.logger.tail('could not connect to postgres', err);
         }
         this.client.query(aquery, function(err, result) {
           if(err) {
-            return this.logger.info('error running query', err);
+            return this.logger.tail('error running query', err);
           }
           
-          this.logger.info('universe : '+ result.rows[0]);
+          this.logger.tail('universe : '+ result.rows[0]);
           
           if(result.rows[0] !== undefined){
             return result;

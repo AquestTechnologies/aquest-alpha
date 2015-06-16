@@ -193,7 +193,6 @@ export default function phidippides(routerState, flux) {
   let completedTasks = []; // Les taches terminée
   let failedTasks = []; // Les taches non terminées car il manque les dépendances
   let displayOnConsole = []; // Permet d'afficher les taches à effectuer sur la console
-  
   // Appel de runPhidippides dans chaque handler
   let runPhidippides = routerState.routes
   .map(route => route.handler['runPhidippides'])
@@ -208,6 +207,7 @@ export default function phidippides(routerState, flux) {
     });
   });
   
+  if (whatToFetch.length === 0) return Promise.resolve();
   if (!checkFormat(whatToFetch)) return Promise.reject('*** Error, invalid markup found.');
   
   // Mieux vaut le faire après checkFormat

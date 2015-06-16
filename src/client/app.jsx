@@ -43,6 +43,10 @@ const router = Router.create({
 // Render app
 let c = 1; //L'app a déjà été render par le server une fois
 router.run( (Handler, routerState) => {
+  if (routerState.pathname.slice(-1) === '/') {
+    router.replaceWith(routerState.pathname.slice(0,-1), null, routerState.query);
+    return;
+  }
   c++;
   routerState.c = c;
   console.log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
@@ -59,5 +63,7 @@ router.run( (Handler, routerState) => {
         console.log('... App rendered');
       }
     );
+  }).catch(function(err) {
+    console.log('!!! Phidippides ' + err);
   });
 });
