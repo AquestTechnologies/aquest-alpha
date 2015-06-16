@@ -12,7 +12,7 @@ export default class IsoFetch {
       }
       return messages;
     })();
-  }
+  } 
   
   universe(universeId) {
     console.log('+++ Fetching universe ' + universeId);
@@ -49,10 +49,10 @@ export default class IsoFetch {
           break;
         default:
           resolve({
-            id: 1,
-            chatId: 1,
-            name: "Startups",
-            description: "This is a place where stuff gets done."
+            id: 0,
+            chatId: 0,
+            name: "Start universe",
+            description: "This is a place where stuff gets started."
           });
         }
       }, 250);

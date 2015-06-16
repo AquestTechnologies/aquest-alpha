@@ -1,5 +1,5 @@
 import pg from 'pg';
-import winstonLogger from '../logger/Winstonlogger.js';
+import winstonLogger from '/home/dherault_gmail_com/aquest-alpha/src/server/logger/Winstonlogger.js';
 
 class DbCaller {
   

@@ -431,7 +431,6 @@ div {
   width: 119rem;
   height: 100%;
   z-index: 50;
-  background-image: url("img/pillars_compressed.png");
   background-size: cover;
   box-shadow: 0.4rem 0 0.5rem 0 rgba(0, 0, 0, 0.5);
   overflow: hidden;
@@ -652,8 +651,9 @@ div {
   width: 60rem;
 }
 nav {
+  box-sizing: border-box;
   position: fixed;
-  width: 111rem;
+  width: 119rem;
   z-index: 100;
   padding: 2rem 4rem 0 4rem;
 }

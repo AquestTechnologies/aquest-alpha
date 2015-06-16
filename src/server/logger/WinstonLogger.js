@@ -1,27 +1,31 @@
-import winston from 'winston';
+let fs = require('fs');
 
-class WinstonLogger extends winston.Logger{
+class AqLogger{
   constructor() {
-    super();
+      
+    this.fileLocation;  
+    this.fileName;
+    this.filePath = this.fileLocation + '/' + this.fileName;
     
-    this.tranports = [
-      new (winston.transports.Console)({
-          showLevel: false
-        }),
-        new (winston.transports.File)({
-          name: 'info-file',
-          filename: '/home/dherault_gmail_com/aquest-alpha/log/info.log',
-          level: 'info',
-          showLevel: false
-        }),
-        new (winston.transports.File)({
-          name: 'error-file',
-          filename: '/home/dherault_gmail_com/aquest-alpha/log/error.log',
-          level: 'error',
-          showLevel: false
-        })
-     ];
+    this.logConfiguration;
+  }
+  
+  default(){
+    this.fileLocation = "/home/dherault_gmail_com/aquest-alpha/log";
+    this.fileName = "info.log";
+    this.logConfiguration = {
+      date: ''  
+    }
+  }
+  
+  log(dataLog){
+    fs.writeFile(this.filePath, dataLog, function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        console.log(dataLog);
+    });
   }
 }
 
-export default WinstonLogger;
+export default AqLogger;

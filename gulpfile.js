@@ -44,10 +44,7 @@ gulp.task('less', ['clean'], function() {
 gulp.task('scripts', ['clean'], function() {
   
   browserify(paths.client)
-    .transform(babel.configure({
-      stage: 1, //ES7 async wait
-      optional: ['runtime'] //Regenerator en runtime et d'autre petites choses https://babeljs.io/docs/usage/runtime/
-    }))
+    .transform(babel)
     .bundle()
     .pipe(source('app.js'))
     .pipe(gulp.dest(paths.dist));
@@ -78,7 +75,7 @@ gulp.task('watch', function() {
 
 gulp.task('devServer', shell.task([
   //On a besoin de async await coté server alors on utilise node à la sauce babel
-  'node_modules/babel/bin/babel-node --stage 1 src/server/index.js'
+  'node_modules/babel/bin/babel-node src/server/index.js'
 ]));
 
 

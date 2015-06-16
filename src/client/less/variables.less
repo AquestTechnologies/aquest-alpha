@@ -43,9 +43,9 @@
 //taille des composants
 @inventory_w:           @inventory_col * @col_w;
 @chat_w:                ( @grid_col - @inventory_col ) * @col_w;
-@menu_w:                @inventory_col * @col_w - 2 * @doubleMargin_w;
+@menu_w:                @inventory_w;
 
-@card_w:                ( @menu_w - @margin_w ) / 2;
+@card_w:                ( @inventory_w - 2 * @doubleMargin_w - @margin_w ) / 2;
 @card_h:                @card_w / @phi;
 
 @chatHeader_h:           8 * @col_w;

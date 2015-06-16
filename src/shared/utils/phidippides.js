@@ -2,7 +2,7 @@ export default function phidippides(routerState, flux) {
 
   // Configuration
   const PLACEHOLDER = '__dependency.'; // Le placeholder pour les arguments des actions
-  const VERBOSE = true;               // Affiche les console.log
+  const VERBOSE = false;               // Affiche les console.log
   
   
   function logMeOrNot(message) {
@@ -29,8 +29,7 @@ export default function phidippides(routerState, flux) {
 
   // Vérifie la présence de data dans store
   function checkPresence({store, data}) {
-    let result = flux._stores[store].state[data] ? true : false;
-    return result;
+    return flux._stores[store].state[data] ? true : false;
   }
   
   
@@ -39,21 +38,20 @@ export default function phidippides(routerState, flux) {
     if (shouldHaveValue === null ) return true;
     
     let whatToCheck = flux._stores[store].state[data];
-    let result = true;
     // Si shouldHaveValue est un object on vérifie que whatToCheck est identique
     if (shouldHaveValue instanceof Object) {
       for(let key in shouldHaveValue) {
-        if (!whatToCheck[key]) {
-          result = false;
+        if (whatToCheck[key] === undefined) {
+          return false;
         } else if (whatToCheck[key] !== shouldHaveValue[key]) {
-          result = false;
+          return false;
         }
       }
     // Sinon shouldHaveValue n'est pas un objet et on vérifie qu'il soit identique à shouldHaveValue
     } else {
-      if (whatToCheck !== shouldHaveValue) result = false;
+      if (whatToCheck !== shouldHaveValue) return false;
     }
-    return result;
+    return true;
   }
   
   
@@ -191,26 +189,35 @@ export default function phidippides(routerState, flux) {
     });
   }
     
-  let whatToFetch = [];
-  let completedTasks = [];
-  let failedTasks = [];
+  let whatToFetch = []; // Les taches à effectuer
+  let completedTasks = []; // Les taches terminée
+  let failedTasks = []; // Les taches non terminées car il manque les dépendances
+  let displayOnConsole = []; // Permet d'afficher les taches à effectuer sur la console
+  
+  // Appel de runPhidippides dans chaque handler
   let runPhidippides = routerState.routes
   .map(route => route.handler['runPhidippides'])
   .filter(method => typeof method === 'function')
   .map(method => method(routerState))
   .filter(handlerReturn => handlerReturn instanceof Array);
   
+  // Extraction des taches vers whatToFetch
   runPhidippides.forEach(function(handlerReturn) {
     handlerReturn.forEach(function(somethingToFetch) {
       whatToFetch.push(somethingToFetch);
     });
   });
   
-  if (!checkFormat(whatToFetch)) return Promise.resolve();
+  if (!checkFormat(whatToFetch)) return Promise.reject('*** Error, invalid markup found.');
+  
+  // Mieux vaut le faire après checkFormat
+  whatToFetch.forEach(function(task) {
+    displayOnConsole.push(task.taskName);
+  });
   
   let howMany = whatToFetch.length;
-  let speakEnglish = howMany > 1 ? ' tasks' : ' task';
-  console.log('*** Resolving ' + howMany + speakEnglish);
+  let speakEnglish = howMany > 1 ? ' tasks : ' : ' task : ';
+  console.log('*** Resolving ' + howMany + speakEnglish + displayOnConsole.toString());
   
   return clearTasks(whatToFetch);
 }
