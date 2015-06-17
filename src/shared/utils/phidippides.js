@@ -1,12 +1,14 @@
-export default function phidippides(routerState, flux) {
+import isClient from './isClient.js';
+import log from './logTailor.js';
 
+export default function phidippides(routerState, flux) {
   // Configuration
   const PLACEHOLDER = '__dependency.'; // Le placeholder pour les arguments des actions
   const VERBOSE = false;               // Affiche les console.log
   
   
   function logMeOrNot(message) {
-    if (VERBOSE === true) console.log(message);
+    if (VERBOSE === true) log(message);
   }
   
   
@@ -217,7 +219,7 @@ export default function phidippides(routerState, flux) {
   
   let howMany = whatToFetch.length;
   let speakEnglish = howMany > 1 ? ' tasks : ' : ' task : ';
-  console.log('*** Resolving ' + howMany + speakEnglish + displayOnConsole.toString());
+  log('*** Resolving ' + howMany + speakEnglish + displayOnConsole.toString());
   
   return clearTasks(whatToFetch);
 }

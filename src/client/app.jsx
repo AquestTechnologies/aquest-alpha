@@ -1,5 +1,7 @@
 import Flux from '../shared/flux.js';
 import phidippides from '../shared/utils/phidippides.js';
+import log from '../shared/utils/logTailor.js';
+import isClient from '../shared/utils/isClient.js';
 
 import React  from 'react';
 import Router from 'react-router';  
@@ -9,11 +11,11 @@ import Websocket from 'socket.io-client';
 const io = Websocket('http://130.211.68.244:8081');
 
 io.on('message', function (message) {
-  console.log('___ Server says ' + message);
+  log('___ Server says ' + message);
 });
 
-console.log('Welcome to Aquest v0!');
-console.log('... Initializing flux');
+log('Welcome to Aquest v0!');
+log('... Initializing flux');
 // Initialize flux
 const flux = new Flux();
 
@@ -27,11 +29,11 @@ try {
     for (let store in flux._stores) {
       flux._stores[store].state = stateFromServer[store];
     }
-    console.log('... State from server injected');
+    log('... State from server injected');
   }
 } catch(err) {
-    console.log('!!! Error while serializing state.');
-    console.log(err);
+    log('!!! Error while serializing state.');
+    log(err);
 }
 
 // Initialise le router
@@ -49,21 +51,21 @@ router.run( (Handler, routerState) => {
   }
   c++;
   routerState.c = c;
-  console.log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
+  log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
   
-  console.log('... Entering phidippides');
+  log('... Entering phidippides');
   phidippides(routerState, flux).then(function() {
-    console.log('... Exiting phidippides');
+    log('... Exiting phidippides');
     
-    console.log('... Entering React.render');
+    log('... Entering React.render');
     React.render(
       <Handler {...routerState} flux={flux} />,
       document.getElementById('mountNode'),
       function() { // Callback
-        console.log('... App rendered');
+        log('... App rendered');
       }
     );
   }).catch(function(err) {
-    console.log('!!! Phidippides ' + err);
+    log('!!! Phidippides ' + err);
   });
 });

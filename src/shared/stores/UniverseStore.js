@@ -1,4 +1,6 @@
 import BaseStore from '../utils/BaseStore.js';
+import isClient from '../utils/isClient.js';
+import log from '../utils/logTailor.js';
 
 export default class UniverseStore extends BaseStore {
   
@@ -13,7 +15,8 @@ export default class UniverseStore extends BaseStore {
     this.register(universeActionIds.setUniverse, this.handleLoadUniverse);
     
     this.state = {}; // Reset le state, important (?)
-    console.log('.S. UniverseStore initialized');
+    
+    log('.S. UniverseStore initialized');
   }
   
   // Les getters servent principalement à FluxComponent.connectToStores
