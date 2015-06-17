@@ -5,21 +5,43 @@ import ChatFooter from './ChatFooter.jsx';
 
 class Chat extends React.Component {
   
-  constructor() {
+  /*constructor() {
     super();
-    this.state = { chat: {} };
-  }
+    this.state = { 
+      chat: {},
+      isLoading: false
+    };
+  }*/
   
   componentWillMount() {
+    let chat = this.props.chat;
+    let isLoading = false;
     if(this.props.chatId !== this.props.chat.id) {
       this.props.actions.loadChat(this.props.chatId);
-    } else {
-      this.setState({ chat: this.props.chat });
+      chat = {};
+      isLoading = true;
     }
+    this.setState({ 
+      chat: chat,
+      isLoading: isLoading
+    });
   }
   
   componentWillReceiveProps(nextProps) {
-    if (nextProps.chatId === nextProps.chat.id) this.setState({ chat: nextProps.chat });
+    if (nextProps.chatId !== nextProps.chat.id) {
+      if (!this.state.isLoading) {
+        this.props.actions.loadChat(nextProps.chatId);
+        this.setState({ 
+          chat: {},
+          isLoading: true
+        });
+      }
+    } else {
+      this.setState({ 
+        chat: nextProps.chat,
+        isLoading: false
+      });
+    }
   }
   
   componentDidMount() {
@@ -38,7 +60,7 @@ class Chat extends React.Component {
     let chat = this.state.chat;
     let messages = chat.messages || [];
     
-    let samuel = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
+    let samuel = "FAIRE LOAD UNIVERSE BY HANDLE The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
     let messagesList = messages.length === 0 ? 'chat_list_hidden' : 'chat_list_visible';
     if (true) { messagesList += ' no_animation'; }
     

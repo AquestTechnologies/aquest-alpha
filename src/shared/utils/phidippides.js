@@ -36,8 +36,8 @@ export default function phidippides(routerState, flux) {
   // Vérifie que data de store possède la valeur demandée
   function checkValue({store, data, shouldHaveValue}) {
     if (shouldHaveValue === null ) return true;
-    
     let whatToCheck = flux._stores[store].state[data];
+    logMeOrNot('*** checkValue of ' + store + '.' + data + '=' + JSON.stringify(whatToCheck) + ' should be ' + JSON.stringify(shouldHaveValue));
     // Si shouldHaveValue est un object on vérifie que whatToCheck est identique
     if (shouldHaveValue instanceof Object) {
       for(let key in shouldHaveValue) {
@@ -161,7 +161,7 @@ export default function phidippides(routerState, flux) {
   
   // Complete toutes les taches
   function clearTasks(tasks) {
-    logMeOrNot('*** clearTasks ' + tasks);
+    logMeOrNot('*** clearTasks');
     failedTasks = [];
     return new Promise(function(resolve, reject) {
       

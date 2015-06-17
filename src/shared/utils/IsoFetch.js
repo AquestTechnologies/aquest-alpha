@@ -52,10 +52,10 @@ export default class IsoFetch {
           break;
         default:
           resolve({
-            id: 0,
-            chatId: 0,
-            name: "Start universe",
-            description: "This is a place where stuff gets started.",
+            id: 1,
+            chatId: 1,
+            name: "Startups",
+            description: "This is a place where stuff gets done.",
             picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
           });
         }
@@ -103,29 +103,11 @@ export default class IsoFetch {
           resolve({
             id: 1,
             chatId: 1,
-            name: "ByName Default",
+            name: "Startups",
             description: "This is a place where stuff gets done.",
             picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
           });
         }
-      }, 250);
-    });
-  }
-  
-  startUniverse() {
-    console.log('+++ Fetching startUniverse');
-    // returning a Promise because that is what fetch does.
-    return new Promise(function (resolve, reject) {
-      // simulate an asynchronous action where data is fetched on
-      // a remote server somewhere.
-      setTimeout(function () {
-        // resolve with some mock data
-        resolve({
-          id: 0,
-          chatId: 0,
-          name: "User's starting universe",
-          description: "This is a place where stuff gets done."
-        });
       }, 250);
     });
   }
@@ -177,7 +159,8 @@ export default class IsoFetch {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
             timestamp:"a long time",
-            handle: '000-handle'
+            handle: '000-handle',
+            chatId: 111
           },
           {
             id: 3,
@@ -186,7 +169,8 @@ export default class IsoFetch {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
             timestamp:"a long time",
-            handle: '000-handle'
+            handle: '000-handle',
+            chatId: 111
           },
           {
             id: 4,
@@ -195,7 +179,8 @@ export default class IsoFetch {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image2.png",
             timestamp:"a long time",
-            handle: '000-handle'
+            handle: '000-handle',
+            chatId: 111
           },
           {
             id: 5,
@@ -204,7 +189,8 @@ export default class IsoFetch {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
             timestamp:"a long time",
-            handle: '000-handle'
+            handle: '000-handle',
+            chatId: 111
           },
           {
             id: 6,
@@ -213,7 +199,8 @@ export default class IsoFetch {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
             timestamp:"a long time",
-            handle: '000-handle'
+            handle: '000-handle',
+            chatId: 111
           },
           {
             id: 7,
@@ -222,7 +209,8 @@ export default class IsoFetch {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image1.png",
             timestamp:"a long time",
-            handle: '000-handle'
+            handle: '000-handle',
+            chatId: 111
           }];
           
         resolve([
@@ -233,7 +221,8 @@ export default class IsoFetch {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image1.png",
             timestamp:"a long time",
-            handle: '000-handle'
+            handle: '000-handle',
+            chatId: 111
           },
         ].concat(pasCustom));
       }, 750);
@@ -268,6 +257,13 @@ export default class IsoFetch {
            resolve({
             id: 3,
             name: "Global Dev chat",
+            messages: messages
+          });
+          break;
+          case 111:
+           resolve({
+            id: 111,
+            name: "Topic chat",
             messages: messages
           });
           break;
@@ -312,7 +308,8 @@ export default class IsoFetch {
             imgPath: "",
             timestamp:"a long time",
             handle: handle,
-            content: "topicByHandle topicByHandle topicByHandle topicByHandle"
+            content: "topicByHandle topicByHandle topicByHandle topicByHandle",
+            chatId: 111
           }
         );
       }, 250);

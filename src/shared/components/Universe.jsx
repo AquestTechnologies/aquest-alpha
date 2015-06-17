@@ -9,7 +9,7 @@ class Universe extends React.Component {
   
   // Load les données initiales
   static runPhidippides(routerState) {
-    let userStartUniverseId = 0;
+    let userStartUniverseId = 1;
     let root = routerState.pathname === '/' ? true : false;
     let correctCreator = root ? 'loadUniverse' : 'loadUniverseByName';
     let correctArgs = root ? [userStartUniverseId] : [routerState.params.universeName];
@@ -52,6 +52,8 @@ class Universe extends React.Component {
        loadChat: chatActions.loadChat
     };
     
+    let correctChatId = this.props.params.topicHandle ? this.props.topic.chatId : this.props.universe.chatId;
+    
     return (
       <div>
         <Menu />
@@ -62,8 +64,8 @@ class Universe extends React.Component {
           actions={actions} 
         />
         <Chat 
-          chatId={this.props.universe.chatId} 
           chat={this.props.chat} 
+          chatId={correctChatId} 
           actions={actions} 
         />
       </div>

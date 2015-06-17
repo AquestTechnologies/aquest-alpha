@@ -34098,6 +34098,8 @@ var Universe = (function (_React$Component) {
         loadChat: chatActions.loadChat
       };
 
+      var correctChatId = this.props.params.topicHandle ? this.props.topic.chatId : this.props.universe.chatId;
+
       return _react2['default'].createElement(
         'div',
         null,
@@ -34109,8 +34111,8 @@ var Universe = (function (_React$Component) {
           actions: actions
         }),
         _react2['default'].createElement(_universeChatJsx2['default'], {
-          chatId: this.props.universe.chatId,
           chat: this.props.chat,
+          chatId: correctChatId,
           actions: actions
         })
       );
@@ -34120,7 +34122,7 @@ var Universe = (function (_React$Component) {
 
     // Load les données initiales
     value: function runPhidippides(routerState) {
-      var userStartUniverseId = 0;
+      var userStartUniverseId = 1;
       var root = routerState.pathname === '/' ? true : false;
       var correctCreator = root ? 'loadUniverse' : 'loadUniverseByName';
       var correctArgs = root ? [userStartUniverseId] : [routerState.params.universeName];
@@ -34619,8 +34621,6 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
@@ -34647,25 +34647,54 @@ var Chat = (function (_React$Component) {
   function Chat() {
     _classCallCheck(this, Chat);
 
-    _get(Object.getPrototypeOf(Chat.prototype), 'constructor', this).call(this);
-    this.state = { chat: {} };
+    if (_React$Component != null) {
+      _React$Component.apply(this, arguments);
+    }
   }
 
   _inherits(Chat, _React$Component);
 
   _createClass(Chat, [{
     key: 'componentWillMount',
+
+    /*constructor() {
+      super();
+      this.state = { 
+        chat: {},
+        isLoading: false
+      };
+    }*/
+
     value: function componentWillMount() {
+      var chat = this.props.chat;
+      var isLoading = false;
       if (this.props.chatId !== this.props.chat.id) {
         this.props.actions.loadChat(this.props.chatId);
-      } else {
-        this.setState({ chat: this.props.chat });
+        chat = {};
+        isLoading = true;
       }
+      this.setState({
+        chat: chat,
+        isLoading: isLoading
+      });
     }
   }, {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(nextProps) {
-      if (nextProps.chatId === nextProps.chat.id) this.setState({ chat: nextProps.chat });
+      if (nextProps.chatId !== nextProps.chat.id) {
+        if (!this.state.isLoading) {
+          this.props.actions.loadChat(nextProps.chatId);
+          this.setState({
+            chat: {},
+            isLoading: true
+          });
+        }
+      } else {
+        this.setState({
+          chat: nextProps.chat,
+          isLoading: false
+        });
+      }
     }
   }, {
     key: 'componentDidMount',
@@ -34687,7 +34716,7 @@ var Chat = (function (_React$Component) {
       var chat = this.state.chat;
       var messages = chat.messages || [];
 
-      var samuel = 'The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother\'s keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.';
+      var samuel = 'FAIRE LOAD UNIVERSE BY HANDLE The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother\'s keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.';
       var messagesList = messages.length === 0 ? 'chat_list_hidden' : 'chat_list_visible';
       if (true) {
         messagesList += ' no_animation';
@@ -35910,10 +35939,10 @@ var IsoFetch = (function () {
               break;
             default:
               resolve({
-                id: 0,
-                chatId: 0,
-                name: "Start universe",
-                description: "This is a place where stuff gets started.",
+                id: 1,
+                chatId: 1,
+                name: "Startups",
+                description: "This is a place where stuff gets done.",
                 picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
               });
           }
@@ -35962,30 +35991,11 @@ var IsoFetch = (function () {
               resolve({
                 id: 1,
                 chatId: 1,
-                name: "ByName Default",
+                name: "Startups",
                 description: "This is a place where stuff gets done.",
                 picturePath: "http://130.211.68.244:8080/img/pillars_compressed.png"
               });
           }
-        }, 250);
-      });
-    }
-  }, {
-    key: "startUniverse",
-    value: function startUniverse() {
-      console.log("+++ Fetching startUniverse");
-      // returning a Promise because that is what fetch does.
-      return new Promise(function (resolve, reject) {
-        // simulate an asynchronous action where data is fetched on
-        // a remote server somewhere.
-        setTimeout(function () {
-          // resolve with some mock data
-          resolve({
-            id: 0,
-            chatId: 0,
-            name: "User's starting universe",
-            description: "This is a place where stuff gets done."
-          });
         }, 250);
       });
     }
@@ -36035,7 +36045,8 @@ var IsoFetch = (function () {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
             timestamp: "a long time",
-            handle: "000-handle"
+            handle: "000-handle",
+            chatId: 111
           }, {
             id: 3,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
@@ -36043,7 +36054,8 @@ var IsoFetch = (function () {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
             timestamp: "a long time",
-            handle: "000-handle"
+            handle: "000-handle",
+            chatId: 111
           }, {
             id: 4,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
@@ -36051,7 +36063,8 @@ var IsoFetch = (function () {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image2.png",
             timestamp: "a long time",
-            handle: "000-handle"
+            handle: "000-handle",
+            chatId: 111
           }, {
             id: 5,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
@@ -36059,7 +36072,8 @@ var IsoFetch = (function () {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
             timestamp: "a long time",
-            handle: "000-handle"
+            handle: "000-handle",
+            chatId: 111
           }, {
             id: 6,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
@@ -36067,7 +36081,8 @@ var IsoFetch = (function () {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
             timestamp: "a long time",
-            handle: "000-handle"
+            handle: "000-handle",
+            chatId: 111
           }, {
             id: 7,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
@@ -36075,7 +36090,8 @@ var IsoFetch = (function () {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image1.png",
             timestamp: "a long time",
-            handle: "000-handle"
+            handle: "000-handle",
+            chatId: 111
           }];
 
           resolve([{
@@ -36085,7 +36101,8 @@ var IsoFetch = (function () {
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image1.png",
             timestamp: "a long time",
-            handle: "000-handle"
+            handle: "000-handle",
+            chatId: 111
           }].concat(pasCustom));
         }, 750);
       });
@@ -36120,6 +36137,13 @@ var IsoFetch = (function () {
               resolve({
                 id: 3,
                 name: "Global Dev chat",
+                messages: messages
+              });
+              break;
+            case 111:
+              resolve({
+                id: 111,
+                name: "Topic chat",
                 messages: messages
               });
               break;
@@ -36165,7 +36189,8 @@ var IsoFetch = (function () {
             imgPath: "",
             timestamp: "a long time",
             handle: handle,
-            content: "topicByHandle topicByHandle topicByHandle topicByHandle"
+            content: "topicByHandle topicByHandle topicByHandle topicByHandle",
+            chatId: 111
           });
         }, 250);
       });
@@ -36227,8 +36252,8 @@ function phidippides(routerState, flux) {
     var shouldHaveValue = _ref2.shouldHaveValue;
 
     if (shouldHaveValue === null) return true;
-
     var whatToCheck = flux._stores[store].state[data];
+    logMeOrNot('*** checkValue of ' + store + '.' + data + '=' + JSON.stringify(whatToCheck) + ' should be ' + JSON.stringify(shouldHaveValue));
     // Si shouldHaveValue est un object on vérifie que whatToCheck est identique
     if (shouldHaveValue instanceof Object) {
       for (var key in shouldHaveValue) {
@@ -36362,7 +36387,7 @@ function phidippides(routerState, flux) {
 
   // Complete toutes les taches
   function clearTasks(tasks) {
-    logMeOrNot('*** clearTasks ' + tasks);
+    logMeOrNot('*** clearTasks');
     failedTasks = [];
     return new Promise(function (resolve, reject) {
 
