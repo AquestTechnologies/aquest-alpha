@@ -8,9 +8,9 @@ export default class UniverseStore extends BaseStore {
     const universeActionIds = flux.getActionIds('universeActions');
     this.registerAsync(universeActionIds.loadUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadUniverseByName, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
-    this.registerAsync(universeActionIds.loadStartUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadAllUniverses, this.handleBeginAsyncRequest, this.handleLoadAllUniverses, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.newUniverse, this.handleBeginAsyncRequest, this.handleNewUniverse, this.handleErrorAsyncRequest);
+    this.register(universeActionIds.setUniverse, this.handleLoadUniverse);
     
     this.state = {}; // Reset le state, important (?)
     console.log('.S. UniverseStore initialized');

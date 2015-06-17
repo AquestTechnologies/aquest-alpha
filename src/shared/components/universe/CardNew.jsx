@@ -4,11 +4,8 @@ class CardNew extends React.Component {
   
   constructor() {
     super();
-    //utiliser router.replaceWith ???
-    this.handleClick = () => {
-      // console.log(Object.getOwnPropertyNames(this.context.router));
-      // this.context.router.transitionTo('newTopic', {universeName: this.context.router.getCurrentParams().universeName} );
-      this.context.router.transitionTo('newTopic', {universeName: this.props.universe.name} );
+    this.handleClick = () => { 
+      this.context.router.transitionTo('newTopic', {universeName: this.props.universeName});
     };
   }
   

@@ -43,7 +43,7 @@ const router = Router.create({
 // Render app
 let c = 1; //L'app a déjà été render par le server une fois
 router.run( (Handler, routerState) => {
-  if (routerState.pathname.slice(-1) === '/') {
+  if (routerState.pathname.slice(-1) === '/' && routerState.pathname !== '/') {
     router.replaceWith(routerState.pathname.slice(0,-1), null, routerState.query);
     return;
   }

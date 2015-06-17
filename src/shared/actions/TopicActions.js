@@ -15,9 +15,29 @@ export default class TopicActions extends BaseActions {
     });
   }
   
-  flushInventory() {
-    console.log('.A. TopicActions.flushInventory');
-    return true;
+  loadTopicByHandle(handle) {
+    console.log('.A. TopicActions.loadTopicByHandle');
+    let fetch = this.fetch;
+    return new Promise(function(resolve, reject) {
+      fetch.topicByHandle(handle).then(function(data) {
+        resolve(data);
+      });
+    });
+  }
+  
+  loadTopicContent(id) {
+    console.log('.A. TopicActions.loadTopicContent');
+    let fetch = this.fetch;
+    return new Promise(function(resolve, reject) {
+      fetch.topicContent(id).then(function(data) {
+        resolve(data);
+      });
+    });
+  }
+  
+  setTopic(topic) {
+    console.log('.A. TopicActions.setTopic');
+    return topic;
   }
 
 }

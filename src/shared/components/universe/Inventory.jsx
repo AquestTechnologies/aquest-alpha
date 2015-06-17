@@ -1,5 +1,4 @@
 import React from 'react';
-import Chat from './Chat.jsx';
 import Card from './Card.jsx';
 import CardNew from './CardNew.jsx';
 
@@ -41,7 +40,7 @@ class Inventory extends React.Component {
   }
   
   componentWillReceiveProps(nextProps) {
-    if (nextProps.universe.id === nextProps.inventory.universeId) this.setState({ inventory: this.props.inventory });
+    if (nextProps.universe.id === nextProps.inventory.universeId) this.setState({ inventory: nextProps.inventory });
   }
   
   render() {
@@ -62,12 +61,16 @@ class Inventory extends React.Component {
                   {this.state.nameVisible ? universe.name : universe.description}
               </div>
             </div>
+            
             <div className={inventoryListClassName} >
-              <CardNew universe={this.props.universe}/>
+              <CardNew universeName={this.props.universe.name}/>
               {topics.map( (topic) => {
-                // On peut surement passer tout ca avec un spreadattribute {...topic}
-                // Par contre topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu et votes detaillés)
-                return <Card key={topic.id} title={topic.title} author={topic.author} desc={topic.desc} imgPath={topic.imgPath} timestamp={topic.timestamp} />;
+                return <Card 
+                  key={topic.id} 
+                  universeName={this.props.universe.name}
+                  topic={topic} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
+                  setTopic = {this.props.actions.setTopic}
+                />;
               })}
             </div>
             

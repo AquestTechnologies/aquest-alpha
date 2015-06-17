@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 
-import Graph from './explore/Graph.jsx';
+import Node from './explore/Node.jsx';
 
 class Explore extends React.Component {
   
@@ -38,10 +38,22 @@ class Explore extends React.Component {
       fontSize: '2rem'
     };
     
+    let setUniverse = this.props.flux.getActions('universeActions').setUniverse;
+    
     return (
       <div style={divStyle}>
         {this.setBackLink()}
-        <Graph universes={this.props.universes} currentUniverse={this.props.universe} />
+        {this.props.universes.map( (universe) => {
+          return (
+            <Node 
+              key={universe.id} 
+              universe={universe} 
+              currentUniverse={this.props.currentUniverse} 
+              setUniverse={setUniverse} 
+              style={divStyle}
+            />
+          );
+        })}
       </div>
     );
   }

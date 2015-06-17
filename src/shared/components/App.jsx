@@ -12,12 +12,13 @@ class App extends React.Component {
       connectToStores={{
         universeStore: store => ({
           universeIsLoading: store.isLoading(),
-          universe: store.getUniverse(),
-          universes: store.getAllUniverses()
+          universes: store.getAllUniverses(),
+          universe: store.getUniverse()
         }),
         topicStore: store => ({
           topicIsLoading: store.isLoading(),
-          inventory: store.getInventory()
+          inventory: store.getInventory(),
+          topic: store.getTopic()
         }),
         chatStore: store => ({
           chatIsLoading: store.isLoading(),

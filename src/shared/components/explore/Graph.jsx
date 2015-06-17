@@ -17,7 +17,7 @@ class Graph extends React.Component {
                 key={universe.id} 
                 universe={universe} 
                 currentUniverse={this.props.currentUniverse} 
-                actions={this.props.actions} 
+                setTopic={this.props.setTopic} 
                 style={divStyle}
               />
             );

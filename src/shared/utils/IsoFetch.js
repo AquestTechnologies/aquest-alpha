@@ -176,7 +176,8 @@ export default class IsoFetch {
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
-            timestamp:"a long time"
+            timestamp:"a long time",
+            handle: '000-handle'
           },
           {
             id: 3,
@@ -184,7 +185,8 @@ export default class IsoFetch {
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
-            timestamp:"a long time"
+            timestamp:"a long time",
+            handle: '000-handle'
           },
           {
             id: 4,
@@ -192,7 +194,8 @@ export default class IsoFetch {
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image2.png",
-            timestamp:"a long time"
+            timestamp:"a long time",
+            handle: '000-handle'
           },
           {
             id: 5,
@@ -200,7 +203,8 @@ export default class IsoFetch {
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
-            timestamp:"a long time"
+            timestamp:"a long time",
+            handle: '000-handle'
           },
           {
             id: 6,
@@ -208,7 +212,8 @@ export default class IsoFetch {
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
-            timestamp:"a long time"
+            timestamp:"a long time",
+            handle: '000-handle'
           },
           {
             id: 7,
@@ -216,7 +221,8 @@ export default class IsoFetch {
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image1.png",
-            timestamp:"a long time"
+            timestamp:"a long time",
+            handle: '000-handle'
           }];
           
         resolve([
@@ -226,7 +232,8 @@ export default class IsoFetch {
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image1.png",
-            timestamp:"a long time"
+            timestamp:"a long time",
+            handle: '000-handle'
           },
         ].concat(pasCustom));
       }, 750);
@@ -272,6 +279,43 @@ export default class IsoFetch {
           });
         }
       }, 750);
+    });
+  }
+  
+  topicContent(id) {
+    console.log('+++ Fetching topicContent ' + id);
+    // returning a Promise because that is what fetch does.
+    return new Promise(function (resolve, reject) {
+      // simulate an asynchronous action where data is fetched on
+      // a remote server somewhere.
+      setTimeout(function () {
+        // resolve with some mock data
+        resolve('Content for topic ' + id);
+      }, 1000);
+    });
+  }
+  
+  topicByHandle(handle) {
+    console.log('+++ Fetching topicByHandle ' + handle);
+    // returning a Promise because that is what fetch does.
+    return new Promise(function (resolve, reject) {
+      // simulate an asynchronous action where data is fetched on
+      // a remote server somewhere.
+      setTimeout(function () {
+        // resolve with some mock data
+        resolve(
+          {
+            id: 111,
+            title: "topicByHandle ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
+            author: "Cicero",
+            desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+            imgPath: "",
+            timestamp:"a long time",
+            handle: handle,
+            content: "topicByHandle topicByHandle topicByHandle topicByHandle"
+          }
+        );
+      }, 250);
     });
   }
   

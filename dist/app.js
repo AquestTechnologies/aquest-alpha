@@ -33544,7 +33544,7 @@ var router = _reactRouter2['default'].create({
 // Render app
 var c = 1; //L'app a déjà été render par le server une fois
 router.run(function (Handler, routerState) {
-  if (routerState.pathname.slice(-1) === '/') {
+  if (routerState.pathname.slice(-1) === '/' && routerState.pathname !== '/') {
     router.replaceWith(routerState.pathname.slice(0, -1), null, routerState.query);
     return;
   }
@@ -33566,7 +33566,7 @@ router.run(function (Handler, routerState) {
   });
 });
 
-},{"../shared/flux.js":298,"../shared/routes.jsx":299,"../shared/utils/phidippides.js":306,"react":225,"react-router":38,"socket.io-client":226}],277:[function(require,module,exports){
+},{"../shared/flux.js":297,"../shared/routes.jsx":298,"../shared/utils/phidippides.js":305,"react":225,"react-router":38,"socket.io-client":226}],277:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -33625,7 +33625,7 @@ var ChatActions = (function (_BaseActions) {
 exports['default'] = ChatActions;
 module.exports = exports['default'];
 
-},{"../utils/BaseActions.js":303}],278:[function(require,module,exports){
+},{"../utils/BaseActions.js":302}],278:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -33671,10 +33671,32 @@ var TopicActions = (function (_BaseActions) {
       });
     }
   }, {
-    key: 'flushInventory',
-    value: function flushInventory() {
-      console.log('.A. TopicActions.flushInventory');
-      return true;
+    key: 'loadTopicByHandle',
+    value: function loadTopicByHandle(handle) {
+      console.log('.A. TopicActions.loadTopicByHandle');
+      var fetch = this.fetch;
+      return new Promise(function (resolve, reject) {
+        fetch.topicByHandle(handle).then(function (data) {
+          resolve(data);
+        });
+      });
+    }
+  }, {
+    key: 'loadTopicContent',
+    value: function loadTopicContent(id) {
+      console.log('.A. TopicActions.loadTopicContent');
+      var fetch = this.fetch;
+      return new Promise(function (resolve, reject) {
+        fetch.topicContent(id).then(function (data) {
+          resolve(data);
+        });
+      });
+    }
+  }, {
+    key: 'setTopic',
+    value: function setTopic(topic) {
+      console.log('.A. TopicActions.setTopic');
+      return topic;
     }
   }]);
 
@@ -33684,7 +33706,7 @@ var TopicActions = (function (_BaseActions) {
 exports['default'] = TopicActions;
 module.exports = exports['default'];
 
-},{"../utils/BaseActions.js":303}],279:[function(require,module,exports){
+},{"../utils/BaseActions.js":302}],279:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -33720,6 +33742,9 @@ var UniverseActions = (function (_BaseActions) {
     // Pour info doc Flummox :
     // [Dans une action] The return value is then sent through the dispatcher automatically. (If you return undefined, Flummox skips the dispatch step.)
 
+    // --------------
+    // Loaders, async
+    // --------------
     value: function loadUniverse(universeId) {
       console.log('.A. UniverseActions.loadUniverse ' + universeId);
       var fetch = this.fetch;
@@ -33741,17 +33766,6 @@ var UniverseActions = (function (_BaseActions) {
       });
     }
   }, {
-    key: 'loadStartUniverse',
-    value: function loadStartUniverse(userId) {
-      console.log('.A. UniverseActions.LoadStartUniverse ' + userId);
-      var fetch = this.fetch;
-      return new Promise(function (resolve, reject) {
-        fetch.startUniverse().then(function (data) {
-          resolve(data);
-        });
-      });
-    }
-  }, {
     key: 'loadAllUniverses',
     value: function loadAllUniverses() {
       console.log('.A. UniverseActions.loadAllUniverses');
@@ -33764,9 +33778,22 @@ var UniverseActions = (function (_BaseActions) {
     }
   }, {
     key: 'newUniverse',
-    value: function newUniverse(newUniverseName, newUniverseDescription) {
+    value: function newUniverse(universe) {
       console.log('.A. UniverseActions.newUniverse');
-      return true;
+      return new Promise(function (resolve, reject) {
+        resolve();
+      });
+    }
+  }, {
+    key: 'setUniverse',
+
+    // --------------
+    // Setters, sync
+    // --------------
+
+    value: function setUniverse(universe) {
+      console.log('.A. UniverseActions.setUniverse');
+      return universe;
     }
   }]);
 
@@ -33776,7 +33803,7 @@ var UniverseActions = (function (_BaseActions) {
 exports['default'] = UniverseActions;
 module.exports = exports['default'];
 
-},{"../utils/BaseActions.js":303}],280:[function(require,module,exports){
+},{"../utils/BaseActions.js":302}],280:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -33829,14 +33856,15 @@ var App = (function (_React$Component) {
             universeStore: function universeStore(store) {
               return {
                 universeIsLoading: store.isLoading(),
-                universe: store.getUniverse(),
-                universes: store.getAllUniverses()
+                universes: store.getAllUniverses(),
+                universe: store.getUniverse()
               };
             },
             topicStore: function topicStore(store) {
               return {
                 topicIsLoading: store.isLoading(),
-                inventory: store.getInventory()
+                inventory: store.getInventory(),
+                topic: store.getTopic()
               };
             },
             chatStore: function chatStore(store) {
@@ -33879,9 +33907,9 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactRouter = require('react-router');
 
-var _exploreGraphJsx = require('./explore/Graph.jsx');
+var _exploreNodeJsx = require('./explore/Node.jsx');
 
-var _exploreGraphJsx2 = _interopRequireDefault(_exploreGraphJsx);
+var _exploreNodeJsx2 = _interopRequireDefault(_exploreNodeJsx);
 
 var Explore = (function (_React$Component) {
   function Explore() {
@@ -33914,6 +33942,8 @@ var Explore = (function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
+      var _this = this;
+
       // CSS temporaire
       var divStyle = {
         width: '60%',
@@ -33921,11 +33951,21 @@ var Explore = (function (_React$Component) {
         fontSize: '2rem'
       };
 
+      var setUniverse = this.props.flux.getActions('universeActions').setUniverse;
+
       return _react2['default'].createElement(
         'div',
         { style: divStyle },
         this.setBackLink(),
-        _react2['default'].createElement(_exploreGraphJsx2['default'], { universes: this.props.universes, currentUniverse: this.props.universe })
+        this.props.universes.map(function (universe) {
+          return _react2['default'].createElement(_exploreNodeJsx2['default'], {
+            key: universe.id,
+            universe: universe,
+            currentUniverse: _this.props.currentUniverse,
+            setUniverse: setUniverse,
+            style: divStyle
+          });
+        })
       );
     }
   }], [{
@@ -33954,7 +33994,7 @@ var Explore = (function (_React$Component) {
 exports['default'] = Explore;
 module.exports = exports['default'];
 
-},{"./explore/Graph.jsx":286,"react":225,"react-router":38}],282:[function(require,module,exports){
+},{"./explore/Node.jsx":286,"react":225,"react-router":38}],282:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34053,6 +34093,8 @@ var Universe = (function (_React$Component) {
 
       var actions = {
         loadInventory: topicActions.loadInventory,
+        setTopic: topicActions.setTopic,
+        loadTopicContent: topicActions.loadTopicContent,
         loadChat: chatActions.loadChat
       };
 
@@ -34063,7 +34105,7 @@ var Universe = (function (_React$Component) {
         _react2['default'].createElement(_reactRouter.RouteHandler, {
           universe: this.props.universe,
           inventory: this.props.inventory,
-          chat: this.props.chat,
+          topic: this.props.topic,
           actions: actions
         }),
         _react2['default'].createElement(_universeChatJsx2['default'], {
@@ -34121,7 +34163,7 @@ Universe.defaultProps = {
 exports['default'] = Universe;
 module.exports = exports['default'];
 
-},{"./universe/Chat.jsx":290,"./universe/Inventory.jsx":293,"./universe/Menu.jsx":294,"react":225,"react-router":38}],284:[function(require,module,exports){
+},{"./universe/Chat.jsx":289,"./universe/Inventory.jsx":292,"./universe/Menu.jsx":293,"react":225,"react-router":38}],284:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34315,73 +34357,6 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _NodeJsx = require('./Node.jsx');
-
-var _NodeJsx2 = _interopRequireDefault(_NodeJsx);
-
-var Graph = (function (_React$Component) {
-  function Graph() {
-    _classCallCheck(this, Graph);
-
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
-  }
-
-  _inherits(Graph, _React$Component);
-
-  _createClass(Graph, [{
-    key: 'render',
-    value: function render() {
-      var _this = this;
-
-      var divStyle = {
-        marginBottom: '1rem'
-      };
-
-      return _react2['default'].createElement(
-        'div',
-        null,
-        this.props.universes.map(function (universe) {
-          return _react2['default'].createElement(_NodeJsx2['default'], {
-            key: universe.id,
-            universe: universe,
-            currentUniverse: _this.props.currentUniverse,
-            actions: _this.props.actions,
-            style: divStyle
-          });
-        })
-      );
-    }
-  }]);
-
-  return Graph;
-})(_react2['default'].Component);
-
-Graph.defaultProps = {};
-
-exports['default'] = Graph;
-module.exports = exports['default'];
-
-},{"./Node.jsx":287,"react":225}],287:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -34404,6 +34379,7 @@ var Node = (function (_React$Component) {
 
     this.handleSelectUniverse = function (universe) {
       console.log('-c- Node.handleSelectUniverse ' + universe.name);
+      _this.props.setUniverse(universe);
       _this.context.router.transitionTo('universe', { universeName: universe.name });
     };
   }
@@ -34441,72 +34417,73 @@ Node.contextTypes = {
 exports['default'] = Node;
 module.exports = exports['default'];
 
-},{"react":225}],288:[function(require,module,exports){
-"use strict";
+},{"react":225}],287:[function(require,module,exports){
+'use strict';
 
-Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, '__esModule', {
   value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-var _react = require("react");
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
 var Card = (function (_React$Component) {
   function Card() {
+    var _this = this;
+
     _classCallCheck(this, Card);
 
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(Card.prototype), 'constructor', this).call(this);
+    this.handleClick = function () {
+      _this.props.setTopic(_this.props.topic);
+      _this.context.router.transitionTo('topic', { universeName: _this.props.universeName, topicHandle: _this.props.topic.handle });
+    };
   }
 
   _inherits(Card, _React$Component);
 
   _createClass(Card, [{
-    key: "setPreview",
+    key: 'setPreview',
     value: function setPreview() {
-      var imgPath = this.props.imgPath;
-      var desc = this.props.desc;
-
-      if (imgPath.length > 0) return _react2["default"].createElement("img", { src: imgPath, className: "card_image" });
-
-      return _react2["default"].createElement(
-        "div",
-        { className: "card_description" },
-        desc
+      if (this.props.topic.imgPath.length > 0) return _react2['default'].createElement('img', { src: this.props.topic.imgPath, className: 'card_image' });
+      return _react2['default'].createElement(
+        'div',
+        { className: 'card_description' },
+        this.props.topic.desc
       );
     }
   }, {
-    key: "setFooter",
+    key: 'setFooter',
     value: function setFooter() {
-      var imgPath = this.props.imgPath;
-      if (imgPath.length == 0) return _react2["default"].createElement("div", { className: "card_description_footer" });
-      // Pas de return c'est grave?
+      if (this.props.topic.imgPath.length == 0) return _react2['default'].createElement('div', { className: 'card_description_footer' });
     }
   }, {
-    key: "render",
+    key: 'render',
     value: function render() {
-      return _react2["default"].createElement(
-        "div",
-        { className: "card" },
-        _react2["default"].createElement(
-          "div",
-          { className: "card_title" },
-          this.props.title
+      var topic = this.props.topic;
+      return _react2['default'].createElement(
+        'div',
+        { className: 'card', onClick: this.handleClick },
+        _react2['default'].createElement(
+          'div',
+          { className: 'card_title' },
+          topic.title
         ),
-        _react2["default"].createElement(
-          "div",
-          { className: "card_author" },
-          "By " + this.props.author + ", " + this.props.timestamp + " ago."
+        _react2['default'].createElement(
+          'div',
+          { className: 'card_author' },
+          'By ' + topic.author + ', ' + topic.timestamp + ' ago.'
         ),
         this.setPreview(),
         this.setFooter()
@@ -34515,20 +34492,32 @@ var Card = (function (_React$Component) {
   }]);
 
   return Card;
-})(_react2["default"].Component);
+})(_react2['default'].Component);
 
 Card.defaultProps = {
-  title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
-  author: "Cicero",
-  desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
-  imgPath: "",
-  timestamp: "a long time"
+  topic: {
+    title: 'Default ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab',
+    author: 'Cicero',
+    desc: 'Default, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I\'m in a transitional period so I don\'t wanna kill you, I wanna help you. But I can\'t give you this case, it don\'t belong to me. Besides, I\'ve already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show\'s called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they\'re going to make more shows. Some pilots get picked and become television programs. Some don\'t, become nothing. She starred in one of the ones that became nothing.',
+    imgPath: '',
+    timestamp: 'a long time',
+    handle: '111-default'
+  },
+  universeName: 'Default',
+  setTopic: function setTopic() {
+    console.log('default setTopic');
+  }
 };
 
-exports["default"] = Card;
-module.exports = exports["default"];
+// Permet d'acceder a this.context.router
+Card.contextTypes = {
+  router: _react2['default'].PropTypes.func.isRequired
+};
 
-},{"react":225}],289:[function(require,module,exports){
+exports['default'] = Card;
+module.exports = exports['default'];
+
+},{"react":225}],288:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -34556,11 +34545,8 @@ var CardNew = (function (_React$Component) {
     _classCallCheck(this, CardNew);
 
     _get(Object.getPrototypeOf(CardNew.prototype), 'constructor', this).call(this);
-    //utiliser router.replaceWith ???
     this.handleClick = function () {
-      // console.log(Object.getOwnPropertyNames(this.context.router));
-      // this.context.router.transitionTo('newTopic', {universeName: this.context.router.getCurrentParams().universeName} );
-      _this.context.router.transitionTo('newTopic', { universeName: _this.props.universe.name });
+      _this.context.router.transitionTo('newTopic', { universeName: _this.props.universeName });
     };
   }
 
@@ -34624,7 +34610,7 @@ CardNew.contextTypes = {
 exports['default'] = CardNew;
 module.exports = exports['default'];
 
-},{"react":225}],290:[function(require,module,exports){
+},{"react":225}],289:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -34742,7 +34728,7 @@ Chat.defaultProps = {
 exports['default'] = Chat;
 module.exports = exports['default'];
 
-},{"./ChatFooter.jsx":291,"./ChatHeader.jsx":292,"./Message.jsx":295,"react":225}],291:[function(require,module,exports){
+},{"./ChatFooter.jsx":290,"./ChatHeader.jsx":291,"./Message.jsx":294,"react":225}],290:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -34796,7 +34782,7 @@ var ChatFooter = (function (_React$Component) {
 exports['default'] = ChatFooter;
 module.exports = exports['default'];
 
-},{"react":225}],292:[function(require,module,exports){
+},{"react":225}],291:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -34861,7 +34847,7 @@ var ChatHeader = (function (_React$Component) {
 exports['default'] = ChatHeader;
 module.exports = exports['default'];
 
-},{"../common/Icon.jsx":284,"react":225}],293:[function(require,module,exports){
+},{"../common/Icon.jsx":284,"react":225}],292:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -34881,10 +34867,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== 'function' 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
-
-var _ChatJsx = require('./Chat.jsx');
-
-var _ChatJsx2 = _interopRequireDefault(_ChatJsx);
 
 var _CardJsx = require('./Card.jsx');
 
@@ -34924,11 +34906,13 @@ var Inventory = (function (_React$Component) {
   }, {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(nextProps) {
-      if (nextProps.universe.id === nextProps.inventory.universeId) this.setState({ inventory: this.props.inventory });
+      if (nextProps.universe.id === nextProps.inventory.universeId) this.setState({ inventory: nextProps.inventory });
     }
   }, {
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
       var universe = this.props.universe;
       var inventory = this.state.inventory;
       var topics = inventory.topics || [];
@@ -34959,9 +34943,14 @@ var Inventory = (function (_React$Component) {
             _react2['default'].createElement(
               'div',
               { className: inventoryListClassName },
-              _react2['default'].createElement(_CardNewJsx2['default'], { universe: this.props.universe }),
+              _react2['default'].createElement(_CardNewJsx2['default'], { universeName: this.props.universe.name }),
               topics.map(function (topic) {
-                return _react2['default'].createElement(_CardJsx2['default'], { key: topic.id, title: topic.title, author: topic.author, desc: topic.desc, imgPath: topic.imgPath, timestamp: topic.timestamp });
+                return _react2['default'].createElement(_CardJsx2['default'], {
+                  key: topic.id,
+                  universeName: _this2.props.universe.name,
+                  topic: topic,
+                  setTopic: _this2.props.actions.setTopic
+                });
               })
             )
           )
@@ -35003,11 +34992,9 @@ Inventory.defaultProps = {
 
 exports['default'] = Inventory;
 module.exports = exports['default'];
+// topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
 
-// On peut surement passer tout ca avec un spreadattribute {...topic}
-// Par contre topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu et votes detaillés)
-
-},{"./Card.jsx":288,"./CardNew.jsx":289,"./Chat.jsx":290,"react":225}],294:[function(require,module,exports){
+},{"./Card.jsx":287,"./CardNew.jsx":288,"react":225}],293:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35101,7 +35088,7 @@ var Menu = (function (_React$Component) {
 exports['default'] = Menu;
 module.exports = exports['default'];
 
-},{"../common/Icon.jsx":284,"react":225,"react-router":38}],295:[function(require,module,exports){
+},{"../common/Icon.jsx":284,"react":225,"react-router":38}],294:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35171,7 +35158,134 @@ Message.defaultProps = {
 exports['default'] = Message;
 module.exports = exports['default'];
 
-},{"../common/Icon.jsx":284,"react":225}],296:[function(require,module,exports){
+},{"../common/Icon.jsx":284,"react":225}],295:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var Topic = (function (_React$Component) {
+  function Topic() {
+    _classCallCheck(this, Topic);
+
+    _get(Object.getPrototypeOf(Topic.prototype), 'constructor', this).call(this);
+    this.state = { topic: {} };
+  }
+
+  _inherits(Topic, _React$Component);
+
+  _createClass(Topic, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      if (!this.props.topic.content) this.props.actions.loadTopicContent(this.props.topic.handle);
+      this.setState({ topic: this.props.topic });
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      this.setState({ topic: nextProps.topic });
+    }
+  }, {
+    key: 'render',
+
+    // ALERTE GROS BUG !!
+    // faire : startups > topic > bouton back > autre topic puis 2 fois history back !!!!
+    // Normalement c'est la merde
+    value: function render() {
+      var topic = this.state.topic;
+
+      return _react2['default'].createElement(
+        'div',
+        { className: 'universe_left', style: { backgroundImage: 'url(' + this.props.universe.picturePath + ')' } },
+        _react2['default'].createElement(
+          'div',
+          { className: 'universe_left_scrollable' },
+          _react2['default'].createElement(
+            'div',
+            { className: 'universe_left_scrolled' },
+            _react2['default'].createElement(
+              'div',
+              { className: 'topic' },
+              _react2['default'].createElement(
+                'div',
+                { className: 'topic_title' },
+                topic.title
+              ),
+              _react2['default'].createElement(
+                'div',
+                { className: 'topic_author' },
+                topic.author
+              ),
+              _react2['default'].createElement(
+                'div',
+                { className: 'topic_content' },
+                topic.content
+              )
+            )
+          )
+        )
+      );
+    }
+  }], [{
+    key: 'runPhidippides',
+
+    // Load les données initiales
+    value: function runPhidippides(routerState) {
+      if (routerState.c === 1) return [{
+        taskName: 'topic',
+        dependency: null,
+        shouldBePresent: {
+          store: 'topicStore',
+          data: 'topic',
+          shouldHaveValue: null
+        },
+        ifNot: {
+          actions: 'topicActions',
+          creator: 'loadTopicByHandle',
+          args: [routerState.params.topicHandle]
+        }
+      }];
+    }
+  }]);
+
+  return Topic;
+})(_react2['default'].Component);
+
+Topic.defaultProps = {
+  universe: {},
+  topic: {
+    title: 'A default title is better than no title!',
+    author: 'Someone',
+    timestamp: '0',
+    content: 'Hello world',
+    handle: '000-A default'
+  }
+};
+
+// Permet d'acceder a this.context.router
+Topic.contextTypes = {
+  router: _react2['default'].PropTypes.func.isRequired
+};
+
+exports['default'] = Topic;
+module.exports = exports['default'];
+
+},{"react":225}],296:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35190,22 +35304,18 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _ChatJsx = require('./Chat.jsx');
-
-var _ChatJsx2 = _interopRequireDefault(_ChatJsx);
-
-var NewTopic = (function (_React$Component) {
-  function NewTopic() {
-    _classCallCheck(this, NewTopic);
+var TopicNew = (function (_React$Component) {
+  function TopicNew() {
+    _classCallCheck(this, TopicNew);
 
     if (_React$Component != null) {
       _React$Component.apply(this, arguments);
     }
   }
 
-  _inherits(NewTopic, _React$Component);
+  _inherits(TopicNew, _React$Component);
 
-  _createClass(NewTopic, [{
+  _createClass(TopicNew, [{
     key: 'render',
     value: function render() {
       return _react2['default'].createElement(
@@ -35219,73 +35329,19 @@ var NewTopic = (function (_React$Component) {
             { className: 'universe_left_scrolled' },
             _react2['default'].createElement(
               'div',
-              { className: '' },
-              'yo'
-            )
-          )
-        )
-      );
-    }
-  }]);
-
-  return NewTopic;
-})(_react2['default'].Component);
-
-NewTopic.defaultProps = {};
-
-exports['default'] = NewTopic;
-module.exports = exports['default'];
-
-},{"./Chat.jsx":290,"react":225}],297:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _ChatJsx = require('./Chat.jsx');
-
-var _ChatJsx2 = _interopRequireDefault(_ChatJsx);
-
-var Topic = (function (_React$Component) {
-  function Topic() {
-    _classCallCheck(this, Topic);
-
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
-  }
-
-  _inherits(Topic, _React$Component);
-
-  _createClass(Topic, [{
-    key: 'render',
-    value: function render() {
-      return _react2['default'].createElement(
-        'div',
-        { className: 'universe_left' },
-        _react2['default'].createElement(
-          'div',
-          { className: 'universe_left_scrollable' },
-          _react2['default'].createElement(
-            'div',
-            { className: 'universe_left_scrolled' },
+              { className: 'topicNew_header' },
+              'New topic in ',
+              this.props.universe.name
+            ),
             _react2['default'].createElement(
               'div',
-              { className: 'topic' },
-              'yo'
+              { className: 'topicNew_rules' },
+              'yo, please don\'t be evil'
+            ),
+            _react2['default'].createElement(
+              'div',
+              { className: 'topicNew' },
+              'sup?'
             )
           )
         )
@@ -35293,18 +35349,13 @@ var Topic = (function (_React$Component) {
     }
   }]);
 
-  return Topic;
+  return TopicNew;
 })(_react2['default'].Component);
 
-Topic.defaultProps = {
-  universe: {},
-  topic: {}
-};
-
-exports['default'] = Topic;
+exports['default'] = TopicNew;
 module.exports = exports['default'];
 
-},{"./Chat.jsx":290,"react":225}],298:[function(require,module,exports){
+},{"react":225}],297:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35375,7 +35426,7 @@ var Flux = (function (_Flummox) {
 exports['default'] = Flux;
 module.exports = exports['default'];
 
-},{"./actions/ChatActions.js":277,"./actions/TopicActions.js":278,"./actions/UniverseActions.js":279,"./stores/ChatStore.js":300,"./stores/TopicStore.js":301,"./stores/UniverseStore.js":302,"flummox":4}],299:[function(require,module,exports){
+},{"./actions/ChatActions.js":277,"./actions/TopicActions.js":278,"./actions/UniverseActions.js":279,"./stores/ChatStore.js":299,"./stores/TopicStore.js":300,"./stores/UniverseStore.js":301,"flummox":4}],298:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35406,9 +35457,9 @@ var _componentsUniverseTopicJsx = require('./components/universe/Topic.jsx');
 
 var _componentsUniverseTopicJsx2 = _interopRequireDefault(_componentsUniverseTopicJsx);
 
-var _componentsUniverseNewTopicJsx = require('./components/universe/NewTopic.jsx');
+var _componentsUniverseTopicNewJsx = require('./components/universe/TopicNew.jsx');
 
-var _componentsUniverseNewTopicJsx2 = _interopRequireDefault(_componentsUniverseNewTopicJsx);
+var _componentsUniverseTopicNewJsx2 = _interopRequireDefault(_componentsUniverseTopicNewJsx);
 
 var _componentsExploreJsx = require('./components/Explore.jsx');
 
@@ -35430,8 +35481,8 @@ var routes = _react2['default'].createElement(
     _reactRouter.Route,
     { name: 'universe', path: '/_:universeName', handler: _componentsUniverseJsx2['default'] },
     _react2['default'].createElement(_reactRouter.DefaultRoute, { handler: _componentsUniverseInventoryJsx2['default'] }),
-    _react2['default'].createElement(_reactRouter.Route, { name: 'topic', path: ':topicHandle', handler: _componentsUniverseTopicJsx2['default'] }),
-    _react2['default'].createElement(_reactRouter.Route, { name: 'newTopic', path: 'new', handler: _componentsUniverseNewTopicJsx2['default'] })
+    _react2['default'].createElement(_reactRouter.Route, { name: 'newTopic', path: 'new', handler: _componentsUniverseTopicNewJsx2['default'] }),
+    _react2['default'].createElement(_reactRouter.Route, { name: 'topic', path: ':topicHandle', handler: _componentsUniverseTopicJsx2['default'] })
   ),
   _react2['default'].createElement(_reactRouter.Route, { name: 'explore', path: '/Explore', handler: _componentsExploreJsx2['default'] }),
   _react2['default'].createElement(_reactRouter.NotFoundRoute, { handler: _componentsNotFoundJsx2['default'] })
@@ -35440,7 +35491,7 @@ var routes = _react2['default'].createElement(
 exports['default'] = routes;
 module.exports = exports['default'];
 
-},{"./components/App.jsx":280,"./components/Explore.jsx":281,"./components/NotFound.jsx":282,"./components/Universe.jsx":283,"./components/universe/Inventory.jsx":293,"./components/universe/NewTopic.jsx":296,"./components/universe/Topic.jsx":297,"react":225,"react-router":38}],300:[function(require,module,exports){
+},{"./components/App.jsx":280,"./components/Explore.jsx":281,"./components/NotFound.jsx":282,"./components/Universe.jsx":283,"./components/universe/Inventory.jsx":292,"./components/universe/Topic.jsx":295,"./components/universe/TopicNew.jsx":296,"react":225,"react-router":38}],299:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35517,7 +35568,7 @@ var ChatStore = (function (_BaseStore) {
 exports['default'] = ChatStore;
 module.exports = exports['default'];
 
-},{"../utils/BaseStore.js":304}],301:[function(require,module,exports){
+},{"../utils/BaseStore.js":303}],300:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35546,7 +35597,9 @@ var TopicStore = (function (_BaseStore) {
 
     var topicActionIds = flux.getActionIds('topicActions');
     this.registerAsync(topicActionIds.loadInventory, this.handleBeginAsyncRequest, this.handleLoadInventory, this.handleErrorAsyncRequest);
-    this.register(topicActionIds.flushInventory, this.handleFlushInventory);
+    this.registerAsync(topicActionIds.loadTopicContent, this.handleBeginAsyncRequest, this.handleLoadTopicContent, this.handleErrorAsyncRequest);
+    this.registerAsync(topicActionIds.loadTopicByHandle, this.handleBeginAsyncRequest, this.handleLoadTopic, this.handleErrorAsyncRequest);
+    this.register(topicActionIds.setTopic, this.handleLoadTopic);
 
     this.state = {}; // Reset le state, important (?)
     console.log('.S. TopicStore initialized');
@@ -35564,6 +35617,12 @@ var TopicStore = (function (_BaseStore) {
       return this.state.inventory;
     }
   }, {
+    key: 'getTopic',
+    value: function getTopic() {
+      // console.log('.S. TopicStore.getTopics');
+      return this.state.topic;
+    }
+  }, {
     key: 'handleLoadInventory',
 
     // Les handlers correspondent au traitement du state après avoir executé une action
@@ -35575,13 +35634,23 @@ var TopicStore = (function (_BaseStore) {
       });
     }
   }, {
-    key: 'handleFlushInventory',
-    value: function handleFlushInventory() {
-      console.log('.S. TopicStore.handleFlushInventory');
-      var inventory = this.state.inventory;
-      inventory.topics = [];
+    key: 'handleLoadTopic',
+    value: function handleLoadTopic(topic) {
+      console.log('.S. TopicStore.handleLoadTopic');
       this.setState({
-        inventory: inventory
+        topic: topic,
+        isLoading: false
+      });
+    }
+  }, {
+    key: 'handleLoadTopicContent',
+    value: function handleLoadTopicContent(content) {
+      console.log('.S. TopicStore.handleLoadTopicContent');
+      var topic = this.state.topic;
+      topic.content = content;
+      this.setState({
+        topic: topic,
+        isLoading: false
       });
     }
   }]);
@@ -35592,7 +35661,7 @@ var TopicStore = (function (_BaseStore) {
 exports['default'] = TopicStore;
 module.exports = exports['default'];
 
-},{"../utils/BaseStore.js":304}],302:[function(require,module,exports){
+},{"../utils/BaseStore.js":303}],301:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35622,9 +35691,9 @@ var UniverseStore = (function (_BaseStore) {
     var universeActionIds = flux.getActionIds('universeActions');
     this.registerAsync(universeActionIds.loadUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadUniverseByName, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
-    this.registerAsync(universeActionIds.loadStartUniverse, this.handleBeginAsyncRequest, this.handleLoadUniverse, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.loadAllUniverses, this.handleBeginAsyncRequest, this.handleLoadAllUniverses, this.handleErrorAsyncRequest);
     this.registerAsync(universeActionIds.newUniverse, this.handleBeginAsyncRequest, this.handleNewUniverse, this.handleErrorAsyncRequest);
+    this.register(universeActionIds.setUniverse, this.handleLoadUniverse);
 
     this.state = {}; // Reset le state, important (?)
     console.log('.S. UniverseStore initialized');
@@ -35683,7 +35752,7 @@ var UniverseStore = (function (_BaseStore) {
 exports['default'] = UniverseStore;
 module.exports = exports['default'];
 
-},{"../utils/BaseStore.js":304}],303:[function(require,module,exports){
+},{"../utils/BaseStore.js":303}],302:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35720,7 +35789,7 @@ var BaseActions = (function (_Actions) {
 exports['default'] = BaseActions;
 module.exports = exports['default'];
 
-},{"../utils/IsoFetch.js":305,"flummox":4}],304:[function(require,module,exports){
+},{"../utils/IsoFetch.js":304,"flummox":4}],303:[function(require,module,exports){
 //copié depuis https://github.com/vesparny/flux-immutable-example/blob/master/src/utils/BaseStore.js
 
 'use strict';
@@ -35773,7 +35842,7 @@ var BaseStore = (function (_Store) {
 exports['default'] = BaseStore;
 module.exports = exports['default'];
 
-},{"flummox":4}],305:[function(require,module,exports){
+},{"flummox":4}],304:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35965,42 +36034,48 @@ var IsoFetch = (function () {
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
-            timestamp: "a long time"
+            timestamp: "a long time",
+            handle: "000-handle"
           }, {
             id: 3,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
-            timestamp: "a long time"
+            timestamp: "a long time",
+            handle: "000-handle"
           }, {
             id: 4,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image2.png",
-            timestamp: "a long time"
+            timestamp: "a long time",
+            handle: "000-handle"
           }, {
             id: 5,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
-            timestamp: "a long time"
+            timestamp: "a long time",
+            handle: "000-handle"
           }, {
             id: 6,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "",
-            timestamp: "a long time"
+            timestamp: "a long time",
+            handle: "000-handle"
           }, {
             id: 7,
             title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image1.png",
-            timestamp: "a long time"
+            timestamp: "a long time",
+            handle: "000-handle"
           }];
 
           resolve([{
@@ -36009,7 +36084,8 @@ var IsoFetch = (function () {
             author: "Cicero",
             desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
             imgPath: "http://130.211.68.244:8080/img/image1.png",
-            timestamp: "a long time"
+            timestamp: "a long time",
+            handle: "000-handle"
           }].concat(pasCustom));
         }, 750);
       });
@@ -36057,6 +36133,43 @@ var IsoFetch = (function () {
         }, 750);
       });
     }
+  }, {
+    key: "topicContent",
+    value: function topicContent(id) {
+      console.log("+++ Fetching topicContent " + id);
+      // returning a Promise because that is what fetch does.
+      return new Promise(function (resolve, reject) {
+        // simulate an asynchronous action where data is fetched on
+        // a remote server somewhere.
+        setTimeout(function () {
+          // resolve with some mock data
+          resolve("Content for topic " + id);
+        }, 1000);
+      });
+    }
+  }, {
+    key: "topicByHandle",
+    value: function topicByHandle(handle) {
+      console.log("+++ Fetching topicByHandle " + handle);
+      // returning a Promise because that is what fetch does.
+      return new Promise(function (resolve, reject) {
+        // simulate an asynchronous action where data is fetched on
+        // a remote server somewhere.
+        setTimeout(function () {
+          // resolve with some mock data
+          resolve({
+            id: 111,
+            title: "topicByHandle ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
+            author: "Cicero",
+            desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+            imgPath: "",
+            timestamp: "a long time",
+            handle: handle,
+            content: "topicByHandle topicByHandle topicByHandle topicByHandle"
+          });
+        }, 250);
+      });
+    }
   }]);
 
   return IsoFetch;
@@ -36065,7 +36178,7 @@ var IsoFetch = (function () {
 exports["default"] = IsoFetch;
 module.exports = exports["default"];
 
-},{}],306:[function(require,module,exports){
+},{}],305:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {

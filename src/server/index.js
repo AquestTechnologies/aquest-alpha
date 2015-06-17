@@ -201,7 +201,7 @@ server.route({
     }
     
     // transforme coco.com/truc/ en coco.com/truc
-    let correctUrl = url.path.slice(-1) === '/' ? url.path.slice(0, -1) : url.path;
+    let correctUrl = url.path.slice(-1) === '/' && url.path !== '/' ? url.path.slice(0, -1) : url.path;
     // Initialise le router
     const router = Router.create({
       routes: routes,

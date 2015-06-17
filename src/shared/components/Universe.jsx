@@ -47,7 +47,9 @@ class Universe extends React.Component {
     
     let actions = {
        loadInventory: topicActions.loadInventory,
-       loadChat: chatActions.loadChat,
+       setTopic: topicActions.setTopic,
+       loadTopicContent: topicActions.loadTopicContent,
+       loadChat: chatActions.loadChat
     };
     
     return (
@@ -55,8 +57,8 @@ class Universe extends React.Component {
         <Menu />
         <RouteHandler 
           universe={this.props.universe} 
-          inventory={this.props.inventory} 
-          chat={this.props.chat} 
+          inventory={this.props.inventory}
+          topic={this.props.topic}
           actions={actions} 
         />
         <Chat 

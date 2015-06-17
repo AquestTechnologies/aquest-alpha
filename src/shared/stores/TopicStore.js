@@ -7,8 +7,10 @@ export default class TopicStore extends BaseStore {
 
     const topicActionIds = flux.getActionIds('topicActions');
     this.registerAsync(topicActionIds.loadInventory, this.handleBeginAsyncRequest, this.handleLoadInventory, this.handleErrorAsyncRequest);
-    this.register(topicActionIds.flushInventory, this.handleFlushInventory);
-
+    this.registerAsync(topicActionIds.loadTopicContent, this.handleBeginAsyncRequest, this.handleLoadTopicContent, this.handleErrorAsyncRequest);
+    this.registerAsync(topicActionIds.loadTopicByHandle, this.handleBeginAsyncRequest, this.handleLoadTopic, this.handleErrorAsyncRequest);
+    this.register(topicActionIds.setTopic, this.handleLoadTopic);
+    
     this.state = {}; // Reset le state, important (?)
     console.log('.S. TopicStore initialized');
   }
@@ -20,6 +22,11 @@ export default class TopicStore extends BaseStore {
     return this.state.inventory;
   }
   
+  getTopic() {
+    // console.log('.S. TopicStore.getTopics');
+    return this.state.topic;
+  }
+  
   // Les handlers correspondent au traitement du state après avoir executé une action
   handleLoadInventory(inventory) { 
     console.log('.S. TopicStore.handleLoadInventory');
@@ -29,13 +36,22 @@ export default class TopicStore extends BaseStore {
     });
   }
   
-  handleFlushInventory() {
-    console.log('.S. TopicStore.handleFlushInventory');
-    let inventory = this.state.inventory;
-    inventory.topics = [];
+  handleLoadTopic(topic) {
+    console.log('.S. TopicStore.handleLoadTopic');
     this.setState({
-      inventory: inventory
+      topic: topic,
+      isLoading: false
     });
   }
-
+  
+  handleLoadTopicContent(content) {
+    console.log('.S. TopicStore.handleLoadTopicContent');
+    let topic = this.state.topic;
+    topic.content = content;
+    this.setState({
+      topic: topic,
+      isLoading: false
+    });
+  }
+  
 }
