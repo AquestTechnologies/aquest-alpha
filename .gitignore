@@ -3,5 +3,8 @@ node_modules
 _misc/davidfaitdeschoses/img
 _misc/profile_pictures_generator/img
 _misc/profile_pictures_generator/node_modules
-dist/*.*
+dist/app.js
+dist/app.css
+dist/index.html
+
 
