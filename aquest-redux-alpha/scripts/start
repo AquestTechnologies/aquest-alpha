@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if `test -d ./dist/img`;
+then
+  `rm -r ./dist/img`;
+  `cp -r ./src/client/img ./dist/img`;
+else
+  `mkdir ./dist/img`;
+  `cp -r ./src/client/img ./dist/img`;
+fi
+./node_modules/node-babel/node_modules/babel/bin/babel-node ./src/server/server.js
+#node --harmony ./src/server/dev_server.js

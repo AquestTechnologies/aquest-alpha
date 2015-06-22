@@ -31,7 +31,7 @@ export default function phidippides(routerState, flux) {
 
   // Vérifie la présence de data dans store
   function checkPresence({store, data}) {
-    return flux._stores[store].state[data] ? true : false;
+    return typeof flux._stores[store].state[data] !== 'undefined';
   }
   
   

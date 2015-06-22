@@ -1,0 +1,90 @@
+// L'idéal serait d'avoir
+// html en px ou % (ou vw !!!!)
+// les composants en rem
+// les sous-éléments d'un composant en em
+// et adapter la valeur du texte de html lors d'un window resize
+
+@import url("https://fonts.googleapis.com/css?family=Roboto:400,700");
+//@import url("http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700");
+
+@base_txt: 1.7rem;
+@small_txt: 1.4rem;
+@large_txt: 2.3rem;
+
+html {
+    //font-size: @col; // !
+    //font-size: 10px; // :(
+    font-family: 'Roboto', sans-serif;
+    font-size: 62.5%;
+    font-weight: 400;
+    //letter-spacing: 0.1rem;
+    color: @black_color;
+}
+
+//___Menu___
+.txt_menu_item {
+    color: @text_inverted_color;
+    font-size: @base_txt;
+    //font-weight: 700;
+}
+
+//___Inventory___
+.txt_inventory_header_name {
+    color: @text_inverted_color;
+    font-size: 3rem;
+    letter-spacing: 0.15rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.txt_inventory_header_desc {
+    color: @text_inverted_color;
+    font-size: @base_txt;
+    line-height: 2rem;
+    text-align: center;
+}
+
+//___Card___
+.txt_card_title {
+    letter-spacing: 0rem;
+    font-size: 2.3rem;
+    font-weight: 700;
+    //line-height: 2.5rem;
+}
+
+.txt_card_author {
+    color: @grey_color;
+    letter-spacing: 0.1rem;
+    font-size: 1.4rem;
+    //line-height: 2.5rem;
+}
+
+.txt_card_description {
+    letter-spacing: 0.1rem;
+    font-size: 1.8rem;
+    line-height: 2.4rem;
+    color: @darkGrey_color;
+    
+}
+
+//__Chat__
+.txt_chatInput {
+    .txt_message_content();
+    color: @grey_color;
+}
+
+.txt_chatHeader_title {
+    font-size: @large_txt;
+}
+
+//__Message__
+.txt_message_author {
+    color: @grey_color;
+    font-size: @base_txt;
+    line-height: 1.7rem;
+}
+
+.txt_message_content {
+    font-size: @base_txt;
+    line-height: 2rem;
+}

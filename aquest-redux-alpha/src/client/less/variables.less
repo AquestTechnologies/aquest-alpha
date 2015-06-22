@@ -1,0 +1,57 @@
+/*
+    Convention de nommage des variables: @j_s_t
+    t : le type de variable, permet de connaitre son usage et son unité : une couleur, une largeur, ...
+    s : [optionnel] le state : visible, hidden, ...
+    j : Le sujet pour lequel elle s'applique, en camelCase
+*/
+
+//___Couleurs___
+
+@white_color:         #fff;
+@black_color:         #1F1F1F; //rgb( 31,  31,  31 );
+
+@grey_color:          #535353; //rgb( 83,  83,  83 );
+@darkGrey_color:      #2F2F2F; //rgb( 47,  47,  47 );
+@lightGrey_color:     #BFBFB5; //rgb( 191,  191,  181 );
+
+@green_color:         #2FD359; //rgb( 47,  211, 89 );
+
+@background_color:    @white_color;
+
+@text_color:          @black_color;
+@text_inverted_color: @white_color;
+
+
+// ___Grille___
+
+// La grille est composée de 192 colonnes, soit 10px chacuns pour un écran de 1920px (Full HD et WUXGA).
+// Les facteurs de 192 sont 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64 et 96, sa décomposition en facteurs premiers est (2^6)*(3^1)
+// 1/192 = 0.00520833333
+@grid_col:              192;
+@inventory_col:         round( @grid_col / @phi );
+//@inventory_col:       114;
+// @inventory_col:       113; //3.125% d'erreur avec 192/@phi
+@margin_col:            2;
+
+// @col_w:               100vw / @grid_col;
+@col_w:                 1rem;
+
+@margin_w:              @margin_col * @col_w;
+@doubleMargin_w:        2 * @margin_w;
+@halfMargin_w:          @margin_w / 2;
+
+//taille des composants
+@inventory_w:           @inventory_col * @col_w;
+@chat_w:                ( @grid_col - @inventory_col ) * @col_w;
+@menu_w:                @inventory_w;
+
+@card_w:                ( @inventory_w - 2 * @doubleMargin_w - @margin_w ) / 2;
+@card_h:                @card_w / @phi;
+
+@chatHeader_h:           8 * @col_w;
+@chatFooter_h:           8 * @col_w;
+
+
+
+// __Divers__
+@phi:                   ( 1 + sqrt( 5 ) ) / 2;

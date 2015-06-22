@@ -37,22 +37,15 @@ CREATE TABLE aquest_schema.CHAT(
 CREATE TABLE aquest_schema.UNIVERSE(
   universeId       BIGSERIAL PRIMARY KEY,
   name             TEXT UNIQUE,
+  handler          TEXT,
   description      TEXT,
   rules            TEXT,
   picturePath      TEXT,
   created          TIMESTAMP,
-  deleted          BOOLEAN,
   chatId           BIGINT,
   linkedUniverseId BIGINT[],
+  deleted          BOOLEAN,
   FOREIGN KEY (chatId) REFERENCES aquest_schema.CHAT
-);
-
-CREATE TABLE aquest_schema.UNIVERSE_LINK(
-  linkId            BIGSERIAL PRIMARY KEY,
-  connectUniverseId BIGINT,
-  linkedUniverseId  BIGINT,
-  FOREIGN KEY (connectUniverseId) REFERENCES aquest_schema.UNIVERSE,
-  FOREIGN KEY (linkedUniverseId) REFERENCES aquest_schema.UNIVERSE
 );
 
 CREATE TABLE aquest_schema.USER (
@@ -114,6 +107,7 @@ CREATE TABLE aquest_schema.USER_UNIVERSE(
 CREATE TABLE aquest_schema.TOPIC(
   topicId      BIGSERIAL PRIMARY KEY,
   title        TEXT,
+  handler      TEXT,
   created      TIMESTAMP,
   deleted      BOOLEAN,
   userId       BIGINT,
