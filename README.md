@@ -4,35 +4,29 @@
 
 Aquest Technologies © 2015
 
-ça vaut le coup de 'use strict' ? https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Strict_mode
+### Liens utiles :
+[Redux](https://github.com/gaearon/redux)
+[Emoji](http://www.emoji-cheat-sheet.com)
 
 ### Todo :
 - API
 - Iso fetch
-- Immutable
+- Immutable ?
 - Loading bar
-- Supprimer tous les async await et remplacer par des promises classiques
-- Enlever `this.state = {};` dans les stores ?
-- Empecher que FluxComponent fasse des get* lorsque isLoading change ou lorsque le router s'apprete à render
-- FluxComponent refetch tout le state flux a chaque changement dans les stores. Il faudrait qu'il ne fetch que celui qui a changé
-- L'implementation actuelle de IsoFetch cree une instance de la classe par Action, l'instance devrait être partagée.
+- ~~Supprimer tous les async await et remplacer par des promises classiques~~
 - ~~Websockets~~
 - ~~Flux state from server on client bootstrap~~
 - ~~BaseStore et BaseAction~~
 
-### Optimisations possibles : 
-- Serialisation des données en provenance de l'API https://github.com/gaearon/normalizr
-- Pure rendering (performance) https://github.com/gaearon/react-pure-render
-
-### Convention de nommage des console.log :
+### Convention de nommage des log :
 | Préfixe | Signification |
 | :-----: | :------------ | |
 | !!! | erreur |
-| ... | App client ou index server |
+| ... | App client ou server |
 | *** | Phidippides |
 | +++ | Fetcher |
 | ___ | Websocket |
-| .S. | Stores |
+| .R. | Reducers |
 | .A. | Actions |
 | .c. | Composant React |
 | -c- | Action de l'utilisateur dans composant React |

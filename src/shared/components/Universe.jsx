@@ -1,57 +1,31 @@
-import React      from 'react';
-import {RouteHandler}      from 'react-router';
+import React          from 'react';
+import {RouteHandler} from 'react-router';
 
-import Menu       from './universe/Menu.jsx';
-import Chat       from './universe/Chat.jsx';
-import Inventory  from './universe/Inventory.jsx';
+import Menu           from './universe/Menu.jsx';
+import Chat           from './universe/Chat.jsx';
 
 class Universe extends React.Component {
   
   // Load les données initiales
   static runPhidippides(routerState) {
-    let userStartUniverseId = 1;
-    let root = routerState.pathname === '/' ? true : false;
-    let correctCreator = root ? 'loadUniverse' : 'loadUniverseByName';
-    let correctArgs = root ? [userStartUniverseId] : [routerState.params.universeName];
-    let correctValue = root ? {id: userStartUniverseId} : {name: routerState.params.universeName};
-
-    let tasks = [{
-      taskName: 'universe',
-      dependency: null,
-      shouldBePresent: {  store: 'universeStore',
-                          data: 'universe',
-                          shouldHaveValue: correctValue },
-      ifNot: {  actions: 'universeActions',
-                creator: correctCreator,
-                args : correctArgs }
+    let root              = routerState.pathname === '/' ? true : false;
+    let correctArg        = root ? 'startups' : routerState.params.universeHandle;
+    let correctValue      = root ? {handle: 'startups'} : {handle: routerState.params.universeHandle};
+    let correctDependency = routerState.params.topicHandle ? 'topic.topic' : 'universe.universe';
+    return [{
+      on:              ['server', 'client'],
+      shouldBePresent: 'universe.universe',
+      shouldHaveValue: correctValue,
+      ifNot:           ['universeActions.loadUniverseByHandle', [correctArg]]  
+    },{
+      on:              ['server', 'client'],
+      dependency:      correctDependency,
+      shouldBePresent: 'chat.chat', 
+      ifNot:           ['chatActions.loadChat', ['__dependency.chatId']]
     }];
-    if (routerState.c === 1) {
-      let correctDependency = routerState.params.topicHandle ? 'topic' : 'universe';
-      tasks.push({
-        taskName: 'chat',
-        dependency: correctDependency,
-        shouldBePresent: {  store: 'chatStore',
-                            data: 'chat',
-                            shouldHaveValue: null },
-        ifNot:  { actions: 'chatActions',
-                  creator: 'loadChat',
-                  args : ['__dependency.chatId'] }
-      });
-    }
-    return tasks;
   }
   
   render() {
-    let topicActions = this.props.flux.getActions('topicActions');
-    let chatActions = this.props.flux.getActions('chatActions');
-    
-    let actions = {
-       loadInventory: topicActions.loadInventory,
-       setTopic: topicActions.setTopic,
-       loadTopicContent: topicActions.loadTopicContent,
-       loadChat: chatActions.loadChat
-    };
-    
     let correctChatId = this.props.params.topicHandle ? this.props.topic.chatId : this.props.universe.chatId;
     
     return (
@@ -61,12 +35,12 @@ class Universe extends React.Component {
           universe={this.props.universe} 
           inventory={this.props.inventory}
           topic={this.props.topic}
-          actions={actions} 
+          setTopic={this.props.setTopic}
         />
         <Chat 
           chat={this.props.chat} 
           chatId={correctChatId} 
-          actions={actions} 
+          loadChat={this.props.loadChat}
         />
       </div>
     );
@@ -74,7 +48,29 @@ class Universe extends React.Component {
 }
 
 Universe.defaultProps = {
-  universe: {}
+  universe: {
+    id: 0,
+    name: 'defaultProps name',
+    description: 'defaultProps description',
+    imgPath: '/static/img/pillars_compressed.png',
+    chatId: 0
+  },
+  inventory: {
+    universeId: 0,
+    topics: []
+  },
+  chat: {
+    id: 0,
+    name: 'defaultProps name',
+    messages: []
+  },
+  topic: {
+    id: 0,
+    author: 'defaultProps author',
+    title: 'defaultProps title',
+    content: 'defaultProps content',
+    timestamp: 'defaultProps timestamp'
+  }
 };
 
 export default Universe;

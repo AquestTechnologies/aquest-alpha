@@ -16,7 +16,7 @@ let routes = (
       <DefaultRoute handler={Inventory} />
     </Route> 
     
-    <Route name='universe' path='/_:universeName' handler={Universe}>
+    <Route name='universe' path='/_:universeHandle' handler={Universe}>
       <DefaultRoute handler={Inventory} />
       <Route name='newTopic' path='new' handler={TopicNew} />
       <Route name='topic' path=':topicHandle' handler={Topic} />

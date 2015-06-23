@@ -3,17 +3,33 @@ import Hapi   from 'hapi';
 import React  from 'react';
 import Router from 'react-router';
 import routes from '../shared/routes.jsx';
-import Flux from '../shared/flux.js';
-import FluxComponent from 'flummox/component';
-import phidippides from '../shared/utils/phidippides.js';
+//import Flux from '../shared/flux.js';
+//import FluxComponent from 'flummox/component';
+import { createRedux, createDispatcher, composeStores } from 'redux';
+import promiseMiddleware from '../shared/middlewares/promiseMiddleware.js';
+import * as reducers from '../shared/reducers';
+import { Provider } from 'redux/react';
+
+import phidippides from '../shared/middlewares/phidippides.js';
 import log from '../shared/utils/logTailor.js';
 
+import * as fetcher from './serverDataFetcher.js'
+
 let server = new Hapi.Server();
+process.env.NODE_ENV = process.env.NODE_ENV || 'development'; // Ca sert à quoi ça ? --> ça permettra de ne plus passer par le webpack-dev-server pour les fichiers statics en production
+
 // Distribution des ports pour l'API et les websockets
-let portApi = process.env.PORT || 8080;
-let portWs = process.env.PORT ? Number(portApi) + 1 : 8081;
+const portApi = process.env.PORT || 8080;
+const portWs = Number(portApi) + 1;
 server.connection({ port: portApi, labels: ['api'] });
 server.connection({ port: portWs, labels: ['ws'] });
+
+//lance webpack-dev-server si on est pas en production
+if (process.env.NODE_ENV !== 'production') {
+  //lancement du webpack-dev-server
+  let serverBundler = require('./dev_server.js'); 
+  serverBundler();
+}
 
 // Registration du plugin websocket
 server.register([
@@ -39,22 +55,22 @@ server.register([
 });
 
 //Routage des assets, inutile en production car derriere un CDN
-server.route({
+/*server.route({
   method: 'GET',
   path: '/app.js',
   handler: function (request, reply) {
     reply.file('dist/app.js');
   }
-});
+});*/
 
-server.route({
+/*server.route({
   method: 'GET',
   path: '/app.css',
   handler: function (request, reply) {
     reply.file('dist/app.css');
   }
 });
-
+*/
 server.route({
     method: 'GET',
     path: '/img/{filename}',
@@ -131,11 +147,17 @@ server.route({
       // Pour l'application naissante c'est son premier router.run
       routerState.c = 1;
       // Initialise une nouvelle instance flux
-      const flux = new Flux();
+      //const flux = new Flux();
+      const dispatcher = createDispatcher(
+        composeStores(reducers),
+        [promiseMiddleware]
+      );
+      
+      const store = createRedux(dispatcher);
       
       // Initialise les stores
       log('info', '... Entering phidippides');
-      phidippides(routerState, flux).then(function() {
+      phidippides(routerState, store.getState(), store.dispatch).then(function() {
         log('info', '... Exiting phidippides');
         // log('info', Handler);
         // log('info', 'state_________________________________________________');
@@ -147,8 +169,8 @@ server.route({
         
         // On extrait le state de l'instance flux
         let fluxState = {};
-        for (let store in flux._stores) { 
-          fluxState[store] = flux._stores[store].state;
+        for (let s in store.getState()) { 
+          fluxState[s] = store.getState()[s];
         }
         let serializedState = JSON.stringify(fluxState);
         // On escape le charactere ' du state serialisé
@@ -161,9 +183,11 @@ server.route({
         log('info', '... Entering React.renderToString');
         try {
           var mount_me_im_famous = React.renderToString(
-            <FluxComponent flux={flux}>
-              <Handler {...routerState} />
-            </FluxComponent>
+            <Provider redux={store}>
+              {() =>
+                <Handler {...routerState} />
+              }
+            </Provider>
           );
         } catch(err) {
           log('error', '!!! Error while React.renderToString.');
@@ -172,7 +196,7 @@ server.route({
         log('info', '... Exiting React.renderToString');
         
         // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
-        readFile('src/shared/index.html', 'utf8').then(function (html){
+        readFile('index.html', 'utf8').then(function (html){
           
           // On extrait le contenu du mountNode 
           // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>

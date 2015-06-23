@@ -1,8 +1,9 @@
-import fs from 'fs';
 import path from 'path';
 import isClient from './isClient';
 
-export default function log(type, dataLog, err) {
+// Ne marce pas (n'ecrit pas)
+// Idée d'ammélioration : http://stackoverflow.com/questions/14172455/get-name-and-line-of-calling-function-in-node-js
+export default function log(args) {
   
   let filePath, logConfiguration;  
   let checkClient = isClient();
@@ -30,6 +31,50 @@ export default function log(type, dataLog, err) {
         { dataLog: true }
       ]
     };
+  }
+  
+  /**
+   * @objectName		:   -
+   * @functionName	:	printObject	
+   * @description		:	affiche un objet javascript sous une forme lisible
+   * 
+   * @param {obj}    Objet à afficher
+   * @param {indent} Indentation à afficher
+   * @return			  :   Une chaine de caractère contenant l'objet indenté
+   * 
+   * */
+  function printObject(obj, indent){
+    let isArray = Array.isArray(obj) ? true : false;
+    let allObject = '';
+    
+    if(isArray){allObject += '[\n';}
+    else{allObject += '{\n'};
+    
+    let objLength = Object.keys(obj).length;
+    let i=0;
+    for (let objKey in obj) {
+      if (obj.hasOwnProperty(objKey)) {
+          if(!isArray){allObject += indent + '"' + objKey + '": ';}
+          if(obj[objKey] === null || obj[objKey] === "undefined" || Object.keys(obj[objKey]).length === 0){
+            allObject += '""';
+            if(i<objLength-1){allObject += ',';}
+          } else if(typeof obj[objKey] === 'object'){
+            allObject += printObject(obj[objKey], indent + ' ');
+            if(i<objLength-1){allObject += ',';}
+          }
+          else {
+            allObject += '"' + obj[objKey] + '"';
+            if(i<objLength-1){allObject += ',';}
+          }
+          allObject += '\n';
+      }
+      i++;
+    }
+    
+    if(isArray){allObject += indent + ']\n';}
+    else{allObject += indent + '}\n';}
+    
+    return allObject;
   }
   
   
@@ -69,16 +114,39 @@ export default function log(type, dataLog, err) {
     return transformedDate;
   }
   
+  let dataLog = '';
   let formatData = '';
-  // console.log('we will log : ' + dataLog);
-  if(dataLog == undefined){
-    dataLog = type;
-  } else {
-    console.log(dataLog);
+  
+  //console.log(arguments + ' ' + typeof arguments + ' ' + arguments.length);
+  /**
+   * Il est déconseillé d'utiliser slice sur les arguments
+   * car cela peut empêcher certaines optimisations des moteurs JavaScripts. 
+   * Pour ce scénario, on peut par exemple 
+   * construire un nouveau tableau en parcourant l'objet arguments.
+   * CF : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Fonctions/arguments
+   */
+   
+  //Array.prototype.slice.call(arguments).forEach(function(argument){});
+  
+  //Attention arguments est un objet, et non un tableau, même si on peut le parcourir
+  for(let i=0, argsTabLength = arguments.length; i < argsTabLength; i++){
+    if(i!=0 && i != argsTabLength -1){
+      dataLog += logConfiguration.separator;
+    }
     
-    //start format log for logfile
-    formatData = type + logConfiguration.separator; 
+    if ((typeof arguments[i] === 'object' || Array.isArray(arguments[i])) && !(Object.getOwnPropertyNames(arguments[i]).length === 0)){
+      if(arguments[i].hasOwnProperty('stack')){
+        dataLog += ' Error ' + arguments[i].stack;
+      } else {
+        dataLog += printObject(arguments[i], '');
+      }
+    }
+    else if(typeof arguments[i] === 'string'){
+      dataLog += arguments[i];
+    }
   }
+  
+  console.log(dataLog);
   
   if (logConfiguration.template) {
     for (let i = 0, confLength = logConfiguration.template.length; i < confLength; i++) {
@@ -88,15 +156,12 @@ export default function log(type, dataLog, err) {
       for (let key in logConfiguration.template[i]) {
         switch (key) {
           case 'date':
-            formatData += transformDate(logConfiguration.template[i][key]);
+            formatData += transformDate(logConfiguration.template[i][key]) + dataLog;
             break;
           
           default:
-            if (key == 'dataLog' && logConfiguration.template[i][key]) {
-              formatData += dataLog;
-              //si err a été passé en paramètre 
-              if (err != undefined) {formatData += logConfiguration + err;}
-            }
+            // on pourra mettre de la mise en forme ici
+            
             break;
         }  
       }  
@@ -110,6 +175,8 @@ export default function log(type, dataLog, err) {
   
   //à mettre en asynchrone en cas de charge serveur importantes
   if (!checkClient) {
+    // import fs from 'fs';
+    var fs = require('fs');
     fs.appendFile(filePath, dataLog +'\n', function(err) {
         if(err) {
             return console.log(err);

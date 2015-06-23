@@ -10,6 +10,8 @@ import * as reducers from '../shared/reducers';
 
 import { Provider } from 'redux/react';
 
+import * as fetcher from './clientDataFetcher.js'
+
 /*import Websocket from 'socket.io-client';
 const io = Websocket('http://130.211.68.244:8081');
 
@@ -61,6 +63,7 @@ router.run( (Handler, routerState) => {
   c++;
   routerState.c = c;
   console.log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
+  
   
   console.log('... Entering phidippides');
   phidippides(routerState, store.getState(), store.dispatch).then(function() {

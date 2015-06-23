@@ -7,24 +7,15 @@ class Explore extends React.Component {
   
   static runPhidippides(routerState) {
     return [{
-      taskName: 'explore',
-      dependency: null,
-      shouldBePresent: {
-        store: 'universeStore',
-        data: 'allUniverses',
-        shouldHaveValue: null
-      },
-      ifNot: {
-        actions: 'universeActions',
-        creator: 'loadAllUniverses',
-        args : []
-      }
+      on:              ['server', 'client'],
+      shouldBePresent: 'universe.universes',
+      ifNot:           ['universeActions.loadUniverses', []]  
     }];
   }
   
   setBackLink() {
     if(this.props.universe) {
-      return <Link to='universe' params={{universeName: this.props.universe.name}}>Back</Link>;
+      return <Link to='universe' params={{universeHandle: this.props.universe.handle}}>Back</Link>;
     } else {
       return <Link to='home'>Starting Universe</Link>;
     }
@@ -38,8 +29,6 @@ class Explore extends React.Component {
       fontSize: '2rem'
     };
     
-    let setUniverse = this.props.flux.getActions('universeActions').setUniverse;
-    
     return (
       <div style={divStyle}>
         {this.setBackLink()}
@@ -49,7 +38,7 @@ class Explore extends React.Component {
               key={universe.id} 
               universe={universe} 
               currentUniverse={this.props.currentUniverse} 
-              setUniverse={setUniverse} 
+              setUniverse={this.props.setUniverse} 
               style={divStyle}
             />
           );

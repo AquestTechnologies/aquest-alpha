@@ -1,35 +1,34 @@
 import log from '../../../shared/utils/logTailor.js';
 import DbCaller from '../../DbCaller.js';
-
+ 
 let db = new DbCaller();
 db.connect();
 
 exports.register = function (server, options, next) {
   server.route({
     method: 'GET',
-    path: '/api/universe/{universeId}',
+    path: '/api/universe/{handle}',
     handler: function (request, reply) {
-      log('info','request params : ' + request.params.universeId);
+      log('info','request params : ' + request.params.handle);
       
-      let sqlQuery = 'SELECT universeId, name, description, chatId FROM aquest_schema.universe WHERE universeId=\'' + request.params.universeId + '\'';
+      let sqlQuery = {
+        type: 'select',
+        query: 'SELECT universeId, name, description, handler, chatId FROM aquest_schema.universe WHERE handler=\'' + request.params.handle + '\'',
+        //query: 'SELECT universeId, name, description, chatId FROM aquest_schema.universe WHERE universeId= $1',
+        //parameters: [request.params.universeId]
+      };
       
       return new Promise(function(resolve, reject) {
         // Appel de l'action
-        db.query(sqlQuery).then(function(result) {
+        db.queryDb(sqlQuery).then(function(result) {
           
           if(result != null){
-            let universeData = {
-              id:          result.rows[0].universeId,
-              name:        result.rows[0].name,
-              description: result.rows[0].description,
-              chatId:      result.rows[0].chatId,
-            };
             
-            log('info', JSON.stringify(universeData));
+            log('info', JSON.stringify(result));
             
-            return reply(universeData);  
+            return reply(result);  
           } else {
-            reject('Query promise rejected');
+            reject('!!! Query promise rejected');
           }
         })
         .catch(function (reason) {

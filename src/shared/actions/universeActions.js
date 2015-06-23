@@ -2,7 +2,7 @@ import log from '../utils/logTailor.js';
 import { 
   fetchUniverseByHandle,
   fetchUniverses
-} from '../utils/fetchers.js'
+} from '../utils/fetchers.new.js'
 import { 
   SET_UNIVERSE,
   LOAD_UNIVERSE_REQUEST,
@@ -34,7 +34,8 @@ import {
 }*/
 
 export function loadUniverseByHandle(handle) {
-  log('.A. loadUniverseByHandle ' + handle);
+  log('.A. loadUniverseByHandle');
+  console.log(JSON.stringify(handle));
   return {
     types: [LOAD_UNIVERSE_REQUEST, LOAD_UNIVERSE_SUCCESS, LOAD_UNIVERSE_FAILURE],
     promise: fetchUniverseByHandle(handle),

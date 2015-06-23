@@ -17,7 +17,7 @@ class Chat extends React.Component {
     let chat = this.props.chat;
     let isLoading = false;
     if(this.props.chatId !== this.props.chat.id) {
-      this.props.actions.loadChat(this.props.chatId);
+      this.props.loadChat(this.props.chatId);
       chat = {};
       isLoading = true;
     }
@@ -30,7 +30,7 @@ class Chat extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.chatId !== nextProps.chat.id) {
       if (!this.state.isLoading) {
-        this.props.actions.loadChat(nextProps.chatId);
+        this.props.loadChat(nextProps.chatId);
         this.setState({ 
           chat: {},
           isLoading: true
@@ -46,23 +46,22 @@ class Chat extends React.Component {
   
   componentDidMount() {
     //permet de scroller les messages tout en bas après le mount.
-    var scrollable = document.getElementById("scrollMeDown");
+    let scrollable       = document.getElementById("scrollMeDown");
     scrollable.scrollTop = scrollable.scrollHeight;
   }
   
   componentDidUpdate() {
     //permet de scroller les messages tout en bas après avoir reçu de nouveaux props.
-    var scrollable = document.getElementById("scrollMeDown");
+    let scrollable       = document.getElementById("scrollMeDown");
     scrollable.scrollTop = scrollable.scrollHeight;
   }
   
   render() {
-    let chat = this.state.chat;
+    let chat     = this.state.chat;
     let messages = chat.messages || [];
     
     let samuel = "FAIRE LOAD UNIVERSE BY HANDLE The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
     let messagesList = messages.length === 0 ? 'chat_list_hidden' : 'chat_list_visible';
-    if (true) { messagesList += ' no_animation'; }
     
     return (
       <div className="chat">
@@ -86,11 +85,5 @@ class Chat extends React.Component {
     );
   }
 }
-
-Chat.defaultProps = {
-  chat: {
-    messages: []
-  }
-};
 
 export default Chat;

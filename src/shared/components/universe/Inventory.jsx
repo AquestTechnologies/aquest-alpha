@@ -1,24 +1,16 @@
-import React from 'react';
-import Card from './Card.jsx';
-import CardNew from './CardNew.jsx';
+import React    from 'react';
+import Card     from './Card.jsx';
+import CardNew  from './CardNew.jsx';
 
 class Inventory extends React.Component {
   
   // Load les données initiales
   static runPhidippides(routerState) {
-    if (routerState.c === 1) return [{
-      taskName: 'inventory',
-      dependency: 'universe',
-      shouldBePresent: {
-        store: 'topicStore',
-        data: 'inventory',
-        shouldHaveValue: null
-      },
-      ifNot:  {
-        actions: 'topicActions',
-        creator: 'loadInventory',
-        args : ['__dependency.id']
-      }
+    return [{
+      on:              ['server', 'client'],
+      shouldBePresent: 'topic.inventory',
+      dependency:      'universe.universe',
+      ifNot:           ['topicActions.loadInventory', ['__dependency.id']]  
     }];
   }
   
@@ -33,7 +25,7 @@ class Inventory extends React.Component {
   
   componentWillMount() {
     if(this.props.universe.id !== this.props.inventory.universeId) {
-      this.props.actions.loadInventory(this.props.universe.id);
+      // this.props.actions.loadInventory(this.props.universe.id);
     } else {
       this.setState({ inventory: this.props.inventory });
     }
@@ -44,12 +36,11 @@ class Inventory extends React.Component {
   }
   
   render() {
-    let universe = this.props.universe;
+    let universe  = this.props.universe;
     let inventory = this.state.inventory;
-    let topics = inventory.topics || [];
+    let topics    = inventory.topics || [];
     
     let inventoryListClassName = topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
-    if (true) { inventoryListClassName += ' no_animation'; } //On verra plus tard pour d'eventuelles animations
     
     return (
       <div className="universe_left" style={{backgroundImage: 'url(' + universe.picturePath + ')'}}>
@@ -67,9 +58,9 @@ class Inventory extends React.Component {
               {topics.map( (topic) => {
                 return <Card 
                   key={topic.id} 
-                  universeName={this.props.universe.name}
+                  universeHandle={this.props.universe.handle}
                   topic={topic} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
-                  setTopic = {this.props.actions.setTopic}
+                  setTopic={this.props.setTopic}
                 />;
               })}
             </div>
@@ -80,13 +71,5 @@ class Inventory extends React.Component {
     );
   }
 }
-
-Inventory.defaultProps = {
-  universe: {},
-  inventory: {
-    universeId: 111,
-    topics: []
-  }
-};
 
 export default Inventory;

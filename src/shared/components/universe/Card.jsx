@@ -6,7 +6,7 @@ class Card extends React.Component {
     super();
     this.handleClick = () => { 
       this.props.setTopic(this.props.topic);
-      this.context.router.transitionTo('topic', {universeName: this.props.universeName, topicHandle: this.props.topic.handle});
+      this.context.router.transitionTo('topic', {universeHandle: this.props.universeHandle, topicHandle: this.props.topic.handle});
     };
   }
   

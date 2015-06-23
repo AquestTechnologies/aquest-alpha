@@ -6,9 +6,9 @@ class Node extends React.Component {
     super();
     
     this.handleSelectUniverse = (universe) => {
-      console.log('-c- Node.handleSelectUniverse ' + universe.name);
+      console.log('-c- Node.handleSelectUniverse ' + universe.handle);
       this.props.setUniverse(universe);
-      this.context.router.transitionTo('universe', {universeName: universe.name});
+      this.context.router.transitionTo('universe', {universeHandle: universe.handle});
     };
   }
   

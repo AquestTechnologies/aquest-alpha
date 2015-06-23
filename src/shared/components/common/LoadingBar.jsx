@@ -1,7 +1,8 @@
-import React            from 'react';
+import React from 'react';
 
 class LoadingBar extends React.Component {
   render() {
+    
     // CSS temporaire
     let divStyle = {
       width: 'auto',
@@ -26,12 +27,22 @@ class LoadingBar extends React.Component {
     
     return (
       <div style={divStyle}>
-          <div style={this.props.universeIsLoading ? nowYouSeeMe : nowYouDont}> universeStore</div>
-          <div style={this.props.topicIsLoading ? nowYouSeeMe : nowYouDont}> topicStore</div>
-          <div style={this.props.chatIsLoading ? nowYouSeeMe : nowYouDont}> chatStore</div>
+          <div style={this.props.universeIsLoading  ? nowYouSeeMe : nowYouDont}>Universe  </div>
+          <div style={this.props.universesIsLoading ? nowYouSeeMe : nowYouDont}>Universes </div>
+          <div style={this.props.inventoryIsLoading ? nowYouSeeMe : nowYouDont}>Inventory </div>
+          <div style={this.props.topicIsLoading     ? nowYouSeeMe : nowYouDont}>Topic     </div>
+          <div style={this.props.chatIsLoading      ? nowYouSeeMe : nowYouDont}>Chat      </div>
       </div>
     );
   }
 }
+
+LoadingBar.defaultProps = {
+  universeIsLoading: false,
+  universesIsLoading: false,
+  inventoryIsLoading: false,
+  topicIsLoading: false,
+  chatIsLoading: false
+};
 
 export default LoadingBar;        

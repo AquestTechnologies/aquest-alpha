@@ -1,6 +1,4 @@
-var path = require('path');
 var webpack = require('webpack');
-//let node_modules_dir = path.join(__dirname, 'node_modules');
 
 var config = {
   devtool: 'eval',
@@ -9,19 +7,20 @@ var config = {
     './src/client/client.js'
   ],
   output: {
-    path: __dirname + "/dist",
+    path: __dirname + '/dist',
     filename: 'bundle.js',
     publicPath: 'http://130.211.68.244:3000/static/' // https://github.com/webpack/webpack-dev-server/issues/135
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin()
+    new webpack.NoErrorsPlugin(),
+    new webpack.IgnorePlugin(/^\.\.\/\.\.\/server\/DbCaller\.js$/)
   ],
   node: {
-    fs: "empty"
+    fs: 'empty'
   },
   resolve: {
-    extensions: ['', '.js', '.jsx'],
+    extensions: ['', '.js', '.jsx']
   },
   module: {
     //noParse: [],
@@ -30,7 +29,7 @@ var config = {
         test: /\.jsx?$/,
         loaders: ['react-hot', 'babel'],
         include: [
-          path.join(__dirname, 'src')
+          __dirname + '/src'
         ],
         exclude: /node_modules/
       },
