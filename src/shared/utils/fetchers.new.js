@@ -1,18 +1,19 @@
 import isClient from './isClient.js';
 
+let checkClient = isClient();
+
+if(!checkClient){
+  let DbCaller = require('../../server/DbCaller.js');
+  var db = new DbCaller();
+  db.connect();
+}
+
 export function fetchUniverse(){}
 
 export function fetchUniverseByName(){}
 
 export function fetchUniverseByHandle(handle){
   console.log('+++ NEW Fetching universeByHandle ' + handle);
-  let checkClient = isClient();
-
-  if(!checkClient){
-    let DbCaller = require('../../server/DbCaller.js');
-    var db = new DbCaller();
-    db.connect();
-  }
   
   //format l'objet
   let query = {
