@@ -9,7 +9,7 @@ import {
 
 
 export function loadChat(chatId) {
-  log('.A. loadChat ' + chatId);
+  log('.A. loadChat : ' + chatId);
   return {
     types: [LOAD_CHAT_REQUEST, LOAD_CHAT_SUCCESS, LOAD_CHAT_FAILURE],
     promise: fetchChat(chatId),

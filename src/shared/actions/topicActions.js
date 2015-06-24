@@ -14,7 +14,7 @@ import {
 } from '../constants/ActionTypes';
 
 export function loadInventory(universeId) {
-  log('.A. loadInventory ' + universeId);
+  log('.A. loadInventory : ' + universeId);
   return {
     types: [LOAD_INVENTORY_REQUEST, LOAD_INVENTORY_SUCCESS, LOAD_INVENTORY_FAILURE],
     promise: fetchInventory(universeId),
@@ -23,7 +23,7 @@ export function loadInventory(universeId) {
 }
 
 export function loadTopicContent(topicId) {
-  log('.A. loadTopicContent ' + topicId);
+  log('.A. loadTopicContent : ' + topicId);
   return {
     types: [LOAD_TOPIC_CONTENT_REQUEST, LOAD_TOPIC_CONTENT_SUCCESS, LOAD_TOPIC_CONTENT_FAILURE],
     promise: loadTopicContent(topicId),
@@ -32,7 +32,7 @@ export function loadTopicContent(topicId) {
 }
 
 export function setTopic(topic) {
-  log('.A. setTopic');
+  log('.A. setTopic : ' + topic.id);
   return {
     type: SET_TOPIC,
     data: topic

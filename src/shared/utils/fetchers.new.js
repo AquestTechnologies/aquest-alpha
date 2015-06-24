@@ -1,4 +1,5 @@
 import isClient from './isClient.js';
+import log from './logTailor.js';
 
 let isServer = !isClient();
 
@@ -13,7 +14,7 @@ export function fetchUniverseByHandle(handle) {
     parameters: handle
   };
   
-  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
   
   return promiseFetch(query, 'api/universe/'+handle);
 }
@@ -25,7 +26,7 @@ export function fetchUniverses() {
     parameters: ''
   };
   
-  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
   
   return promiseFetch(query, 'api/universes/');
 }
@@ -36,7 +37,7 @@ export function fetchChat(id) {
     parameters: id
   };
   
-  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
   
   return promiseFetch(query, 'api/chat/');
 }
@@ -47,7 +48,7 @@ export function fetchTopicByHandle(handle) {
     parameters: handle
   };
   
-  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
   
   return promiseFetch(query, 'api/topic/');
 }
@@ -58,7 +59,7 @@ export function fetchTopicContent(id) {
     parameters: id
   };
   
-  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
   
   return promiseFetch(query, 'api/topic/content/');
 }
@@ -66,23 +67,23 @@ export function fetchTopicContent(id) {
 function promiseFetch(query, url){
   return new Promise(function (resolve, reject) {
     if(isServer){
-      console.log('+++ server');
+      log('+++ server');
       q.queryDb(query).then(function(result) {
         if(result != null){
-          console.log(query.source + ' ' + JSON.stringify(result));
+          log(query.source + ' ' + JSON.stringify(result));
           return resolve(result);
         } else  {
           reject('!!! middleFetcher error');
         }
       });
     } else {
-      console.log('+++ client');
+      log('+++ client');
       var req = new XMLHttpRequest();
       req.open('GET', url);
   
       req.onload = function() {
         if (req.status == 200) {
-          console.log(query.source + ' ' + JSON.stringify(req.response));
+          log(query.source + ' ' + JSON.stringify(req.response));
           resolve(req.response);
         }
         else {
@@ -97,6 +98,6 @@ function promiseFetch(query, url){
       req.send();
     }
   }).catch(function (err) {
-      console.log('RestAPI ', err.stack);
+      log('RestAPI ', err.stack);
   });
 }

@@ -1,7 +1,7 @@
 var webpack = require('webpack');
 
 var config = {
-  devtool: 'eval',
+  devtool: 'eval', //Il faudra enlever ce truc pour la prod :o
   entry: [
     'webpack/hot/dev-server',
     './src/client/client.js'
@@ -14,7 +14,10 @@ var config = {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
-    new webpack.IgnorePlugin(/^\.\.\/\.\.\/server\/queryDb\.js$/)
+    // new webpack.IgnorePlugin(/^\.\.\/\.\.\/server\/queryDb\.js$/)
+    new webpack.IgnorePlugin(/queryDb/),
+    // new webpack.ContextReplacementPlugin(/queryDb/, null),
+    new webpack.ContextReplacementPlugin(/chalk/, null)
   ],
   node: {
     fs: 'empty'

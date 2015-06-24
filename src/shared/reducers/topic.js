@@ -22,7 +22,7 @@ export default function chat(state = initialState, action) {
       inventoryIsLoading: state.inventoryIsLoading
     };
   case LOAD_INVENTORY_REQUEST:
-    log('.R. LOAD_INVENTORY_REQUEST ' + action);
+    log('.R. LOAD_INVENTORY_REQUEST');
     return {
       topic: state.topic,
       inventory: state.inventory,
@@ -30,7 +30,7 @@ export default function chat(state = initialState, action) {
       inventoryIsLoading: true
     };
   case LOAD_INVENTORY_SUCCESS:
-    log('.R. LOAD_INVENTORY_SUCCESS ' + action);
+    log('.R. LOAD_INVENTORY_SUCCESS');
     return {
       topic: state.topic,
       inventory: action.result,

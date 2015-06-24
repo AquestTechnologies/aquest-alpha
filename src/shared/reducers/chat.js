@@ -13,13 +13,13 @@ const initialState = {
 export default function chat(state = initialState, action) {
   switch (action.type) {
   case LOAD_CHAT_REQUEST:
-    log('.R. LOAD_CHAT_REQUEST ' + action);
+    log('.R. LOAD_CHAT_REQUEST');
     return {
       chat: state.chat,
       chatIsLoading: true
     };
   case LOAD_CHAT_SUCCESS:
-    log('.R. LOAD_CHAT_SUCCESS ' + action);
+    log('.R. LOAD_CHAT_SUCCESS');
     return {
       chat: action.result,
       chatIsLoading: false,

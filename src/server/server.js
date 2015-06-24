@@ -93,7 +93,6 @@ server.route({
   method: 'GET',
   path: '/{p*}',
   handler: function (request, reply) {
-    log('path: /{p*} ' + JSON.stringify(request.params));
     reply.prerenderer(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
   }
 });

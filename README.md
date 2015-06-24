@@ -13,6 +13,7 @@ Aquest Technologies © 2015
 ### ToDoList 23/06 --> 26/06
               
 - [ ] IsoFetch
+- [ ] Dans la DB : remplace trucid par trucId
 - [x] Correction logTailor
 - [ ] window.STATE\_FROM_SERVER
 - [ ] chalk --> https://github.com/sindresorhus/chalk

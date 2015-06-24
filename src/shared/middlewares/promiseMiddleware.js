@@ -1,3 +1,4 @@
+import log from '../utils/logTailor.js';
 // Copié depuis https://github.com/gaearon/redux/blob/master/docs/middleware.md
 /*export default function promiseMiddleware(next) {
   return (action) => {
@@ -91,7 +92,7 @@
 }*/
 
 export default function promiseMiddleware(next) {
-  console.log('.M. promiseMiddleware');
+  log('.M. promiseMiddleware');
   return (action) => {
     const { promise, types, data } = action;
     if (!promise) {

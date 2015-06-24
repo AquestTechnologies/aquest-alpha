@@ -34,8 +34,7 @@ import {
 }*/
 
 export function loadUniverseByHandle(handle) {
-  log('.A. loadUniverseByHandle');
-  console.log(JSON.stringify(handle));
+  log('.A. loadUniverseByHandle : ' + handle);
   return {
     types: [LOAD_UNIVERSE_REQUEST, LOAD_UNIVERSE_SUCCESS, LOAD_UNIVERSE_FAILURE],
     promise: fetchUniverseByHandle(handle),
@@ -53,7 +52,7 @@ export function loadUniverses() {
 }
 
 export function setUniverse(universe) {
-  log('.A. setUniverse');
+  log('.A. setUniverse : ' + universe.name);
   return {
     type: SET_UNIVERSE,
     data: universe

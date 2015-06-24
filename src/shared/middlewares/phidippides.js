@@ -8,7 +8,7 @@ import * as topicActions    from '../actions/topicActions';
 export default function phidippides(routerState, fluxState, dispatch) {
   
   // Configuration
-  const VERBOSE = false;                // Affiche les console.log
+  const VERBOSE = false;                // Affiche les log
   const DEVELOPMENT = true;             // Permet de ne pas appeller checkFormat en production !!! A remplacer par une constante de projet !!!
   const PLACEHOLDER = '__dependency.';  // Le placeholder pour les arguments des actions
   const METHOD_NAME = 'runPhidippides'; // Le nom de la méthode des composants react
@@ -41,7 +41,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
   
   let howMany = whatToFetch.length;
   let speakEnglish = howMany > 1 ? ' tasks : ' : ' task : ';
-  log('*** Resolving ' + howMany + speakEnglish, displayOnConsole.toString());
+  log('*** Resolving ' + howMany + speakEnglish + displayOnConsole.toString());
   
   if (howMany === 0) return Promise.resolve();
   if (DEVELOPMENT && !checkFormat(whatToFetch)) return Promise.reject('*** ERROR ! invalid markup found.');
@@ -50,8 +50,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
   
 
   function logMeOrNot(type, message) {
-    // if (VERBOSE === true) log(type, message);
-    if (VERBOSE === true) console.log(type);
+if (VERBOSE === true) log(type, message);
   }
   
   
@@ -200,12 +199,12 @@ export default function phidippides(routerState, fluxState, dispatch) {
           clearTasks(failedTasks).then(function() {
             resolve();
           }).catch(function(why) {
-            console.log('error', '*** ERROR ! clearTasks failed ' + why);
+            log('error', '*** ERROR ! clearTasks failed 2');
             reject(why);
           });
         }
       }).catch(function(why) {
-        console.log('error', '*** ERROR ! clearTasks');
+        log('error', '*** ERROR ! clearTasks failed 1');
         reject(why);
       });
     });
@@ -237,7 +236,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
               logMeOrNot('*** clearOneTask ' + task.shouldBePresent + ' OK [present > wrong value > dependency complete]');
               resolve();
             }).catch(function(why) {
-              console.log('error', '*** ERROR ! clearOneTask [present > wrong value > dependency complete]');
+              log('error', '*** ERROR ! clearOneTask [present > wrong value > dependency complete]');
               reject(why);
             });
           }
@@ -258,7 +257,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
             logMeOrNot('*** clearOneTask ' + task.shouldBePresent + ' OK [missing > dependency complete]');
             resolve();
           }).catch(function(why) {
-            console.log('error', '*** ERROR ! clearOneTask [missing > dependency complete]');
+            log('error', '*** ERROR ! clearOneTask [missing > dependency complete]');
             reject(why);
           });
         }

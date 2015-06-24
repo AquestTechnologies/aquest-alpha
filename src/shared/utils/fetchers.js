@@ -1,6 +1,7 @@
+import log from './logTailor.js';
 
 export function fetchUniverse(universeId) {
-  console.log('+++ Fetching universe ' + universeId);
+  log('+++ Fetching universe ' + universeId);
   // returning a Promise because that is what fetch does.
   return new Promise(function (resolve, reject) {
     // simulate an asynchronous action where data is fetched on
@@ -53,7 +54,7 @@ export function fetchUniverse(universeId) {
 }
 
 export function fetchUniverseByName(universeName) {
-  console.log('+++ Fetching universeByName ' + universeName);
+  log('+++ Fetching universeByName ' + universeName);
   // returning a Promise because that is what fetch does.
   return new Promise(function (resolve, reject) {
     // simulate an asynchronous action where data is fetched on
@@ -106,7 +107,7 @@ export function fetchUniverseByName(universeName) {
 }
 
 export function fetchUniverseByHandle(handle) {
-  console.log('+++ Fetching universeByHandle ' + handle);
+  log('+++ Fetching universeByHandle ' + handle);
   // returning a Promise because that is what fetch does.
   return new Promise(function (resolve, reject) {
     // simulate an asynchronous action where data is fetched on
@@ -159,7 +160,7 @@ export function fetchUniverseByHandle(handle) {
 }
 
 export function fetchUniverses() {
-  console.log('+++ Fetching all universes');
+  log('+++ Fetching all universes');
   // returning a Promise because that is what fetch does.
   return new Promise(function (resolve, reject) {
     // simulate an asynchronous action where data is fetched on
@@ -197,7 +198,7 @@ export function fetchUniverses() {
 }
 
 export function fetchInventory(universeId) {
-  console.log('+++ Fetching inventory for universe ' + universeId);
+  log('+++ Fetching inventory for universe ' + universeId);
   
   return new Promise(function (resolve, reject) {
     setTimeout(function () {
@@ -283,7 +284,7 @@ export function fetchChat(chatId) {
   
   chatId = parseInt(chatId);
   
-  console.log('+++ Fetching chat ' + chatId);
+  log('+++ Fetching chat ' + chatId);
   let messages = [];
   for (let i = 0; i < 100; i++) {
     messages.push({
@@ -339,7 +340,7 @@ export function fetchChat(chatId) {
 }
 
 export function fetchTopicContent(id) {
-  console.log('+++ Fetching topicContent ' + id);
+  log('+++ Fetching topicContent ' + id);
   // returning a Promise because that is what fetch does.
   return new Promise(function (resolve, reject) {
     // simulate an asynchronous action where data is fetched on
@@ -352,7 +353,7 @@ export function fetchTopicContent(id) {
 }
 
 export function fetchTopicByHandle(handle) {
-  console.log('+++ Fetching topicByHandle ' + handle);
+  log('+++ Fetching topicByHandle ' + handle);
   // returning a Promise because that is what fetch does.
   return new Promise(function (resolve, reject) {
     // simulate an asynchronous action where data is fetched on

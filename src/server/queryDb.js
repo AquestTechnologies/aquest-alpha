@@ -9,24 +9,24 @@ export function queryDb(queryP) {
   const host     = '146.148.13.18'; 
   const port     = '5432'; 
   const database = 'aquestdb';
-  let client   = null;
+  let client     = null;
   
   try{
    connect();
   } catch(err){
-    log('!!! queryDb connect');
+    log('error', '!!! queryDb connect');
     log('error', err);
   };
   
   let buildQuery = '';
   let queryCallback = null;
-  console.log('queryDb : ' + JSON.stringify(queryP));
+  log('queryDb : ' + JSON.stringify(queryP));
   
   switch (queryP.source) {
     case 'fetchUniverses':
        buildQuery = 'SELECT universeid, name, description, picturepath, handler, chatid FROM aquest_schema.universe WHERE handler=\'' + queryP.parameters + '\'';
       
-      console.log('will trigger query : ' + buildQuery);
+      log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
         let universes = [];
         
@@ -49,7 +49,7 @@ export function queryDb(queryP) {
 
       buildQuery = 'SELECT universeid, name, description, picturepath, handler, chatid FROM aquest_schema.universe WHERE handler=\'' + queryP.parameters + '\'';
       
-      console.log('will trigger query : ' + buildQuery);
+      log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
         return ({
           id:          result.rows[0].universeid,
@@ -72,7 +72,7 @@ export function queryDb(queryP) {
         aquest_schema.message, aquest_schema.atome_message, aquest_schema.user \
       WHERE message.chatid=\'' + queryP.parameters + '\' AND message.id = atome_message.messageid';
       
-      console.log('will trigger query : ' + buildQuery);
+      log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
         let messagesChat = [];
         
@@ -99,7 +99,7 @@ export function queryDb(queryP) {
         aquest_schema.topic, aquest_schema.atome_topic, aquest_schema.user \
       WHERE handler=\'' + queryP.parameters + '\' AND topic.topicid = atome_topic.topicid AND topic.userid = user.userid';
       
-      console.log('will trigger query : ' + buildQuery);
+      log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
         return ({
           id:          result.rows[0].universeid,
@@ -121,7 +121,7 @@ export function queryDb(queryP) {
         aquest_schema.atome_topic \
       WHERE topicid=\'' + queryP.parameters + '\' orderby ordered';
       
-      console.log('will trigger query : ' + buildQuery);
+      log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
         let topicContents = [];
         
@@ -149,13 +149,14 @@ export function queryDb(queryP) {
   
   function connect(){
     let postgresurl = 'postgres://'+user+':'+password+'@'+host+':'+port+'/'+database;
-    console.log('log into ' + database + ' through ' + postgresurl);
+    log('log into ' + database + ' through ' + postgresurl);
     
     if(!client){
       client = new pg.Client(postgresurl);
       client.connect(function(err) {
         if(err) {
-          return log('error','could not connect to postgres', err);
+          log('error', '!!! Could not connect to postgres');
+          log('error', err);
         }
       });
     }
@@ -163,7 +164,7 @@ export function queryDb(queryP) {
   
   function handleQuery(resolve, reject, err, result, callback){
     if(err) {
-      console.log('!!! error queryDb -> query : ' + err.stack);
+      log('error', '!!! Error queryDb -> query : ' + err.stack);
       reject('error running query : ' + err);
     }
     
