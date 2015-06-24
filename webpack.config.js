@@ -14,7 +14,7 @@ var config = {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
-    new webpack.IgnorePlugin(/^\.\.\/\.\.\/server\/DbCaller\.js$/)
+    new webpack.IgnorePlugin(/^\.\.\/\.\.\/server\/queryDb\.js$/)
   ],
   node: {
     fs: 'empty'

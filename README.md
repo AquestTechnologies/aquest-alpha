@@ -5,18 +5,27 @@
 Aquest Technologies © 2015
 
 ### Liens utiles :
-[Redux](https://github.com/gaearon/redux)
-[Emoji](http://www.emoji-cheat-sheet.com)
+- [Redux](https://github.com/gaearon/redux)
+- [Hapi](http://hapijs.com/api)
+- [Emoji](http://www.emoji-cheat-sheet.com)
 
-### Todo :
-- API
-- Iso fetch
-- Immutable ?
-- Loading bar
-- ~~Supprimer tous les async await et remplacer par des promises classiques~~
-- ~~Websockets~~
-- ~~Flux state from server on client bootstrap~~
-- ~~BaseStore et BaseAction~~
+
+### ToDoList 23/06 --> 26/06
+              
+- [ ] IsoFetch
+- [x] Correction logTailor
+- [ ] window.STATE\_FROM_SERVER
+- [ ] chalk --> https://github.com/sindresorhus/chalk
+- [ ] loading bar
+- [ ] Immutable ?
+- [ ] Implementer Redux 1.0
+- [ ] Implementer un fichier config (constantes, production, liens du bundle, etc...)
+- [ ] verifier les escapes du state ( < > ' " SQL)
+- [ ] verifier les escapes du put ( < > ' " SQL)
+- [ ] mettre en place un outil scrum, exemple : https://github.com/aliasaria/scrumblr
+- [ ] mettre en place RabbitMQ
+- [ ] faire les liens Hapijs <-> webSocket <-> rabbitMQ <-> postgres 
+
 
 ### Convention de nommage des log :
 | Préfixe | Signification |
@@ -24,12 +33,12 @@ Aquest Technologies © 2015
 | !!! | erreur |
 | ... | App client ou server |
 | *** | Phidippides |
-| +++ | Fetcher |
+| +++ | Fetchers |
 | ___ | Websocket |
 | .R. | Reducers |
-| .A. | Actions |
-| .c. | Composant React |
-| -c- | Action de l'utilisateur dans composant React |
+| .A. | ActionCreators |
+| .c. | Composants React |
+| -c- | Action de l'utilisateur dans composants React |
 
 ### Informations sur la base de données
 - Groupe administrateur : admin, Utilisateur : aquest
@@ -44,3 +53,4 @@ Aquest Technologies © 2015
 ### Visualiser les tables de la base de données
 - psql aquestdb
 - \dt aquest_schema.*
+- 

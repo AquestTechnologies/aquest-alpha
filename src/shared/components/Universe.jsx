@@ -9,8 +9,8 @@ class Universe extends React.Component {
   // Load les données initiales
   static runPhidippides(routerState) {
     let root              = routerState.pathname === '/' ? true : false;
-    let correctArg        = root ? 'startups' : routerState.params.universeHandle;
-    let correctValue      = root ? {handle: 'startups'} : {handle: routerState.params.universeHandle};
+    let correctArg        = root ? 'Startups' : routerState.params.universeHandle;
+    let correctValue      = root ? {handle: 'Startups'} : {handle: routerState.params.universeHandle};
     let correctDependency = routerState.params.topicHandle ? 'topic.topic' : 'universe.universe';
     return [{
       on:              ['server', 'client'],
@@ -19,8 +19,8 @@ class Universe extends React.Component {
       ifNot:           ['universeActions.loadUniverseByHandle', [correctArg]]  
     },{
       on:              ['server', 'client'],
+      shouldBePresent: 'chat.chat',
       dependency:      correctDependency,
-      shouldBePresent: 'chat.chat', 
       ifNot:           ['chatActions.loadChat', ['__dependency.chatId']]
     }];
   }

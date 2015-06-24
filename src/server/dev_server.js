@@ -1,7 +1,7 @@
-import webpack from 'webpack';
+import webpack          from 'webpack';
 import webpackDevServer from 'webpack-dev-server';
-import config from '../../webpack.config';
-import log    from '../shared/utils/logTailor.js';
+import config           from '../../webpack.config';
+import log              from '../shared/utils/logTailor.js';
 
 export default function(){
   
@@ -19,6 +19,7 @@ export default function(){
   
   new webpackDevServer(bundle, {
     publicPath: config.output.publicPath,
+    noInfo : true,
     hot: true,
     historyApiFallback: true,
     stats: {
@@ -38,6 +39,6 @@ export default function(){
     if (err) {
       log(err);
     }
-    log('Listening at 0.0.0.0:3000');
+    log('WDS listening at 0.0.0.0:3000');
   });
 }

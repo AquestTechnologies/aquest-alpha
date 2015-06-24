@@ -46,6 +46,8 @@ export default class DbCaller {
         
         buildQuery = 'SELECT universeId, name, description, handler, chatId FROM aquest_schema.universe WHERE handler=\'' + queryP.parameters + '\'';
         
+        console.log('will trigger query : ' + buildQuery);
+        
         return new Promise(function(resolve,reject){
           client.query(buildQuery, function(err, result) {
             if(err) {

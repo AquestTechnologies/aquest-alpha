@@ -3,8 +3,7 @@ import Hapi   from 'hapi';
 import React  from 'react';
 import Router from 'react-router';
 import routes from '../shared/routes.jsx';
-//import Flux from '../shared/flux.js';
-//import FluxComponent from 'flummox/component';
+
 import { createRedux, createDispatcher, composeStores } from 'redux';
 import promiseMiddleware from '../shared/middlewares/promiseMiddleware.js';
 import * as reducers from '../shared/reducers';
@@ -12,8 +11,6 @@ import { Provider } from 'redux/react';
 
 import phidippides from '../shared/middlewares/phidippides.js';
 import log from '../shared/utils/logTailor.js';
-
-import * as fetcher from './serverDataFetcher.js'
 
 let server = new Hapi.Server();
 process.env.NODE_ENV = process.env.NODE_ENV || 'development'; // Ca sert à quoi ça ? --> ça permettra de ne plus passer par le webpack-dev-server pour les fichiers statics en production
@@ -39,8 +36,8 @@ server.register([
   
   if (err) throw err;
   server.start(function() {
-    log('info', 'Make it rain! API server started at ' + server.info.uri);
-    log('info', '              ws  server started at ' + server.select('ws').info.uri);
+    log('Make it rain! API server started at ' + server.info.uri);
+    log('              ws  server started at ' + server.select('ws').info.uri);
     console.log('  ___                        _        \n' + // !
                 ' / _ \\                      | |      \n' +
                 '/ /_\\ \\ __ _ _   _  ___  ___| |_    \n' +
@@ -54,6 +51,11 @@ server.register([
   });
 });
 
+// Config des cookies
+/*server.state('STATE_FROM_SERVER', {
+    ttl: null,
+    encoding: 'base64json'
+});*/
 //Routage des assets, inutile en production car derriere un CDN
 /*server.route({
   method: 'GET',
@@ -91,6 +93,7 @@ server.route({
   method: 'GET',
   path: '/{p*}',
   handler: function (request, reply) {
+    log('path: /{p*} ' + JSON.stringify(request.params));
     reply.prerenderer(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
   }
 });
@@ -121,7 +124,7 @@ server.route({
     m = ('' + m).length == 2 ? m : '0' + m;
     s = ('' + s).length == 2 ? s : '0' + s;
     c++;
-    log('info', '\n[' + c + '] ' + h + ':' + m + ':' + s + ' ' + this.request.info.remoteAddress + ':' + this.request.info.remotePort + ' ' + this.request.method + ' ' + this.request.url.path);
+    log('\n[' + c + '] ' + h + ':' + m + ':' + s + ' ' + this.request.info.remoteAddress + ':' + this.request.info.remotePort + ' ' + this.request.method + ' ' + this.request.url.path);
     
     // Servira à lire le fichier HTML
     function readFile (filename, enc) {
@@ -143,7 +146,7 @@ server.route({
     
     // Match la location et les routes, et renvoie le bon layout (Handler) et le state
     router.run( (Handler, routerState) => {
-      log('info', '_____________ router.run _____________');
+      log('_____________ router.run _____________');
       // Pour l'application naissante c'est son premier router.run
       routerState.c = 1;
       // Initialise une nouvelle instance flux
@@ -156,31 +159,19 @@ server.route({
       const store = createRedux(dispatcher);
       
       // Initialise les stores
-      log('info', '... Entering phidippides');
+      log('... Entering phidippides');
       phidippides(routerState, store.getState(), store.dispatch).then(function() {
-        log('info', '... Exiting phidippides');
-        // log('info', Handler);
-        // log('info', 'state_________________________________________________');
-        // log('info', state);
-        // log('info', 'flux_________________________________________________');
-        // log('info', flux);
-        // log('info', '_________________________________________________');
-        // log('info', flux._stores.universeStore.state);
+        log('... Exiting phidippides');
         
-        // On extrait le state de l'instance flux
-        let fluxState = {};
-        for (let s in store.getState()) { 
-          fluxState[s] = store.getState()[s];
-        }
-        let serializedState = JSON.stringify(fluxState);
-        // On escape le charactere ' du state serialisé
-        serializedState = serializedState.replace(/'/g, '&apos;');
-        log('info', '... Flux state serialized');
-        // log('info', serializedState);
+        // On extrait le state du store
+        //let serializedState = JSON.stringify(store.getState()).replace(/</g, '&lsaquo;');
+        // let serializedState = store.getState();
+        log('... State serialized');
+        // log(serializedState);
         
         // rendering de l'app fluxée
         // Doc React pour info : If you call React.render() on a node that already has this server-rendered markup, React will preserve it and only attach event handlers, allowing you to have a very performant first-load experience.
-        log('info', '... Entering React.renderToString');
+        log('... Entering React.renderToString');
         try {
           var mount_me_im_famous = React.renderToString(
             <Provider redux={store}>
@@ -190,23 +181,28 @@ server.route({
             </Provider>
           );
         } catch(err) {
-          log('error', '!!! Error while React.renderToString.');
+          log('error', '!!! Error while React.renderToString');
           log('error', err);
         }
-        log('info', '... Exiting React.renderToString');
+        log('... Exiting React.renderToString');
         
         // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
         readFile('index.html', 'utf8').then(function (html){
           
           // On extrait le contenu du mountNode 
           // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
-          let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
+          //let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
           // Enfin on cale notre élément dans le mountNode.
-          let htmlWithoutFlux = html.replace(placeholder, mount_me_im_famous);
-          let htmlWithFlux = htmlWithoutFlux.replace('id="mountNode"', 'id="mountNode" state-from-server=\'' + serializedState + '\'');
-          response.source  = htmlWithFlux;
+          //let htmlWithoutState = html.replace(placeholder, mount_me_im_famous);
+          //let htmlWithState = htmlWithoutState.replace('id="mountNode"', 'id="mountNode" state-from-server=\'' + serializedState + '\'');
+          let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
+          html = html.replace(placeholder, mount_me_im_famous);
+          //log('store state : ' + JSON.stringify(store.getState()));
+          html = html.replace('</title>','</title>\n\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>');
+          //response.state('STATE_FROM_SERVER', JSON.stringify(store.getState()));
+          response.source = html;
           response.send();
-          log('info', 'Served '+ correctUrl + '\n');
+          log('Served '+ correctUrl + '\n');
         }).catch(function (err) {
           log('error', '!!! Error while reading HTML.');
           log('error', err);

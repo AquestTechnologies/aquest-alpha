@@ -1,85 +1,102 @@
 import isClient from './isClient.js';
 
-let checkClient = isClient();
+let isServer = !isClient();
 
-if(!checkClient){
-  let DbCaller = require('../../server/DbCaller.js');
-  var db = new DbCaller();
-  db.connect();
+if(isServer){
+  var q = require('../../server/queryDb.js');
 }
 
-export function fetchUniverse(){}
-
-export function fetchUniverseByName(){}
-
-export function fetchUniverseByHandle(handle){
-  console.log('+++ NEW Fetching universeByHandle ' + handle);
+export function fetchUniverseByHandle(handle) {
   
-  //format l'objet
   let query = {
     source: 'fetchUniverseByHandle',
     parameters: handle
-  }
+  };
   
-  if(!checkClient){
-    return new Promise(function (resolve, reject) {
-      db.fetchUniverseByHandle(query).then(function(result) {
+  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  
+  return promiseFetch(query, 'api/universe/'+handle);
+}
+
+export function fetchUniverses() {
+
+  let query = {
+    source: 'fetchUniverses',
+    parameters: ''
+  };
+  
+  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  
+  return promiseFetch(query, 'api/universes/');
+}
+
+export function fetchChat(id) {
+  let query = {
+    source: 'fetchChat',
+    parameters: id
+  };
+  
+  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  
+  return promiseFetch(query, 'api/chat/');
+}
+
+export function fetchTopicByHandle(handle) {
+  let query = {
+    source: 'fetchTopicByHandle',
+    parameters: handle
+  };
+  
+  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  
+  return promiseFetch(query, 'api/topic/');
+}
+
+export function fetchTopicContent(id) {
+  let query = {
+    source: 'fetchTopicContent',
+    parameters: id
+  };
+  
+  console.log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  
+  return promiseFetch(query, 'api/topic/content/');
+}
+
+function promiseFetch(query, url){
+  return new Promise(function (resolve, reject) {
+    if(isServer){
+      console.log('+++ server');
+      q.queryDb(query).then(function(result) {
         if(result != null){
-          let universeData = {
-            id:          result.rows[0].universeId,
-            name:        result.rows[0].name,
-            description: result.rows[0].description,
-            chatId:      result.rows[0].chatId,
-          };
-          
-          console.log('fetchUniverseByHandle : ' + JSON.stringify(universeData));
-          
-          return resolve(universeData);
+          console.log(query.source + ' ' + JSON.stringify(result));
+          return resolve(result);
         } else  {
           reject('!!! middleFetcher error');
         }
-      }).catch(function (reason) {
-          console.log('RestAPI ', reason);
       });
-    });
-  } else {
-    console.log('on the client');
-    return new Promise(function(resolve, reject) {
-      // Fais le boulot XHR habituel
+    } else {
+      console.log('+++ client');
       var req = new XMLHttpRequest();
-      req.open('GET', 'api/universe/'+ handle);
+      req.open('GET', url);
   
       req.onload = function() {
-        // Ceci est appelé même pour une 404 etc.
-        // aussi vérifie le statut
         if (req.status == 200) {
-          // Accomplit la promesse avec le texte de la réponse
+          console.log(query.source + ' ' + JSON.stringify(req.response));
           resolve(req.response);
         }
         else {
-          // Sinon rejette avec le texte du statut
-          // qui on l’éspère sera une erreur ayant du sens
           reject(Error(req.statusText));
         }
       };
   
-      // Gère les erreurs réseau
       req.onerror = function() {
         reject(Error("Erreur réseau"));
       };
   
-      // Lance la requête
       req.send();
-    });
-  }
+    }
+  }).catch(function (err) {
+      console.log('RestAPI ', err.stack);
+  });
 }
-
-export function fetchUniverses(){}
-
-export function fetchTopics(){}
-
-export function fetchChat(){}
-
-export function fetchTopicContent() {}
-
-export function fetchTopicByHandle() {}
