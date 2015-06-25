@@ -37,7 +37,7 @@ CREATE TABLE aquest_schema.CHAT(
 CREATE TABLE aquest_schema.UNIVERSE(
   universeId       BIGSERIAL PRIMARY KEY,
   name             TEXT UNIQUE,
-  handler          TEXT,
+  handler          TEXT UNIQUE,
   description      TEXT,
   rules            TEXT,
   picturePath      TEXT,
@@ -107,7 +107,7 @@ CREATE TABLE aquest_schema.USER_UNIVERSE(
 CREATE TABLE aquest_schema.TOPIC(
   topicId      BIGSERIAL PRIMARY KEY,
   title        TEXT,
-  handler      TEXT,
+  handler      TEXT UNIQUE,
   created      TIMESTAMP,
   deleted      BOOLEAN,
   userId       BIGINT,

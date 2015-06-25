@@ -36,6 +36,7 @@ export default function universe(state = initialState, action) {
     };
   case LOAD_UNIVERSE_SUCCESS:
     log('.R. LOAD_UNIVERSE_SUCCESS');
+    log(JSON.stringify(action.result));
     return {
       universe: action.result,
       universes: state.universes,

@@ -5,10 +5,10 @@ import * as universeActions from '../actions/universeActions';
 import * as chatActions     from '../actions/chatActions';
 import * as topicActions    from '../actions/topicActions';
 
-export default function phidippides(routerState, fluxState, dispatch, fetcher) {
+export default function phidippides(routerState, fluxState, dispatch) {
   
   // Configuration
-  const VERBOSE = false;                // Affiche les console.log
+  const VERBOSE = false;                // Affiche les log
   const DEVELOPMENT = true;             // Permet de ne pas appeller checkFormat en production !!! A remplacer par une constante de projet !!!
   const PLACEHOLDER = '__dependency.';  // Le placeholder pour les arguments des actions
   const METHOD_NAME = 'runPhidippides'; // Le nom de la méthode des composants react
@@ -41,7 +41,7 @@ export default function phidippides(routerState, fluxState, dispatch, fetcher) {
   
   let howMany = whatToFetch.length;
   let speakEnglish = howMany > 1 ? ' tasks : ' : ' task : ';
-  log('*** Resolving ' + howMany + speakEnglish, displayOnConsole.toString());
+  log('*** Resolving ' + howMany + speakEnglish + displayOnConsole.toString());
   
   if (howMany === 0) return Promise.resolve();
   if (DEVELOPMENT && !checkFormat(whatToFetch)) return Promise.reject('*** ERROR ! invalid markup found.');
@@ -50,8 +50,7 @@ export default function phidippides(routerState, fluxState, dispatch, fetcher) {
   
 
   function logMeOrNot(type, message) {
-    // if (VERBOSE === true) log(type, message);
-    if (VERBOSE === true) console.log(type);
+    if (VERBOSE === true) log(type, message);
   }
   
   
@@ -200,12 +199,12 @@ export default function phidippides(routerState, fluxState, dispatch, fetcher) {
           clearTasks(failedTasks).then(function() {
             resolve();
           }).catch(function(why) {
-            console.log('error', '*** ERROR ! clearTasks failed ' + why);
+            log('error', '*** ERROR ! clearTasks failed 2');
             reject(why);
           });
         }
       }).catch(function(why) {
-        console.log('error', '*** ERROR ! clearTasks');
+        log('error', '*** ERROR ! clearTasks failed 1');
         reject(why);
       });
     });
@@ -237,7 +236,7 @@ export default function phidippides(routerState, fluxState, dispatch, fetcher) {
               logMeOrNot('*** clearOneTask ' + task.shouldBePresent + ' OK [present > wrong value > dependency complete]');
               resolve();
             }).catch(function(why) {
-              console.log('error', '*** ERROR ! clearOneTask [present > wrong value > dependency complete]');
+              log('error', '*** ERROR ! clearOneTask [present > wrong value > dependency complete]');
               reject(why);
             });
           }
@@ -258,7 +257,7 @@ export default function phidippides(routerState, fluxState, dispatch, fetcher) {
             logMeOrNot('*** clearOneTask ' + task.shouldBePresent + ' OK [missing > dependency complete]');
             resolve();
           }).catch(function(why) {
-            console.log('error', '*** ERROR ! clearOneTask [missing > dependency complete]');
+            log('error', '*** ERROR ! clearOneTask [missing > dependency complete]');
             reject(why);
           });
         }
@@ -289,29 +288,14 @@ export default function phidippides(routerState, fluxState, dispatch, fetcher) {
     }
     
     let args     = ifNot[1];
-    let realArgs = {
-      fetcher: null,
-      args: []
-    };
-    
-    let fetchFunction = raw[1].replace('load','fetch');
-    console.log('fetcher ' + fetcher);
-    console.log('info fectFunction : ' + fetchFunction);
-    
-    /*if(fetcher && fetcher[fetchFunction]){
-      realArgs.args.push({fetch: fetcher[fetchFunction]});
-    }*/
-    if(fetcher && fetcher[fetchFunction]){
-      console.log('fetcher présent');
-      realArgs.fetcher = fetcher[fetchFunction];
-    }
+    let realArgs = [];
     
     // Traitement des arguments
     args.forEach(function(arg) {
       logMeOrNot('*** callActionCreator processing arg ' + arg);
       // Si un argument ne possède pas PLACEHOLDER alors il est assimilable tel quel
       if (typeof arg !== 'string' || arg.search(PLACEHOLDER) === -1) {
-        realArgs.args.push(arg);
+        realArgs.push(arg);
       }
       else { // Sinon il faut le traiter
         logMeOrNot('*** callActionCreator \'' + PLACEHOLDER + '\' found in arg ' + arg);
@@ -333,18 +317,15 @@ export default function phidippides(routerState, fluxState, dispatch, fetcher) {
           }
         });
         logMeOrNot('*** callActionCreator realArg is ' + realArg);
-        realArgs.args.push(realArg);
+        realArgs.push(realArg);
       }
     });
-    
-    console.log(JSON.stringify(realArgs));
-    
     logMeOrNot('*** callActionCreator args processing complete, real args are ' + realArgs);
     return new Promise(function(resolve, reject) {
       // Appel de l'action creator
       dispatch(creator.apply(null, realArgs)).then(function(data) {
         logMeOrNot('*** callActionCreator dispatch resolved :');
-        logMeOrNot(data);
+        logMeOrNot('*** ' + data);
         resolve(data.result);
       }).catch(function(why) {
         log('error', '*** callActionCreator dispatch failed');

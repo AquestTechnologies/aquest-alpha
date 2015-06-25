@@ -7,7 +7,7 @@ class Inventory extends React.Component {
   // Load les données initiales
   static runPhidippides(routerState) {
     return [{
-      on:              ['server', 'client'],
+      on:              ['server'],
       shouldBePresent: 'topic.inventory',
       dependency:      'universe.universe',
       ifNot:           ['topicActions.loadInventory', ['__dependency.id']]  

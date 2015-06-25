@@ -18,7 +18,7 @@ class Universe extends React.Component {
       shouldHaveValue: correctValue,
       ifNot:           ['universeActions.loadUniverseByHandle', [correctArg]]  
     },{
-      on:              ['server', 'client'],
+      on:              ['server'],
       shouldBePresent: 'chat.chat',
       dependency:      correctDependency,
       ifNot:           ['chatActions.loadChat', ['__dependency.chatId']]
@@ -36,6 +36,7 @@ class Universe extends React.Component {
           inventory={this.props.inventory}
           topic={this.props.topic}
           setTopic={this.props.setTopic}
+          loadTopicContent={this.props.loadTopicContent}
         />
         <Chat 
           chat={this.props.chat} 

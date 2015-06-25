@@ -10,13 +10,11 @@ Aquest Technologies © 2015
 - [Emoji](http://www.emoji-cheat-sheet.com)
 
 
-### ToDoList 23/06 --> 26/06
+### En manque d'idées ?
               
 - [ ] IsoFetch
-- [ ] Dans la DB : remplace trucid par trucId
-- [x] Correction logTailor
-- [ ] window.STATE\_FROM_SERVER
-- [ ] chalk --> https://github.com/sindresorhus/chalk
+- [ ] Utiliser proptype et le context pour passer les données user et les actions
+- [ ] Dans les requetes SQL : double quotes : remplace trucid par trucId
 - [ ] loading bar
 - [ ] Immutable ?
 - [ ] Implementer Redux 1.0
@@ -26,16 +24,21 @@ Aquest Technologies © 2015
 - [ ] mettre en place un outil scrum, exemple : https://github.com/aliasaria/scrumblr
 - [ ] mettre en place RabbitMQ
 - [ ] faire les liens Hapijs <-> webSocket <-> rabbitMQ <-> postgres 
+- [ ] SASS
+- [ ] responsive design
+- [x] window.STATE\_FROM_SERVER
+- [x] chalk --> https://github.com/sindresorhus/chalk
+- [x] Correction logTailor
 
 
 ### Convention de nommage des log :
 | Préfixe | Signification |
-| :-----: | :------------ | |
+| :-----: | :------------ |
 | !!! | erreur |
 | ... | App client ou server |
 | *** | Phidippides |
 | +++ | Fetchers |
-| ___ | Websocket |
+| _w_ | Websocket |
 | .R. | Reducers |
 | .A. | ActionCreators |
 | .c. | Composants React |
@@ -54,4 +57,8 @@ Aquest Technologies © 2015
 ### Visualiser les tables de la base de données
 - psql aquestdb
 - \dt aquest_schema.*
-- 
+
+
+### Ports ouverts sur l'instance de dev
+
+tcp:8080,8081,8082,8083,8084,8085,8888,8889,8890,3000,9090,9091,3001

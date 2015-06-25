@@ -3,6 +3,7 @@ import Hapi   from 'hapi';
 import React  from 'react';
 import Router from 'react-router';
 import routes from '../shared/routes.jsx';
+import config from 'config';
 
 import { createRedux, createDispatcher, composeStores } from 'redux';
 import promiseMiddleware from '../shared/middlewares/promiseMiddleware.js';
@@ -12,14 +13,14 @@ import { Provider } from 'redux/react';
 import phidippides from '../shared/middlewares/phidippides.js';
 import log from '../shared/utils/logTailor.js';
 
+let serverConfig = config.get('server');
+console.log(serverConfig);
 let server = new Hapi.Server();
-process.env.NODE_ENV = process.env.NODE_ENV || 'development'; // Ca sert à quoi ça ? --> ça permettra de ne plus passer par le webpack-dev-server pour les fichiers statics en production
+// process.env.NODE_ENV = process.env.NODE_ENV || 'development'; // Ca sert à quoi ça ? --> ça permettra de ne plus passer par le webpack-dev-server pour les fichiers statics en production
 
 // Distribution des ports pour l'API et les websockets
-const portApi = process.env.PORT || 8080;
-const portWs = Number(portApi) + 1;
-server.connection({ port: portApi, labels: ['api'] });
-server.connection({ port: portWs, labels: ['ws'] });
+server.connection({ port: serverConfig.apiPort, labels: ['api'] });
+server.connection({ port: serverConfig.wsPort, labels: ['ws'] });
 
 //lance webpack-dev-server si on est pas en production
 if (process.env.NODE_ENV !== 'production') {
@@ -85,7 +86,7 @@ server.route({
   method: 'GET',
   path: '/',
   handler: function (request, reply) {
-    reply.prerenderer(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
+    reply.prerenderer();
   }
 });
 
@@ -93,7 +94,7 @@ server.route({
   method: 'GET',
   path: '/{p*}',
   handler: function (request, reply) {
-    reply.prerenderer(request.url, request.info.remoteAddress, request.info.remotePort, request.method);
+    reply.prerenderer();
   }
 });
 
@@ -109,7 +110,7 @@ server.route({
 (function() {
   let c = 0;
   
-  server.decorate('reply', 'prerenderer', function (url, ip, port, method) {
+  server.decorate('reply', 'prerenderer', function () {
     
     // Intercepte la réponse
     let response = this.response().hold();
@@ -136,7 +137,8 @@ server.route({
     }
     
     // transforme coco.com/truc/ en coco.com/truc
-    let correctUrl = url.path.slice(-1) === '/' && url.path !== '/' ? url.path.slice(0, -1) : url.path;
+    let url = this.request.url.path;
+    let correctUrl = url.slice(-1) === '/' && url !== '/' ? url.slice(0, -1) : url;
     // Initialise le router
     const router = Router.create({
       routes: routes,
@@ -190,15 +192,16 @@ server.route({
           
           // On extrait le contenu du mountNode 
           // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
-          //let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
-          // Enfin on cale notre élément dans le mountNode.
-          //let htmlWithoutState = html.replace(placeholder, mount_me_im_famous);
-          //let htmlWithState = htmlWithoutState.replace('id="mountNode"', 'id="mountNode" state-from-server=\'' + serializedState + '\'');
           let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
+          // Enfin on cale notre élément dans le mountNode.
           html = html.replace(placeholder, mount_me_im_famous);
-          //log('store state : ' + JSON.stringify(store.getState()));
-          html = html.replace('</title>','</title>\n\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>');
-          //response.state('STATE_FROM_SERVER', JSON.stringify(store.getState()));
+          // html = html.replace('</title>','</title>\n\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>');
+          html = html.replace('</body>',
+            '\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>\n' +
+            '\t<script src="http://130.211.68.244:' + serverConfig.WDSPort + '/webpack-dev-server.js"></script>\n' +
+            '\t<script src="http://130.211.68.244:' + serverConfig.WDSPort + '/static/bundle.js"></script>\n' +
+            '</body>'
+          );
           response.source = html;
           response.send();
           log('Served '+ correctUrl + '\n');

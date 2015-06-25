@@ -50,7 +50,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
   
 
   function logMeOrNot(type, message) {
-if (VERBOSE === true) log(type, message);
+    if (VERBOSE === true) log(type, message);
   }
   
   
@@ -325,7 +325,7 @@ if (VERBOSE === true) log(type, message);
       // Appel de l'action creator
       dispatch(creator.apply(null, realArgs)).then(function(data) {
         logMeOrNot('*** callActionCreator dispatch resolved :');
-        logMeOrNot(data);
+        logMeOrNot('*** ' + data);
         resolve(data.result);
       }).catch(function(why) {
         log('error', '*** callActionCreator dispatch failed');

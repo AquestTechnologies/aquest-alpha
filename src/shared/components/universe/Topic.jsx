@@ -4,19 +4,10 @@ class Topic extends React.Component {
   
   // Load les données initiales
   static runPhidippides(routerState) {
-    if (routerState.c === 1) return [{
-      taskName: 'topic',
-      dependency: null,
-      shouldBePresent: {
-        store: 'topicStore',
-        data: 'topic',
-        shouldHaveValue: null
-      },
-      ifNot:  {
-        actions: 'topicActions',
-        creator: 'loadTopicByHandle',
-        args : [routerState.params.topicHandle]
-      }
+    return [{
+      on:              ['server'],
+      shouldBePresent: 'topic.topic',
+      ifNot:           ['topicActions.loadTopicByHandle', [routerState.params.topicHandle]]
     }];
   }
   
@@ -26,7 +17,7 @@ class Topic extends React.Component {
   }
   
   componentWillMount() {
-    if(!this.props.topic.content)  this.props.actions.loadTopicContent(this.props.topic.handle);
+    if(!this.props.topic.content) this.props.loadTopicContent(this.props.topic.handle);
     this.setState({ topic: this.props.topic });
   }
   

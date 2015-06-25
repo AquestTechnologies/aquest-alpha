@@ -18,26 +18,28 @@ export function queryDb(queryP) {
     log('error', err);
   };
   
-  let buildQuery = '';
+  let buildQuery = null;
   let queryCallback = null;
   log('queryDb : ' + JSON.stringify(queryP));
   
   switch (queryP.source) {
     case 'fetchUniverses':
-       buildQuery = 'SELECT universeid, name, description, picturepath, handler, chatid FROM aquest_schema.universe WHERE handler=\'' + queryP.parameters + '\'';
+       buildQuery = 'SELECT universeid, name, description, picturepath, handler, chatid FROM aquest_schema.universe';
       
       log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
         let universes = [];
-        
+    
         for(let row in result.rows){
+          let r = result.rows[row];
+          
           universes.push({
-            id:          row.universeid,
-            chatId:      row.chatid,
-            name:        row.name,
-            description: row.description,
-            picturePath: 'http://130.211.68.244:8080/img/'+row.picturepath,
-            handle:      row.handler
+            id:          r.universeid,
+            chatId:      r.chatid,
+            name:        r.name,
+            description: r.description,
+            picturePath: 'http://130.211.68.244:8080/img/'+r.picturepath,
+            handle:      r.handler
           });
         }
         
@@ -51,13 +53,14 @@ export function queryDb(queryP) {
       
       log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
+        let r=result.rows[0];
         return ({
-          id:          result.rows[0].universeid,
-          chatId:      result.rows[0].chatid,
-          name:        result.rows[0].name,
-          description: result.rows[0].description,
-          picturePath: 'http://130.211.68.244:8080/img/'+result.rows[0].picturepath,
-          handle:      result.rows[0].handler
+          id:          r.universeid,
+          chatId:      r.chatid,
+          name:        r.name,
+          description: r.description,
+          picturePath: 'http://130.211.68.244:8080/img/'+r.picturepath,
+          handle:      r.handler
         });
       }
       break;
@@ -77,17 +80,50 @@ export function queryDb(queryP) {
         let messagesChat = [];
         
         for(let row in result.rows){
+          let r=result.rows[row] ;
+          
           messagesChat.push({
-            id:      row.id,
-            chatId:  row.queryP.parameters,
-            name:    row.username,
-            content: row.content
+            id:      r.id,
+            chatId:  r.queryP.parameters,
+            name:    r.username,
+            content: r.content
           });
         }
         
         return messagesChat;
       }
       break;
+      
+    case 'fetchInventory':
+       
+      buildQuery = 
+      'SELECT \
+        topicId, title, handler, created, user.username, chatId \
+      FROM \
+          aquest_schema.topic, aquest_schema.user \
+      WHERE \
+        topicId=\'' + queryP.parameters + '\' AND user.userId = topic.userId';
+      
+      log('will trigger query : ' + buildQuery);
+      queryCallback = function(result){
+        let universes = [];
+        
+        for(let row in result.rows){
+          let r=result.rows[row];
+          universes.push({
+            topicId:  r.topiId,
+            title:    r.chatId,
+            handler:  r.handler,
+            created:  r.created,
+            username: r.username,
+            userId:   r.userId,
+            chatId:   r.chatId
+          });
+        }
+        
+        return universes;
+      }
+      break;  
       
     case 'fetchTopicByHandle':
       
@@ -101,13 +137,14 @@ export function queryDb(queryP) {
       
       log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
+        let r=result.rows[0];
         return ({
-          id:          result.rows[0].universeid,
-          chatId:      result.rows[0].chatid,
-          name:        result.rows[0].name,
-          description: result.rows[0].description,
-          picturePath: 'http://130.211.68.244:8080/img/'+result.rows[0].picturepath,
-          handle:      result.rows[0].handler
+          id:          r.universeid,
+          chatId:      r.chatid,
+          name:        r.name,
+          description: r.description,
+          picturePath: 'http://130.211.68.244:8080/img/'+r.picturepath,
+          handle:      r.handler
         });
       }
       break;
@@ -115,6 +152,7 @@ export function queryDb(queryP) {
     case 'fetchTopicContent':
       
       // atomeTopicId, content, ordered, deleted, topicId, atomeId
+      buildQuery =
       'SELECT \
         atome_topic.content \
       FROM \
@@ -126,25 +164,53 @@ export function queryDb(queryP) {
         let topicContents = [];
         
         for(let row in result.rows){
+          let r = result.rows[row];
           topicContents.push({
-            id:      row.id,
-            content: row.content
+            id:      r.id,
+            content: r.content
           });
         }
         
         return topicContents;
       }
       break;
+      
+    case 'addChatMessage':
+      // atomeTopicId, content, ordered, deleted, topicId, atomeId
+      let chatId = queryP.parameters.chatId;
+      let messageContent = queryP.parameters.messageContent;
+      buildQuery = 
+      'with addMessage as ( \
+        INSERT INTO aquest_schema.message \
+          (chatId, created, deleted) \
+        VALUES \
+          (\''+ chatId + '\', CURRENT_TIMESTAMP, \'' +  false +'\') \
+        RETURNING messageId\
+      ) \
+      INSERT INTO aquest_schema.atome_message \
+      SELECT messageId FROM addMessage \
+      RETURNING messageId';
+      
+      log('will trigger query : ');
+      log(buildQuery.replace('/\\\\n/',''));
+      queryCallback = function(result){
+        
+        return result;
+      }
+      break;
     
     default:
-      buildQuery = 'SELECT universeId, name, description, handler, chatId FROM aquest_schema.universe WHERE handler=\'' + queryP.parameters + '\'';
+      // buildQuery = 'SELECT universeId, name, description, handler, chatId FROM aquest_schema.universe WHERE handler=\'' + queryP.parameters + '\'';
+      return null;
       break;
   }
   
   return new Promise(function(resolve,reject){
-    client.query(buildQuery, function(err, result) {
-      handleQuery(resolve, reject, err, result, queryCallback)
-    });
+    if(buildQuery){
+      client.query(buildQuery, function(err, result) {
+        handleQuery(resolve, reject, err, result, queryCallback);
+      });
+    }
   });
   
   function connect(){
@@ -168,7 +234,7 @@ export function queryDb(queryP) {
       reject('error running query : ' + err);
     }
     
-    if(result.rows[0] !== 'undefined'){
+    if(result && result.rows && result.rows[0] !== 'undefined'){
       if(callback){
         resolve(callback(result));
       }

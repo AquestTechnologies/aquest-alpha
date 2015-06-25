@@ -1,3 +1,4 @@
+require('./less/app.less');
 import phidippides  from '../shared/middlewares/phidippides.js';
 import log          from '../shared/utils/logTailor.js';
 import React        from 'react';
@@ -17,7 +18,7 @@ io.on('message', function (message) {
   log('___ Server says ' + message);
 });*/
 
-log('warn', 'Welcome to Aquest v0.0.2!');
+log('Welcome to Aquest v0.0.2!');
 log('... Initializing Redux and React Router');
 /**
  * limite maximal par cookie pour le navigateur le plus exigeant 4093 bytes : http://browsercookielimits.squawky.net/
@@ -35,8 +36,8 @@ log('... Initializing Redux and React Router');
 //let encodedStateFromServer = document.cookie.match(new RegExp('STATE_FROM_SERVER=([^;]+)'));
 //log('encodedStateFromServer ' + JSON.stringify(encodedStateFromServer));
 //let stateFromServer = encodedStateFromServer ? JSON.parse(window.atob(encodedStateFromServer[1])) : '';
-let stateFromServer = window.STATE_FROM_SERVER ? window.STATE_FROM_SERVER : '';
-log('stateFromServer ' + stateFromServer);
+let stateFromServer = window.STATE_FROM_SERVER || {};
+// log('stateFromServer ' + stateFromServer);
 let dispatcher = createDispatcher(
   composeStores(reducers),
   [promiseMiddleware]
@@ -91,5 +92,3 @@ router.run( (Handler, routerState) => {
     log('error', err);
   });
 });
-
-require('./less/app.less');

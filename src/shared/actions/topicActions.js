@@ -1,7 +1,8 @@
 import log from '../utils/logTailor.js';
 import {
   fetchInventory,
-  fetchTopicByHandle
+  fetchTopicByHandle,
+  fetchTopicContent
 } from '../utils/fetchers.js';
 import { 
   LOAD_INVENTORY_REQUEST,
@@ -10,6 +11,9 @@ import {
   LOAD_TOPIC_CONTENT_REQUEST,
   LOAD_TOPIC_CONTENT_SUCCESS,
   LOAD_TOPIC_CONTENT_FAILURE,
+  LOAD_TOPIC_BY_HANDLE_REQUEST,
+  LOAD_TOPIC_BY_HANDLE_SUCCESS,
+  LOAD_TOPIC_BY_HANDLE_FAILURE,
   SET_TOPIC
 } from '../constants/ActionTypes';
 
@@ -22,12 +26,21 @@ export function loadInventory(universeId) {
   };
 }
 
-export function loadTopicContent(topicId) {
-  log('.A. loadTopicContent : ' + topicId);
+export function loadTopicByHandle(handle) {
+  log('.A. loadTopicByHandle : ' + handle);
+  return {
+    types: [LOAD_TOPIC_BY_HANDLE_REQUEST, LOAD_TOPIC_BY_HANDLE_SUCCESS, LOAD_TOPIC_BY_HANDLE_FAILURE],
+    promise: fetchTopicByHandle(handle),
+    data: handle
+  };
+}
+
+export function loadTopicContent(id) {
+  log('.A. loadTopicContent : ' + id);
   return {
     types: [LOAD_TOPIC_CONTENT_REQUEST, LOAD_TOPIC_CONTENT_SUCCESS, LOAD_TOPIC_CONTENT_FAILURE],
-    promise: loadTopicContent(topicId),
-    data: topicId
+    promise: fetchTopicContent(id),
+    data: id
   };
 }
 

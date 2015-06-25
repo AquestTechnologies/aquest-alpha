@@ -1,24 +1,27 @@
 import webpack          from 'webpack';
 import webpackDevServer from 'webpack-dev-server';
-import config           from '../../webpack.config';
+import WDSConfig        from '../../webpack.config';
 import log              from '../shared/utils/logTailor.js';
+import chalk            from 'chalk';
+import config           from 'config';
 
 export default function(){
   
-  let bundle = webpack(config);
+  let bundle = webpack(WDSConfig);
+  let port = config.get('server.WDSPort');
   let bundleStart;
   
   bundle.plugin('compile', function() {
-    log('Bundling...');
+    log(chalk.green('Bundling...'));
     bundleStart = Date.now();
   });
   
   bundle.plugin('done', function() {
-    log('Bundled in ' + (Date.now() - bundleStart) + 'ms!');
+    log(chalk.green('Bundled in ' + (Date.now() - bundleStart) + 'ms!'));
   });
   
   new webpackDevServer(bundle, {
-    publicPath: config.output.publicPath,
+    publicPath: WDSConfig.output.publicPath,
     noInfo : true,
     hot: true,
     historyApiFallback: true,
@@ -35,10 +38,10 @@ export default function(){
       path:    /^(?!.*\/static\/)(.*)$/, 
       target:  'http://localhost:8080/'
     }]
-  }).listen(3000, '0.0.0.0', function (err) {
+  }).listen(port, '0.0.0.0', function (err) {
     if (err) {
       log(err);
     }
-    log('WDS listening at 0.0.0.0:3000');
+    log('WDS listening at 0.0.0.0:' + port);
   });
 }

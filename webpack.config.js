@@ -1,6 +1,9 @@
 var webpack = require('webpack');
+var config = require('config');
 
-var config = {
+var WDSPort = config.get('server.WDSPort');
+
+var WDSConfig = {
   devtool: 'eval', //Il faudra enlever ce truc pour la prod :o
   entry: [
     'webpack/hot/dev-server',
@@ -9,7 +12,7 @@ var config = {
   output: {
     path: __dirname + '/dist',
     filename: 'bundle.js',
-    publicPath: 'http://130.211.68.244:3000/static/' // https://github.com/webpack/webpack-dev-server/issues/135
+    publicPath: 'http://130.211.68.244:' + WDSPort + '/static/' // https://github.com/webpack/webpack-dev-server/issues/135
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
@@ -52,8 +55,8 @@ var config = {
 //optimisation pour la prod 
 deps.forEach(function (dep) {
   let depPath = path.resolve(node_modules_dir, dep);
-  config.resolve.alias[dep.split(path.sep)[0]] = depPath;
-  config.module.noParse.push(depPath);
+  WDSConfig.resolve.alias[dep.split(path.sep)[0]] = depPath;
+  WDSConfig.module.noParse.push(depPath);
 });*/
 
-module.exports = config;
+module.exports = WDSConfig;

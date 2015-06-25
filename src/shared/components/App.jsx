@@ -6,6 +6,7 @@ import {Connector}          from 'redux/react';
 
 import * as universeActions from '../actions/universeActions';
 import * as chatActions     from '../actions/chatActions';
+import * as topicActions     from '../actions/topicActions';
 
 import LoadingBar           from './common/LoadingBar.jsx';
 
@@ -59,6 +60,7 @@ export default class App extends React.Component {
               chat={chat}
               {...bindActionCreators(universeActions, dispatch)} 
               {...bindActionCreators(chatActions, dispatch)} 
+              {...bindActionCreators(topicActions, dispatch)} 
             />
           </div>
         }

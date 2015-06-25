@@ -33,20 +33,33 @@ exports.register = function (server, options, next) {
   });
   
   server.route({
-    method: 'POST',
-    path: '/api/chat/{id}&{number}&{password}',
+    method: 'GET',
+    path: '/api/chat/{id}',
     handler: function (request, reply) {
-      log('info','request params : ' + JSON.stringify(request.params));
+      log('info','request params all universes');
       
-      if(request.params.password && request.params.password === 'AquestTechnologiesDHEABE'){
-        let query = {
-          source: 'insertChatMessages',
-          parameters: { 'id': request.params.id, 'number': request.params.number}
-        };
-        
-        log('info','request params : ' + JSON.stringify(query));
-        //return reply(promiseRestFetch(query));
-      }
+      let query = {
+        source: 'fetchChat',
+        parameters: request.params.id
+      };
+      
+      return reply(promiseRestFetch(query));
+    }
+  });
+  
+  server.route({
+    method: 'POST',
+    path: '/api/message/{chatId}&{messageContent}',
+    handler: function (request, reply) {
+      log('info','request params insert chat message');
+      log(request.params);
+      let query = {
+        source: 'addChatMessage',
+        parameters: {chatId: request.params.chatId, messageContent: request.params.messageContent}
+      };
+      
+      log(query);
+      return reply(promiseRestFetch(query));
     }
   });
   
