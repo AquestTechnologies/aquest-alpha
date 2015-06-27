@@ -1,18 +1,18 @@
 var webpack = require('webpack');
-var config = require('config');
+var devConfig = require('./config/development_server.js');
 
-var WDSPort = config.get('server.WDSPort');
+var config = devConfig();
 
 var WDSConfig = {
-  devtool: 'eval', //Il faudra enlever ce truc pour la prod :o
+  devtool: 'eval',
   entry: [
     'webpack/hot/dev-server',
     './src/client/client.js'
   ],
   output: {
-    path: __dirname + '/dist',
-    filename: 'bundle.js',
-    publicPath: 'http://130.211.68.244:' + WDSPort + '/static/' // https://github.com/webpack/webpack-dev-server/issues/135
+    path: __dirname + '/' + config.assetsDir,
+    filename: config.assetsFileName,
+    publicPath: 'http://' + config.host + ':' + config.ports.wds + '/' + config.assetsPublicDir + '/' // https://github.com/webpack/webpack-dev-server/issues/135
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),

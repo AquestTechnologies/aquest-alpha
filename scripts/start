@@ -9,5 +9,5 @@
 #   `cp -r ./src/client/img ./dist/img`;
 # fi
 cp ./src/client/img/* ./dist/img/
-./node_modules/node-babel/node_modules/babel/bin/babel-node ./src/server/server.js
+NODE_ENV='development' ./node_modules/node-babel/node_modules/babel/bin/babel-node ./src/server/server.js
 #node --harmony ./src/server/dev_server.js

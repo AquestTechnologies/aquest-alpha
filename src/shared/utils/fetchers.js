@@ -283,7 +283,7 @@ export function fetchInventory(universeId) {
 }
 
 export function fetchChat(chatId) {
-  
+  //chatId = chatId.toString();
   log('+++ Fetching chat ' + chatId);
   let messages = [];
   for (let i = 0; i < 100; i++) {

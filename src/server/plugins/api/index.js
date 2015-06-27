@@ -49,13 +49,13 @@ exports.register = function (server, options, next) {
   
   server.route({
     method: 'POST',
-    path: '/api/message/{chatId}&{messageContent}',
+    path: '/api/message/{userId}&{chatId}&{messageContent}',
     handler: function (request, reply) {
       log('info','request params insert chat message');
       log(request.params);
       let query = {
         source: 'addChatMessage',
-        parameters: {chatId: request.params.chatId, messageContent: request.params.messageContent}
+        parameters: {userId: request.params.userId, chatId: request.params.chatId, messageContent: request.params.messageContent}
       };
       
       log(query);

@@ -9,5 +9,5 @@
 #   `cp -r ./src/client/img ./dist/img`;
 # fi
 cp ./src/client/img/* ./dist/img/
-./node_modules/node-babel/node_modules/babel/bin/babel-node ./src/server/server.js --NODE_CONFIG='{"server": {"apiPort": 9090, "wsPort": 9091, "WDSPort": 3001}}'
+NODE_ENV='development' PORTS_OFFSET=1 ./node_modules/node-babel/node_modules/babel/bin/babel-node ./src/server/server.js
 #node --harmony ./src/server/dev_server.js

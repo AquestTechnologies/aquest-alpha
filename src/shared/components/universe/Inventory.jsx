@@ -25,7 +25,7 @@ class Inventory extends React.Component {
   
   componentWillMount() {
     if(this.props.universe.id !== this.props.inventory.universeId) {
-      // this.props.actions.loadInventory(this.props.universe.id);
+      this.props.loadInventory(this.props.universe.id);
     } else {
       this.setState({ inventory: this.props.inventory });
     }

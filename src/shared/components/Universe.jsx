@@ -37,6 +37,7 @@ class Universe extends React.Component {
           topic={this.props.topic}
           setTopic={this.props.setTopic}
           loadTopicContent={this.props.loadTopicContent}
+          loadInventory={this.props.loadInventory}
         />
         <Chat 
           chat={this.props.chat} 

@@ -2,7 +2,7 @@ import log from '../utils/logTailor.js';
 import { 
   fetchUniverseByHandle,
   fetchUniverses
-} from '../utils/fetchers.new.js'
+} from '../utils/fetchers.js'
 import { 
   SET_UNIVERSE,
   LOAD_UNIVERSE_REQUEST,

@@ -1,30 +1,30 @@
-import fs     from 'fs';
-import Hapi   from 'hapi';
-import React  from 'react';
-import Router from 'react-router';
-import routes from '../shared/routes.jsx';
-import config from 'config';
+import fs         from 'fs';
+import Hapi       from 'hapi';
+import React      from 'react';
+import Router     from 'react-router';
 
 import { createRedux, createDispatcher, composeStores } from 'redux';
-import promiseMiddleware from '../shared/middlewares/promiseMiddleware.js';
-import * as reducers from '../shared/reducers';
-import { Provider } from 'redux/react';
+import { Provider }                                     from 'redux/react';
 
-import phidippides from '../shared/middlewares/phidippides.js';
-import log from '../shared/utils/logTailor.js';
+import * as reducers      from '../shared/reducers';
+import routes             from '../shared/routes.jsx';
+import log                from '../shared/utils/logTailor.js';
+import devConfig          from '../../config/development_server.js';
+import phidippides        from '../shared/middlewares/phidippides.js';
+import promiseMiddleware  from '../shared/middlewares/promiseMiddleware.js';
 
-let serverConfig = config.get('server');
-console.log(serverConfig);
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+log('Starting Node in ' + process.env.NODE_ENV + ' mode');
+
+let serverConfig = devConfig();
 let server = new Hapi.Server();
-// process.env.NODE_ENV = process.env.NODE_ENV || 'development'; // Ca sert à quoi ça ? --> ça permettra de ne plus passer par le webpack-dev-server pour les fichiers statics en production
 
 // Distribution des ports pour l'API et les websockets
-server.connection({ port: serverConfig.apiPort, labels: ['api'] });
-server.connection({ port: serverConfig.wsPort, labels: ['ws'] });
+server.connection({ port: serverConfig.ports.api, labels: ['api'] });
+server.connection({ port: serverConfig.ports.ws,  labels: ['ws']  });
 
 //lance webpack-dev-server si on est pas en production
-if (process.env.NODE_ENV !== 'production') {
-  //lancement du webpack-dev-server
+if (process.env.NODE_ENV === 'development') {
   let serverBundler = require('./dev_server.js'); 
   serverBundler();
 }
@@ -33,9 +33,10 @@ if (process.env.NODE_ENV !== 'production') {
 server.register([
   {register: require('./plugins/websocket')},
   {register: require('./plugins/api')}
-], function (err) {
-  
+], 
+function (err) {
   if (err) throw err;
+  
   server.start(function() {
     log('Make it rain! API server started at ' + server.info.uri);
     log('              ws  server started at ' + server.select('ws').info.uri);
@@ -162,17 +163,8 @@ server.route({
       // Initialise les stores
       log('... Entering phidippides');
       phidippides(routerState, store.getState(), store.dispatch).then(function() {
-        log('... Exiting phidippides');
+        log('info', '... Exiting phidippides', '... Entering React.renderToString');
         
-        // On extrait le state du store
-        //let serializedState = JSON.stringify(store.getState()).replace(/</g, '&lsaquo;');
-        // let serializedState = store.getState();
-        log('... State serialized');
-        // log(serializedState);
-        
-        // rendering de l'app fluxée
-        // Doc React pour info : If you call React.render() on a node that already has this server-rendered markup, React will preserve it and only attach event handlers, allowing you to have a very performant first-load experience.
-        log('... Entering React.renderToString');
         try {
           var mount_me_im_famous = React.renderToString(
             <Provider redux={store}>
@@ -182,8 +174,7 @@ server.route({
             </Provider>
           );
         } catch(err) {
-          log('error', '!!! Error while React.renderToString');
-          log('error', err);
+          log('error', '!!! Error while React.renderToString', err);
         }
         log('... Exiting React.renderToString');
         
@@ -198,20 +189,18 @@ server.route({
           // html = html.replace('</title>','</title>\n\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>');
           html = html.replace('</body>',
             '\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>\n' +
-            '\t<script src="http://130.211.68.244:' + serverConfig.WDSPort + '/webpack-dev-server.js"></script>\n' +
-            '\t<script src="http://130.211.68.244:' + serverConfig.WDSPort + '/static/bundle.js"></script>\n' +
+            '\t<script src="http://' + serverConfig.host + ':' + serverConfig.ports.wds + '/webpack-dev-server.js"></script>\n' +
+            '\t<script src="http://' + serverConfig.host + ':' + serverConfig.ports.wds + '/' + serverConfig.assetsPublicDir + '/' + serverConfig.assetsFileName + '"></script>\n' +
             '</body>'
           );
           response.source = html;
           response.send();
           log('Served '+ correctUrl + '\n');
         }).catch(function (err) {
-          log('error', '!!! Error while reading HTML.');
-          log('error', err);
+          log('error', '!!! Error while reading HTML.', err);
         });
       }).catch(function(err) {
-        log('error', '!!! Error while Phidippides.');
-        log('error', err);
+        log('error', '!!! Error while Phidippides.', err);
       });
     });
   });
