@@ -1,18 +1,18 @@
 require('./less/app.less');
-import phidippides  from '../shared/middlewares/phidippides.js';
+import phidippides  from '../shared/utils/phidippides.js';
 import log          from '../shared/utils/logTailor.js';
 import React        from 'react';
 import Router       from 'react-router';  
 import routes       from '../shared/routes.jsx';
 
 import { createRedux, createDispatcher, composeStores } from 'redux';
-import promiseMiddleware from '../shared/middlewares/promiseMiddleware.js';
+import promiseMiddleware from '../shared/utils/promiseMiddleware.js';
 import * as reducers from '../shared/reducers';
 
 import { Provider } from 'redux/react';
 
 /*import Websocket from 'socket.io-client';
-const io = Websocket('http://130.211.68.244:8081');
+const io = Websocket('http://130.211.68.244:8081'); //Prendre le bon port
 
 io.on('message', function (message) {
   log('___ Server says ' + message);

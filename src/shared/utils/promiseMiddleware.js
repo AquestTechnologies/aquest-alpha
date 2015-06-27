@@ -1,4 +1,4 @@
-import log from '../utils/logTailor.js';
+import log from './logTailor.js';
 // Copié depuis https://github.com/gaearon/redux/blob/master/docs/middleware.md
 
 export default function promiseMiddleware(next) {

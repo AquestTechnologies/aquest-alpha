@@ -10,11 +10,11 @@ import * as reducers      from '../shared/reducers';
 import routes             from '../shared/routes.jsx';
 import log                from '../shared/utils/logTailor.js';
 import devConfig          from '../../config/development_server.js';
-import phidippides        from '../shared/middlewares/phidippides.js';
-import promiseMiddleware  from '../shared/middlewares/promiseMiddleware.js';
+import phidippides        from '../shared/utils/phidippides.js';
+import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-log('Starting Node in ' + process.env.NODE_ENV + ' mode');
+log('node', 'Starting Node in ' + process.env.NODE_ENV + ' mode');
 
 let serverConfig = devConfig();
 let server = new Hapi.Server();

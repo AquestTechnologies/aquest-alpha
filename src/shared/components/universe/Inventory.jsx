@@ -43,29 +43,27 @@ class Inventory extends React.Component {
     let inventoryListClassName = topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
     
     return (
-      <div className="universe_left" style={{backgroundImage: 'url(' + universe.picturePath + ')'}}>
-        <div className="universe_left_scrollable">
-          <div className="universe_left_scrolled">
-          
-            <div className="inventory_header">
-              <div className={this.state.nameVisible ? 'inventory_header_name' : 'inventory_header_desc'} onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
-                  {this.state.nameVisible ? universe.name : universe.description}
-              </div>
+      <div className="universe_left_scrollable">
+        <div className="universe_left_scrolled">
+        
+          <div className="inventory_header">
+            <div className={this.state.nameVisible ? 'inventory_header_name' : 'inventory_header_desc'} onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
+                {this.state.nameVisible ? universe.name : universe.description}
             </div>
-            
-            <div className={inventoryListClassName} >
-              <CardNew universeName={this.props.universe.name}/>
-              {topics.map( (topic) => {
-                return <Card 
-                  key={topic.id} 
-                  universeHandle={this.props.universe.handle}
-                  topic={topic} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
-                  setTopic={this.props.setTopic}
-                />;
-              })}
-            </div>
-            
           </div>
+          
+          <div className={inventoryListClassName} >
+            <CardNew universeName={this.props.universe.name}/>
+            {topics.map( (topic) => {
+              return <Card 
+                key={topic.id} 
+                universeHandle={this.props.universe.handle}
+                topic={topic} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
+                setTopic={this.props.setTopic}
+              />;
+            })}
+          </div>
+          
         </div>
       </div>
     );

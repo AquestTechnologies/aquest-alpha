@@ -1,5 +1,5 @@
-import log      from '../utils/logTailor.js';
-import isClient from '../utils/isClient.js';
+import log      from './logTailor.js';
+import isClient from './isClient.js';
 
 import * as universeActions from '../actions/universeActions';
 import * as chatActions     from '../actions/chatActions';
@@ -8,55 +8,47 @@ import * as topicActions    from '../actions/topicActions';
 export default function phidippides(routerState, fluxState, dispatch) {
   
   // Configuration
-  const VERBOSE = false;                // Affiche les log
-  const DEVELOPMENT = true;             // Permet de ne pas appeller checkFormat en production !!! A remplacer par une constante de projet !!!
+  const VERBOSE     = false;            // Affiche les log
+  const DEVELOPMENT = true;             // Permet de ne pas appeller checkFormat en production !!! A remplacer par une constante de projet ? !!!
   const PLACEHOLDER = '__dependency.';  // Le placeholder pour les arguments des actions
   const METHOD_NAME = 'runPhidippides'; // Le nom de la méthode des composants react
+  const ENVIRONMENT = isClient() ? 'client' : 'server';
   const ACTION_CREATORS = {
     universeActions: universeActions,
     chatActions: chatActions,
     topicActions: topicActions
   };
   
-  let whatToFetch       = []; // Les taches à effectuer
-  let completedTasks    = []; // Les taches terminée
-  let failedTasks       = []; // Les taches non terminées car il manque les dépendances
-  let displayOnConsole  = []; // Permet d'afficher les taches à effectuer sur la console
+  let completedTasks    = []; // Les tâches terminée
+  let failedTasks       = []; // Les tâches non terminées car il manque les dépendances
   let preventInfinite   = 0;  // Compte le nombre de cycles pour empecher les boucles infinies
+  let whatToDo          = routerState.routes
+  .map(route => route.handler[METHOD_NAME])                 // Recherche de runPhidippides dans chaque handler
+  .filter(method => typeof method === 'function')           // Filtre si c'est une fonction
+  .map(method => method(routerState))                       // Appel de runPhidippides
+  .filter(handlerReturn => handlerReturn instanceof Array)  // Filtre si runPhidippides retourne un array (de tâches)
+  .reduce((a, b) => a.concat(b))                            // Réduction de l'array d'array de tâches en array de tâches
+  .filter(task => checkFormat(task))                        // Évince les tâches hors format
+  .filter(task => checkEnvironment(task.on));               // Évince les tâches ne devant pas tourner côté client/server
   
-  // Appel de runPhidippides dans chaque handler
-  let runPhidippides = routerState.routes
-  .map(route => route.handler[METHOD_NAME])
-  .filter(method => typeof method === 'function')
-  .map(method => method(routerState))
-  .filter(handlerReturn => handlerReturn instanceof Array);
-  
-  // Extraction des taches vers whatToFetch
-  runPhidippides.forEach(function(handlerReturn) {
-    handlerReturn.forEach(function(somethingToFetch) {
-      whatToFetch.push(somethingToFetch);
-      displayOnConsole.push(somethingToFetch.shouldBePresent);
-    });
-  });
-  
-  let howMany = whatToFetch.length;
-  let speakEnglish = howMany > 1 ? ' tasks : ' : ' task : ';
-  log('*** Resolving ' + howMany + speakEnglish + displayOnConsole.toString());
-  
+  let howMany = whatToDo.length;
   if (howMany === 0) return Promise.resolve();
-  if (DEVELOPMENT && !checkFormat(whatToFetch)) return Promise.reject('*** ERROR ! invalid markup found.');
   
-  return clearTasks(whatToFetch);
+  let speakEnglish = howMany > 1 ? ' tasks : ' : ' task : ';
+  log('*** Resolving ' + howMany + speakEnglish + whatToDo.map(task => task.shouldBePresent).toString());
+  
+  return clearTasks(whatToDo);
   
 
-  function logMeOrNot(type, message) {
-    if (VERBOSE === true) log(type, message);
+  function logMeOrNot(type, ...messages) {
+    if (VERBOSE === true) log(type, ...messages);
   }
   
   
   // Vérifie l'intégrité du markup des handlers
-  function checkFormat(tasks) {
-    tasks.forEach(function(task) {
+  // Peut mieux faire... ^^
+  function checkFormat(task) {
+    if (DEVELOPMENT) {
       let whatIsWrong     = '';
       let on              = task.hasOwnProperty('on');
       let ifNot           = task.hasOwnProperty('ifNot');
@@ -106,12 +98,14 @@ export default function phidippides(routerState, fluxState, dispatch) {
       if (task.hasOwnProperty('dependency') && typeof task.dependency !== 'string') whatIsWrong += '\'dependency\' property should be a string\n';
       
       if (whatIsWrong.length > 0) {
-        log('error', '*** ERROR ! Please check task format for task : ' + JSON.stringify(task));
-        log('error', whatIsWrong);
+        log('error', '*** ERROR ! Please check task format for task : ' + JSON.stringify(task), whatIsWrong);
         return false;
       }
-    });
-    return true;
+      return true;
+    }
+    else {
+      return true;
+    }
   }
   
   // Retourne l'élément du state correspondant à dataString
@@ -166,26 +160,21 @@ export default function phidippides(routerState, fluxState, dispatch) {
   
   // Détermine si l'action doit être executée en fonction de l'environnement et de task.on
   function checkEnvironment(taskOn) {
-    let env = isClient() ? 'client' : 'server';
     for (let i = 0, l = taskOn.length; i < l; i++) {
-      if (taskOn[i] === env) return true;
+      if (taskOn[i] === ENVIRONMENT) return true;
     }
     return false;
   }
   
   
-  // Complete toutes les taches
+  // Complete toutes les tâches
   function clearTasks(tasks) {
     preventInfinite++;
     failedTasks = [];
     return new Promise(function(resolve, reject) {
-      // Peuple la liste des taches (promises) à accomplir
-      let clearUs = [];
-      tasks.forEach(function(task) {
-        if (checkEnvironment(task.on)) clearUs.push(clearOneTask(task));
-      });
-      // Attend que toutes les taches soient résolues
-      Promise.all(clearUs).then(function() {
+      // Attend que toutes les tâches soient résolues
+      Promise.all(tasks.map(task => clearOneTask(task)))
+      .then(function() {
         logMeOrNot('*** clearTasks ended');
         logMeOrNot('*** failedTasks :');
         logMeOrNot(failedTasks);
@@ -194,7 +183,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
         if (failedTasks.length === 0) { // Si aucune tache n'a échoué c'est terminé
           resolve();
         }
-        else { // Sinon on rappel les taches échouées (possible boucle infinie ici)
+        else { // Sinon on rappel les tâches échouées (possible boucle infinie ici)
           if (preventInfinite > 10) throw('Infinite loop detected');
           clearTasks(failedTasks).then(function() {
             resolve();
@@ -283,8 +272,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
       creator = ACTION_CREATORS[raw[0]][raw[1]]; //ACTION_CREATORS[module][creator]
     }
     catch(err) {
-      log('error', '*** ERROR ! callActionCreator ' + raw[0] + '.' + raw[1] + ' does not exist');
-      log('error', err);
+      log('error', '*** ERROR ! callActionCreator ' + raw[0] + '.' + raw[1] + ' does not exist', err);
     }
     
     let args     = ifNot[1];
@@ -305,7 +293,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
         // Donc pour chaque niveau de nesting on extrait l'info utile avec la boucle A
         let attributes = attributeString.split('.');
         let realArg;
-        // On compare cherche parmis les taches complétées la dependance de la tache actuelle
+        // On compare cherche parmis les tâches complétées la dependance de la tache actuelle
         completedTasks.forEach(function(completedTask) {
           if (completedTask.task.shouldBePresent === task.dependency) {
             // Quand on l'a trouvée on recupère le résultat de la tache pour le passer en argument à l'action
@@ -322,7 +310,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
     });
     logMeOrNot('*** callActionCreator args processing complete, real args are ' + realArgs);
     return new Promise(function(resolve, reject) {
-      // Appel de l'action creator
+      // Appel de l'action creator et dispatch de l'action
       dispatch(creator.apply(null, realArgs)).then(function(data) {
         logMeOrNot('*** callActionCreator dispatch resolved :');
         logMeOrNot('*** ' + data);

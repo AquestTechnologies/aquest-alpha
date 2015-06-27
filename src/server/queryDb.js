@@ -1,7 +1,7 @@
-import pg from 'pg';
-import log from '../shared/utils/logTailor.js';
-import query from 'pg-query';
+import pg       from 'pg';
+import query    from 'pg-query';
 import dbConfig from '../../config/database.js';
+import log      from '../shared/utils/logTailor.js';
 
 export function queryDb(queryP) {
   
@@ -12,35 +12,59 @@ export function queryDb(queryP) {
   const database = dbConfig.database;
   let client     = null;
   
-  try{
+  try {
    connect();
-  } catch(err){
-    log('error', '!!! queryDb connect');
-    log('error', err);
+  } 
+  catch (err) {
+    log('error', '!!! queryDb connect', err);
   }
   
   let buildQuery = null;
   let queryCallback = null;
   log('queryDb : ' + JSON.stringify(queryP));
   
+  // Proposition de refactoring (j'ai rien touché hein ^^ --> sauf les log pke mtn logTailor mange plusieurs arguments)
+  // on y voit plus clair sans les commentaires 
+  
+  // switch (queryP.source) {
+  //   case 'fetchTruc':
+  //     log('query', '+++ fetchTruc : ' + query.data);
+  //     buildQuery = 'je fais du sql';
+  //     return makeQuery(buildQuery); // ou encore mieux makeQuery('je fais du sql')
+  //     // pas de callback pke la bdd renvoie des données brutes assimilables telles quelles par l'app
+  //   case 'fetchMachin':
+  //     // ...
+  // }
+  
+  // function makeQuery(sqlString) {
+  //   return new Promise(function(resolve, reject) {
+  //     client.query(sqlString, function(err, result) {
+  //       if (err) {
+  //         reject(err);
+  //       }
+  //       resolve(result); //result a deja la bonne structure pke la bdd est trop cool
+  //     });
+  //   });
+  // }
+  
   switch (queryP.source) {
     case 'fetchUniverses':
        buildQuery = 'SELECT "universeId", "name", "description", "picturePath", "handler", "chatId" FROM aquest_schema.universe';
       
       log('will trigger query : ' + buildQuery);
-      queryCallback = function(result){
-        let universes = [];
-    
+      queryCallback = function(result){ // Il serait utile de se debarasser de ce callback 
+        let universes = [];             // La bdd devrait renvoyer des données admissibles par l'application
+          
         for(let row in result.rows){
           let r = result.rows[row];
           
           universes.push({
-            id:          r.universeId,
+            id:          r.universeId, // id ? on peut garder universeId c'est pas mal (cf ligne 33)
             chatId:      r.chatId,
             name:        r.name,
             description: r.description,
-            picturePath: 'http://130.211.68.244:8080/'+r.picturePath,
-            handle:      r.handler
+            picturePath: 'http://130.211.68.244:8080/'+r.picturePath, // les chemins relatifs et absolus fonctionnes, au choix prendre relatif
+            handle:      r.handler // handler ? 
           });
         }
         
@@ -146,7 +170,7 @@ export function queryDb(queryP) {
       queryCallback = function(result){
         let r=result.rows[0];
         return ({
-          id:          r.universeId,
+          id:          r.universeId, 
           chatId:      r.chatId,
           name:        r.userName,
           description: r.description,
@@ -229,8 +253,7 @@ export function queryDb(queryP) {
       client = new pg.Client(postgresurl);
       client.connect(function(err) {
         if(err) {
-          log('error', '!!! Could not connect to postgres');
-          log('error', err);
+          log('error', '!!! Could not connect to postgres', err);
         }
       });
     }
@@ -238,7 +261,7 @@ export function queryDb(queryP) {
   
   function handleQuery(resolve, reject, err, result, callback){
     if(err) {
-      log('error', '!!! Error queryDb -> query : ' + err.stack);
+      log('error', '!!! Error queryDb -> query : ', err);
       reject('error running query : ' + err);
     }
     

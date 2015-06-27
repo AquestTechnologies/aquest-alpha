@@ -32,23 +32,21 @@ class Topic extends React.Component {
     let topic = this.state.topic;
     
     return (
-      <div className="universe_left" style={{backgroundImage: 'url(' + this.props.universe.picturePath + ')'}}>
-        <div className="universe_left_scrollable">
-          <div className="universe_left_scrolled">
-          
-            <div className="topic">
-              <div className="topic_title">
-                {topic.title}
-              </div>
-              <div className="topic_author">
-                {topic.author}
-              </div>
-              <div className="topic_content">
-                {topic.content}
-              </div>
+      <div className="universe_left_scrollable">
+        <div className="universe_left_scrolled">
+        
+          <div className="topic">
+            <div className="topic_title">
+              {topic.title}
             </div>
-            
+            <div className="topic_author">
+              {topic.author}
+            </div>
+            <div className="topic_content">
+              {topic.content}
+            </div>
           </div>
+          
         </div>
       </div>
     );

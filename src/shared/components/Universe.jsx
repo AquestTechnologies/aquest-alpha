@@ -31,18 +31,20 @@ class Universe extends React.Component {
     return (
       <div>
         <Menu />
-        <RouteHandler 
-          universe={this.props.universe} 
-          inventory={this.props.inventory}
-          topic={this.props.topic}
-          setTopic={this.props.setTopic}
-          loadTopicContent={this.props.loadTopicContent}
-          loadInventory={this.props.loadInventory}
-        />
+        <div className="universe_left" style={{backgroundImage: 'url(' + this.props.universe.picturePath + ')'}}>
+          <RouteHandler
+            universe={this.props.universe} 
+            inventory={this.props.inventory}
+            topic={this.props.topic}
+            setTopic={this.props.setTopic}
+            loadTopicContent={this.props.loadTopicContent} //passer les actions par le context, a faire
+            loadInventory={this.props.loadInventory} //passer les actions par le context, a faire
+          />
+        </div>
         <Chat 
           chat={this.props.chat} 
           chatId={correctChatId} 
-          loadChat={this.props.loadChat}
+          loadChat={this.props.loadChat} //passer les actions par le context, a faire
         />
       </div>
     );
