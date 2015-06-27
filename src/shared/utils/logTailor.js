@@ -75,3 +75,26 @@ export default function log(type, ...messages) {
   }
   
 }
+
+export function logWelcome(x) {
+  if (x) {
+    log('\n_-\' Welcome to Aquest v0.0.2 \'-_\n' +
+      'Enjoy your visit.\n' +
+      'contact : hello@aquest.fr\n ');
+    log('Hack us and get good French stuff shipped to you worldwide!\n' +
+      'Just don\'t arm our business too much please.\n ');
+    log('© 2015 Aquest Technologies SAS.\n' + 
+    'Should be open-sourced when the above hacking program ends.\n '); // t'en penses quoi ?
+    log('Made with many open-source technologies including but not limited to: ' + // permet d'attribuer temporairement (pas vraiment legalement valable)
+    '(Full licence available at http//aquest.fr/404)\n' +
+    '- Node.js\n' +
+    '- PostgreSQL\n' +
+    '- rabbitMQ\n' +
+    '- Hapi.js\n' +
+    '- Socket.IO\n' +
+    '- Redux\n' +
+    '- React\n' +
+    'Thanks to everyone who contributed! \n ');
+    log('\n... Rock\'n\'roll\n ');
+  }
+}

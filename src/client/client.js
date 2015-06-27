@@ -1,9 +1,10 @@
 require('./less/app.less');
-import phidippides  from '../shared/utils/phidippides.js';
-import log          from '../shared/utils/logTailor.js';
 import React        from 'react';
 import Router       from 'react-router';  
+// import config       from '../../config/client.js';
 import routes       from '../shared/routes.jsx';
+import phidippides  from '../shared/utils/phidippides.js';
+import {log, logWelcome} from '../shared/utils/logTailor.js';
 
 import { createRedux, createDispatcher, composeStores } from 'redux';
 import promiseMiddleware from '../shared/utils/promiseMiddleware.js';
@@ -19,7 +20,7 @@ io.on('message', function (message) {
 });*/
 
 (function app() {
-  log('Welcome to Aquest v0.0.2!');
+  logWelcome(false);
   log('... Initializing Redux and React Router');
   
   const stateFromServer = window.STATE_FROM_SERVER || {};

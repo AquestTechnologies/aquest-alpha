@@ -1,17 +1,17 @@
 import webpack          from 'webpack';
 import webpackDevServer from 'webpack-dev-server';
-import wdsConfig        from '../../webpack.config.js';
+import config        from '../../webpack.config.js';
 import log              from '../shared/utils/logTailor.js';
 import chalk            from 'chalk';
-import devConfig        from '../../config/development_server.js';
+import gdevConfig        from '../../config/development.js';
 
 export default function(){
   
-  let startTime = Date.now();
-  let serverConfig = devConfig();
-  let port = serverConfig.ports.wds;
+  const startTime = Date.now();
+  const devConfig = gdevConfig();
+  const wdsConfig = devConfig.wds;
   
-  let bundle = webpack(wdsConfig);
+  const bundle = webpack(config);
   bundle.plugin('compile', function() {
     log(chalk.green('Bundling...'));
   });
@@ -21,7 +21,7 @@ export default function(){
   });
   
   new webpackDevServer(bundle, {
-    publicPath: wdsConfig.output.publicPath,
+    publicPath: config.output.publicPath,
     noInfo : true,
     hot: true,
     historyApiFallback: true,
@@ -36,14 +36,14 @@ export default function(){
     proxy: [{
       // proxy toutes les requêtes ne contenant pas "*/static/*"
       // path:    /^(?!.*\/static\/)(.*)$/, 
-      path:    new RegExp('^(?!.*\/' + serverConfig.assetsPublicDir + '\/)(.*)$'),
-      target:  'http://localhost:' + serverConfig.ports.api + '/'
+      path:    new RegExp(wdsConfig.proxyPathRegex),
+      target:  'http://localhost:' + devConfig.api.port + '/'
     }]
-  }).listen(port, '0.0.0.0', function (err) {
+  }).listen(wdsConfig.port, wdsConfig.host, function (err) {
     if (err) {
       log(err);
       return;
     }
-    log('WDS listening at 0.0.0.0:' + port);
+    log('WDS listening at ' + wdsConfig.host + ':' + wdsConfig.port);
   });
 }

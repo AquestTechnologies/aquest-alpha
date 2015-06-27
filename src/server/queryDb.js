@@ -1,15 +1,16 @@
-import pg       from 'pg';
-import query    from 'pg-query';
-import dbConfig from '../../config/database.js';
-import log      from '../shared/utils/logTailor.js';
+import pg        from 'pg';
+import query     from 'pg-query';
+import devConfig from '../../config/development.js';
+import log       from '../shared/utils/logTailor.js';
 
 export function queryDb(queryP) {
   
-  const user     = dbConfig.user;
-  const password = dbConfig.password;
-  const host     = dbConfig.host; 
-  const port     = dbConfig.port; 
-  const database = dbConfig.database;
+  const pgConfig = devConfig.pg; // quel scope ?
+  const user     = pgConfig.user;
+  const password = pgConfig.password;
+  const host     = pgConfig.host; 
+  const port     = pgConfig.port; 
+  const database = pgConfig.database;
   let client     = null;
   
   try {
@@ -36,6 +37,7 @@ export function queryDb(queryP) {
   //     // ...
   // }
   
+  //Je suis totalement d'accord
   // function makeQuery(sqlString) {
   //   return new Promise(function(resolve, reject) {
   //     client.query(sqlString, function(err, result) {
@@ -46,6 +48,10 @@ export function queryDb(queryP) {
   //     });
   //   });
   // }
+  
+  /*Je compte codé aussi une fonction de "fetch" entre les données nécessaires, et les données retournées
+  Genre tu donnes un objet en argument avec les données que tu veux, la requête se fait, et ensuite il fait un fetch automatique
+  et te créer l'objet en fonction de ce que tu voulais*/
   
   switch (queryP.source) {
     case 'fetchUniverses':
@@ -64,7 +70,7 @@ export function queryDb(queryP) {
             name:        r.name,
             description: r.description,
             picturePath: 'http://130.211.68.244:8080/'+r.picturePath, // les chemins relatifs et absolus fonctionnes, au choix prendre relatif
-            handle:      r.handler // handler ? 
+            handle:      r.handler // handler ? --> je l'ai appelé comme ça dans la DB, il va falloir qu'on choisise
           });
         }
         

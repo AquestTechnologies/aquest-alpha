@@ -9,19 +9,19 @@ import { Provider }                                     from 'redux/react';
 import * as reducers      from '../shared/reducers';
 import routes             from '../shared/routes.jsx';
 import log                from '../shared/utils/logTailor.js';
-import devConfig          from '../../config/development_server.js';
+import devConfig          from '../../config/development.js';
 import phidippides        from '../shared/utils/phidippides.js';
 import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log('node', 'Starting Node in ' + process.env.NODE_ENV + ' mode');
 
-let serverConfig = devConfig();
+const config = devConfig();
 let server = new Hapi.Server();
 
 // Distribution des ports pour l'API et les websockets
-server.connection({ port: serverConfig.ports.api, labels: ['api'] });
-server.connection({ port: serverConfig.ports.ws,  labels: ['ws']  });
+server.connection({ port: config.api.port, labels: ['api'] });
+server.connection({ port: config.ws.port,  labels: ['ws']  });
 
 //lance webpack-dev-server si on est pas en production
 if (process.env.NODE_ENV === 'development') {
@@ -189,8 +189,8 @@ server.route({
           // html = html.replace('</title>','</title>\n\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>');
           html = html.replace('</body>',
             '\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>\n' +
-            '\t<script src="http://' + serverConfig.host + ':' + serverConfig.ports.wds + '/webpack-dev-server.js"></script>\n' +
-            '\t<script src="http://' + serverConfig.host + ':' + serverConfig.ports.wds + '/' + serverConfig.assetsPublicDir + '/' + serverConfig.assetsFileName + '"></script>\n' +
+            '\t<script src="' + config.wds.hotFile + '"></script>\n' +
+            '\t<script src="' + config.wds.publicPath + '/' + config.wds.filename + '"></script>\n' +
             '</body>'
           );
           response.source = html;
