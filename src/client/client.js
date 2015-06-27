@@ -4,7 +4,7 @@ import Router       from 'react-router';
 // import config       from '../../config/client.js';
 import routes       from '../shared/routes.jsx';
 import phidippides  from '../shared/utils/phidippides.js';
-import {log, logWelcome} from '../shared/utils/logTailor.js';
+import {default as log, logWelcome} from '../shared/utils/logTailor.js';
 
 import { createRedux, createDispatcher, composeStores } from 'redux';
 import promiseMiddleware from '../shared/utils/promiseMiddleware.js';
