@@ -17,7 +17,7 @@ class Topic extends React.Component {
   }
   
   componentWillMount() {
-    if(!this.props.topic.content) this.props.loadTopicContent(this.props.topic.handle);
+    if (!this.props.topic.content) this.props.loadTopicContent(this.props.topic.handle);
     this.setState({ topic: this.props.topic });
   }
   
@@ -28,26 +28,25 @@ class Topic extends React.Component {
   // ALERTE GROS BUG !!
   // faire : startups > topic > bouton back > autre topic puis 2 fois history back !!!!
   // Normalement c'est la merde
+  // Sauf que pour l'instant il n'y a pas de bouton back
   render() {
     let topic = this.state.topic;
     
     return (
-      <div className="universe_left_scrollable">
-        <div className="universe_left_scrolled">
+      <div>
         
-          <div className="topic">
-            <div className="topic_title">
-              {topic.title}
-            </div>
-            <div className="topic_author">
-              {topic.author}
-            </div>
-            <div className="topic_content">
-              {topic.content}
-            </div>
+        <div className="topic">
+          <div className="topic_title">
+            {topic.title}
           </div>
-          
+          <div className="topic_author">
+            {topic.author}
+          </div>
+          <div className="topic_content">
+            {topic.content}
+          </div>
         </div>
+          
       </div>
     );
   }
