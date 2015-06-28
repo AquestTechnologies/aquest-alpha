@@ -1,13 +1,13 @@
 import React        from 'react';
 import {Route, DefaultRoute, NotFoundRoute } from 'react-router';
 
-import App         from './components/App.jsx';
-import Universe    from './components/Universe.jsx';
-import Inventory   from './components/universe/Inventory.jsx';
-import Topic       from './components/universe/Topic.jsx';
-import TopicNew    from './components/universe/TopicNew.jsx';
-import Explore     from './components/Explore.jsx';
-import NotFound    from './components/NotFound.jsx';
+import App         from './components/App';
+import Universe    from './components/Universe';
+import Inventory   from './components/universe/Inventory';
+import Topic       from './components/universe/Topic';
+import TopicNew    from './components/universe/TopicNew';
+import Explore     from './components/Explore';
+import NotFound    from './components/NotFound';
 
 let routes = (
   <Route handler={App}> 

@@ -1,4 +1,4 @@
-import log from './logTailor.js';
+import randomInteger from './randomInteger.js';
 
 export default function generateGraph(size) {
   
@@ -10,7 +10,6 @@ export default function generateGraph(size) {
   
   // Encore mieux, social gravity
   // http://arxiv.org/pdf/1209.0748v1.pdf
-  log('generateGraph ' + size);
   const MIN_EDGES = 1;
   const MAX_EDGES = 5;
   const MIN_FORCE = 1;
@@ -25,10 +24,7 @@ export default function generateGraph(size) {
   });
   
   for (let i = 1; i < size; i++) {
-    log('___for loop ' + i);
     adj = selectAdjacents(nodes, MIN_EDGES, MAX_EDGES);
-    log('adj are :');
-    log(adj);
     node = {
       index: i,
       name: (Math.random() + 1).toString(36).substring(2 ,5)
@@ -38,7 +34,7 @@ export default function generateGraph(size) {
       edges.push({
         begin: node.index,
         end: a.index,
-        force: randomNumber(MIN_FORCE, MAX_FORCE)
+        force: randomInteger(MIN_FORCE, MAX_FORCE)
       });
     });
   }
@@ -49,27 +45,19 @@ export default function generateGraph(size) {
   });
 }
 
-function randomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 function selectAdjacents(nodes, min, max) {
-  log('selectAdjacents');
   let queue;
   let selected = [];
   let l = nodes.length;
   let alreadySelected = false;
   
-  for (let i = randomNumber(min, max); i--;) {
-    queue = nodes[randomNumber(0, l-1)];
-    log('queue is :');
-    log(queue);
+  for (let i = randomInteger(min, max); i--;) {
+    queue = nodes[randomInteger(0, l-1)];
     selected.forEach(function(s) {
       if (s === queue) alreadySelected = true;
     });
     if (alreadySelected === false) selected.push(queue);
   }
   
-  log('selectAdjacents returned ' + selected.length + ' nodes');
   return selected;
 } 
