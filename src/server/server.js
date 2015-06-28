@@ -162,8 +162,9 @@ server.route({
       
       // Initialise les stores
       log('... Entering phidippides');
+      let d = new Date();
       phidippides(routerState, store.getState(), store.dispatch).then(function() {
-        log('info', '... Exiting phidippides', '... Entering React.renderToString');
+        log('info', '... Exiting phidippides after ' + (new Date() - d) + 'ms' , '... Entering React.renderToString');
         
         try {
           var mount_me_im_famous = React.renderToString(

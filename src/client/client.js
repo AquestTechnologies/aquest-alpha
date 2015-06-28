@@ -50,10 +50,10 @@ io.on('message', function (message) {
     routerState.c = c;
     log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
     
-    
+    let d = new Date();
     log('... Entering phidippides');
     phidippides(routerState, store.getState(), store.dispatch).then(function() {
-      log('info', '... Exiting phidippides', '... Entering React.render');
+      log('info', '... Exiting phidippides after ' + (new Date() - d) + 'ms', '... Entering React.render');
       
       try {
         React.render(
