@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 
 import Node from './explore/Node.jsx';
+import generateGraph from '../utils/graphGenerator.js';
 
 class Explore extends React.Component {
   
@@ -13,13 +14,8 @@ class Explore extends React.Component {
     }];
   }
   
-  setBackLink() {
-    if(this.props.universe) {
-      return <Link to='universe' params={{universeHandle: this.props.universe.handle}}>Back</Link>;
-    } else {
-      return <Link to='home'>Starting Universe</Link>;
-    }
-  }
+  
+  
   
   render() {
     // CSS temporaire
@@ -31,7 +27,7 @@ class Explore extends React.Component {
     
     return (
       <div style={divStyle}>
-        {this.setBackLink()}
+        {this.renderBackLink()}
         {this.props.universes.map( (universe) => {
           return (
             <Node 
@@ -43,6 +39,32 @@ class Explore extends React.Component {
             />
           );
         })}
+        <br />
+        <br />
+        {this.renderGraph()}
+      </div>
+    );
+  }
+  
+  
+  renderBackLink() {
+    if(this.props.universe) {
+      return <Link to='universe' params={{universeHandle: this.props.universe.handle}}>Back</Link>;
+    } else {
+      return <Link to='home'>Starting Universe</Link>;
+    }
+  }
+  
+  renderGraph() {
+    let graph = generateGraph(5);
+    
+    return(
+      <div>
+        <div>Node</div>
+        <div>{JSON.stringify(graph.nodes)}</div>
+        <br/>
+        <div>Edges</div>
+        <div>{JSON.stringify(graph.edges)}</div>
       </div>
     );
   }
