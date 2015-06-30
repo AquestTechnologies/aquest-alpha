@@ -79,7 +79,7 @@ server.route({
     method: 'GET',
     path: '/img/{filename}',
     handler: function (request, reply) {
-        reply.file('dist/img/' + request.params.filename);
+      reply.file('dist/img/' + request.params.filename);
     }
 });
 
@@ -174,7 +174,8 @@ server.route({
               }
             </Provider>
           );
-        } catch(err) {
+        } 
+        catch(err) {
           log('error', '!!! Error while React.renderToString', err);
         }
         log('... Exiting React.renderToString');

@@ -1,6 +1,6 @@
 import React    from 'react';
-import Card     from './Card.jsx';
-import CardNew  from './CardNew.jsx';
+import Card     from './Card';
+import CardNew  from './CardNew';
 
 class Inventory extends React.Component {
   

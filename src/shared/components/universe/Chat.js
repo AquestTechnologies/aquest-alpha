@@ -1,7 +1,7 @@
 import React from 'react';
-import Message from './Message.jsx';
-import ChatHeader from './ChatHeader.jsx';
-import ChatFooter from './ChatFooter.jsx';
+import Message from './Message';
+import ChatHeader from './ChatHeader';
+import ChatFooter from './ChatFooter';
 
 class Chat extends React.Component {
   

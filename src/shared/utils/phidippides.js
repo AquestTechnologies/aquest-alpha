@@ -11,6 +11,8 @@ export default function phidippides(routerState, fluxState, dispatch) {
   // Exemple :'/_aefzgrjeflkvn' fait actuelement un fetch
   
   // Phidippides doit-il considérer un 404 si le fetch à échouer et rediriger ?
+  // ou cela doit-il etre fait plus loin dans le stack ?
+  // Dans componentDidMount or WillMount ?
   
   // Configuration
   const VERBOSE         = false;            // Affiche les log
@@ -35,7 +37,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
   .filter ( method   => typeof method === 'function' )  // Filtre si c'est une fonction
   .map    ( method   => method(routerState)          )  // Appel de runPhidippides
   .filter ( returned => returned instanceof Array    )  // Filtre si runPhidippides retourne un array (de tâches)
-  .reduce ( (a, b)   => a.concat(b)                  )  // Réduction de l'array d'array de tâches en array de tâches
+  .reduce ( (a, b)   => a.concat(b), []              )  // Réduction de l'array d'array de tâches en array de tâches
   .filter ( task     => checkFormat(task)            )  // Évince les tâches hors format
   .filter ( task     => checkEnvironment(task.on)    ); // Évince les tâches ne devant pas tourner côté client/server
   
@@ -75,29 +77,25 @@ export default function phidippides(routerState, fluxState, dispatch) {
     return false;
   }
   
-  // Vérifie la présence et la valeure de la donnée derrière dataString
-  // à commenter
+  // Vérifie la présence et la valeur de la donnée derrière dataString
   function checkData(dataString, shouldHaveValue) {
-    let x = dataString.split('.');
     let data = STATE;
-    for (let i in x) data = data[x[i]];
+    let x = dataString.split('.');
+    for (let i in x) data = data[x[i]]; // 'truc.machin.id' --> truc[machin][id]
     logMeOrNot('*** checkData of ' + dataString + ' --> ' + JSON.stringify(data) + ' should contain ' + JSON.stringify(shouldHaveValue));
     
-    // Évince undefined, null, [], {}, ''
-    if (typeof data !== typeof shouldHaveValue)                       return false;
-    if (data instanceof Array && !(shouldHaveValue instanceof Array)) return false;
-    if (data === undefined || data === null || data === '')         return false;
+    if (data === undefined || data === null || data === '') return false;
     // Si shouldHaveValue est un object on vérifie que data est identique
     if (data instanceof Object) {
       if (data instanceof Array) {
-        if (data.length === 0) return false;
-        log('error', '!!! Code non vérifié !');
-        for (let key of shouldHaveValue) {
-          if (data[key] !== shouldHaveValue[key]) return false;
-        }
+        if (data.length === 0) return false; // Si data === []
+        // Ici phidippides n'est pas codé (!)
+        // Soit data doit etre strictement egal à shouldHaveValue
+        // Soit data doit contenir un exemplaire de shouldHaveValue
+        log('error', '!!! Code non implémenté !');
       }
       else {
-        if (Object.keys(data).length === 0) return false;
+        if (Object.keys(data).length === 0) return false; // Si data === {}
         for (let key in shouldHaveValue) {
           if (data[key] !== shouldHaveValue[key]) return false;
         }
@@ -120,7 +118,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
         logMeOrNot('*** ___ clearTasks ended ___');
         logMeOrNot('*** completed tasks : ' + completedTasks.map(task => task.task.shouldBePresent));
         logMeOrNot('*** failed tasks : ' + failedTasks.map(task => task.shouldBePresent));
-        logMeOrNot('*** ___');
+        logMeOrNot('*** ___\n');
         // Si aucune tache n'a échoué c'est terminé
         if (failedTasks.length === 0) {
           resolve();
@@ -202,27 +200,27 @@ export default function phidippides(routerState, fluxState, dispatch) {
     }
 
     // Traitement des arguments
-    ifNot[1].forEach(function(arg) {
+    for (let arg of ifNot[1]) {
       logMeOrNot('*** callActionCreator processing arg ' + arg);
       realArg = arg;
       // Si un argument string possède PLACEHOLDER alors il faut le traiter
       if (typeof arg === 'string' && arg.search(PLACEHOLDER) !== -1) {
         logMeOrNot('*** callActionCreator \'' + PLACEHOLDER + '\' found in arg ' + arg);
         // à commenter
-        let dataTree = arg.replace(PLACEHOLDER, '').split('.');
-        completedTasks.forEach(function(completedTask) {
-          if (completedTask.task.shouldBePresent === task.dependency) {
+        let dataTree = arg.replace(PLACEHOLDER, '').split('.'); // '__dependency.truc.machin.id' --> ['truc', 'machin', 'id']
+        for (let t of completedTasks) {
+          if (t.task.shouldBePresent === task.dependency) {
             // Quand on l'a trouvée on recupère le résultat de la tache pour le passer en argument à l'action
-            realArg = completedTask.result;
+            realArg = t.result;
             for (let i = 0, l = dataTree.length; i < l; i++) {
-              realArg = realArg[dataTree[i]];
+              realArg = realArg[dataTree[i]]; // ['truc', 'machin', 'id'] --> t.result[truc][machin][id]
             }
           }
-        });
+        }
       }
       realArgs.push(realArg);
       logMeOrNot('*** callActionCreator realArg is ' + realArg);
-    });
+    }
     
     return new Promise(function(resolve, reject) {
       // Appel de l'action creator et dispatch de l'action

@@ -1,8 +1,8 @@
 import React          from 'react';
 import {RouteHandler} from 'react-router';
 
-import Menu           from './universe/Menu.jsx';
-import Chat           from './universe/Chat.jsx';
+import Menu           from './universe/Menu';
+import Chat           from './universe/Chat';
 
 class Universe extends React.Component {
   

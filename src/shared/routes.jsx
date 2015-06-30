@@ -7,6 +7,7 @@ import Inventory   from './components/universe/Inventory';
 import Topic       from './components/universe/Topic';
 import TopicNew    from './components/universe/TopicNew';
 import Explore     from './components/Explore';
+import User        from './components/User';
 import NotFound    from './components/NotFound';
 
 let routes = (
@@ -20,6 +21,9 @@ let routes = (
       <DefaultRoute handler={Inventory} />
       <Route name='newTopic' path='new' handler={TopicNew} />
       <Route name='topic' path=':topicHandle' handler={Topic} />
+    </Route>
+    
+    <Route name='user' path='/@:pseudo' handler={User}>
     </Route>
     
     <Route name='explore' path='/Explore' handler={Explore} />

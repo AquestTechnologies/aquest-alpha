@@ -8,7 +8,7 @@ import * as universeActions from '../actions/universeActions';
 import * as chatActions     from '../actions/chatActions';
 import * as topicActions     from '../actions/topicActions';
 
-import LoadingBar           from './common/LoadingBar.jsx';
+import LoadingBar           from './common/LoadingBar';
 
 function select(state) {
   return { 

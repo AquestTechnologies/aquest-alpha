@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router';
-import Icon from '../common/Icon.jsx';
+import Icon from '../common/Icon';
 class Menu extends React.Component {
   render() {
     return (
@@ -8,8 +8,10 @@ class Menu extends React.Component {
       
         <ul className="menu_left">
           <li>
-            <Icon name="disk" cssclass="menu_icon" />
-            <span className="st_hide">{"currentUser"}</span>
+            <Link to="user" params={{pseudo:'admin'}}>
+                <Icon name="disk" cssclass="menu_icon" />
+                <span className="st_hide">{"Admin"}</span>
+            </Link>
           </li>
           <li>
             <Link to="explore">

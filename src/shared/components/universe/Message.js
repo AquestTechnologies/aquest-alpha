@@ -1,5 +1,5 @@
 import React from 'react';
-import Icon from '../common/Icon.jsx';
+import Icon from '../common/Icon';
 
 class Message extends React.Component {
   render() {

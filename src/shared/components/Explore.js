@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 
-import Node from './explore/Node.jsx';
+import Node from './explore/Node';
 import generateGraph from '../utils/graphGenerator.js';
 import {default as generatePseudos, getBiggestPseudo, getSmallestPseudo, getPossibilitiesNumber} from '../utils/pseudosGenerator.js';
 

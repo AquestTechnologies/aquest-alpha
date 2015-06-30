@@ -13,6 +13,7 @@ Aquest Technologies © 2015
 ### En manque d'idées ?
               
 - [ ] IsoFetch
+- [ ] Interdire `null`
 - [ ] Utiliser proptype et le context pour passer les données user et les actions
 - [ ] Dans les requetes SQL : double quotes : remplace trucid par trucId
 - [ ] loading bar

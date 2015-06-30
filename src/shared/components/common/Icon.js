@@ -5,6 +5,10 @@ class Icon extends React.Component {
     var strokeWidth = this.props.strokeWidth; 
     //mettre les icones en markup svg ici et les wrapper dans <g></g> si besoin
     //penser à remplacer toute couleur par currentColor et strokeWidth par {strokeWidth}
+    
+    // http://www.streamlineicons.com/preview-ultimate.html
+    // https://nucleoapp.com/#0
+    
     var icons = {
       circle:        <circle fill="none" stroke="currentColor" strokeWidth={strokeWidth} stroke-miterlimit="10" cx="32" cy="32" r="31"/>,
       disk:          <circle fill="currentColor" cx="32" cy="32" r="31"/>,
