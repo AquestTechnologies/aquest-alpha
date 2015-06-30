@@ -1,26 +1,26 @@
-import log from '../utils/logTailor.js';
+import log from '../utils/logTailor';
 import {
   fetchInventory,
   fetchTopicByHandle,
   fetchTopicContent
-} from '../utils/fetchers.js';
+} from '../utils/fetchers';
 import { 
-  LOAD_INVENTORY_REQUEST,
-  LOAD_INVENTORY_SUCCESS,
-  LOAD_INVENTORY_FAILURE,
-  LOAD_TOPIC_CONTENT_REQUEST,
-  LOAD_TOPIC_CONTENT_SUCCESS,
-  LOAD_TOPIC_CONTENT_FAILURE,
-  LOAD_TOPIC_BY_HANDLE_REQUEST,
-  LOAD_TOPIC_BY_HANDLE_SUCCESS,
-  LOAD_TOPIC_BY_HANDLE_FAILURE,
-  SET_TOPIC
+  SET_TOPIC,
+  REQUEST_INVENTORY,
+  SUCCESS_INVENTORY,
+  FAILURE_INVENTORY,
+  REQUEST_TOPIC_CONTENT,
+  SUCCESS_TOPIC_CONTENT,
+  FAILURE_TOPIC_CONTENT,
+  REQUEST_TOPIC_BY_HANDLE,
+  SUCCESS_TOPIC_BY_HANDLE,
+  FAILURE_TOPIC_BY_HANDLE
 } from '../constants/ActionTypes';
 
 export function loadInventory(universeId) {
   log('.A. loadInventory : ' + universeId);
   return {
-    types: [LOAD_INVENTORY_REQUEST, LOAD_INVENTORY_SUCCESS, LOAD_INVENTORY_FAILURE],
+    types: [REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY],
     promise: fetchInventory(universeId),
     data: universeId
   };
@@ -29,7 +29,7 @@ export function loadInventory(universeId) {
 export function loadTopicByHandle(handle) {
   log('.A. loadTopicByHandle : ' + handle);
   return {
-    types: [LOAD_TOPIC_BY_HANDLE_REQUEST, LOAD_TOPIC_BY_HANDLE_SUCCESS, LOAD_TOPIC_BY_HANDLE_FAILURE],
+    types: [REQUEST_TOPIC_BY_HANDLE, SUCCESS_TOPIC_BY_HANDLE, FAILURE_TOPIC_BY_HANDLE],
     promise: fetchTopicByHandle(handle),
     data: handle
   };
@@ -38,7 +38,7 @@ export function loadTopicByHandle(handle) {
 export function loadTopicContent(id) {
   log('.A. loadTopicContent : ' + id);
   return {
-    types: [LOAD_TOPIC_CONTENT_REQUEST, LOAD_TOPIC_CONTENT_SUCCESS, LOAD_TOPIC_CONTENT_FAILURE],
+    types: [REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT],
     promise: fetchTopicContent(id),
     data: id
   };

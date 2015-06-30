@@ -15,7 +15,7 @@ aquest/[univers]/[post]  --> le post en question. Utiliser un id donnera ça : a
                                                          Pk pas une route comme comme medium ? https://medium.com/@monicawestin/a-tale-of-two-gift-economies-8ee08e461fb5
 
  
-Dépendances :
+Dépendances : Obso__
 
 bir = before initial rendering
 air = after initial rendering
@@ -34,3 +34,122 @@ Universe      bir : universeStore.universe + picture, populateFluxState
   |           
   \--Chat     bir : props.chatId
               air : chatStore.chat, action(chatId)
+
+
+State :
+
+user
+  id
+  ...
+  loads
+    request
+    success
+    failure
+
+universe
+  id
+  ...
+  loads
+    request
+    success
+    failure
+
+topic
+  id
+  content
+  ...
+  loads
+    request
+    success
+    failure
+
+chat
+  id
+  name
+  messages [] ordre chrono
+  loads
+    request
+    success
+    failure
+
+graph
+  nodes {}
+    universeId :
+      universe
+    
+  edges
+    n1 //id
+    n2 //id
+    f  //force
+  loading
+  loads
+    request
+    success
+    failure
+
+// les arrays sont trié par ordre chronologique
+// pas de flag deleted
+
+user : {
+  id        //les user connaissent leur id (sauf si on peut faire autrement)
+  pseudo
+  firstName
+  lastName
+  bio
+  picture
+  privacyLevel // o!
+  // pas d'email ni de hash mdp
+  _ranks : {
+    universeId : {
+      level
+      name
+  data : {
+    ... stats et metrics
+    
+currentUniverseId // a renommer
+
+universes: {
+  id : {
+    name          //les universe, chat, topic, votes et edges ne connaissent pas leur id
+    description
+    handle
+    picture
+    rules
+    chatId
+    topics : {      // les topics n'apparraissent que pour un univers donné donc sont normalisés
+      topicId : {
+        handle
+        title
+        author
+        timestamp
+        chatId
+    sortTopicsByTime()
+    sortTopicsByVotes()
+    sortTopicsWithMagic()
+    
+chats: {        // chats et votes sont denormalisés (ou normalisés ? u_u) car apparraissent à plusieurs endroits (universe + topic et topic + message)
+  id : {
+    name
+    messages []
+
+votes : {
+  id : {
+  // tbd
+  
+  
+edges: { // sert à construire le graph des univers
+  id : { // universeUniverseId
+    1Id
+    2Id
+    f
+
+// collecte des données d'usage. Calq sera appellé dans un higher order reducer
+// avec ca on peut reproduire à l'encran ce que fait l'utilsateur, et meme en temps reel
+// a condition que tout appel du routeur se fasse dans les actions ou les reducers
+// sert aussi à loading bar
+records : { 
+  (sequence) : {
+    date
+    action
+      
+  

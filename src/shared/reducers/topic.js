@@ -1,15 +1,15 @@
-import log from '../utils/logTailor.js';
+import log from '../utils/logTailor';
 import { 
-  LOAD_INVENTORY_REQUEST,
-  LOAD_INVENTORY_SUCCESS,
-  LOAD_INVENTORY_FAILURE,
-  LOAD_TOPIC_CONTENT_REQUEST,
-  LOAD_TOPIC_CONTENT_SUCCESS,
-  LOAD_TOPIC_CONTENT_FAILURE,
-  LOAD_TOPIC_BY_HANDLE_REQUEST,
-  LOAD_TOPIC_BY_HANDLE_SUCCESS,
-  LOAD_TOPIC_BY_HANDLE_FAILURE,
-  SET_TOPIC
+  SET_TOPIC,
+  REQUEST_INVENTORY,
+  SUCCESS_INVENTORY,
+  FAILURE_INVENTORY,
+  REQUEST_TOPIC_CONTENT,
+  SUCCESS_TOPIC_CONTENT,
+  FAILURE_TOPIC_CONTENT,
+  REQUEST_TOPIC_BY_HANDLE,
+  SUCCESS_TOPIC_BY_HANDLE,
+  FAILURE_TOPIC_BY_HANDLE
 } from '../constants/ActionTypes';
 
 const initialState = {
@@ -29,8 +29,8 @@ export default function chat(state = initialState, action) {
       inventoryIsLoading: state.inventoryIsLoading
     };
     
-  case LOAD_INVENTORY_REQUEST:
-    log('.R. LOAD_INVENTORY_REQUEST');
+  case REQUEST_INVENTORY:
+    log('.R. REQUEST_INVENTORY');
     return {
       topic: state.topic,
       inventory: state.inventory,
@@ -38,8 +38,8 @@ export default function chat(state = initialState, action) {
       inventoryIsLoading: true
     };
     
-  case LOAD_INVENTORY_SUCCESS:
-    log('.R. LOAD_INVENTORY_SUCCESS');
+  case SUCCESS_INVENTORY:
+    log('.R. SUCCESS_INVENTORY');
     return {
       topic: state.topic,
       inventory: action.result,
@@ -47,8 +47,8 @@ export default function chat(state = initialState, action) {
       inventoryIsLoading: false
     };
     
-  case LOAD_TOPIC_CONTENT_REQUEST:
-    log('.R. LOAD_TOPIC_CONTENT_REQUEST');
+  case REQUEST_TOPIC_CONTENT:
+    log('.R. REQUEST_TOPIC_CONTENT');
     return {
       topic: state.topic,
       inventory: state.inventory,
@@ -56,8 +56,8 @@ export default function chat(state = initialState, action) {
       inventoryIsLoading: state.inventoryIsLoading
     };
     
-  case LOAD_TOPIC_CONTENT_SUCCESS:
-    log('.R. LOAD_TOPIC_CONTENT_SUCCESS');
+  case SUCCESS_TOPIC_CONTENT:
+    log('.R. SUCCESS_TOPIC_CONTENT');
     let topic = state.topic;
     topic.content = action.result;
     return {
@@ -67,8 +67,8 @@ export default function chat(state = initialState, action) {
       inventoryIsLoading: state.inventoryIsLoading
     };
     
-  case LOAD_TOPIC_BY_HANDLE_REQUEST:
-    log('.R. LOAD_TOPIC_BY_HANDLE_REQUEST');
+  case REQUEST_TOPIC_BY_HANDLE:
+    log('.R. REQUEST_TOPIC_BY_HANDLE');
     return {
       topic: state.topic,
       inventory: state.inventory,
@@ -76,8 +76,8 @@ export default function chat(state = initialState, action) {
       inventoryIsLoading: state.inventoryIsLoading
     };
     
-  case LOAD_TOPIC_BY_HANDLE_SUCCESS:
-    log('.R. LOAD_TOPIC_BY_HANDLE_SUCCESS');
+  case SUCCESS_TOPIC_BY_HANDLE:
+    log('.R. SUCCESS_TOPIC_BY_HANDLE');
     return {
       topic: action.result,
       inventory: state.inventory,

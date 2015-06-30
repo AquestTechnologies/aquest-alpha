@@ -134,7 +134,7 @@ class Pseudos extends React.Component {
         <br/>
         <h3>Or many</h3>
         {this.state.pseudos.map( pseudo => {
-          return(<li>{pseudo}</li>);
+          return(<li key={pseudo}>{pseudo}</li>);
         })}
       </div>
     );

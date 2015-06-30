@@ -1,12 +1,12 @@
-import log from '../utils/logTailor.js';
+import log from '../utils/logTailor';
 import { 
-  LOAD_UNIVERSE_REQUEST,
-  LOAD_UNIVERSE_SUCCESS,
-  LOAD_UNIVERSE_FAILURE,
-  LOAD_UNIVERSES_REQUEST,
-  LOAD_UNIVERSES_SUCCESS,
-  LOAD_UNIVERSES_FAILURE,
-  SET_UNIVERSE
+  SET_UNIVERSE,
+  REQUEST_UNIVERSE,
+  SUCCESS_UNIVERSE,
+  FAILURE_UNIVERSE,
+  REQUEST_UNIVERSES,
+  SUCCESS_UNIVERSES,
+  FAILURE_UNIVERSES
 } from '../constants/ActionTypes';
 
 const initialState = {
@@ -26,32 +26,32 @@ export default function universe(state = initialState, action) {
       universeIsLoading: state.universeIsLoading,
       universesIsLoading: state.universesIsLoading
     };
-  case LOAD_UNIVERSE_REQUEST:
-    log('.R. LOAD_UNIVERSE_REQUEST');
+  case REQUEST_UNIVERSE:
+    log('.R. REQUEST_UNIVERSE');
     return {
       universe: state.universe,
       universes: state.universes,
       universeIsLoading: true,
       universesIsLoading: state.universesIsLoading
     };
-  case LOAD_UNIVERSE_SUCCESS:
-    log('.R. LOAD_UNIVERSE_SUCCESS');
+  case SUCCESS_UNIVERSE:
+    log('.R. SUCCESS_UNIVERSE');
     return {
       universe: action.result,
       universes: state.universes,
       universeIsLoading: false,
       universesIsLoading: state.universesIsLoading
     };
-  case LOAD_UNIVERSES_REQUEST:
-    log('.R. LOAD_UNIVERSES_REQUEST');
+  case REQUEST_UNIVERSES:
+    log('.R. REQUEST_UNIVERSES');
     return {
       universe: state.universe,
       universes: state.universes,
       universeIsLoading: state.universeIsLoading,
       universesIsLoading: true
     };
-  case LOAD_UNIVERSES_SUCCESS:
-    log('.R. LOAD_UNIVERSES_SUCCESS');
+  case SUCCESS_UNIVERSES:
+    log('.R. SUCCESS_UNIVERSES');
     return {
       universe: state.universe,
       universes: action.result,

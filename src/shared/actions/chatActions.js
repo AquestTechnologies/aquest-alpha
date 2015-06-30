@@ -1,9 +1,9 @@
-import { fetchChat } from '../utils/fetchers.js'
-import log from '../utils/logTailor.js';
+import { fetchChat } from '../utils/fetchers';
+import log from '../utils/logTailor';
 import { 
-  LOAD_CHAT_REQUEST,
-  LOAD_CHAT_SUCCESS,
-  LOAD_CHAT_FAILURE
+  REQUEST_CHAT,
+  SUCCESS_CHAT,
+  FAILURE_CHAT
 } from '../constants/ActionTypes';
 
 
@@ -11,7 +11,7 @@ import {
 export function loadChat(chatId) {
   log('.A. loadChat : ' + chatId);
   return {
-    types: [LOAD_CHAT_REQUEST, LOAD_CHAT_SUCCESS, LOAD_CHAT_FAILURE],
+    types: [REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT],
     promise: fetchChat(chatId),
     data: chatId
   };

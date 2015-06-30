@@ -14,8 +14,8 @@ Aquest Technologies © 2015
               
 - [ ] IsoFetch
 - [ ] Interdire `null`
+- [ ] Mesurer le temps entre les actions request et success et l'afficher dans le log
 - [ ] Utiliser proptype et le context pour passer les données user et les actions
-- [ ] Dans les requetes SQL : double quotes : remplace trucid par trucId
 - [ ] loading bar
 - [ ] Immutable ?
 - [ ] Implementer Redux 1.0
@@ -27,6 +27,7 @@ Aquest Technologies © 2015
 - [ ] faire les liens Hapijs <-> webSocket <-> rabbitMQ <-> postgres 
 - [ ] SASS
 - [ ] responsive design
+- [x] Dans les requetes SQL : double quotes : remplace trucid par trucId
 - [x] window.STATE\_FROM_SERVER
 - [x] chalk --> https://github.com/sindresorhus/chalk
 - [x] Correction logTailor

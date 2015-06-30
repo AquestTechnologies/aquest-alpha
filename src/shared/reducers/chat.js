@@ -1,8 +1,8 @@
-import log from '../utils/logTailor.js';
+import log from '../utils/logTailor';
 import { 
-  LOAD_CHAT_REQUEST,
-  LOAD_CHAT_SUCCESS,
-  LOAD_CHAT_FAILURE
+  REQUEST_CHAT,
+  SUCCESS_CHAT,
+  FAILURE_CHAT
 } from '../constants/ActionTypes';
 
 const initialState = {
@@ -12,14 +12,14 @@ const initialState = {
 
 export default function chat(state = initialState, action) {
   switch (action.type) {
-  case LOAD_CHAT_REQUEST:
-    log('.R. LOAD_CHAT_REQUEST');
+  case REQUEST_CHAT:
+    log('.R. REQUEST_CHAT');
     return {
       chat: state.chat,
       chatIsLoading: true
     };
-  case LOAD_CHAT_SUCCESS:
-    log('.R. LOAD_CHAT_SUCCESS');
+  case SUCCESS_CHAT:
+    log('.R. SUCCESS_CHAT');
     return {
       chat: action.result,
       chatIsLoading: false,

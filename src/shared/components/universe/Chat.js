@@ -46,7 +46,7 @@ class Chat extends React.Component {
   
   componentDidMount() {
     //permet de scroller les messages tout en bas après le mount.
-    console.log('.C. Chat mount');
+    // console.log('.C. Chat mount');
     setTimeout(function(){ // Pourquoi un timeout de merde ? Pke sans ça chrome le fait pas ! 
       let scrollable = document.getElementById("scrollMeDown");
       scrollable.scrollTop = scrollable.scrollHeight;
@@ -54,7 +54,7 @@ class Chat extends React.Component {
   }
   
   componentDidUpdate() {
-    console.log('.C. Chat update');
+    // console.log('.C. Chat update');
     //permet de scroller les messages tout en bas après avoir reçu de nouveaux props.
     let scrollable       = document.getElementById("scrollMeDown");
     scrollable.scrollTop = scrollable.scrollHeight;
