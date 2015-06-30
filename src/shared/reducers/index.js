@@ -1,3 +1,4 @@
-export { default as universe } from './universe';
-export { default as topic } from './topic';
-export { default as chat } from './chat';
+export { default as universe } from './universes';
+export { default as topic } from './topics';
+export { default as chat } from './chats';
+export { default as records } from './records';

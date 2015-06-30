@@ -9,6 +9,8 @@ import {default as log, logWelcome} from '../shared/utils/logTailor.js';
 import { createRedux, createDispatcher, composeStores } from 'redux';
 import promiseMiddleware from '../shared/utils/promiseMiddleware.js';
 import * as reducers from '../shared/reducers';
+import records from '../shared/reducers/records';
+import key from './vendor/keymaster';
 
 import { Provider } from 'redux/react';
 
@@ -25,8 +27,11 @@ io.on('message', function (message) {
   
   const stateFromServer = window.STATE_FROM_SERVER || {};
   // log('stateFromServer ' + stateFromServer);
+  
+
   let dispatcher = createDispatcher(
     composeStores(reducers),
+    // composeStores(reducers)
     [promiseMiddleware]
   );
   let store = createRedux(dispatcher, stateFromServer);
@@ -75,6 +80,19 @@ io.on('message', function (message) {
     }).catch(function(err) {
       log('error', '!!! Phidippides', err);
     });
+  });
+  
+  key('ctrl+q', () => {
+    console.log(store.getState());
+    return false;
+  });
+  key('ctrl+alt+u', () => {
+    console.log(store.getState().universe);
+    return false;
+  });
+  key('ctrl+alt+q', () => {
+    console.log(store.getState().records);
+    return false;
   });
 
 })();

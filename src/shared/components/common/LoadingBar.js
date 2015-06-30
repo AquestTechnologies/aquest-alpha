@@ -1,6 +1,37 @@
 import React from 'react';
 
-class LoadingBar extends React.Component {
+export default class LoadingBar extends React.Component {
+  
+  constructor() {
+    super();
+    this.state = {
+      loadings: []
+    };
+  }
+  
+  componentWillReceiveProps(nextProps) {
+    let nextRecords = nextProps.records;
+    let needsResolving = [];
+    
+    for (let record of nextRecords) {
+      let type = record.action.type;
+      let subType = type.substr(8); //pratique :)
+      if (type.match(/REQUEST/)) {
+        needsResolving.push(subType);
+      }
+      else if (type.match(/SUCCESS|FAILURE/)) {
+        for (let needs of needsResolving) {
+          if (needs === subType) {
+           needsResolving.splice(needsResolving.indexOf(needs), 1);
+          }
+        }
+      }
+    }
+    this.setState({
+      loadings: needsResolving
+    });
+  }
+  
   render() {
     
     // CSS temporaire
@@ -14,35 +45,16 @@ class LoadingBar extends React.Component {
       zIndex: '1000',
       // backgroundColor: '#fff',
       fontSize: '1.7rem',
-      fontWeight: '700'
-    };
-    
-    let nowYouSeeMe = {
-      color: '#FF6600',
-    };
-    
-    let nowYouDont = {
-      display: 'none'
+      fontWeight: '700',
+      color: '#FF6600'
     };
     
     return (
       <div style={divStyle}>
-          <div style={this.props.universeIsLoading  ? nowYouSeeMe : nowYouDont}>Universe  </div>
-          <div style={this.props.universesIsLoading ? nowYouSeeMe : nowYouDont}>Universes </div>
-          <div style={this.props.inventoryIsLoading ? nowYouSeeMe : nowYouDont}>Inventory </div>
-          <div style={this.props.topicIsLoading     ? nowYouSeeMe : nowYouDont}>Topic     </div>
-          <div style={this.props.chatIsLoading      ? nowYouSeeMe : nowYouDont}>Chat      </div>
+        {this.state.loadings.map(
+          loading => <div key={loading}>{loading}</div> 
+        )}
       </div>
     );
   }
 }
-
-LoadingBar.defaultProps = {
-  universeIsLoading: false,
-  universesIsLoading: false,
-  inventoryIsLoading: false,
-  topicIsLoading: false,
-  chatIsLoading: false
-};
-
-export default LoadingBar;        

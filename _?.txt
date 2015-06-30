@@ -38,6 +38,7 @@ Universe      bir : universeStore.universe + picture, populateFluxState
 
 State :
 
+Obso__
 user
   id
   ...
@@ -87,8 +88,8 @@ graph
     success
     failure
 
+__Proposé
 // les arrays sont trié par ordre chronologique
-// pas de flag deleted
 
 user : {
   id        //les user connaissent leur id (sauf si on peut faire autrement)

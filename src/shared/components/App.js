@@ -16,12 +16,8 @@ function select(state) {
     universes:          state.universe.universes,
     inventory:          state.topic.inventory,
     topic:              state.topic.topic,
-    chat:               state.chat.chat,
-    universeIsLoading:  state.universe.universeIsLoading,
-    universesIsLoading: state.universe.universesIsLoading,
-    inventoryIsLoading: state.topic.inventoryIsLoading,
-    topicIsLoading:     state.topic.topicIsLoading,
-    chatIsLoading:      state.chat.chatIsLoading,
+    chat:              state.chat.chat,
+    records:      state.records,
   };
 }
 
@@ -37,20 +33,12 @@ export default class App extends React.Component {
             inventory,
             topic,
             chat,
-            universeIsLoading,
-            universesIsLoading,
-            inventoryIsLoading,
-            topicIsLoading,
-            chatIsLoading,
-            dispatch 
+            dispatch ,
+            records
           }) => 
           <div>
             <LoadingBar 
-              universeIsLoading={universeIsLoading}
-              universesIsLoading={universesIsLoading}
-              inventoryIsLoading={inventoryIsLoading}
-              topicIsLoading={topicIsLoading}
-              chatIsLoading={chatIsLoading}
+              records = {records}
             />
             <RouteHandler 
               universe={universe}
