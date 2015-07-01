@@ -3,8 +3,8 @@ import Hapi       from 'hapi';
 import React      from 'react';
 import Router     from 'react-router';
 
-import { createRedux, createDispatcher, composeStores } from 'redux';
-import { Provider }                                     from 'redux/react';
+import { createStore, composeReducers } from 'redux';
+import { Provider }                     from 'redux/react';
 
 import * as reducers      from '../shared/reducers';
 import routes             from '../shared/routes.jsx';
@@ -149,16 +149,13 @@ server.route({
     // Match la location et les routes, et renvoie le bon layout (Handler) et le state
     router.run( (Handler, routerState) => {
       log('_____________ router.run _____________');
-      // Pour l'application naissante c'est son premier router.run
-      routerState.c = 1;
+
       // Initialise une nouvelle instance flux
-      //const flux = new Flux();
-      const dispatcher = createDispatcher(
-        composeStores(reducers),
+      const store = createStore(
+        composeReducers(reducers),
+        {},
         [promiseMiddleware]
       );
-      
-      const store = createRedux(dispatcher);
       
       // Initialise les stores
       log('... Entering phidippides');
@@ -168,7 +165,7 @@ server.route({
         
         try {
           var mount_me_im_famous = React.renderToString(
-            <Provider redux={store}>
+            <Provider store={store}>
               {() =>
                 <Handler {...routerState} />
               }
@@ -179,7 +176,6 @@ server.route({
           log('error', '!!! Error while React.renderToString', err);
         }
         log('... Exiting React.renderToString');
-        
         // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
         readFile('index.html', 'utf8').then(function (html){
           

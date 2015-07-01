@@ -55,7 +55,7 @@ export function queryDb(queryP) {
   
   switch (queryP.source) {
     case 'fetchUniverses':
-       buildQuery = 'SELECT "universeId", "name", "description", "picturePath", "handler", "chatId" FROM aquest_schema.universe';
+       buildQuery = 'SELECT "universeId", "name", "description", "picturePath", "handle", "chatId" FROM aquest_schema.universe';
       
       log('will trigger query : ' + buildQuery);
       queryCallback = function(result){ // Il serait utile de se debarasser de ce callback 
@@ -70,7 +70,7 @@ export function queryDb(queryP) {
             name:        r.name,
             description: r.description,
             picturePath: 'http://130.211.68.244:8080/'+r.picturePath, // les chemins relatifs et absolus fonctionnes, au choix prendre relatif
-            handle:      r.handler // handler ? --> je l'ai appelé comme ça dans la DB, il va falloir qu'on choisise
+            handle:      r.handle // handle ? --> je l'ai appelé comme ça dans la DB, il va falloir qu'on choisise
           });
         }
         
@@ -80,7 +80,7 @@ export function queryDb(queryP) {
       
     case 'fetchUniverseByHandle':
 
-      buildQuery = 'SELECT "universeId", "name", "description", "picturePath", "handler", "chatId" FROM aquest_schema.universe WHERE handler=\'' + queryP.parameters + '\'';
+      buildQuery = 'SELECT "universeId", "name", "description", "picturePath", "handle", "chatId" FROM aquest_schema.universe WHERE handle=\'' + queryP.parameters + '\'';
       
       log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
@@ -92,7 +92,7 @@ export function queryDb(queryP) {
           name:        r.name,
           description: r.description,
           picturePath: 'http://130.211.68.244:8080/'+r.picturePath,
-          handle:      r.handler
+          handle:      r.handle
         });
       };
       break;
@@ -135,7 +135,7 @@ export function queryDb(queryP) {
        
       buildQuery = 
       'SELECT \
-        "topicId", "title", "handler", "created", user."userName", "chatId" \
+        "topicId", "title", "handle", "created", user."userName", "chatId" \
       FROM \
           aquest_schema.topic, aquest_schema.user \
       WHERE \
@@ -150,7 +150,7 @@ export function queryDb(queryP) {
           universes.push({
             topicId:  r.topiId,
             title:    r.chatId,
-            handler:  r.handler,
+            handle:  r.handle,
             created:  r.created,
             username: r.userName,
             userId:   r.userId,
@@ -167,10 +167,10 @@ export function queryDb(queryP) {
       // id, title, author, desc, imgPath, timestamp, handle, content, chatId
       buildQuery = 
       'SELECT \
-        topic."topicId", topic."title", user."userName", topic."handler", atome_topic."content", topic."chatId" \
+        topic."topicId", topic."title", user."userName", topic."handle", atome_topic."content", topic."chatId" \
       FROM \
         aquest_schema.topic, aquest_schema.atome_topic, aquest_schema.user \
-      WHERE "handler"=\'' + queryP.parameters + '\' AND topic."topicId" = atome_topic."topicId" AND topic."userId" = user."userId"';
+      WHERE "handle"=\'' + queryP.parameters + '\' AND topic."topicId" = atome_topic."topicId" AND topic."userId" = user."userId"';
       
       log('will trigger query : ' + buildQuery);
       queryCallback = function(result){
@@ -181,7 +181,7 @@ export function queryDb(queryP) {
           name:        r.userName,
           description: r.description,
           picturePath: 'http://130.211.68.244:8080/'+r.picturePath,
-          handle:      r.handler
+          handle:      r.handle
         });
       };
       break;
@@ -237,9 +237,34 @@ export function queryDb(queryP) {
         return result;
       };
       break;
+      
+      
+    case 'addUniverse':
+      // id, universe1Id, universe2Id"         BIGINT,
+  "force"               BIGINT,
+  "createdAt"           TIMESTAMP DEFAULT now(),
+  "updatedAt"           TIMESTAMP DEFAULT now(),
+  "deleted"             BOOLEAN,
+      let name = queryP.parameters.name;
+      let handle = queryP.parameters.handle;
+      let description = queryP.parameters.description;
+      
+      buildQuery = 
+      'INSERT INTO aquest_schema.universe \
+        (name, handle, description, "picturePath", "chatId") \
+      VALUES \
+        (\''+ name + '\', \'' + handle + '\', \'' + description + '\');';
+      
+      log('will trigger query : ');
+      log(buildQuery.replace('/\\\\n/',''));
+      queryCallback = function(result){
+        
+        return result;
+      };
+      break;
     
     default:
-      // buildQuery = 'SELECT universeId, name, description, handler, chatId FROM aquest_schema.universe WHERE handler=\'' + queryP.parameters + '\'';
+      // buildQuery = 'SELECT universeId, name, description, handle, chatId FROM aquest_schema.universe WHERE handle=\'' + queryP.parameters + '\'';
       return null;
   }
   

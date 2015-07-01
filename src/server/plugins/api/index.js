@@ -5,7 +5,7 @@ exports.register = function (server, options, next) {
   server.route({
     method: 'GET',
     path: '/api/universe/{handle}',
-    handler: function (request, reply) {
+    handle: function (request, reply) {
       log('info','request params : ' + request.params.handle);
       
       let query = {
@@ -18,9 +18,25 @@ exports.register = function (server, options, next) {
   });
   
   server.route({
+    method: 'POST',
+    path: '/api/universe/{name}&{handle}&{description}',
+    handle: function (request, reply) {
+      log('info','request params insert universe');
+      log(request.params);
+      let query = {
+        source: 'addUniverse',
+        parameters: {name: request.params.name, handle: request.params.handle, description: request.params.description}
+      };
+      
+      log(query);
+      return reply(promiseRestFetch(query));
+    }
+  });
+  
+  server.route({
     method: 'GET',
     path: '/api/universes/',
-    handler: function (request, reply) {
+    handle: function (request, reply) {
       log('info','request params all universes');
       
       let query = {
@@ -35,7 +51,7 @@ exports.register = function (server, options, next) {
   server.route({
     method: 'GET',
     path: '/api/chat/{id}',
-    handler: function (request, reply) {
+    handle: function (request, reply) {
       log('info','request params all universes');
       
       let query = {
@@ -50,7 +66,7 @@ exports.register = function (server, options, next) {
   server.route({
     method: 'POST',
     path: '/api/message/{userId}&{chatId}&{messageContent}',
-    handler: function (request, reply) {
+    handle: function (request, reply) {
       log('info','request params insert chat message');
       log(request.params);
       let query = {

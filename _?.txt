@@ -88,7 +88,7 @@ graph
     success
     failure
 
-__Proposé
+__Obso
 // les arrays sont trié par ordre chronologique
 
 user : {
@@ -152,5 +152,75 @@ records : {
   (sequence) : {
     date
     action
-      
+
+__Proposé
+// https://github.com/gaearon/normalizr
+// les arrays sont trié par ordre chronologique
+currentUniverseId // a renommer
+currentUserId     // a renommer
+
+users : {
+  id : {
+    id
+    pseudo
+    firstName     //fetched
+    lastName      //fetched
+    bio     //fetched
+    picture     //fetched
+    privacyLevel // pour l'utilisateur actuel
+    // pas d'email ni de hash mdp
+    _ranks : {
+      universeId : {
+        level
+        name
+    data : {
+      ... stats et metrics
+    
+
+universes: {
+  id : {
+    id
+    name        
+    description
+    handle
+    picture
+    rules
+    chatId
+    topics : {      
+      topicId : {
+        handle
+        title
+        author
+        timestamp
+        chatId
+    sortTopicsByTime()
+    sortTopicsByVotes()
+    sortTopicsWithMagic()
+    
+chats: {        // chats et votes sont denormalisés (ou normalisés ? u_u) car apparraissent à plusieurs endroits (universe + topic et topic + message)
+  id : {
+    id
+    name
+    messages []
+
+votes : {
+  id : {
+  // tbd
+  
+  
+edges: { // sert à construire le graph des univers
+  id : { // universeUniverseId
+    id
+    1Id
+    2Id
+    f
+
+// collecte des données d'usage. Calq sera appellé dans un higher order reducer
+// avec ca on peut reproduire à l'encran ce que fait l'utilsateur, et meme en temps reel
+// a condition que tout appel du routeur se fasse dans les actions ou les reducers
+// sert aussi à loading bar
+records : { 
+  (sequence) : {
+    date
+    action
   

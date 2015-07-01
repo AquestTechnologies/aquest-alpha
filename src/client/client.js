@@ -6,7 +6,7 @@ import routes       from '../shared/routes.jsx';
 import phidippides  from '../shared/utils/phidippides.js';
 import {default as log, logWelcome} from '../shared/utils/logTailor.js';
 
-import { createRedux, createDispatcher, composeStores } from 'redux';
+import { createStore, composeReducers } from 'redux';
 import promiseMiddleware from '../shared/utils/promiseMiddleware.js';
 import * as reducers from '../shared/reducers';
 import records from '../shared/reducers/records';
@@ -18,7 +18,7 @@ import { Provider } from 'redux/react';
 const io = Websocket('http://130.211.68.244:8081'); //Prendre le bon port
 
 io.on('message', function (message) {
-  log('___ Server says ' + message);
+  log('_w_ Server says ' + message);
 });*/
 
 (function app() {
@@ -29,12 +29,11 @@ io.on('message', function (message) {
   // log('stateFromServer ' + stateFromServer);
   
 
-  let dispatcher = createDispatcher(
-    composeStores(reducers),
-    // composeStores(reducers)
+  const store = createStore(
+    composeReducers(reducers),
+    stateFromServer,
     [promiseMiddleware]
   );
-  let store = createRedux(dispatcher, stateFromServer);
   // On extrait le state serialisé du DOM
   
   // Initialise le router
@@ -62,7 +61,7 @@ io.on('message', function (message) {
       
       try {
         React.render(
-          <Provider redux={store}>
+          <Provider store={store}>
             {() =>
               <Handler {...routerState} />
             }

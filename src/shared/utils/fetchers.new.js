@@ -11,6 +11,7 @@ export function fetchUniverseByHandle(handle) {
   
   let query = {
     source: 'fetchUniverseByHandle',
+    type: 'GET',
     parameters: handle
   };
   
@@ -23,6 +24,7 @@ export function fetchUniverses() {
 
   let query = {
     source: 'fetchUniverses',
+    type: 'GET',
     parameters: ''
   };
   
@@ -34,6 +36,7 @@ export function fetchUniverses() {
 export function fetchChat(id) {
   let query = {
     source: 'fetchChat',
+    type: 'GET',
     parameters: id
   };
   
@@ -45,6 +48,7 @@ export function fetchChat(id) {
 export function fetchInventory(universeId){
   let query = {
     source: 'fetchInventory',
+    type: 'GET',
     parameters: universeId
   };
   
@@ -56,6 +60,7 @@ export function fetchInventory(universeId){
 export function fetchTopicByHandle(handle) {
   let query = {
     source: 'fetchTopicByHandle',
+    type: 'GET',
     parameters: handle
   };
   
@@ -67,6 +72,7 @@ export function fetchTopicByHandle(handle) {
 export function fetchTopicContent(id) {
   let query = {
     source: 'fetchTopicContent',
+    type: 'GET',
     parameters: id
   };
   
@@ -92,7 +98,7 @@ function promiseFetch(query, url) {
     else {
       log('+++ client');
       var req = new XMLHttpRequest();
-      req.open('GET', url);
+      req.open(query.type, url);
 
       req.onload = function() {
         if (req.status == 200) {

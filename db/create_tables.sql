@@ -30,163 +30,163 @@ CREATE DOMAIN aquest_schema.pseudo AS VARCHAR(15) CHECK (
 );
 
 CREATE TABLE aquest_schema.CHAT(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "name"                TEXT,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN
+  id                  BIGSERIAL PRIMARY KEY,
+  name                TEXT,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN
 );
 
 CREATE TABLE aquest_schema.UNIVERSE(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "chatId"              BIGINT,
-  "name"                TEXT UNIQUE,
-  "handler"             TEXT UNIQUE,
-  "description"         TEXT,
-  "rules"               TEXT,
-  "picturePath"         TEXT,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("chatId") REFERENCES aquest_schema.CHAT
+  id                   BIGSERIAL PRIMARY KEY,
+  chat_id              BIGINT,
+  name                 TEXT UNIQUE,
+  handle               TEXT UNIQUE,
+  description          TEXT,
+  rules                TEXT,
+  picture              TEXT,
+  created_at           TIMESTAMP DEFAULT now(),
+  updated_at           TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT
 );
 
 CREATE TABLE aquest_schema.UNIVERSE_UNIVERSE(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "universe1Id"         BIGINT,
-  "universe2Id"         BIGINT,
-  "force"               BIGINT,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("universe1Id") REFERENCES aquest_schema.UNIVERSE
-  FOREIGN KEY ("universe2Id") REFERENCES aquest_schema.UNIVERSE
+  id                   BIGSERIAL PRIMARY KEY,
+  universe1_id         BIGINT,
+  universe2_id         BIGINT,
+  force                BIGINT,
+  created_at           TIMESTAMP DEFAULT now(),
+  updated_at           TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (universe1_id) REFERENCES aquest_schema.UNIVERSE
+  FOREIGN KEY (universe2_id) REFERENCES aquest_schema.UNIVERSE
 );
 
 CREATE TABLE aquest_schema.USER (
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "email"               TEXT UNIQUE,
-  "pseudo"              aquest_schema.user_names NOT NULL UNIQUE,
-  "firstName"           TEXT,
-  "lastName"            TEXT,
-  "passwordSalt"        TEXT NOT NULL,
-  "passwordHash"        TEXT NOT NULL,
-  "bio"                 TEXT,
-  "picturePath"         TEXT,
-  "creationIp"          INET,
-  "startUniverseId"     BIGINT,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("startUniverseId") REFERENCES aquest_schema.UNIVERSE
+  id                   BIGSERIAL PRIMARY KEY,
+  email                TEXT UNIQUE,
+  pseudo               aquest_schema.user_names NOT NULL UNIQUE,
+  first_name           TEXT,
+  last_name            TEXT,
+  password_salt        TEXT NOT NULL,
+  password_hash        TEXT NOT NULL,
+  bio                  TEXT,
+  picture              TEXT,
+  creation_ip          INET,
+  start_universe_id    BIGINT,
+  created_at           TIMESTAMP DEFAULT now(),
+  updated_at           TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (start_universe_id) REFERENCES aquest_schema.UNIVERSE
 );
 
 CREATE TABLE aquest_schema.RANK(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "universeId"          BIGINT,
-  "title"               TEXT,
-  "level"               SMALLINT,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("universeId") REFERENCES aquest_schema.UNIVERSE
+  id                  BIGSERIAL PRIMARY KEY,
+  universe_id         BIGINT,
+  title               TEXT,
+  level               SMALLINT,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE
 );
 
 -- Comment le vote s'attache à un topic ou un message?
--- universeId est-t-il redondant?
+-- universe_id est-t-il redondant?
 CREATE TABLE aquest_schema.VOTE(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "authorId"            BIGINT,
-  "userId"              BIGINT, 
-  "universeId"          BIGINT,
-  "content"             TEXT,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("authorId") REFERENCES aquest_schema.USER,
-  FOREIGN KEY ("userId") REFERENCES aquest_schema.USER,
-  FOREIGN KEY ("universeId") REFERENCES aquest_schema.UNIVERSE
+  id                  BIGSERIAL PRIMARY KEY,
+  author_id           BIGINT,
+  user_id             BIGINT, 
+  universe_id         BIGINT,
+  content             TEXT,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (author_id) REFERENCES aquest_schema.USER,
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE
 );
 
 CREATE TABLE aquest_schema.GOALS(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "rankId"              BIGINT,
-  "content"             JSON,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("rankId") REFERENCES aquest_schema.RANK
+  id                  BIGSERIAL PRIMARY KEY,
+  rank_id             BIGINT,
+  content             JSON,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (rank_id) REFERENCES aquest_schema.RANK
 );
 
 CREATE TABLE aquest_schema.USER_UNIVERSE(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "userId"              BIGINT,
-  "universeId"          BIGINT,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("userId") REFERENCES aquest_schema.USER,
-  FOREIGN KEY ("universeId") REFERENCES aquest_schema.UNIVERSE
+  id                  BIGSERIAL PRIMARY KEY,
+  user_id             BIGINT,
+  universe_id         BIGINT,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE
 );
 
 CREATE TABLE aquest_schema.TOPIC(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "userId"              BIGINT,
-  "chatId"              BIGINT,
-  "universeId"          BIGINT,
-  "title"               TEXT,
-  "handle"              TEXT UNIQUE,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("userId") REFERENCES aquest_schema.USER,
-  FOREIGN KEY ("universeId") REFERENCES aquest_schema.UNIVERSE,
-  FOREIGN KEY ("chatId") REFERENCES aquest_schema.CHAT
+  id                  BIGSERIAL PRIMARY KEY,
+  user_id             BIGINT,
+  chat_id             BIGINT,
+  universe_id         BIGINT,
+  title               TEXT,
+  handle              TEXT UNIQUE,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE,
+  FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT
 );
 
 CREATE TABLE aquest_schema.ATOME(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "type"                TEXT,
-  "structure"           JSON,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN
+  id                  BIGSERIAL PRIMARY KEY,
+  type                TEXT,
+  structure           JSON,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN
 );
 
 CREATE TABLE aquest_schema.MESSAGE(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "userId"              BIGINT,
-  "chatId"              BIGINT,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("userId") REFERENCES aquest_schema.USER,
-  FOREIGN KEY ("chatId") REFERENCES aquest_schema.CHAT
+  id                  BIGSERIAL PRIMARY KEY,
+  user_id             BIGINT,
+  chat_id             BIGINT,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
+  FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT
 );
 
 CREATE TABLE aquest_schema.ATOME_TOPIC(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "atomeId"             BIGINT,
-  "topicId"             BIGINT,
-  "content"             JSON,
-  "order"               INTEGER,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("topicId") REFERENCES aquest_schema.MESSAGE,
-  FOREIGN KEY ("atomeId") REFERENCES aquest_schema.ATOME
+  id                  BIGSERIAL PRIMARY KEY,
+  atome_id            BIGINT,
+  topic_id            BIGINT,
+  content             JSON,
+  order               INTEGER,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (topic_id) REFERENCES aquest_schema.MESSAGE,
+  FOREIGN KEY (atome_id) REFERENCES aquest_schema.ATOME
 );
 
 CREATE TABLE aquest_schema.ATOME_MESSAGE(
-  "id"                  BIGSERIAL PRIMARY KEY,
-  "atomeId"             BIGINT,
-  "messageId"           BIGINT,
-  "content"             JSON,
-  "createdAt"           TIMESTAMP DEFAULT now(),
-  "updatedAt"           TIMESTAMP DEFAULT now(),
-  "deleted"             BOOLEAN,
-  FOREIGN KEY ("messageId") REFERENCES aquest_schema.MESSAGE,
-  FOREIGN KEY ("atomeId") REFERENCES aquest_schema.ATOME
+  id                  BIGSERIAL PRIMARY KEY,
+  atome_id            BIGINT,
+  message_id          BIGINT,
+  content             JSON,
+  created_at          TIMESTAMP DEFAULT now(),
+  updated_at          TIMESTAMP DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (message_id) REFERENCES aquest_schema.MESSAGE,
+  FOREIGN KEY (atome_id) REFERENCES aquest_schema.ATOME
 );
 
 
@@ -196,8 +196,8 @@ CREATE FUNCTION aquest_schema.create_chat()
   DECLARE
       last_chat_id BIGINT;
   BEGIN
-      INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING "chatId" INTO last_chat_id;
-      NEW."chatId" := last_chat_id;
+      INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING chat_id INTO last_chat_id;
+      NEW.chat_id := last_chat_id;
       RETURN NEW;
   END;
 $create_chat$ LANGUAGE plpgsql;
@@ -220,7 +220,7 @@ CREATE FUNCTION set_updated_timestamp()
   LANGUAGE plpgsql
   AS $update_timestamp$ 
   BEGIN
-    NEW."updatedAt" := now(); -- risque de ne pas marcher
+    NEW.updated_at := now(); -- risque de ne pas marcher
     RETURN NEW;
   END;
   $update_timestamp$;
@@ -236,16 +236,16 @@ CREATE TRIGGER update_timestamp
   
 
 INSERT INTO aquest_schema.universe 
-    (name, handler, description, "picturePath", "chatId") 
+    (name, handle, description, picture, chat_id) 
   VALUES 
     ('Startups', 'Startups', 'This is the description of the Startups universe', 'img/pillars_compressed.png', '0');
     
 INSERT INTO aquest_schema.universe 
-    (name, handler, description, "picturePath", "chatId") 
+    (name, handle, description, picture, chat_id) 
   VALUES 
     ('Design', 'Design', 'This is the description of the Design Universe', 'img/designer_compressed.png', '0');
     
 INSERT INTO aquest_schema.user 
-    (email, "userName", "firstName", "lastName", "startUniverse", "passwordSalt", "passwordHash") 
+    (email, pseudo, first_name, last_name, start_universe_id, password_salt, password_hash) 
   VALUES 
     ('johndoe@gmail.com', 'johnDoe', 'John', 'Doe', '1', 'fsfgfdgsdfgsdfokoksqlsd', 'dskjfsdkfjks');
