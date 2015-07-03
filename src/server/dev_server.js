@@ -7,12 +7,13 @@ import gdevConfig        from '../../config/development.js';
 
 export default function(){
   
-  const startTime = Date.now();
+  let startTime;
   const devConfig = gdevConfig();
   const wdsConfig = devConfig.wds;
   
   const bundle = webpack(config);
   bundle.plugin('compile', function() {
+    startTime  = Date.now();
     log(chalk.green('Bundling...'));
   });
   

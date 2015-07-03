@@ -156,6 +156,7 @@ records : {
 __Proposé
 // https://github.com/gaearon/normalizr
 // les arrays sont trié par ordre chronologique
+
 currentUniverseId // a renommer
 currentUserId     // a renommer
 

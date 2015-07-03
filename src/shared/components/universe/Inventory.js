@@ -25,6 +25,7 @@ class Inventory extends React.Component {
   
   componentWillMount() {
     if(this.props.universe.id !== this.props.inventory.universeId) {
+    // if(false) {
       this.props.loadInventory(this.props.universe.id);
     } else {
       this.setState({ inventory: this.props.inventory });
@@ -33,13 +34,13 @@ class Inventory extends React.Component {
   
   componentWillReceiveProps(nextProps) {
     if (nextProps.universe.id === nextProps.inventory.universeId) this.setState({ inventory: nextProps.inventory });
+    // if (true) this.setState({ inventory: nextProps.inventory });
   }
   
   render() {
     let universe  = this.props.universe;
     let inventory = this.state.inventory;
     let topics    = inventory.topics || [];
-    
     let inventoryListClassName = topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
     
     return (

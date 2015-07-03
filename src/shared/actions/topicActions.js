@@ -22,7 +22,7 @@ export function loadInventory(universeId) {
   return {
     types: [REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY],
     promise: fetchInventory(universeId),
-    data: universeId
+    params: universeId
   };
 }
 
@@ -31,7 +31,7 @@ export function loadTopicByHandle(handle) {
   return {
     types: [REQUEST_TOPIC_BY_HANDLE, SUCCESS_TOPIC_BY_HANDLE, FAILURE_TOPIC_BY_HANDLE],
     promise: fetchTopicByHandle(handle),
-    data: handle
+    params: handle
   };
 }
 
@@ -40,7 +40,7 @@ export function loadTopicContent(id) {
   return {
     types: [REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT],
     promise: fetchTopicContent(id),
-    data: id
+    params: id
   };
 }
 
@@ -48,6 +48,6 @@ export function setTopic(topic) {
   log('.A. setTopic : ' + topic.id);
   return {
     type: SET_TOPIC,
-    data: topic
+    params: topic
   };
 }

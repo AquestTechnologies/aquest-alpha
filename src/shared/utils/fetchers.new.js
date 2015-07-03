@@ -1,21 +1,27 @@
-import isClient from './isClient.js';
-import log from './logTailor.js';
+import isClient from './isClient';
+import log from './logTailor';
 
 let isServer = !isClient();
 
-if(isServer){
-  var q = require('../../server/queryDb.js');
-}
+
+
+var q = isServer ? require('../../server/queryDb') : {};
+// console.log(q);
 
 export function fetchUniverseByHandle(handle) {
+  
+  /*let formData = new FormData();
+  formData.append('params', handle);
+  
+  log(formData);*/
   
   let query = {
     source: 'fetchUniverseByHandle',
     type: 'GET',
-    parameters: handle
+    params: handle
   };
   
-  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  // log('+++ ' + query.source + ' | params : ' + query.params);
   
   return promiseFetch(query, 'api/universe/'+handle);
 }
@@ -25,10 +31,10 @@ export function fetchUniverses() {
   let query = {
     source: 'fetchUniverses',
     type: 'GET',
-    parameters: ''
+    params: ''
   };
   
-  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  // log('+++ ' + query.source + ' | params : ' + query.params);
   
   return promiseFetch(query, 'api/universes/');
 }
@@ -37,66 +43,64 @@ export function fetchChat(id) {
   let query = {
     source: 'fetchChat',
     type: 'GET',
-    parameters: id
+    params: id
   };
   
-  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  // log('+++ ' + query.source + ' | params : ' + query.params);
   
-  return promiseFetch(query, 'api/chat/');
+  return promiseFetch(query, 'api/chat/'+id);
 }
 
 export function fetchInventory(universeId){
   let query = {
     source: 'fetchInventory',
     type: 'GET',
-    parameters: universeId
+    params: universeId
   };
   
-  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  // log('+++ ' + query.source + ' | params : ' + query.params);
   
-  return promiseFetch(query, 'api/inventory/');
+  return promiseFetch(query, 'api/inventory/'+universeId);
 }
 
 export function fetchTopicByHandle(handle) {
   let query = {
     source: 'fetchTopicByHandle',
     type: 'GET',
-    parameters: handle
+    params: handle
   };
   
-  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  // log('+++ ' + query.source + ' | params : ' + query.params);
   
-  return promiseFetch(query, 'api/topic/');
+  return promiseFetch(query, 'api/topic/'+handle);
 }
 
 export function fetchTopicContent(id) {
   let query = {
     source: 'fetchTopicContent',
     type: 'GET',
-    parameters: id
+    params: id
   };
   
-  log('+++ ' + query.source + ' | parameters : ' + query.parameters);
+  // log('+++ ' + query.source + ' | params : ' + query.params);
   
-  return promiseFetch(query, 'api/topic/content/');
+  return promiseFetch(query, 'api/topic/content/'+id);
 }
 
 function promiseFetch(query, url) {
   return new Promise(function(resolve, reject) {
     if (isServer) {
-      log('+++ server');
-      q.queryDb(query).then(function(result) {
+      q(query).then(function(result) {
         if (result != null) {
-          log('+++ ' + query.source + ' ' + JSON.stringify(result));
+          // log('+++ ' + query.source + ' ' + JSON.stringify(result));
           return resolve(result);
         }
         else {
-          reject('!!! middleFetcher error');
+          return reject('!!! promiseFetch error');
         }
       });
     }
     else {
-      log('+++ client');
       var req = new XMLHttpRequest();
       req.open(query.type, url);
 
@@ -117,6 +121,6 @@ function promiseFetch(query, url) {
       req.send();
     }
   }).catch(function(err) {
-    log('RestAPI ', err.stack);
+    log('error', err);
   });
 }

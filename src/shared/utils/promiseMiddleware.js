@@ -4,15 +4,27 @@ import log from './logTailor.js';
 export default function promiseMiddleware(next) {
   log('.M. promiseMiddleware');
   return (action) => {
-    const { promise, types, data } = action;
+    const { promise, types, params } = action;
     if (!promise) return next(action);
     
     const [REQUEST, SUCCESS, FAILURE] = types;
-    next({ data, type: REQUEST });
+    next({ params, type: REQUEST });
     
-    return promise.then(
-      (result) => next({ data, result, type: SUCCESS }),
-      (error)  => next({ data, error,  type: FAILURE })
-    );
+    /*return promise.then(
+      (result) => next({ params, result, type: SUCCESS })
+    ).catch(
+      (error)  => next({ params, error,  type: FAILURE })
+    );*/
+    
+    return promise.then(function(result){
+      // log('promiseMiddleware --> SUCCESS');
+      // log(result);
+      next({ params, result, type: SUCCESS });
+      return result;
+    }).catch(function(error){
+      // log('promiseMiddleware --> failed : ' + error);
+      next({ params, error,  type: FAILURE }); 
+      return error;
+    });
   };
 }

@@ -16,7 +16,7 @@ export function fetchUniverse(universeId) {
           chatId: '1',
           name: "Startups",
           description: "This is a place where stuff gets done.",
-          picturePath: "/img/pillars_compressed.png",
+          picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });
         break;
@@ -26,7 +26,7 @@ export function fetchUniverse(universeId) {
           chatId: '2',
           name: "Design",
           description: "This is a place where stuff gets designed.",
-          picturePath: "/img/designer_compressed.png",
+          picture: "/img/designer_compressed.png",
           handle: "Design"
         });
         break;
@@ -36,7 +36,7 @@ export function fetchUniverse(universeId) {
           chatId: '3',
           name: "Dev",
           description: "This is a place where stuff gets developped.",
-          picturePath: "/img/forest-compressed.png",
+          picture: "/img/forest-compressed.png",
           handle: "Dev"
         });
         break;
@@ -46,7 +46,7 @@ export function fetchUniverse(universeId) {
           chatId: '1',
           name: "Startups",
           description: "This is a place where stuff gets done.",
-          picturePath: "/img/pillars_compressed.png",
+          picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });
       }
@@ -70,7 +70,7 @@ export function fetchUniverseByName(universeName) {
           chatId: '1',
           name: "Startups",
           description: "This is a place where stuff gets done.",
-          picturePath: "/img/pillars_compressed.png",
+          picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });
         break;
@@ -80,7 +80,7 @@ export function fetchUniverseByName(universeName) {
           chatId: '2',
           name: "Design",
           description: "This is a place where stuff gets designed.",
-          picturePath: "/img/designer_compressed.png",
+          picture: "/img/designer_compressed.png",
           handle: "Design"
         });
         break;
@@ -90,7 +90,7 @@ export function fetchUniverseByName(universeName) {
           chatId: '3',
           name: "Dev",
           description: "This is a place where stuff gets developped.",
-          picturePath: "/img/forest-compressed.png",
+          picture: "/img/forest-compressed.png",
           handle: "Dev"
         });
         break;
@@ -100,7 +100,7 @@ export function fetchUniverseByName(universeName) {
           chatId: '1',
           name: "Startups",
           description: "This is a place where stuff gets done.",
-          picturePath: "/img/pillars_compressed.png",
+          picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });
       }
@@ -123,7 +123,7 @@ export function fetchUniverseByHandle(handle) {
           chatId: '1',
           name: "Startups",
           description: "This is a place where stuff gets done.",
-          picturePath: "/img/pillars_compressed.png",
+          picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });
         break;
@@ -133,7 +133,7 @@ export function fetchUniverseByHandle(handle) {
           chatId: '2',
           name: "Design",
           description: "This is a place where stuff gets designed.",
-          picturePath: "/img/designer_compressed.png",
+          picture: "/img/designer_compressed.png",
           handle: "Design"
         });
         break;
@@ -143,7 +143,7 @@ export function fetchUniverseByHandle(handle) {
           chatId: '3',
           name: "Dev",
           description: "This is a place where stuff gets developped.",
-          picturePath: "/img/forest-compressed.png",
+          picture: "/img/forest-compressed.png",
           handle: "Dev"
         });
         break;
@@ -153,7 +153,7 @@ export function fetchUniverseByHandle(handle) {
           chatId: '1',
           name: "Startups",
           description: "This is a place where stuff gets done.",
-          picturePath: "/img/pillars_compressed.png",
+          picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });
       }
@@ -175,7 +175,7 @@ export function fetchUniverses() {
           chatId: '1',
           name: "Startups",
           description: "This is a place where stuff gets done.",
-          picturePath: "/img/pillars_compressed.png",
+          picture: "/img/pillars_compressed.png",
           handle: "Startups"
         },
         {
@@ -183,7 +183,7 @@ export function fetchUniverses() {
           chatId: '2',
           name: "Design",
           description: "This is a place where stuff gets designed.",
-          picturePath: "/img/designer_compressed.png",
+          picture: "/img/designer_compressed.png",
           handle: "Design"
         },
         {
@@ -191,7 +191,7 @@ export function fetchUniverses() {
           chatId: '3',
           name: "Dev",
           description: "This is a place where stuff gets developped.",
-          picturePath: "/img/forest-compressed.png",
+          picture: "/img/forest-compressed.png",
           handle: "Dev"
         }
       ]);

@@ -60,7 +60,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
   
   // Parcours completedTask pour déterminer si une dependance est terminée
   function checkDependency(dependency) {
-    logMeOrNot('*** checkDependency named ' + dependency);
+    logMeOrNot('*** _ checkDependency named ' + dependency);
     if (dependency === undefined) return true;
     for (let t of completedTasks) {
       if (t.task.shouldBePresent === dependency) return true;
@@ -82,20 +82,22 @@ export default function phidippides(routerState, fluxState, dispatch) {
     let data = STATE;
     let x = dataString.split('.');
     for (let i in x) data = data[x[i]]; // 'truc.machin.id' --> truc[machin][id]
-    logMeOrNot('*** checkData of ' + dataString + ' --> ' + JSON.stringify(data) + ' should contain ' + JSON.stringify(shouldHaveValue));
+    logMeOrNot('*** _ checkData of ' + dataString + ' --> ' + JSON.stringify(data));
     
     if (data === undefined || data === null || data === '') return false;
+    if (data instanceof Array && data.length === 0) return false; // Si data === []
+    if (data instanceof Object && Object.keys(data).length === 0) return false; // Si data === {}
+    if (shouldHaveValue === undefined) return true;
+    logMeOrNot('*** _ ' + ' should contain ' + JSON.stringify(shouldHaveValue));
     // Si shouldHaveValue est un object on vérifie que data est identique
     if (data instanceof Object) {
       if (data instanceof Array) {
-        if (data.length === 0) return false; // Si data === []
         // Ici phidippides n'est pas codé (!)
         // Soit data doit etre strictement egal à shouldHaveValue
         // Soit data doit contenir un exemplaire de shouldHaveValue
         log('error', '!!! Code non implémenté !');
       }
       else {
-        if (Object.keys(data).length === 0) return false; // Si data === {}
         for (let key in shouldHaveValue) {
           if (data[key] !== shouldHaveValue[key]) return false;
         }
@@ -115,17 +117,18 @@ export default function phidippides(routerState, fluxState, dispatch) {
       // Attend que toutes les tâches soient résolues
       Promise.all(tasks.map(task => clearOneTask(task))).then(function() {
       
-        logMeOrNot('*** ___ clearTasks ended ___');
+        logMeOrNot('\n');
+        logMeOrNot('*** * clearTasks ended * ');
         logMeOrNot('*** completed tasks : ' + completedTasks.map(task => task.task.shouldBePresent));
         logMeOrNot('*** failed tasks : ' + failedTasks.map(task => task.shouldBePresent));
-        logMeOrNot('*** ___\n');
+        logMeOrNot('\n');
         // Si aucune tache n'a échoué c'est terminé
         if (failedTasks.length === 0) {
           resolve();
         }
         // Sinon on rappel les tâches échouées (possible boucle infinie ici)
         else { 
-          if (preventInfinite > 10) throw('Infinite loop detected');
+          if (preventInfinite > 10) throw('!!! Infinite loop detected');
           // Inception des promises 8)
           clearTasks(failedTasks).then(function() {
             resolve();
@@ -190,7 +193,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
     const callMe = ifNot[0].split('.'); //'module.creator' -> ['module', 'creator']
     let creator, realArgs = [], realArg;
     
-    logMeOrNot('*** callActionCreator ' + ifNot[0] + ' ' + ifNot[1]);
+    logMeOrNot('*** _ callActionCreator ' + callMe[1]);
     
     try { // Je ne sais pas si try catch est une bonne façon de faire ça
       creator = ACTION_CREATORS[callMe[0]][callMe[1]]; //ACTION_CREATORS[module][creator]
@@ -201,15 +204,16 @@ export default function phidippides(routerState, fluxState, dispatch) {
 
     // Traitement des arguments
     for (let arg of ifNot[1]) {
-      logMeOrNot('*** callActionCreator processing arg ' + arg);
+      logMeOrNot('*** ___ processing arg ' + arg);
       realArg = arg;
       // Si un argument string possède PLACEHOLDER alors il faut le traiter
       if (typeof arg === 'string' && arg.search(PLACEHOLDER) !== -1) {
-        logMeOrNot('*** callActionCreator \'' + PLACEHOLDER + '\' found in arg ' + arg);
+        logMeOrNot('*** ___ dependency found');
         // à commenter
         let dataTree = arg.replace(PLACEHOLDER, '').split('.'); // '__dependency.truc.machin.id' --> ['truc', 'machin', 'id']
         for (let t of completedTasks) {
           if (t.task.shouldBePresent === task.dependency) {
+            logMeOrNot('*** ___ dependency resolved');
             // Quand on l'a trouvée on recupère le résultat de la tache pour le passer en argument à l'action
             realArg = t.result;
             for (let i = 0, l = dataTree.length; i < l; i++) {
@@ -219,18 +223,21 @@ export default function phidippides(routerState, fluxState, dispatch) {
         }
       }
       realArgs.push(realArg);
-      logMeOrNot('*** callActionCreator realArg is ' + realArg);
+      logMeOrNot('*** ___ realArg is ' + realArg.toString().substring(0,9));
     }
     
     return new Promise(function(resolve, reject) {
       // Appel de l'action creator et dispatch de l'action
-      logMeOrNot('*** callActionCreator calling with args ' + realArgs);
+      logMeOrNot('*** ___ calling with args ' + realArgs);
       dispatch(creator.apply(null, realArgs)).then(function(data) {
-        logMeOrNot('*** callActionCreator dispatch resolved');
-        resolve(data.result);
+        logMeOrNot('***  _ Dispatch for ' + task.shouldBePresent + ' resolved');
+        logMeOrNot(data);
+        resolve(data);
+        return data; // ...
       }).catch(function(why) {
         log('error', '*** callActionCreator dispatch failed');
         reject(why);
+        return why;
       });
     });
   }
@@ -295,5 +302,4 @@ export default function phidippides(routerState, fluxState, dispatch) {
       return true;
     }
   }
-  
 }

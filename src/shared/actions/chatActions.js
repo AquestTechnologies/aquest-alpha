@@ -13,6 +13,6 @@ export function loadChat(chatId) {
   return {
     types: [REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT],
     promise: fetchChat(chatId),
-    data: chatId
+    params: chatId
   };
 }

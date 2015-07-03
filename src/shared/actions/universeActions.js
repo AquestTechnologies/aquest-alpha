@@ -19,7 +19,7 @@ export function loadUniverseByHandle(handle) {
   return {
     types: [REQUEST_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE],
     promise: fetchUniverseByHandle(handle),
-    data: handle
+    params: handle
   };
 }
 
@@ -28,7 +28,7 @@ export function loadUniverses() {
   return {
     types: [REQUEST_UNIVERSES, SUCCESS_UNIVERSES, FAILURE_UNIVERSES],
     promise: fetchUniverses(),
-    data: null
+    params: null
   };
 }
 
@@ -36,6 +36,6 @@ export function setUniverse(universe) {
   log('.A. setUniverse : ' + universe.name);
   return {
     type: SET_UNIVERSE,
-    data: universe
+    params: universe
   };
 }

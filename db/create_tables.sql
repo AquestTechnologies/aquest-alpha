@@ -15,7 +15,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA aquest_schema
 GRANT ALL ON TABLES TO admin WITH GRANT OPTION;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA aquest_schema
-GRANT SELECT, UPDATE, INSERT ON SEQUENCES TO users;
+GRANT SELECT, UPDATE ON SEQUENCES TO users;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA aquest_schema
 GRANT ALL ON FUNCTIONS TO admin WITH GRANT OPTION;
@@ -48,7 +48,7 @@ CREATE TABLE aquest_schema.UNIVERSE(
   created_at           TIMESTAMP DEFAULT now(),
   updated_at           TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT
+  FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id)
 );
 
 CREATE TABLE aquest_schema.UNIVERSE_UNIVERSE(
@@ -58,15 +58,15 @@ CREATE TABLE aquest_schema.UNIVERSE_UNIVERSE(
   force                BIGINT,
   created_at           TIMESTAMP DEFAULT now(),
   updated_at           TIMESTAMP DEFAULT now(),
-  deleted             BOOLEAN,
-  FOREIGN KEY (universe1_id) REFERENCES aquest_schema.UNIVERSE
+  deleted              BOOLEAN,
+  FOREIGN KEY (universe1_id) REFERENCES aquest_schema.UNIVERSE,
   FOREIGN KEY (universe2_id) REFERENCES aquest_schema.UNIVERSE
 );
 
 CREATE TABLE aquest_schema.USER (
   id                   BIGSERIAL PRIMARY KEY,
   email                TEXT UNIQUE,
-  pseudo               aquest_schema.user_names NOT NULL UNIQUE,
+  pseudo               aquest_schema.pseudo NOT NULL UNIQUE,
   first_name           TEXT,
   last_name            TEXT,
   password_salt        TEXT NOT NULL,
@@ -141,7 +141,7 @@ CREATE TABLE aquest_schema.TOPIC(
   deleted             BOOLEAN,
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE,
-  FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT
+  FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id)
 );
 
 CREATE TABLE aquest_schema.ATOME(
@@ -161,7 +161,7 @@ CREATE TABLE aquest_schema.MESSAGE(
   updated_at          TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
-  FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT
+  FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id)
 );
 
 CREATE TABLE aquest_schema.ATOME_TOPIC(
@@ -169,7 +169,7 @@ CREATE TABLE aquest_schema.ATOME_TOPIC(
   atome_id            BIGINT,
   topic_id            BIGINT,
   content             JSON,
-  order               INTEGER,
+  "order"             INTEGER,
   created_at          TIMESTAMP DEFAULT now(),
   updated_at          TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
@@ -189,46 +189,54 @@ CREATE TABLE aquest_schema.ATOME_MESSAGE(
   FOREIGN KEY (atome_id) REFERENCES aquest_schema.ATOME
 );
 
-
-
-CREATE FUNCTION aquest_schema.create_chat() 
-  RETURNS trigger AS $create_chat$
+CREATE FUNCTION aquest_schema.create_chat_topic() 
+  RETURNS trigger AS $create_chat_topic$
   DECLARE
       last_chat_id BIGINT;
+      chat_name TEXT;
   BEGIN
-      INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING chat_id INTO last_chat_id;
+      INSERT INTO aquest_schema.chat (name) VALUES (NEW.title) RETURNING id INTO last_chat_id;
       NEW.chat_id := last_chat_id;
       RETURN NEW;
   END;
-$create_chat$ LANGUAGE plpgsql;
+$create_chat_topic$ LANGUAGE plpgsql;
+
+
+CREATE FUNCTION aquest_schema.create_chat_universe() 
+  RETURNS trigger AS $create_chat_universe$
+  DECLARE
+      last_chat_id BIGINT;
+      chat_name TEXT;
+  BEGIN
+      INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING id INTO last_chat_id;
+      NEW.chat_id := last_chat_id;
+      RETURN NEW;
+  END;
+$create_chat_universe$ LANGUAGE plpgsql;
 
 CREATE TRIGGER create_chat
   BEFORE INSERT
   ON aquest_schema.universe
-  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.create_chat();
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.create_chat_universe();
   
 CREATE TRIGGER create_chat
   BEFORE INSERT
   ON aquest_schema.topic
-  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.create_chat();
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.create_chat_topic();
   
   
-  
-  
-CREATE FUNCTION set_updated_timestamp()
-  RETURNS TRIGGER
-  LANGUAGE plpgsql
-  AS $update_timestamp$ 
+CREATE FUNCTION aquest_schema.set_updated_timestamp()
+  RETURNS TRIGGER AS $set_updated_timestamp$
   BEGIN
     NEW.updated_at := now(); -- risque de ne pas marcher
     RETURN NEW;
   END;
-  $update_timestamp$;
+$set_updated_timestamp$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_timestamp
   BEFORE UPDATE 
-  ON aquest_schema.universe -- Pk préciser un schema ?
-  FOR EACH ROW EXECUTE PROCEDURE set_updated_timestamp();
+  ON aquest_schema.universe -- Pk préciser un schema ? Les bases de données fonctionnent avec des schémas, si tu n'en met pas tout vas dans public, pour des raison de sécurité il vaut mieux créer un schéma pour configurer les accès en fonction des utilisateurs  (plutôt que de le faire pour chaque table, ...)
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
   
 -- ... déjà si ça marche c'est bien
   

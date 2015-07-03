@@ -32,7 +32,7 @@ class Universe extends React.Component {
       <div>
         <Menu />
         
-        <div className="universe_left" style={{backgroundImage: 'url(' + this.props.universe.picturePath + ')'}}>
+        <div className="universe_left" style={{backgroundImage: 'url(' + this.props.universe.picture + ')'}}>
           <div className="universe_left_scrollable">
             <div className="universe_left_scrolled">
               <RouteHandler
