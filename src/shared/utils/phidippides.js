@@ -229,7 +229,7 @@ export default function phidippides(routerState, fluxState, dispatch) {
     return new Promise(function(resolve, reject) {
       // Appel de l'action creator et dispatch de l'action
       logMeOrNot('*** ___ calling with args ' + realArgs);
-      dispatch(creator.apply(null, realArgs)).then(function(data) {
+      dispatch(creator.apply(null, realArgs)).then(function(data) { // ICI !! le then ne doit pas s'appliquer à dispatch
         logMeOrNot('***  _ Dispatch for ' + task.shouldBePresent + ' resolved');
         logMeOrNot(data);
         resolve(data);

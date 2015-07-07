@@ -10,7 +10,7 @@ import * as reducers      from '../shared/reducers';
 import routes             from '../shared/routes.jsx';
 import log                from '../shared/utils/logTailor.js';
 import devConfig          from '../../config/development.js';
-import phidippides        from '../shared/utils/phidippides.js';
+import phidippides        from '../shared/utils/phidippides2.js';
 import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -153,7 +153,19 @@ server.route({
       // Initialise une nouvelle instance flux
       const store = createStore(
         composeReducers(reducers),
-        {},
+        {
+          globals: {
+            userId: 1,
+            universeId: 1,
+          },
+          users: {
+            1 : {
+              id: 1,
+              pseudo: 'AdminsOnlyLiveOnce',
+              biography: 'YOLO'
+            }
+          }
+        },
         [promiseMiddleware]
       );
       

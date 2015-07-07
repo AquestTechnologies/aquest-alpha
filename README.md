@@ -13,6 +13,7 @@ Aquest Technologies © 2015
 ### En manque d'idées ?
               
 - [ ] IsoFetch
+- [ ] changer trucActions par trucsActions
 - [ ] Interdire `null`
 - [ ] Mesurer le temps entre les actions request et success et l'afficher dans le log
 - [ ] Utiliser proptype et le context pour passer les données user et les actions

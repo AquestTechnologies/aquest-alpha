@@ -205,79 +205,96 @@ export function fetchInventory(universeId) {
   return new Promise(function (resolve, reject) {
     setTimeout(function () {
       let pasCustom = [{
-          id: '2',
+          id: 2,
+          universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
           desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           imgPath: "",
           timestamp:"a long time",
           handle: '000-handle',
-          chatId: '111'
+          chatId: "111"
         },
         {
-          id: '3',
+          id: 3,
+          universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
           desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           imgPath: "",
           timestamp:"a long time",
           handle: '000-handle',
-          chatId: '111'
+          chatId: "111"
         },
         {
-          id: '4',
+          id: 4,
+          universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
           desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           imgPath: "/img/image2.png",
           timestamp:"a long time",
           handle: '000-handle',
-          chatId: '111'
+          chatId: "111"
         },
         {
-          id: '5',
+          id: 5,
+          universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
           desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           imgPath: "",
           timestamp:"a long time",
           handle: '000-handle',
-          chatId: '111'
+          chatId: "111"
         },
         {
-          id: '6',
+          id: 6,
+          universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
           desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           imgPath: "",
           timestamp:"a long time",
           handle: '000-handle',
-          chatId: '111'
+          chatId: "111"
         },
         {
-          id: '7',
+          id: 7,
+          universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
           desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           imgPath: "/img/image1.png",
           timestamp:"a long time",
           handle: '000-handle',
-          chatId: '111'
+          chatId: "111"
         }];
         
-      resolve({
-        universeId: universeId,
-        topics: [{
-          id: '1',
+      resolve(
+        [{
+          id: 1,
+          universeId,
           title: universeId + " ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
           desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           imgPath: "/img/image1.png",
           timestamp:"a long time",
           handle: '000-handle',
-          chatId: '111'
+          chatId: "111"
+        },
+        {
+          id: 888888,
+          universeId: 888888,
+          title: "Le filtrage des topics ne marche pas",
+          author: "Yolo",
+          desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+          imgPath: "",
+          timestamp:"a long time",
+          handle: '000-handle',
+          chatId: "111"
         }].concat(pasCustom)
-      });
+      );
     }, 750);
   });
 }

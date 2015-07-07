@@ -120,13 +120,23 @@ export default function queryDb(queryInfo) {
       case 'fetchChat':
         
         // id, author, content
-        sql = 
+        /*sql = 
         'SELECT \
           message.id, aquest_user.pseudo, atome_message.content, chat.name as chat_name \
         FROM \
           aquest_schema.message, aquest_schema.atome_message, aquest_schema.user aquest_user, aquest_schema.chat \
         WHERE \
-          chat.id = message.chat_id AND aquest_user.id = message.user_id AND message.chat_id = \'' + params + '\' AND message.id = atome_message.message_id';
+          chat.id = message.chat_id AND aquest_user.id = message.user_id AND message.chat_id = \'' + params + '\' AND message.id = atome_message.message_id';*/
+          
+        sql = 
+        'SELECT \
+          message.id, aquest_user.pseudo, atome_message.content, chat.name as chat_name \
+        FROM \
+          aquest_schema.message \
+            RIGHT OUTER JOIN aquest_schema.chat ON chat.id = message.chat_id \
+            LEFT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.id \
+            LEFT JOIN  aquest_schema.atome_message ON message.id = atome_message.message_id \
+        WHERE chat.id = \'' + params + '\'';
         
         // log('+++ ' + sql.replace('\\','').substring(0,29));
         callback = function(result){

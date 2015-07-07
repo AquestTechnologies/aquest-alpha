@@ -4,52 +4,86 @@ import {RouteHandler} from 'react-router';
 import Menu           from './universe/Menu';
 import Chat           from './universe/Chat';
 
+import * as universeActions from '../actions/universeActions';
+import * as chatActions from '../actions/chatActions';
+import * as topicActions from '../actions/topicActions';
+
 class Universe extends React.Component {
   
   // Load les données initiales
-  static runPhidippides(routerState) {
+  /*static runPhidippides(routerState) {
     let root              = routerState.pathname === '/' ? true : false;
-    let correctArg        = root ? 'Startups' : routerState.params.universeHandle;
-    let correctValue      = root ? {handle: 'Startups'} : {handle: routerState.params.universeHandle};
+    let correctHandle     = root ? 'Startups' : routerState.params.universeHandle;
     let correctDependency = routerState.params.topicHandle ? 'topic.topic' : 'universe.universe';
     return [{
       on:              ['server', 'client'],
-      shouldBePresent: 'universe.universe',
-      shouldHaveValue: correctValue,
-      ifNot:           ['universeActions.loadUniverseByHandle', [correctArg]]  
+      shouldBePresent: 'universes.' + correctHandle,
+      shouldHaveValue: {handle: correctHandle},
+      ifNot:           ['universeActions.loadUniverseByHandle', [correctHandle]]  
     },{
       on:              ['server'],
       shouldBePresent: 'chat.chat',
       dependency:      correctDependency,
       ifNot:           ['chatActions.loadChat', ['__dependency.chatId']]
     }];
+  }*/
+  
+  static runPhidippides(routerState, fluxState, dispatch) {
+    return new Promise((resolve, reject) => {
+      if (fluxState.universes[fluxState.globals.universeId] === undefined) {
+        const correctHandle = routerState.pathname === '/' ? 'Startups' : routerState.params.universeHandle;
+        const action1 = universeActions.loadUniverseByHandle(correctHandle);
+        dispatch(action1);
+        action1.promise.then(data => {
+          // console.log('resolved !!!');
+          // console.log(data);
+          const action2 = chatActions.loadChat(data.chatId);
+          const action3 = topicActions.loadInventory(data.id);
+          dispatch(action2);
+          dispatch(action3);
+          Promise.all([ //Phidippides :'(
+            action2.promise,
+            action3.promise,
+          ]).then(() => resolve());
+        });
+      } else {
+        resolve();
+      }
+    });
   }
   
   render() {
-    let correctChatId = this.props.params.topicHandle ? this.props.topic.chatId : this.props.universe.chatId;
+    // console.log('universes :');
+    // console.log(this.props.universes);
+    // console.log('universe :');
+    const globals  = this.props.globals;
+    const chat     = this.props.chats[globals.chatId];
+    const universe = this.props.universes[globals.universeId];
+    // console.log(universe);
+    // let correctChatId = this.props.params.topicHandle ? this.props.topic.chatId : universe.chatId;
     
     return (
       <div>
         <Menu />
         
-        <div className="universe_left" style={{backgroundImage: 'url(' + this.props.universe.picture + ')'}}>
+        <div className="universe_left" style={{backgroundImage: 'url(' + universe.picture + ')'}}>
           <div className="universe_left_scrollable">
             <div className="universe_left_scrolled">
               <RouteHandler
-                universe={this.props.universe} 
-                inventory={this.props.inventory}
-                topic={this.props.topic}
+                globals={globals}
+                universe={universe} 
+                topics={this.props.topics}
                 setTopic={this.props.setTopic}
                 loadTopicContent={this.props.loadTopicContent} //passer les actions par le context, a faire
-                loadInventory={this.props.loadInventory} //passer les actions par le context, a faire
+                //loadInventory={this.props.loadInventory} //passer les actions par le context, a faire
               />
             </div>
           </div>
         </div>
         
         <Chat 
-          chat={this.props.chat} 
-          chatId={correctChatId} 
+          chat={chat} 
+          //chatId={correctChatId} 
           loadChat={this.props.loadChat} //passer les actions par le context, a faire
         />
       </div>
@@ -57,7 +91,8 @@ class Universe extends React.Component {
   }
 }
 
-Universe.defaultProps = {
+// à supprimer ?
+Universe.defaultProps = { 
   universe: {
     id: 0,
     name: 'defaultProps name',

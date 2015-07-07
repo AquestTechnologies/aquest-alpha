@@ -1,6 +1,5 @@
 import log from '../utils/logTailor';
 import { 
-  SET_TOPIC,
   REQUEST_INVENTORY,
   SUCCESS_INVENTORY,
   FAILURE_INVENTORY,
@@ -11,38 +10,32 @@ import {
   SUCCESS_TOPIC_BY_HANDLE,
   FAILURE_TOPIC_BY_HANDLE
 } from '../constants/ActionTypes';
+import simpleCopy from '../utils/simpleCopy';
 
-
-export default function chat(state = {}, action) {
+export default function topics(state = {}, action) {
+  let newState;
   switch (action.type) {
     
-  case SET_TOPIC:
-    return {
-      topic: action.data,
-      inventory: state.inventory
-    };
-    
-  case SUCCESS_INVENTORY:
-    return {
-      topic: state.topic,
-      inventory: action.result
-    };
-    
-  case SUCCESS_TOPIC_CONTENT:
-    let topic = state.topic;
-    topic.content = action.result;
-    return {
-      topic: topic,
-      inventory: state.inventory
-    };
-    
-  case SUCCESS_TOPIC_BY_HANDLE:
-    return {
-      topic: action.result,
-      inventory: state.inventory
-    };
-    
-  default:
-    return state;
+    case SUCCESS_INVENTORY:
+      newState = simpleCopy(state);
+      action.result.forEach(topic => newState[topic.id] = topic);
+      return newState;
+      
+    // case SUCCESS_TOPIC_CONTENT:
+    //   let topic = state.topic;
+    //   topic.content = action.result;
+    //   return {
+    //     topic: topic,
+    //     inventory: state.inventory
+    //   };
+      
+    // case SUCCESS_TOPIC_BY_HANDLE:
+    //   return {
+    //     topic: action.result,
+    //     inventory: state.inventory
+    //   };
+      
+    default:
+      return state;
   }
 }

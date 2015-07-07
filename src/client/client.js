@@ -3,7 +3,7 @@ import React        from 'react';
 import Router       from 'react-router';  
 // import config       from '../../config/client.js';
 import routes       from '../shared/routes.jsx';
-import phidippides  from '../shared/utils/phidippides.js';
+import phidippides  from '../shared/utils/phidippides2.js';
 import {default as log, logWelcome} from '../shared/utils/logTailor.js';
 
 import { createStore, composeReducers } from 'redux';
@@ -26,7 +26,7 @@ io.on('message', function (message) {
   log('... Initializing Redux and React Router');
   
   const stateFromServer = window.STATE_FROM_SERVER || {};
-  // log('stateFromServer ' + stateFromServer);
+  // log('info', 'stateFromServer :', stateFromServer);
   
 
   const store = createStore(
@@ -34,7 +34,7 @@ io.on('message', function (message) {
     stateFromServer,
     [promiseMiddleware]
   );
-  // On extrait le state serialisé du DOM
+  // log('info', 'state :', store.getState());
   
   // Initialise le router
   let router = Router.create({ 

@@ -15,12 +15,14 @@ class Chat extends React.Component {
   
   componentWillMount() {
     let chat = this.props.chat;
+    // console.log('.c. Chat mount');
+    // console.log(chat);
     let isLoading = false;
-    if(this.props.chatId !== this.props.chat.id) {
-      this.props.loadChat(this.props.chatId);
-      chat = {};
-      isLoading = true;
-    }
+    // if(this.props.chatId !== this.props.chat.id) {
+    //   this.props.loadChat(this.props.chatId);
+    //   chat = {};
+    //   isLoading = true;
+    // }
     this.setState({ 
       chat: chat,
       isLoading: isLoading
@@ -28,7 +30,8 @@ class Chat extends React.Component {
   }
   
   componentWillReceiveProps(nextProps) {
-    if (nextProps.chatId !== nextProps.chat.id) {
+    // if (nextProps.chatId !== nextProps.chat.id) {
+    if (false) {
       if (!this.state.isLoading) {
         this.props.loadChat(nextProps.chatId);
         this.setState({ 
@@ -47,7 +50,7 @@ class Chat extends React.Component {
   componentDidMount() {
     //permet de scroller les messages tout en bas après le mount.
     // console.log('.C. Chat mount');
-    setTimeout(function(){ // Pourquoi un timeout de merde ? Pke sans ça chrome le fait pas ! 
+    setTimeout(() => { // Pourquoi un timeout de merde ? Pke sans ça chrome le fait pas ! 
       let scrollable = document.getElementById("scrollMeDown");
       scrollable.scrollTop = scrollable.scrollHeight;
     }, 10);

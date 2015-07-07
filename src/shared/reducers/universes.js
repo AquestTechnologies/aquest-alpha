@@ -8,26 +8,23 @@ import {
   SUCCESS_UNIVERSES,
   FAILURE_UNIVERSES
 } from '../constants/ActionTypes';
-
+import simpleCopy from '../utils/simpleCopy';
 
 export default function universes(state = {}, action) {
+  let newState;
   switch (action.type) {
-  case SET_UNIVERSE:
-    return {
-      universe: action.data,
-      universes: state.universes
-    };
-  case SUCCESS_UNIVERSE:
-    return {
-      universe: action.result,
-      universes: state.universes
-    };
-  case SUCCESS_UNIVERSES:
-    return {
-      universe: state.universe,
-      universes: action.result
-    };
-  default:
-    return state;
+    
+    case SUCCESS_UNIVERSE:
+      newState = simpleCopy(state);
+      newState[action.result.id] = action.result;
+      return newState;
+  
+    case SUCCESS_UNIVERSES:
+      newState = simpleCopy(state);
+      action.results.forEach(universe => newState[universe.id] = universe);
+      return newState;
+    
+    default:
+      return state;
   }
 }

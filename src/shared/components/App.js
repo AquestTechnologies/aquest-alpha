@@ -12,12 +12,11 @@ import LoadingBar           from './common/LoadingBar';
 
 function select(state) {
   return { 
-    universe:           state.universe.universe,
-    universes:          state.universe.universes,
-    inventory:          state.topic.inventory,
-    topic:              state.topic.topic,
-    chat:              state.chat.chat,
-    records:      state.records,
+    globals:    state.globals,
+    universes:  state.universes,
+    topics:     state.topics,
+    chats:      state.chats,
+    records:    state.records,
   };
 }
 
@@ -28,24 +27,22 @@ export default class App extends React.Component {
       <Connector select={select}>
         {
           ({ 
-            universe,
+            globals,
             universes,
-            inventory,
-            topic,
-            chat,
-            dispatch ,
-            records
+            topics,
+            chats,
+            records,
+            dispatch,
           }) => 
           <div>
             <LoadingBar 
               records = {records}
             />
             <RouteHandler 
-              universe={universe}
+              globals={globals}
               universes={universes}
-              inventory={inventory}
-              topic={topic}
-              chat={chat}
+              topics={topics}
+              chats={chats}
               {...bindActionCreators(universeActions, dispatch)} 
               {...bindActionCreators(chatActions, dispatch)} 
               {...bindActionCreators(topicActions, dispatch)} 
