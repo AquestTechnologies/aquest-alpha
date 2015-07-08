@@ -2,8 +2,10 @@ import React from 'react';
 import { Link } from 'react-router';
 
 import Node from './explore/Node';
-import generateGraph from '../utils/graphGenerator.js';
-import {default as generatePseudos, getBiggestPseudo, getSmallestPseudo, getPossibilitiesNumber} from '../utils/pseudosGenerator.js';
+import generateGraph from '../utils/graphGenerator';
+import {default as generatePseudos, getBiggestPseudo, getSmallestPseudo, getPossibilitiesNumber} from '../utils/pseudosGenerator';
+
+import {loadUniverses} from '../actions';
 
 export default class Explore extends React.Component {
   /*
@@ -16,11 +18,11 @@ export default class Explore extends React.Component {
   }
   */
   static runPhidippides(routerState, fluxState, dispatch) {
-    return [{
-      on:              ['server', 'client'],
-      shouldBePresent: 'universe.universes',
-      ifNot:           ['universeActions.loadUniverses', []]  
-    }];
+    return new Promise((resolve, reject) => {
+      const action = loadUniverses();
+      dispatch(action);
+      action.promise.then(() => resolve());
+    });
   }
   
   componentDidMount() {
@@ -30,7 +32,7 @@ export default class Explore extends React.Component {
   
   render() {
     // CSS temporaire
-    let divStyle = {
+    const divStyle = {
       width: '60%',
       margin: 'auto',
       fontSize: '2rem'
@@ -39,17 +41,7 @@ export default class Explore extends React.Component {
     return (
       <div style={divStyle}>
         {this.renderBackLink()}
-        {this.props.universes.map( (universe) => {
-          return (
-            <Node 
-              key={universe.id} 
-              universe={universe} 
-              currentUniverse={this.props.currentUniverse} 
-              setUniverse={this.props.setUniverse} 
-              style={divStyle}
-            />
-          );
-        })}
+        {this.renderGraph()}
         <br />
         <br />
         <div id="graph" />
@@ -61,11 +53,31 @@ export default class Explore extends React.Component {
   }
   
   renderBackLink() {
-    if(this.props.universe) {
-      return <Link to='universe' params={{universeHandle: this.props.universe.handle}}>Back</Link>;
+    let universe = this.props.universes[this.props.globals.universeId];
+    if(universe) {
+      return <Link to='universe' params={{universeHandle: universe.handle}}>Back</Link>;
     } else {
       return <Link to='home'>Starting Universe</Link>;
     }
+  }
+  
+  // :(
+  renderGraph() {
+    const universesProps = this.props.universes;
+    let universes = [];
+    for (let key in universesProps) {
+      if (universesProps.hasOwnProperty(key)) universes.push(universesProps[key]);
+    }
+    return universes.map(universe => {
+      return(
+        <Node 
+          key={universe.id} 
+          universe={universe} 
+          currentUniverse={this.props.universes[this.props.globals.universeId]} 
+          setUniverse={this.props.setUniverse} 
+        />
+      );
+    });
   }
   
 }

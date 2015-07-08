@@ -4,9 +4,7 @@ import {RouteHandler} from 'react-router';
 import Menu           from './universe/Menu';
 import Chat           from './universe/Chat';
 
-import * as universesActions from '../actions/universesActions';
-import * as chatsActions from '../actions/chatsActions';
-import * as topicsActions from '../actions/topicsActions';
+import * as actions from '../actions';
 
 class Universe extends React.Component {
   
@@ -30,28 +28,34 @@ class Universe extends React.Component {
   
   static runPhidippides(routerState, fluxState, dispatch) {
     return new Promise((resolve, reject) => {
-      if (fluxState.universes[fluxState.globals.universeId] === undefined) {
+      if (fluxState.universes.get(fluxState.globals.universeId) === undefined) {
         
         const correctHandle = routerState.pathname === '/' ? 'Startups' : routerState.params.universeHandle;
-        const action1 = universesActions.loadUniverseByHandle(correctHandle);
+        const action1 = actions.loadUniverseByHandle(correctHandle);
         dispatch(action1);
         
         action1.promise.then(data => {
           // console.log('resolved !!!');
           // console.log(data);
-          const action2 = chatsActions.loadChat(data.chatId);
-          const action3 = topicsActions.loadInventory(data.id);
-          dispatch(action2);
+          let todo = [];
+          if (fluxState.chats.get(fluxState.globals.chatId) === undefined) {
+            const action2 = actions.loadChat(data.chatId);
+            dispatch(action2);
+            todo.push(action2.promise);
+          }
+          const action3 = actions.loadInventory(data.id);
           dispatch(action3);
-          
-          Promise.all([ //Phidippides :'(
-            action2.promise,
-            action3.promise,
-          ]).then(() => resolve());
+          todo.push(action3.promise);
+          Promise.all(todo).then(() => resolve());
         });
       } else {
-        
-        resolve();
+        if (fluxState.chats.get(fluxState.globals.chatId) === undefined) {
+          const action2 = actions.loadChat(fluxState.universes.get(fluxState.globals.universeId).chatId);
+          dispatch(action2);
+          action2.promise.then(() => resolve());
+        } else {
+          resolve();
+        }
       }
     });
   }
@@ -63,11 +67,12 @@ class Universe extends React.Component {
     const globals  = this.props.globals;
     const chat     = this.props.chats[globals.chatId];
     const universe = this.props.universes[globals.universeId];
+    console.log(universe);
     // console.log(universe);
     // let correctChatId = this.props.params.topicHandle ? this.props.topic.chatId : universe.chatId;
     
     return (
-      <div>
+      <div> 
         <Menu />
         
         <div className="universe_left" style={{backgroundImage: 'url(' + universe.picture + ')'}}>
@@ -76,7 +81,7 @@ class Universe extends React.Component {
               <RouteHandler
                 globals={globals}
                 universe={universe} 
-                topics={this.props.topics}
+                topics={universe.topics}
                 setTopic={this.props.setTopic}
                 loadTopicContent={this.props.loadTopicContent} //passer les actions par le context, a faire
                 //loadInventory={this.props.loadInventory} //passer les actions par le context, a faire

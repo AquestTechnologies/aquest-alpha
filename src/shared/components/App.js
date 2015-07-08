@@ -4,18 +4,15 @@ import {RouteHandler}       from 'react-router';
 import {bindActionCreators} from 'redux';
 import {Connector}          from 'redux/react';
 
-import * as universesActions from '../actions/universesActions';
-import * as chatsActions     from '../actions/chatsActions';
-import * as topicsActions     from '../actions/topicsActions';
+import * as actions from '../actions';
 
 import LoadingBar           from './common/LoadingBar';
 
 function select(state) {
   return { 
     globals:    state.globals,
-    universes:  state.universes,
-    topics:     state.topics,
-    chats:      state.chats,
+    universes:  state.universes.toJS(),
+    chats:      state.chats.toJS(),
     records:    state.records,
   };
 }
@@ -29,7 +26,6 @@ export default class App extends React.Component {
           ({ 
             globals,
             universes,
-            topics,
             chats,
             records,
             dispatch,
@@ -41,11 +37,8 @@ export default class App extends React.Component {
             <RouteHandler 
               globals={globals}
               universes={universes}
-              topics={topics}
               chats={chats}
-              {...bindActionCreators(universesActions, dispatch)} 
-              {...bindActionCreators(chatsActions, dispatch)} 
-              {...bindActionCreators(topicsActions, dispatch)} 
+              {...bindActionCreators(actions, dispatch)} 
             />
           </div>
         }

@@ -1,5 +1,5 @@
 export const SET_UNIVERSE = 'SET_UNIVERSE';
-export const SET_TOPIC = 'SET_TOPIC';
+export const SET_TOPIC    = 'SET_TOPIC';
 
 export const REQUEST_UNIVERSE = 'REQUEST_UNIVERSE';
 export const SUCCESS_UNIVERSE = 'SUCCESS_UNIVERSE';

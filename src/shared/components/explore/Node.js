@@ -5,7 +5,7 @@ class Node extends React.Component {
   constructor() {
     super();
     
-    this.handleSelectUniverse = (universe) => {
+    this.handleSelectUniverse = universe => {
       console.log('-c- Node.handleSelectUniverse ' + universe.handle);
       this.props.setUniverse(universe);
       this.context.router.transitionTo('universe', {universeHandle: universe.handle});
@@ -13,7 +13,7 @@ class Node extends React.Component {
   }
   
   render() {
-    let universe = this.props.universe;
+    const universe = this.props.universe;
     
     return (
       <div>

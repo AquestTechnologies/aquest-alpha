@@ -17,45 +17,30 @@ class Inventory extends React.Component {
   constructor() {
     super();
     this.state = {
-      inventory: {},
+      // inventory: {},
       nameVisible: true
     };
     this.handleHeaderHover = () => this.setState({ nameVisible: !this.state.nameVisible });
   }
   
-  componentWillMount() {
+  /*componentWillMount() {
     // if(this.props.universe.id !== this.props.inventory.universeId) {
     if(false) {
       this.props.loadInventory(this.props.universe.id);
     } else {
-      this.setState({inventory: this.getInventory()});
+      this.setState({inventory: this.props.topics});
     }
-  }
+  }*/
   
   // componentWillReceiveProps(nextProps) {
   //   if (nextProps.universe.id === nextProps.inventory.universeId) this.setState({ inventory: nextProps.inventory });
   //   // if (true) this.setState({ inventory: nextProps.inventory });
   // }
   
-  getInventory() {
-    // console.log('.c. Inventory getInventory');
-    const topics = this.props.topics;
-    const universeId = this.props.universe.id;
-    // console.log(universeId);
-    let inventory = [];
-    for (let key in topics) {
-      // console.log(topics[key].universeId);
-      if (topics.hasOwnProperty(key) && topics[key].hasOwnProperty('universeId') && topics[key].universeId === universeId) {
-        inventory.push(topics[key]);
-      }
-    }
-    // console.log(inventory.length);
-    return inventory;
-  }
   
   render() {
     const universe  = this.props.universe;
-    const inventoryListClassName = this.state.inventory.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
+    const inventoryListClassName = this.props.topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
     
     return (
       <div>      
@@ -65,7 +50,7 @@ class Inventory extends React.Component {
         
         <div className={inventoryListClassName} >
           <CardNew universeName={universe.name} />
-          {this.renderCards(this.state.inventory)}
+          {this.renderCards()}
         </div>
         
       </div>
@@ -82,7 +67,7 @@ class Inventory extends React.Component {
   
   renderCards() {
     return (
-      this.state.inventory.map(topic => {
+      this.props.topics.map(topic => {
         return <Card 
           key={topic.id} 
           universeHandle={this.props.universe.handle}

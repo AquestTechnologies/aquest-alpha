@@ -1,18 +1,16 @@
 require('./less/app.less');
-import React        from 'react';
-import Router       from 'react-router';  
-// import config       from '../../config/client.js';
-import routes       from '../shared/routes.jsx';
-import phidippides  from '../shared/utils/phidippides2.js';
-import {default as log, logWelcome} from '../shared/utils/logTailor.js';
+import React                            from 'react';
+import {createStore, composeReducers}   from 'redux';
+import Immutable                        from 'immutable';
+import {Provider}                       from 'redux/react';
+import Router                           from 'react-router';  
+import key                              from './vendor/keymaster';
+import * as reducers                    from '../shared/reducers';
+import routes                           from '../shared/routes.jsx';
+import {default as log, logWelcome}     from '../shared/utils/logTailor.js';
+import phidippides                      from '../shared/utils/phidippides2.js';
+import promiseMiddleware                from '../shared/utils/promiseMiddleware.js';
 
-import { createStore, composeReducers } from 'redux';
-import promiseMiddleware from '../shared/utils/promiseMiddleware.js';
-import * as reducers from '../shared/reducers';
-import records from '../shared/reducers/records';
-import key from './vendor/keymaster';
-
-import { Provider } from 'redux/react';
 
 /*import Websocket from 'socket.io-client';
 const io = Websocket('http://130.211.68.244:8081'); //Prendre le bon port
@@ -22,15 +20,33 @@ io.on('message', function (message) {
 });*/
 
 (function app() {
+  
   logWelcome(false);
   log('... Initializing Redux and React Router');
   
+  let clientState = {};
   const stateFromServer = window.STATE_FROM_SERVER || {};
-  // log('info', 'stateFromServer :', stateFromServer);
+  
+  if (stateFromServer.hasOwnProperty('immutableKeys')) {
+    const immutableKeys = stateFromServer.immutableKeys;
+    delete stateFromServer.immutableKeys;
+    let immutable;
+    
+    for (let key in stateFromServer) {
+      immutable = false;
+      immutableKeys.forEach(immutableKey => {
+        if (immutableKey === key) immutable = true;
+      });
+      clientState[key] = immutable ? Immutable.fromJS(stateFromServer[key]) : stateFromServer[key];
+    }
+  } else {
+    clientState = stateFromServer;
+  }
+  // log('info', 'clientState :', clientState);
   
   const store = createStore(
     composeReducers(reducers),
-    stateFromServer,
+    clientState,
     [promiseMiddleware]
   );
   // log('info', 'state :', store.getState());
@@ -50,7 +66,6 @@ io.on('message', function (message) {
       return;
     }
     c++;
-    routerState.c = c;
     log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
     
     let d = new Date();

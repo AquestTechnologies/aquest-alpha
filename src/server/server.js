@@ -2,6 +2,7 @@ import fs         from 'fs';
 import Hapi       from 'hapi';
 import React      from 'react';
 import Router     from 'react-router';
+import Immutable  from 'immutable';
 
 import { createStore, composeReducers } from 'redux';
 import { Provider }                     from 'redux/react';
@@ -126,13 +127,13 @@ server.route({
             userId: 1,
             universeId: 1,
           },
-          users: {
+          users: Immutable.fromJS({
             1 : {
               id: 1,
               pseudo: 'AOLO',
               biography: 'AdminsOnlyLiveOnce'
             }
-          }
+          })
         },
         [promiseMiddleware]
       );
@@ -166,8 +167,15 @@ server.route({
           
           // Enfin on cale notre élément dans le mountNode.
           html = html.replace(placeholder, mount_me_im_famous);
+          
+          // Passage du state dans window
+          let serverState = store.getState()
+          serverState.immutableKeys = []
+          for (var key in serverState) {
+            if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); 
+          }
           html = html.replace('</body>',
-            '\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>\n' +
+            '\t<script>window.STATE_FROM_SERVER='+JSON.stringify(serverState)+';</script>\n' +
             '\t<script src="' + config.wds.hotFile + '"></script>\n' +
             '\t<script src="' + config.wds.publicPath + '/' + config.wds.filename + '"></script>\n' +
             '</body>'

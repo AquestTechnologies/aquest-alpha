@@ -22,6 +22,7 @@ export default function promiseMiddleware(next) {
       next({ params, result, type: SUCCESS });
       return result;
     }).catch(function(error){
+      console.log(error);
       // log('promiseMiddleware --> failed : ' + error);
       next({ params, error,  type: FAILURE }); 
       return error;
