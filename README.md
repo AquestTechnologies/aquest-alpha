@@ -12,14 +12,12 @@ Aquest Technologies © 2015
 
 ### En manque d'idées ?
               
-- [ ] IsoFetch
-- [ ] changer trucActions par trucsActions
-- [ ] Interdire `null`
+- [ ] Interdire `null` ?
 - [ ] Mesurer le temps entre les actions request et success et l'afficher dans le log
-- [ ] Utiliser proptype et le context pour passer les données user et les actions
+- [ ] Passer les actions autrement
 - [ ] loading bar
 - [ ] Immutable ?
-- [ ] Implementer Redux 1.0
+- [ ] Proptypes pour tous les composants
 - [ ] Implementer un fichier config (constantes, production, liens du bundle, etc...)
 - [ ] verifier les escapes du state ( < > ' " SQL)
 - [ ] verifier les escapes du put ( < > ' " SQL)
@@ -28,6 +26,9 @@ Aquest Technologies © 2015
 - [ ] faire les liens Hapijs <-> webSocket <-> rabbitMQ <-> postgres 
 - [ ] SASS
 - [ ] responsive design
+- [x] IsoFetch
+- [x] changer trucActions par trucsActions
+- [x] Implementer Redux 1.0
 - [x] Dans les requetes SQL : double quotes : remplace trucid par trucId
 - [x] window.STATE\_FROM_SERVER
 - [x] chalk --> https://github.com/sindresorhus/chalk

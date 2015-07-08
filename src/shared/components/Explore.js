@@ -6,8 +6,16 @@ import generateGraph from '../utils/graphGenerator.js';
 import {default as generatePseudos, getBiggestPseudo, getSmallestPseudo, getPossibilitiesNumber} from '../utils/pseudosGenerator.js';
 
 export default class Explore extends React.Component {
-  
+  /*
   static runPhidippides(routerState) {
+    return [{
+      on:              ['server', 'client'],
+      shouldBePresent: 'universe.universes',
+      ifNot:           ['universeActions.loadUniverses', []]  
+    }];
+  }
+  */
+  static runPhidippides(routerState, fluxState, dispatch) {
     return [{
       on:              ['server', 'client'],
       shouldBePresent: 'universe.universes',
@@ -16,7 +24,7 @@ export default class Explore extends React.Component {
   }
   
   componentDidMount() {
-    React.render(<Graph />, document.getElementById('graph'));
+    React.render(<Graph />, document.getElementById('graph')); //Ne de-mount pa :(
     React.render(<Pseudos />, document.getElementById('pseudos'));
   }
   

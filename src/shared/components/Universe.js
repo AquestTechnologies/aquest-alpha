@@ -4,9 +4,9 @@ import {RouteHandler} from 'react-router';
 import Menu           from './universe/Menu';
 import Chat           from './universe/Chat';
 
-import * as universeActions from '../actions/universeActions';
-import * as chatActions from '../actions/chatActions';
-import * as topicActions from '../actions/topicActions';
+import * as universesActions from '../actions/universesActions';
+import * as chatsActions from '../actions/chatsActions';
+import * as topicsActions from '../actions/topicsActions';
 
 class Universe extends React.Component {
   
@@ -19,34 +19,38 @@ class Universe extends React.Component {
       on:              ['server', 'client'],
       shouldBePresent: 'universes.' + correctHandle,
       shouldHaveValue: {handle: correctHandle},
-      ifNot:           ['universeActions.loadUniverseByHandle', [correctHandle]]  
+      ifNot:           ['universesActions.loadUniverseByHandle', [correctHandle]]  
     },{
       on:              ['server'],
       shouldBePresent: 'chat.chat',
       dependency:      correctDependency,
-      ifNot:           ['chatActions.loadChat', ['__dependency.chatId']]
+      ifNot:           ['chatsActions.loadChat', ['__dependency.chatId']]
     }];
   }*/
   
   static runPhidippides(routerState, fluxState, dispatch) {
     return new Promise((resolve, reject) => {
       if (fluxState.universes[fluxState.globals.universeId] === undefined) {
+        
         const correctHandle = routerState.pathname === '/' ? 'Startups' : routerState.params.universeHandle;
-        const action1 = universeActions.loadUniverseByHandle(correctHandle);
+        const action1 = universesActions.loadUniverseByHandle(correctHandle);
         dispatch(action1);
+        
         action1.promise.then(data => {
           // console.log('resolved !!!');
           // console.log(data);
-          const action2 = chatActions.loadChat(data.chatId);
-          const action3 = topicActions.loadInventory(data.id);
+          const action2 = chatsActions.loadChat(data.chatId);
+          const action3 = topicsActions.loadInventory(data.id);
           dispatch(action2);
           dispatch(action3);
+          
           Promise.all([ //Phidippides :'(
             action2.promise,
             action3.promise,
           ]).then(() => resolve());
         });
       } else {
+        
         resolve();
       }
     });

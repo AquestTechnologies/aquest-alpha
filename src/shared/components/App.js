@@ -4,9 +4,9 @@ import {RouteHandler}       from 'react-router';
 import {bindActionCreators} from 'redux';
 import {Connector}          from 'redux/react';
 
-import * as universeActions from '../actions/universeActions';
-import * as chatActions     from '../actions/chatActions';
-import * as topicActions     from '../actions/topicActions';
+import * as universesActions from '../actions/universesActions';
+import * as chatsActions     from '../actions/chatsActions';
+import * as topicsActions     from '../actions/topicsActions';
 
 import LoadingBar           from './common/LoadingBar';
 
@@ -43,9 +43,9 @@ export default class App extends React.Component {
               universes={universes}
               topics={topics}
               chats={chats}
-              {...bindActionCreators(universeActions, dispatch)} 
-              {...bindActionCreators(chatActions, dispatch)} 
-              {...bindActionCreators(topicActions, dispatch)} 
+              {...bindActionCreators(universesActions, dispatch)} 
+              {...bindActionCreators(chatsActions, dispatch)} 
+              {...bindActionCreators(topicsActions, dispatch)} 
             />
           </div>
         }
