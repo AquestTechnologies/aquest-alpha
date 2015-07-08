@@ -17,7 +17,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log('node', 'Starting Node in ' + process.env.NODE_ENV + ' mode');
 
 const config = devConfig();
-let server = new Hapi.Server();
+const server = new Hapi.Server();
 
 // Distribution des ports pour l'API et les websockets
 server.connection({ port: config.api.port, labels: ['api'] });
@@ -33,11 +33,10 @@ if (process.env.NODE_ENV === 'development') {
 server.register([
   {register: require('./plugins/websocket')},
   {register: require('./plugins/api')}
-], 
-function (err) {
+], err => {
   if (err) throw err;
   
-  server.start(function() {
+  server.start(() => {
     log('Make it rain! API server started at ' + server.info.uri);
     log('              ws  server started at ' + server.select('ws').info.uri);
     console.log('  ___                        _        \n' + // !
@@ -53,65 +52,34 @@ function (err) {
   });
 });
 
-// Config des cookies
-/*server.state('STATE_FROM_SERVER', {
-    ttl: null,
-    encoding: 'base64json'
-});*/
-//Routage des assets, inutile en production car derriere un CDN
-/*server.route({
-  method: 'GET',
-  path: '/app.js',
-  handler: function (request, reply) {
-    reply.file('dist/app.js');
-  }
-});*/
-
-/*server.route({
-  method: 'GET',
-  path: '/app.css',
-  handler: function (request, reply) {
-    reply.file('dist/app.css');
-  }
-});
-*/
 server.route({
-    method: 'GET',
-    path: '/img/{filename}',
-    handler: function (request, reply) {
-      reply.file('dist/img/' + request.params.filename);
-    }
+  method: 'GET',
+  path: '/img/{filename}',
+  handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
 });
 
 server.route({
   method: 'GET',
   path: '/',
-  handler: function (request, reply) {
-    reply.prerenderer();
-  }
+  handler: (request, reply) => reply.prerenderer()
 });
 
 server.route({
   method: 'GET',
   path: '/{p*}',
-  handler: function (request, reply) {
-    reply.prerenderer();
-  }
+  handler: (request, reply) => reply.prerenderer()
 });
 
 server.route({
   method: 'GET',
   path: '/favicon.ico',
-  handler: function (request, reply) {
-    return reply({}); // Haha je kif
-  }
+  handler: (request, reply) => reply({}) // Haha je kif
 });
 
 // Prerendering
-(function() {
+(() => {
   let c = 0;
-  
-  server.decorate('reply', 'prerenderer', function () {
+  server.decorate('reply', 'prerenderer', function() {
     
     // Intercepte la réponse
     let response = this.response().hold();
@@ -129,8 +97,8 @@ server.route({
     
     // Servira à lire le fichier HTML
     function readFile (filename, enc) {
-      return new Promise(function (ohyes, ohno){
-        fs.readFile(filename, enc, function (err, res){
+      return new Promise((ohyes, ohno) => {
+        fs.readFile(filename, enc, (err, res) => {
           if (err) ohno(err);
           else ohyes(res);
         });
@@ -147,7 +115,7 @@ server.route({
     });
     
     // Match la location et les routes, et renvoie le bon layout (Handler) et le state
-    router.run( (Handler, routerState) => {
+    router.run((Handler, routerState) => {
       log('_____________ router.run _____________');
 
       // Initialise une nouvelle instance flux
@@ -161,8 +129,8 @@ server.route({
           users: {
             1 : {
               id: 1,
-              pseudo: 'AdminsOnlyLiveOnce',
-              biography: 'YOLO'
+              pseudo: 'AOLO',
+              biography: 'AdminsOnlyLiveOnce'
             }
           }
         },
@@ -172,31 +140,32 @@ server.route({
       // Initialise les stores
       log('... Entering phidippides');
       let d = new Date();
-      phidippides(routerState, store.getState(), store.dispatch).then(function() {
+      phidippides(routerState, store.getState(), store.dispatch).then(() => {
+        
         log('info', '... Exiting phidippides after ' + (new Date() - d) + 'ms' , '... Entering React.renderToString');
         
         try {
           var mount_me_im_famous = React.renderToString(
             <Provider store={store}>
-              {() =>
-                <Handler {...routerState} />
-              }
+              {() => <Handler {...routerState} />}
             </Provider>
           );
         } 
         catch(err) {
           log('error', '!!! Error while React.renderToString', err);
         }
+        
         log('... Exiting React.renderToString');
+        
         // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
-        readFile('index.html', 'utf8').then(function (html){
+        readFile('index.html', 'utf8').then(html => {
           
           // On extrait le contenu du mountNode 
           // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
-          let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0];
+          let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0]; //à mod.
+          
           // Enfin on cale notre élément dans le mountNode.
           html = html.replace(placeholder, mount_me_im_famous);
-          // html = html.replace('</title>','</title>\n\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>');
           html = html.replace('</body>',
             '\t<script>window.STATE_FROM_SERVER='+JSON.stringify(store.getState())+';</script>\n' +
             '\t<script src="' + config.wds.hotFile + '"></script>\n' +
@@ -206,12 +175,9 @@ server.route({
           response.source = html;
           response.send();
           log('Served '+ correctUrl + '\n');
-        }).catch(function (err) {
-          log('error', '!!! Error while reading HTML.', err);
-        });
-      }).catch(function(err) {
-        log('error', '!!! Error while Phidippides.', err);
-      });
+          
+        }).catch(err => log('error', '!!! Error while reading HTML.', err));
+      }).catch(err => log('error', '!!! Error while Phidippides.', err));
     });
   });
 })();

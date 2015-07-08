@@ -28,7 +28,6 @@ io.on('message', function (message) {
   const stateFromServer = window.STATE_FROM_SERVER || {};
   // log('info', 'stateFromServer :', stateFromServer);
   
-
   const store = createStore(
     composeReducers(reducers),
     stateFromServer,
@@ -44,7 +43,7 @@ io.on('message', function (message) {
   
   // Render app
   let c = 0;
-  router.run( (Handler, routerState) => {
+  router.run((Handler, routerState) => {
     // Gère les trailing slash des url
     if (routerState.pathname.slice(-1) === '/' && routerState.pathname !== '/') {
       router.replaceWith(routerState.pathname.slice(0,-1), null, routerState.query);
@@ -56,29 +55,23 @@ io.on('message', function (message) {
     
     let d = new Date();
     log('... Entering phidippides');
-    phidippides(routerState, store.getState(), store.dispatch).then(function() {
+    phidippides(routerState, store.getState(), store.dispatch).then(() => {
       log('info', '... Exiting phidippides after ' + (new Date() - d) + 'ms', '... Entering React.render');
       
       try {
         React.render(
           <Provider store={store}>
-            {() =>
-              <Handler {...routerState} />
-            }
+            {() => <Handler {...routerState} />}
           </Provider>,
           document.getElementById('mountNode'),
-          function() { // Callback
-            log('... App rendered');
-          }
+          () => log('... App rendered')
         );
       } 
       catch(err) {
         log('error', '!!! React.render', err);
       }
       
-    }).catch(function(err) {
-      log('error', '!!! Phidippides', err);
-    });
+    }).catch(err => log('error', '!!! Phidippides', err));
   });
   
   key('ctrl+q', () => {
@@ -86,7 +79,7 @@ io.on('message', function (message) {
     return false;
   });
   key('ctrl+alt+u', () => {
-    console.log(store.getState().universe);
+    console.log(store.getState().universes);
     return false;
   });
   key('ctrl+alt+q', () => {
