@@ -11,7 +11,7 @@ import * as reducers      from '../shared/reducers';
 import routes             from '../shared/routes.jsx';
 import log                from '../shared/utils/logTailor.js';
 import devConfig          from '../../config/development.js';
-import phidippides        from '../shared/utils/phidippides2.js';
+import phidippides        from '../shared/utils/phidippides3.js';
 import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -141,7 +141,7 @@ server.route({
       // Initialise les stores
       log('... Entering phidippides');
       let d = new Date();
-      phidippides(routerState, store.getState(), store.dispatch).then(() => {
+      phidippides(routerState, store.dispatch).then(() => {
         
         log('info', '... Exiting phidippides after ' + (new Date() - d) + 'ms' , '... Entering React.renderToString');
         
@@ -169,8 +169,8 @@ server.route({
           html = html.replace(placeholder, mount_me_im_famous);
           
           // Passage du state dans window
-          let serverState = store.getState()
-          serverState.immutableKeys = []
+          let serverState = store.getState();
+          serverState.immutableKeys = [];
           for (var key in serverState) {
             if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); 
           }

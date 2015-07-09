@@ -5,29 +5,22 @@ import Node from './explore/Node';
 import generateGraph from '../utils/graphGenerator';
 import {default as generatePseudos, getBiggestPseudo, getSmallestPseudo, getPossibilitiesNumber} from '../utils/pseudosGenerator';
 
-import {loadUniverses} from '../actions';
+import {loadUniverses} from '../actionCreators';
 
 export default class Explore extends React.Component {
-  /*
+  
   static runPhidippides(routerState) {
     return [{
-      on:              ['server', 'client'],
-      shouldBePresent: 'universe.universes',
-      ifNot:           ['universeActions.loadUniverses', []]  
+      id:      'universes',
+      creator: 'loadUniverses',
+      args:    []
     }];
-  }
-  */
-  static runPhidippides(routerState, fluxState, dispatch) {
-    return new Promise((resolve, reject) => {
-      const action = loadUniverses();
-      dispatch(action);
-      action.promise.then(() => resolve());
-    });
   }
   
   componentDidMount() {
     React.render(<Graph />, document.getElementById('graph')); //Ne de-mount pa :(
     React.render(<Pseudos />, document.getElementById('pseudos'));
+    this.props.loadUniverses();
   }
   
   render() {

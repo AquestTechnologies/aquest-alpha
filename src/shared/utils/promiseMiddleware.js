@@ -3,29 +3,23 @@ import log from './logTailor.js';
 
 export default function promiseMiddleware(next) {
   log('.M. promiseMiddleware');
-  return (action) => {
+  return action => {
     const { promise, types, params } = action;
     if (!promise) return next(action);
     
     const [REQUEST, SUCCESS, FAILURE] = types;
     next({ params, type: REQUEST });
     
-    /*return promise.then(
-      (result) => next({ params, result, type: SUCCESS })
-    ).catch(
-      (error)  => next({ params, error,  type: FAILURE })
-    );*/
-    
-    return promise.then(function(result){
-      // log('promiseMiddleware --> SUCCESS');
-      // log(result);
-      next({ params, result, type: SUCCESS });
-      return result;
-    }).catch(function(error){
-      console.log(error);
-      // log('promiseMiddleware --> failed : ' + error);
-      next({ params, error,  type: FAILURE }); 
-      return error;
+    return promise.then(payload => {
+      // log(payload);
+      next({ params, payload, type: SUCCESS });
+      return payload; // Pour phidippides
+      
+    }).catch(payload => {
+      console.log(payload);
+      next({ params, payload, type: FAILURE }); 
+      return payload;
+      
     });
   };
 }

@@ -25,6 +25,7 @@ export default function(){
     publicPath: config.output.publicPath,
     noInfo : true,
     hot: true,
+    headers: { "Access-Control-Allow-Origin": "*" },
     historyApiFallback: true,
     stats: {
       colors: true

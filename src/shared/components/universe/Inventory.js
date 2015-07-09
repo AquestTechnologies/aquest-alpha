@@ -5,14 +5,15 @@ import CardNew  from './CardNew';
 class Inventory extends React.Component {
   
   // Load les données initiales
-  /*static runPhidippides(routerState) {
+  static runPhidippides(routerState) {
     return [{
-      on:              ['server'],
-      shouldBePresent: 'topic.inventory',
-      dependency:      'universe.universe',
-      ifNot:           ['topicActions.loadInventory', ['__dependency.id']]  
+      id:         'inventory',
+      dependency: 'universe',
+      creator:    'loadInventory',
+      args:       ['__dependency.id']
     }];
-  }*/
+  }
+  
   
   constructor() {
     super();
@@ -23,14 +24,15 @@ class Inventory extends React.Component {
     this.handleHeaderHover = () => this.setState({ nameVisible: !this.state.nameVisible });
   }
   
-  /*componentWillMount() {
-    // if(this.props.universe.id !== this.props.inventory.universeId) {
-    if(false) {
-      this.props.loadInventory(this.props.universe.id);
-    } else {
-      this.setState({inventory: this.props.topics});
-    }
-  }*/
+  componentWillMount() {
+    if (!this.props.universe.topics.length) this.props.loadInventory(this.props.universe.id);
+    // // if(this.props.universe.id !== this.props.inventory.universeId) {
+    // if(false) {
+    //   this.props.loadInventory(this.props.universe.id);
+    // } else {
+    //   this.setState({inventory: this.props.topics});
+    // }
+  }
   
   // componentWillReceiveProps(nextProps) {
   //   if (nextProps.universe.id === nextProps.inventory.universeId) this.setState({ inventory: nextProps.inventory });
@@ -38,9 +40,10 @@ class Inventory extends React.Component {
   // }
   
   
+  
   render() {
     const universe  = this.props.universe;
-    const inventoryListClassName = this.props.topics.length === 0 ? 'inventory_list_hidden' : 'inventory_list_visible';
+    const inventoryListClassName = universe.topics.length ? 'inventory_list_visible' : 'inventory_list_hidden';
     
     return (
       <div>      
@@ -67,7 +70,7 @@ class Inventory extends React.Component {
   
   renderCards() {
     return (
-      this.props.topics.map(topic => {
+      this.props.universe.topics.map(topic => {
         return <Card 
           key={topic.id} 
           universeHandle={this.props.universe.handle}

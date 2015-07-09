@@ -10,23 +10,22 @@ export default class LoadingBar extends React.Component {
   }
   
   componentWillReceiveProps(nextProps) {
-    let nextRecords = nextProps.records;
     let needsResolving = [];
+    const nextRecords = nextProps.records;
     
-    for (let record of nextRecords) {
-      let type = record.action.type;
-      let subType = type.substr(8); //pratique :)
+    nextRecords.forEach(record => {
+      const type = record.action.type;
+      const subType = type.substr(8); //pratique :)
       if (type.match(/REQUEST/)) {
         needsResolving.push(subType);
       }
       else if (type.match(/SUCCESS|FAILURE/)) {
-        for (let needs of needsResolving) {
-          if (needs === subType) {
-           needsResolving.splice(needsResolving.indexOf(needs), 1);
-          }
-        }
+        needsResolving.forEach(needs => {
+          if (needs === subType) needsResolving.splice(needsResolving.indexOf(needs), 1);
+        });
       }
-    }
+    });
+    
     this.setState({
       loadings: needsResolving
     });
@@ -51,9 +50,7 @@ export default class LoadingBar extends React.Component {
     
     return (
       <div style={divStyle}>
-        {this.state.loadings.map(
-          loading => <div key={loading}>{loading}</div> 
-        )}
+        {this.state.loadings.map(loading => <div key={loading}>{loading}</div>)}
       </div>
     );
   }

@@ -8,7 +8,6 @@ import key                              from './vendor/keymaster';
 import * as reducers                    from '../shared/reducers';
 import routes                           from '../shared/routes.jsx';
 import {default as log, logWelcome}     from '../shared/utils/logTailor.js';
-import phidippides                      from '../shared/utils/phidippides2.js';
 import promiseMiddleware                from '../shared/utils/promiseMiddleware.js';
 
 
@@ -19,7 +18,7 @@ io.on('message', function (message) {
   log('_w_ Server says ' + message);
 });*/
 
-(function app() {
+(() => {
   
   logWelcome(false);
   log('... Initializing Redux and React Router');
@@ -69,24 +68,15 @@ io.on('message', function (message) {
     log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
     
     let d = new Date();
-    log('... Entering phidippides');
-    phidippides(routerState, store.getState(), store.dispatch).then(() => {
-      log('info', '... Exiting phidippides after ' + (new Date() - d) + 'ms', '... Entering React.render');
+    log('... Entering React.render');
       
-      try {
-        React.render(
-          <Provider store={store}>
-            {() => <Handler {...routerState} />}
-          </Provider>,
-          document.getElementById('mountNode'),
-          () => log('... App rendered')
-        );
-      } 
-      catch(err) {
-        log('error', '!!! React.render', err);
-      }
-      
-    }).catch(err => log('error', '!!! Phidippides', err));
+    React.render(
+      <Provider store={store}>
+        {() => <Handler {...routerState} />}
+      </Provider>,
+      document.getElementById('mountNode'),
+      () => log('... App rendered')
+    );
   });
   
   key('ctrl+q', () => {

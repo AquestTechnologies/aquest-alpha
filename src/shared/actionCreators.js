@@ -31,8 +31,7 @@ export function loadUniverses() {
   log('.A. loadUniverses');
   return {
     types: [REQUEST_UNIVERSES, SUCCESS_UNIVERSES, FAILURE_UNIVERSES],
-    promise: fetchUniverses(),
-    params: null
+    promise: fetchUniverses()
   };
 }
 

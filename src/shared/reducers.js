@@ -12,7 +12,7 @@ import {
 
 export function globals(state = {}, action) {
   switch (action.type) {
-    
+  
   case SET_UNIVERSE:
     return {
       userId:     state.userId,
@@ -24,16 +24,16 @@ export function globals(state = {}, action) {
   case SUCCESS_UNIVERSE:
     return {
       userId:     state.userId,
-      chatId:     action.result.chatId,
+      chatId:     action.payload.chatId,
       topicId:    state.topicId,
-      universeId: action.result.id,
+      universeId: action.payload.id,
     };
     
   case SET_TOPIC:
     return {
       userId:     state.userId,
       chatId:     state.chatId,
-      topicId:    action.result.id,
+      topicId:    action.payload.id,
       universeId: state.universeId,
     };
     
@@ -46,45 +46,36 @@ export function universes(state = Immutable.Map(), action) {
   let newState;
   switch (action.type) {
     
-    case SUCCESS_UNIVERSE:
-      // newState = simpleCopy(state);
-      // newState[action.result.id] = action.result;
-      action.result.topics = [];
-      return state.set(action.result.id, Immutable.fromJS(action.result));
+  case SUCCESS_UNIVERSE:
+    action.payload.topics = [];
+    return state.set(action.payload.id, Immutable.fromJS(action.payload));
+
+  case SUCCESS_UNIVERSES:
+    newState = state;
+    action.payload.forEach(universe => {
+      universe.topics = newState.get(universe.id) === undefined ? [] : newState.getIn([universe.id, 'topics']);
+      newState = newState.set(universe.id, Immutable.fromJS(universe));
+    });
+    return newState;
   
-    case SUCCESS_UNIVERSES:
-      // newState = simpleCopy(state);
-      // action.result.forEach(universe => newState[universe.id] = universe);
-      newState = state;
-      action.result.forEach(universe => {
-        universe.topics = newState.get(universe.id) === undefined ? [] : newState.getIn([universe.id, 'topics']);
-        newState = newState.set(universe.id, Immutable.fromJS(universe));
-      });
-      return newState;
-    
-    case SUCCESS_INVENTORY:
-      // newState = simpleCopy(state);
-      // action.result.forEach(topic => newState[topic.id] = topic);
-      newState = state;
-      action.result.forEach(topic => newState = newState.updateIn([action.params, 'topics'], topics => topics.push(Immutable.fromJS(topic))));
-      return newState;
-    
-    default:
-      return state;
+  case SUCCESS_INVENTORY:
+    newState = state;
+    action.payload.forEach(topic => newState = newState.updateIn([action.params, 'topics'], topics => topics.push(Immutable.fromJS(topic))));
+    return newState;
+  
+  default:
+    return state;
   }
 }
 
 export function chats(state = Immutable.Map(), action) {
-  let newState;
   switch (action.type) {
     
-    case SUCCESS_CHAT:
-      // newState = simpleCopy(state);
-      // newState[action.result.id] = action.result;
-      return state.set(action.result.id, Immutable.fromJS(action.result));;
-      
-    default:
-      return state;
+  case SUCCESS_CHAT:
+    return state.set(action.payload.id, Immutable.fromJS(action.payload));
+    
+  default:
+    return state;
   }
 }
 

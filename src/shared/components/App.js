@@ -4,7 +4,7 @@ import {RouteHandler}       from 'react-router';
 import {bindActionCreators} from 'redux';
 import {Connector}          from 'redux/react';
 
-import * as actions from '../actions';
+import * as actionCreators from '../actionCreators';
 
 import LoadingBar           from './common/LoadingBar';
 
@@ -38,7 +38,7 @@ export default class App extends React.Component {
               globals={globals}
               universes={universes}
               chats={chats}
-              {...bindActionCreators(actions, dispatch)} 
+              {...bindActionCreators(actionCreators, dispatch)} 
             />
           </div>
         }
