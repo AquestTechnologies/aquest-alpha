@@ -16,11 +16,13 @@ class Node extends React.Component {
     const universe = this.props.universe;
     
     return (
-      <div>
-          <div onClick={ this.handleSelectUniverse.bind(null, universe) }>
-            { universe.name }
+      <div onClick={this.handleSelectUniverse.bind(null, universe)}>
+          <div >
+            {universe.name}
           </div>
-          { universe.description }
+          <div >
+            {universe.description}
+          </div>
       </div>
     );
   }

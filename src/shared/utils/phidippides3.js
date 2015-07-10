@@ -161,7 +161,7 @@ export default function phidippides(routerState, dispatch) {
       const action = creator.apply(null, realArgs);
       dispatch(action);
       if (action.promise === undefined) resolve(action.payload);
-      action.promise.then(data => {
+      else action.promise.then(data => {
         logMeOrNot('***  _ Dispatch for ' + task.id + ' resolved');
         // logMeOrNot(data);
         resolve(data);

@@ -15,7 +15,7 @@ import phidippides        from '../shared/utils/phidippides3.js';
 import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-log('node', 'Starting Node in ' + process.env.NODE_ENV + ' mode');
+log('node', `Starting Node in ${process.env.NODE_ENV} mode`);
 
 const config = devConfig();
 const server = new Hapi.Server();
@@ -25,10 +25,7 @@ server.connection({ port: config.api.port, labels: ['api'] });
 server.connection({ port: config.ws.port,  labels: ['ws']  });
 
 //lance webpack-dev-server si on est pas en production
-if (process.env.NODE_ENV === 'development') {
-  let serverBundler = require('./dev_server.js'); 
-  serverBundler();
-}
+if (process.env.NODE_ENV === 'development') require('./dev_server.js')();
 
 // Registration du plugin websocket
 server.register([
@@ -38,8 +35,8 @@ server.register([
   if (err) throw err;
   
   server.start(() => {
-    log('Make it rain! API server started at ' + server.info.uri);
-    log('              ws  server started at ' + server.select('ws').info.uri);
+    log(`Make it rain! API server started at ${server.info.uri}`);
+    log(`              ws  server started at ${server.select('ws').info.uri}`);
     console.log('  ___                        _        \n' + // !
                 ' / _ \\                      | |      \n' +
                 '/ /_\\ \\ __ _ _   _  ___  ___| |_    \n' +
@@ -49,7 +46,6 @@ server.register([
                 '          | |\n' +
                 '          |_|'
                );
-  
   });
 });
 
@@ -62,13 +58,13 @@ server.route({
 server.route({
   method: 'GET',
   path: '/',
-  handler: (request, reply) => reply.prerenderer()
+  handler: (request, reply) => reply.prerenderer(request, reply)
 });
 
 server.route({
   method: 'GET',
   path: '/{p*}',
-  handler: (request, reply) => reply.prerenderer()
+  handler: (request, reply) => reply.prerenderer(request, reply)
 });
 
 server.route({
@@ -80,10 +76,10 @@ server.route({
 // Prerendering
 (() => {
   let c = 0;
-  server.decorate('reply', 'prerenderer', function() {
+  server.decorate('reply', 'prerenderer', (request, reply) => {
     
     // Intercepte la réponse
-    let response = this.response().hold();
+    const response = reply.response().hold();
     
     // Affiche les infos de la requete
     let d = new Date(),
@@ -94,21 +90,21 @@ server.route({
     m = ('' + m).length == 2 ? m : '0' + m;
     s = ('' + s).length == 2 ? s : '0' + s;
     c++;
-    log('\n[' + c + '] ' + h + ':' + m + ':' + s + ' ' + this.request.info.remoteAddress + ':' + this.request.info.remotePort + ' ' + this.request.method + ' ' + this.request.url.path);
+    log(`\n[${c}] ${h}:${m}:${s} ${request.info.remoteAddress}:${request.info.remotePort} ${request.method} ${request.url.path}`);
     
     // Servira à lire le fichier HTML
     function readFile (filename, enc) {
-      return new Promise((ohyes, ohno) => {
+      return new Promise((resolve, reject) => {
         fs.readFile(filename, enc, (err, res) => {
-          if (err) ohno(err);
-          else ohyes(res);
+          if (err) reject(err);
+          else resolve(res);
         });
       });
     }
     
     // transforme coco.com/truc/ en coco.com/truc
-    let url = this.request.url.path;
-    let correctUrl = url.slice(-1) === '/' && url !== '/' ? url.slice(0, -1) : url;
+    const url = request.url.path;
+    const correctUrl = url.slice(-1) === '/' && url !== '/' ? url.slice(0, -1) : url;
     // Initialise le router
     const router = Router.create({
       routes: routes,
@@ -140,13 +136,13 @@ server.route({
       
       // Initialise les stores
       log('... Entering phidippides');
-      let d = new Date();
+      const d = new Date();
       phidippides(routerState, store.dispatch).then(() => {
         
-        log('info', '... Exiting phidippides after ' + (new Date() - d) + 'ms' , '... Entering React.renderToString');
+        log('info', `... Exiting phidippides after ${new Date() - d}ms` , '... Entering React.renderToString');
         
         try {
-          var mount_me_im_famous = React.renderToString(
+          var mountMeImFamous = React.renderToString(
             <Provider store={store}>
               {() => <Handler {...routerState} />}
             </Provider>
@@ -166,23 +162,23 @@ server.route({
           let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0]; //à mod.
           
           // Enfin on cale notre élément dans le mountNode.
-          html = html.replace(placeholder, mount_me_im_famous);
+          html = html.replace(placeholder, mountMeImFamous);
           
           // Passage du state dans window
           let serverState = store.getState();
           serverState.immutableKeys = [];
           for (var key in serverState) {
-            if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); 
+            if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !
           }
           html = html.replace('</body>',
-            '\t<script>window.STATE_FROM_SERVER='+JSON.stringify(serverState)+';</script>\n' +
-            '\t<script src="' + config.wds.hotFile + '"></script>\n' +
-            '\t<script src="' + config.wds.publicPath + '/' + config.wds.filename + '"></script>\n' +
+            `\t<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>\n` +
+            `\t<script src="${config.wds.hotFile }"></script>\n` +
+            `\t<script src="${config.wds.publicPath + config.wds.filename}"></script>\n` +
             '</body>'
           );
           response.source = html;
           response.send();
-          log('Served '+ correctUrl + '\n');
+          log(`Served ${correctUrl}\n`);
           
         }).catch(err => log('error', '!!! Error while reading HTML.', err));
       }).catch(err => log('error', '!!! Error while Phidippides.', err));

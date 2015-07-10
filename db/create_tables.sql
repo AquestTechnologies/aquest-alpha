@@ -135,6 +135,7 @@ CREATE TABLE aquest_schema.TOPIC(
   chat_id             BIGINT,
   universe_id         BIGINT,
   title               TEXT,
+  picture             TEXT,
   handle              TEXT UNIQUE,
   created_at          TIMESTAMP DEFAULT now(),
   updated_at          TIMESTAMP DEFAULT now(),

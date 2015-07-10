@@ -5,32 +5,33 @@ class Topic extends React.Component {
   // Load les données initiales
   static runPhidippides(routerState) {
     return [{
-      on:              ['server'],
-      shouldBePresent: 'topic.topic',
-      ifNot:           ['topicActions.loadTopicByHandle', [routerState.params.topicHandle]]
+      id:         'topic',
+      creator:    'loadTopicByHandle',
+      args:       [routerState.params.topicHandle]
     }];
   }
   
-  constructor() {
+  /*constructor() {
     super();
     this.state = { topic: {} };
-  }
+  }*/
   
-  componentWillMount() {
+  /*componentWillMount() {
     if (!this.props.topic.content) this.props.loadTopicContent(this.props.topic.handle);
     this.setState({ topic: this.props.topic });
   }
   
   componentWillReceiveProps(nextProps) {
     this.setState({ topic: nextProps.topic });
-  }
+  }*/
   
   // ALERTE GROS BUG !!
   // faire : startups > topic > bouton back > autre topic puis 2 fois history back !!!!
   // Normalement c'est la merde
   // Sauf que pour l'instant il n'y a pas de bouton back
   render() {
-    let topic = this.state.topic;
+    // Pas ouf
+    const topic = this.props.universe.topics.filter(topic => topic.handle === this.props.params.topicHandle)[0];
     
     return (
       <div>

@@ -100,6 +100,43 @@ export default function queryDb(queryInfo) {
         
       case 'fetchUniverseByHandle':
   
+        sql = 'SELECT \
+                row_to_json(universe_topics) \
+              FROM ( \
+                SELECT \
+                  universe, array_agg(row_to_json(row(topics.topic_title, topics.topic_handle))) as topics \
+                FROM ( \
+                  SELECT \
+              	universe, topic.title topic_title, topic.handle topic_handle \
+                  FROM \
+                    aquest_schema.topic, \
+                    (SELECT universe.id, universe.name, universe.handle, universe.description FROM aquest_schema.universe WHERE universe.handle = \'' + params +  '\') universe \
+                  WHERE \
+                    topic.universe_id = universe.id \
+                ) topics \
+                GROUP BY topics.universe \
+               ) universe_topics;'
+               
+        /* Format des données retournées
+        {
+          "universe": {
+              "id": 3,
+              "name": "cuteCats",
+              "handle": "cuteCats",
+              "description": "This is a universe for cute cats :)"
+          },
+          "topics": [
+              {
+                  "f1": "David s Cute Cat",
+                  "f2": "DavidCuteCat"
+              },
+              {
+                  "f1": "David Cute Dog",
+                  "f2": "DavidCuteDog"
+              }
+          ]
+        }*/
+  
         sql = 'SELECT id, name, description, picture, handle, chat_id FROM aquest_schema.universe WHERE handle=\'' + params + '\'';
         
         // log('+++ ' + sql.replace('\\','').substring(0,29));

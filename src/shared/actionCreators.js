@@ -36,10 +36,10 @@ export function loadUniverses() {
 }
 
 export function setUniverse(universe) {
-  log('.A. setUniverse : ' + universe.name);
+  log('.A. setUniverse : ' + universe.handle);
   return {
     type: SET_UNIVERSE,
-    params: universe
+    payload: universe
   };
 }
 
@@ -71,10 +71,10 @@ export function loadTopicContent(id) {
 }
 
 export function setTopic(topic) {
-  log('.A. setTopic : ' + topic.id);
+  log('.A. setTopic : ' + topic.handle);
   return {
     type: SET_TOPIC,
-    params: topic
+    payload: topic
   };
 }
 

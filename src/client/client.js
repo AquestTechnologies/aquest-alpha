@@ -65,7 +65,7 @@ io.on('message', function (message) {
       return;
     }
     c++;
-    log('__________ ' + c + ' router.run ' + routerState.pathname + ' __________');
+    log(`__________ ${c} router.run ${routerState.pathname} __________`);
     
     let d = new Date();
     log('... Entering React.render');
@@ -79,16 +79,35 @@ io.on('message', function (message) {
     );
   });
   
-  key('ctrl+q', () => {
-    console.log(store.getState());
+  key('ctrl+shift+1', () => {
+    console.log('state :', store.getState());
     return false;
   });
-  key('ctrl+alt+u', () => {
-    console.log(store.getState().universes);
+  key('ctrl+shift+2', () => {
+    console.log('universes :', store.getState().universes.toJS());
     return false;
   });
-  key('ctrl+alt+q', () => {
-    console.log(store.getState().records);
+  key('ctrl+shift+3', () => {
+    const state = store.getState();
+    console.log('topics :', state.universes.toJS()[state.globals.universeId].topics);
+    return false;
+  });
+  key('ctrl+shift+4', () => {
+    const state = store.getState();
+    console.log('topic :', state.universes.toJS()[state.globals.universeId].topics[state.globals.topicId]);
+    return false;
+  });
+  key('ctrl+shift+5', () => {
+    console.log('chats :', store.getState().chats.toJS());
+    return false;
+  });
+  key('ctrl+shift+6', () => {
+    const state = store.getState();
+    console.log('chat :', state.chats.toJS()[state.globals.chatId]);
+    return false;
+  });
+  key('ctrl+shift+9', () => {
+    console.log('records :', store.getState().records);
     return false;
   });
 

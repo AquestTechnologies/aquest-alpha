@@ -75,10 +75,10 @@ class Universe extends React.Component {
             <div className="universe_left_scrolled">
               <RouteHandler
                 // globals={globals}
-                universe={universe} 
-                setTopic={this.props.setTopic}
-                loadTopicContent={this.props.loadTopicContent} //passer les actions par le context, a faire
-                loadInventory={this.props.loadInventory} //passer les actions par le context, a faire
+                universe = {universe}
+                setTopic = {this.props.setTopic}
+                loadTopicContent = {this.props.loadTopicContent} //passer les actions par le context, a faire
+                loadInventory = {this.props.loadInventory} //passer les actions par le context, a faire
               />
             </div>
           </div>

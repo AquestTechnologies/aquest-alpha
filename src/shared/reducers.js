@@ -16,14 +16,6 @@ export function globals(state = {}, action) {
   case SET_UNIVERSE:
     return {
       userId:     state.userId,
-      chatId:     action.params.chatId,
-      topicId:    state.topicId,
-      universeId: action.params.id,
-    };
-    
-  case SUCCESS_UNIVERSE:
-    return {
-      userId:     state.userId,
       chatId:     action.payload.chatId,
       topicId:    state.topicId,
       universeId: action.payload.id,
@@ -32,9 +24,17 @@ export function globals(state = {}, action) {
   case SET_TOPIC:
     return {
       userId:     state.userId,
-      chatId:     state.chatId,
+      chatId:     action.payload.chatId,
       topicId:    action.payload.id,
       universeId: state.universeId,
+    };
+    
+  case SUCCESS_UNIVERSE:
+    return {
+      userId:     state.userId,
+      chatId:     action.payload.chatId,
+      topicId:    state.topicId,
+      universeId: action.payload.id,
     };
     
   default:

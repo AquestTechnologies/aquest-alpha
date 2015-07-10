@@ -5,47 +5,40 @@ import ChatFooter from './ChatFooter';
 
 class Chat extends React.Component {
   
-  /*constructor() {
+  constructor() {
     super();
     this.state = { 
-      chat: {},
+      chat:      {},
       isLoading: false
     };
-  }*/
+  }
   
   componentWillMount() {
-    if (this.props.chat === undefined) this.props.loadChat(this.props.chatId);
-    // let chat = this.props.chat;
-    // // console.log('.c. Chat mount');
-    // // console.log(chat);
-    // let isLoading = false;
-    // // if(this.props.chatId !== this.props.chat.id) {
-    // //   this.props.loadChat(this.props.chatId);
-    // //   chat = {};
-    // //   isLoading = true;
-    // // }
-    // this.setState({ 
-    //   chat: chat,
-    //   isLoading: isLoading
-    // });
+    let chat = this.props.chat;
+    let isLoading = false;
+    if(this.props.chat === undefined) {
+      this.props.loadChat(this.props.chatId);
+      chat      = {};
+      isLoading = true;
+    }
+    this.setState({chat, isLoading});
   }
   
   componentWillReceiveProps(nextProps) {
-    // // if (nextProps.chatId !== nextProps.chat.id) {
-    // if (false) {
-    //   if (!this.state.isLoading) {
-    //     this.props.loadChat(nextProps.chatId);
-    //     this.setState({ 
-    //       chat: {},
-    //       isLoading: true
-    //     });
-    //   }
-    // } else {
-    //   this.setState({ 
-    //     chat: nextProps.chat,
-    //     isLoading: false
-    //   });
-    // }
+    if (nextProps.chat === undefined) {
+      if (!this.state.isLoading) {
+        this.props.loadChat(nextProps.chatId);
+        this.setState({ 
+          chat:      {},
+          isLoading: true
+        });
+      }
+    } else {
+      this.setState({ 
+        chat:      nextProps.chat,
+        isLoading: false
+      });
+    }
   }
   
   componentDidMount() {
@@ -65,7 +58,7 @@ class Chat extends React.Component {
   }
   
   render() {
-    const chat     = this.props.chat || {};
+    const chat     = this.state.chat || {};
     const messages = chat.messages || [];
     const samuel = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
     const messagesList = messages.length ? 'chat_list_visible' : 'chat_list_hidden';
