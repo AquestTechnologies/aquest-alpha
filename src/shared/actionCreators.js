@@ -1,9 +1,9 @@
 import log from './utils/logTailor';
 import { 
-  fetchUniverseByHandle,
+  fetchUniverse,
   fetchUniverses,
   fetchInventory,
-  fetchTopicByHandle,
+  fetchTopic,
   fetchTopicContent,
   fetchChat
 } from './utils/fetchers';
@@ -13,17 +13,17 @@ import {
   REQUEST_UNIVERSES, SUCCESS_UNIVERSES, FAILURE_UNIVERSES,
   REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY,
   REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT,
-  REQUEST_TOPIC_BY_HANDLE, SUCCESS_TOPIC_BY_HANDLE, FAILURE_TOPIC_BY_HANDLE,
+  REQUEST_TOPIC, SUCCESS_TOPIC, FAILURE_TOPIC,
   REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT
 } from './actionsTypes';
 
 
-export function loadUniverseByHandle(handle) {
-  log('.A. loadUniverseByHandle : ' + handle);
+export function loadUniverse(id) {
+  log(`.A. loadUniverse : ${id}`);
   return {
     types: [REQUEST_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE],
-    promise: fetchUniverseByHandle(handle),
-    params: handle
+    promise: fetchUniverse(id),
+    params: id
   };
 }
 
@@ -35,16 +35,9 @@ export function loadUniverses() {
   };
 }
 
-export function setUniverse(universe) {
-  log('.A. setUniverse : ' + universe.handle);
-  return {
-    type: SET_UNIVERSE,
-    payload: universe
-  };
-}
 
 export function loadInventory(universeId) {
-  log('.A. loadInventory : ' + universeId);
+  log(`.A. loadInventory : ${universeId}`);
   return {
     types: [REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY],
     promise: fetchInventory(universeId),
@@ -52,17 +45,17 @@ export function loadInventory(universeId) {
   };
 }
 
-export function loadTopicByHandle(handle) {
-  log('.A. loadTopicByHandle : ' + handle);
+export function loadTopic(handle) {
+  log(`.A. loadTopic ${handle}`);
   return {
-    types: [REQUEST_TOPIC_BY_HANDLE, SUCCESS_TOPIC_BY_HANDLE, FAILURE_TOPIC_BY_HANDLE],
-    promise: fetchTopicByHandle(handle),
+    types: [REQUEST_TOPIC, SUCCESS_TOPIC, FAILURE_TOPIC],
+    promise: fetchTopic(handle),
     params: handle
   };
 }
 
 export function loadTopicContent(id) {
-  log('.A. loadTopicContent : ' + id);
+  log(`.A. loadTopicContent : ${id}`);
   return {
     types: [REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT],
     promise: fetchTopicContent(id),
@@ -70,16 +63,9 @@ export function loadTopicContent(id) {
   };
 }
 
-export function setTopic(topic) {
-  log('.A. setTopic : ' + topic.handle);
-  return {
-    type: SET_TOPIC,
-    payload: topic
-  };
-}
 
 export function loadChat(chatId) {
-  log('.A. loadChat : ' + chatId);
+  log(`.A. loadChat : ${chatId}`);
   return {
     types: [REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT],
     promise: fetchChat(chatId),
@@ -87,3 +73,18 @@ export function loadChat(chatId) {
   };
 }
 
+/*export function setUniverse(universe) {
+  log('.A. setUniverse : ' + universe.handle);
+  return {
+    type: SET_UNIVERSE,
+    payload: universe
+  };
+}*/
+
+/*export function setTopic(topic) {
+  log('.A. setTopic : ' + topic.handle);
+  return {
+    type: SET_TOPIC,
+    payload: topic
+  };
+}*/

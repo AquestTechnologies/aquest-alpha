@@ -8,86 +8,57 @@ class Universe extends React.Component {
   
   // Load les données initiales
   static runPhidippides(routerState) {
-    const correctHandle     = routerState.pathname === '/' ? 'Startups' : routerState.params.universeHandle;
-    const correctDependency = routerState.params.topicHandle ? 'topic' : 'universe';
     return [{
       id:         'universe',
-      creator:    'loadUniverseByHandle',
-      args:       [correctHandle]
+      creator:    'loadUniverse',
+      args:       [routerState.pathname === '/' ? 'Startups' : routerState.params.universeId]
     },{
       id:         'chat',
-      dependency: correctDependency,
+      dependency: routerState.params.topicId ? 'topic' : 'universe',
       creator:    'loadChat',
       args:       ['__dependency.chatId']
     }];
   }
   
-  // static runPhidippides(routerState, fluxState, dispatch) {
-  //   return new Promise((resolve, reject) => {
-  //     if (fluxState.universes.get(fluxState.globals.universeId) === undefined) {
-        
-  //       const correctHandle = routerState.pathname === '/' ? 'Startups' : routerState.params.universeHandle;
-  //       const action1 = actions.loadUniverseByHandle(correctHandle);
-  //       dispatch(action1);
-        
-  //       action1.promise.then(data => {
-  //         // console.log('resolved !!!');
-  //         // console.log(data);
-  //         let todo = [];
-  //         if (fluxState.chats.get(fluxState.globals.chatId) === undefined) {
-  //           const action2 = actions.loadChat(data.chatId);
-  //           dispatch(action2);
-  //           todo.push(action2.promise);
-  //         }
-  //         const action3 = actions.loadInventory(data.id);
-  //         dispatch(action3);
-  //         todo.push(action3.promise);
-  //         Promise.all(todo).then(() => resolve());
-  //       });
-  //     } else {
-  //       if (fluxState.chats.get(fluxState.globals.chatId) === undefined) {
-  //         const action2 = actions.loadChat(fluxState.universes.get(fluxState.globals.universeId).chatId);
-  //         dispatch(action2);
-  //         action2.promise.then(() => resolve());
-  //       } else {
-  //         resolve();
-  //       }
-  //     }
-  //   });
-  // }
+  filterTopics(topics, universeId) {
+    let result = {};
+    for (let id in topics) {
+      if (topics.hasOwnProperty(id) && topics[id].universeId === universeId) result[id] = topics[id];
+    }
+    return result;
+  }
   
   render() {
-    // console.log('universes :');
-    // console.log(this.props.universes);
-    // console.log('universe :');
-    const globals  = this.props.globals;
-    const chatId   = globals.chatId;
-    const universe = this.props.universes[globals.universeId];
-    // console.log(universe);
-    // let correctChatId = this.props.params.topicHandle ? this.props.topic.chatId : universe.chatId;
+    const universeId = this.props.params.universeId;
+    const topicId    = this.props.params.topicId;
+    const universe   = this.props.universes[universeId];
+    const topics     = this.filterTopics(this.props.topics, universeId);
+    const chatId     = topicId === undefined ? universe.chatId : topics[topicId].chatId;
+    // console.log('universes :', this.props.universes);
+    // console.log('universe :', universe);
     
     return (
       <div> 
         <Menu />
         
-        <div className="universe_left" style={{backgroundImage: 'url(' + universe.picture + ')'}}>
+        <div className="universe_left" style={{backgroundImage: `url(${universe.picture})`}}>
           <div className="universe_left_scrollable">
             <div className="universe_left_scrolled">
               <RouteHandler
-                // globals={globals}
-                universe = {universe}
-                setTopic = {this.props.setTopic}
+                topics           = {topics}
+                universe         = {universe}
+                setTopic         = {this.props.setTopic}
+                loadInventory    = {this.props.loadInventory} //passer les actions par le context, a faire
                 loadTopicContent = {this.props.loadTopicContent} //passer les actions par le context, a faire
-                loadInventory = {this.props.loadInventory} //passer les actions par le context, a faire
               />
             </div>
           </div>
         </div>
         
         <Chat 
-          chatId={chatId} 
-          chat={this.props.chats[chatId]} 
-          loadChat={this.props.loadChat} //passer les actions par le context, a faire
+          chatId   = {chatId}
+          chat     = {this.props.chats[chatId]} 
+          loadChat = {this.props.loadChat} //passer les actions par le context, a faire
         />
       </div>
     );

@@ -3,9 +3,9 @@ import {Route, DefaultRoute, NotFoundRoute } from 'react-router';
 
 import App         from './components/App';
 import Universe    from './components/Universe';
-import Inventory   from './components/universe/Inventory';
-import Topic       from './components/universe/Topic';
-import TopicNew    from './components/universe/TopicNew';
+import Inventory   from './components/Inventory';
+import Topic       from './components/Topic';
+import TopicNew    from './components/TopicNew';
 import Explore     from './components/Explore';
 import User        from './components/User';
 import NotFound    from './components/NotFound';
@@ -17,10 +17,10 @@ let routes = (
       <DefaultRoute handler={Inventory} />
     </Route> 
     
-    <Route name='universe' path='/_:universeHandle' handler={Universe}>
+    <Route name='universe' path='/_:universeId' handler={Universe}>
       <DefaultRoute handler={Inventory} />
       <Route name='newTopic' path='new' handler={TopicNew} />
-      <Route name='topic' path=':topicHandle' handler={Topic} />
+      <Route name='topic' path=':topicId' handler={Topic} />
     </Route>
     
     <Route name='user' path='/@:pseudo' handler={User}>

@@ -5,7 +5,7 @@ class CardNew extends React.Component {
   constructor() {
     super();
     this.handleClick = () => { 
-      this.context.router.transitionTo('newTopic', {universeName: this.props.universeName});
+      this.context.router.transitionTo('newTopic', {universeId: this.props.universeId});
     };
   }
   

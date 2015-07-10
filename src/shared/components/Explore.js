@@ -46,28 +46,25 @@ export default class Explore extends React.Component {
   }
   
   renderBackLink() {
-    let universe = this.props.universes[this.props.globals.universeId];
+    let universe = this.props.universes.get(this.props.params.universeId);
     if(universe) {
-      return <Link to='universe' params={{universeHandle: universe.handle}}>Back</Link>;
+      return <Link to='universe' params={{universeId: universe.get('id')}}>Back</Link>;
     } else {
       return <Link to='home'>Starting Universe</Link>;
     }
   }
   
-  // :(
   renderGraph() {
-    const universesProps = this.props.universes;
-    let universes = [];
-    for (let key in universesProps) {
-      if (universesProps.hasOwnProperty(key)) universes.push(universesProps[key]);
-    }
-    return universes.map(universe => {
+    // const universesProps = this.props.universes;
+    // let universes = [];
+    // for (let key in universesProps) {
+    //   if (universesProps.hasOwnProperty(key)) universes.push(universesProps[key]);
+    // }
+    return this.props.universes.values().map(universe => {
       return(
         <Node 
-          key={universe.id} 
+          key={universe.get('id')} 
           universe={universe} 
-          currentUniverse={this.props.universes[this.props.globals.universeId]} 
-          setUniverse={this.props.setUniverse} 
         />
       );
     });

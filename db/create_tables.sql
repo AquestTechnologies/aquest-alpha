@@ -38,10 +38,9 @@ CREATE TABLE aquest_schema.CHAT(
 );
 
 CREATE TABLE aquest_schema.UNIVERSE(
-  id                   BIGSERIAL PRIMARY KEY,
+  id                   TEXT PRIMARY KEY,
   chat_id              BIGINT,
   name                 TEXT UNIQUE,
-  handle               TEXT UNIQUE,
   description          TEXT,
   rules                TEXT,
   picture              TEXT,
@@ -53,14 +52,14 @@ CREATE TABLE aquest_schema.UNIVERSE(
 
 CREATE TABLE aquest_schema.UNIVERSE_UNIVERSE(
   id                   BIGSERIAL PRIMARY KEY,
-  universe1_id         BIGINT,
-  universe2_id         BIGINT,
+  universe1_id         TEXT,
+  universe2_id         TEXT,
   force                BIGINT,
   created_at           TIMESTAMP DEFAULT now(),
   updated_at           TIMESTAMP DEFAULT now(),
   deleted              BOOLEAN,
-  FOREIGN KEY (universe1_id) REFERENCES aquest_schema.UNIVERSE,
-  FOREIGN KEY (universe2_id) REFERENCES aquest_schema.UNIVERSE
+  FOREIGN KEY (universe1_id) REFERENCES aquest_schema.UNIVERSE(id),
+  FOREIGN KEY (universe2_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
 
 CREATE TABLE aquest_schema.USER (
@@ -74,38 +73,39 @@ CREATE TABLE aquest_schema.USER (
   bio                  TEXT,
   picture              TEXT,
   creation_ip          INET,
-  start_universe_id    BIGINT,
+  start_universe_id    TEXT,
   created_at           TIMESTAMP DEFAULT now(),
   updated_at           TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (start_universe_id) REFERENCES aquest_schema.UNIVERSE
+  FOREIGN KEY (start_universe_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
 
 CREATE TABLE aquest_schema.RANK(
   id                  BIGSERIAL PRIMARY KEY,
-  universe_id         BIGINT,
+  universe_id         TEXT,
   title               TEXT,
   level               SMALLINT,
   created_at          TIMESTAMP DEFAULT now(),
   updated_at          TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
 
--- Comment le vote s'attache à un topic ou un message?
+-- Comment le vote s'attache à un topic ou un message? voir champ source_id
 -- universe_id est-t-il redondant?
 CREATE TABLE aquest_schema.VOTE(
   id                  BIGSERIAL PRIMARY KEY,
   author_id           BIGINT,
   user_id             BIGINT, 
-  universe_id         BIGINT,
+  universe_id         TEXT,
+  source_id           TEXT, -- concat('message',message.id) ou concat('topic', topic.id)
   content             TEXT,
   created_at          TIMESTAMP DEFAULT now(),
   updated_at          TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (author_id) REFERENCES aquest_schema.USER,
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
-  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE
+  FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
 
 CREATE TABLE aquest_schema.GOALS(
@@ -121,27 +121,26 @@ CREATE TABLE aquest_schema.GOALS(
 CREATE TABLE aquest_schema.USER_UNIVERSE(
   id                  BIGSERIAL PRIMARY KEY,
   user_id             BIGINT,
-  universe_id         BIGINT,
+  universe_id         TEXT,
   created_at          TIMESTAMP DEFAULT now(),
   updated_at          TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
-  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
 
 CREATE TABLE aquest_schema.TOPIC(
-  id                  BIGSERIAL PRIMARY KEY,
+  id                  TEXT PRIMARY KEY,
   user_id             BIGINT,
   chat_id             BIGINT,
-  universe_id         BIGINT,
+  universe_id         TEXT,
   title               TEXT,
   picture             TEXT,
-  handle              TEXT UNIQUE,
   created_at          TIMESTAMP DEFAULT now(),
   updated_at          TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
-  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE,
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id)
 );
 
@@ -161,21 +160,21 @@ CREATE TABLE aquest_schema.MESSAGE(
   created_at          TIMESTAMP DEFAULT now(),
   updated_at          TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER,
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id)
 );
 
 CREATE TABLE aquest_schema.ATOME_TOPIC(
   id                  BIGSERIAL PRIMARY KEY,
   atome_id            BIGINT,
-  topic_id            BIGINT,
+  topic_id            TEXT,
   content             JSON,
   "order"             INTEGER,
   created_at          TIMESTAMP DEFAULT now(),
   updated_at          TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (topic_id) REFERENCES aquest_schema.MESSAGE,
-  FOREIGN KEY (atome_id) REFERENCES aquest_schema.ATOME
+  FOREIGN KEY (topic_id) REFERENCES aquest_schema.TOPIC(id),
+  FOREIGN KEY (atome_id) REFERENCES aquest_schema.ATOME(id)
 );
 
 CREATE TABLE aquest_schema.ATOME_MESSAGE(
@@ -186,8 +185,8 @@ CREATE TABLE aquest_schema.ATOME_MESSAGE(
   created_at          TIMESTAMP DEFAULT now(),
   updated_at          TIMESTAMP DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (message_id) REFERENCES aquest_schema.MESSAGE,
-  FOREIGN KEY (atome_id) REFERENCES aquest_schema.ATOME
+  FOREIGN KEY (message_id) REFERENCES aquest_schema.MESSAGE(id),
+  FOREIGN KEY (atome_id) REFERENCES aquest_schema.ATOME(id)
 );
 
 CREATE FUNCTION aquest_schema.create_chat_topic() 
@@ -241,20 +240,38 @@ CREATE TRIGGER update_timestamp
   
 -- ... déjà si ça marche c'est bien
   
-  
-  
+CREATE OR REPLACE FUNCTION aquest_schema.concat_json(topic_array JSON)
+RETURNS JSON AS $$
+  var o = {};
+  for(var i = 0, topic_array_length = topic_array.length ; i < topic_array_length ; i++){
+    for(var key in topic_array[i]){
+      o[key] = topic_array[i][key];
+    }
+  }
+  return o
+$$ LANGUAGE plv8 IMMUTABLE STRICT;
 
 INSERT INTO aquest_schema.universe 
-    (name, handle, description, picture, chat_id) 
+    (id, name, description, picture, chat_id) 
   VALUES 
     ('Startups', 'Startups', 'This is the description of the Startups universe', 'img/pillars_compressed.png', '0');
     
 INSERT INTO aquest_schema.universe 
-    (name, handle, description, picture, chat_id) 
+    (id, name, description, picture, chat_id) 
   VALUES 
     ('Design', 'Design', 'This is the description of the Design Universe', 'img/designer_compressed.png', '0');
     
 INSERT INTO aquest_schema.user 
     (email, pseudo, first_name, last_name, start_universe_id, password_salt, password_hash) 
   VALUES 
-    ('johndoe@gmail.com', 'johnDoe', 'John', 'Doe', '1', 'fsfgfdgsdfgsdfokoksqlsd', 'dskjfsdkfjks');
+    ('johndoe@gmail.com', 'johnDoe', 'John', 'Doe', 'Startups', 'fsfgfdgsdfgsdfokoksqlsd', 'dskjfsdkfjks
+    
+INSERT INTO aquest_schema.topic 
+    (id, user_id, universe_id, title) 
+  VALUES 
+    ('newStartup', 1, 'Startups', 'Aquest Technologies');    
+    
+INSERT INTO aquest_schema.topic 
+    (id, user_id, universe_id, title) 
+  VALUES 
+    ('newStartup-oi8', 1, 'Startups', 'David et Augustin');

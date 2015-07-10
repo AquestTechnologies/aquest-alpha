@@ -45,8 +45,8 @@ Aquest Technologies © 2015
 | _w_ | Websocket |
 | .R. | Reducers |
 | .A. | ActionCreators |
-| .c. | Composants React |
-| -c- | Action de l'utilisateur dans composants React |
+| .C. | Composants React |
+| -C- | Action de l'utilisateur dans composants React |
 
 ### Informations sur la base de données
 - Groupe administrateur : admin, Utilisateur : aquest

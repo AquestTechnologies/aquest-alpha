@@ -1,160 +1,48 @@
 import log from './logTailor.js';
 
-// Obso
-export function fetchUniverse(universeId) {
-  log('+++ Fetching universe ' + universeId);
+export function fetchUniverse(id) {
+  log('+++ Fetching universe ' + id);
   // returning a Promise because that is what fetch does.
   return new Promise(function (resolve, reject) {
     // simulate an asynchronous action where data is fetched on
     // a remote server somewhere.
     setTimeout(function () {
       // resolve with some mock data
-      switch (universeId) {
+      switch (id) {
         case '1':
          resolve({
-          id: '1',
+          id: "Startups",
           chatId: '1',
           name: "Startups",
-          description: "This is a place where stuff gets done.",
+          descriptionription: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
-          handle: "Startups"
         });
         break;
         case '2':
          resolve({
-          id: '2',
+          id: "Design",
           chatId: '2',
           name: "Design",
-          description: "This is a place where stuff gets designed.",
+          descriptionription: "This is a place where stuff gets designed.",
           picture: "/img/designer_compressed.png",
-          handle: "Design"
         });
         break;
         case '3':
          resolve({
-          id: '3',
+          id: "Dev",
           chatId: '3',
           name: "Dev",
-          description: "This is a place where stuff gets developped.",
+          descriptionription: "This is a place where stuff gets developped.",
           picture: "/img/forest-compressed.png",
-          handle: "Dev"
         });
         break;
       default:
         resolve({
-          id: '1',
+          id: "Startups",
           chatId: '1',
           name: "Startups",
-          description: "This is a place where stuff gets done.",
+          descriptionription: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
-          handle: "Startups"
-        });
-      }
-    }, 250);
-  });
-}
-
-// Obso
-export function fetchUniverseByName(universeName) {
-  log('+++ Fetching universeByName ' + universeName);
-  // returning a Promise because that is what fetch does.
-  return new Promise(function (resolve, reject) {
-    // simulate an asynchronous action where data is fetched on
-    // a remote server somewhere.
-    setTimeout(function () {
-      // resolve with some mock data
-      switch (universeName) {
-        case "Startups":
-         resolve({
-          id: '1',
-          chatId: '1',
-          name: "Startups",
-          description: "This is a place where stuff gets done.",
-          picture: "/img/pillars_compressed.png",
-          handle: "Startups"
-        });
-        break;
-        case "Design":
-         resolve({
-          id: '2',
-          chatId: '2',
-          name: "Design",
-          description: "This is a place where stuff gets designed.",
-          picture: "/img/designer_compressed.png",
-          handle: "Design"
-        });
-        break;
-        case "Dev":
-         resolve({
-          id: '3',
-          chatId: '3',
-          name: "Dev",
-          description: "This is a place where stuff gets developped.",
-          picture: "/img/forest-compressed.png",
-          handle: "Dev"
-        });
-        break;
-      default:
-        resolve({
-          id: '1',
-          chatId: '1',
-          name: "Startups",
-          description: "This is a place where stuff gets done.",
-          picture: "/img/pillars_compressed.png",
-          handle: "Startups"
-        });
-      }
-    }, 250);
-  });
-}
-
-export function fetchUniverseByHandle(handle) {
-  log('+++ Fetching universeByHandle ' + handle);
-  // returning a Promise because that is what fetch does.
-  return new Promise(function (resolve, reject) {
-    // simulate an asynchronous action where data is fetched on
-    // a remote server somewhere.
-    setTimeout(function () {
-      // resolve with some mock data
-      switch (handle) {
-        case "Startups":
-         resolve({
-          id: '1',
-          chatId: '1',
-          name: "Startups",
-          description: "This is a place where stuff gets done.",
-          picture: "/img/pillars_compressed.png",
-          handle: "Startups"
-        });
-        break;
-        case "Design":
-         resolve({
-          id: '2',
-          chatId: '2',
-          name: "Design",
-          description: "This is a place where stuff gets designed.",
-          picture: "/img/designer_compressed.png",
-          handle: "Design"
-        });
-        break;
-        case "Dev":
-         resolve({
-          id: '3',
-          chatId: '3',
-          name: "Dev",
-          description: "This is a place where stuff gets developped.",
-          picture: "/img/forest-compressed.png",
-          handle: "Dev"
-        });
-        break;
-      default:
-        resolve({
-          id: '1',
-          chatId: '1',
-          name: "Startups",
-          description: "This is a place where stuff gets done.",
-          picture: "/img/pillars_compressed.png",
-          handle: "Startups"
         });
       }
     }, 250);
@@ -171,28 +59,25 @@ export function fetchUniverses() {
       // resolve with some mock data
       resolve([
         {
-          id: '1',
+          id: "Startups",
           chatId: '1',
           name: "Startups",
-          description: "This is a place where stuff gets done.",
+          descriptionription: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
-          handle: "Startups"
         },
         {
-          id: '2',
+          id: "Design",
           chatId: '2',
           name: "Design",
-          description: "This is a place where stuff gets designed.",
+          descriptionription: "This is a place where stuff gets designed.",
           picture: "/img/designer_compressed.png",
-          handle: "Design"
         },
         {
-          id: '3',
+          id: "Dev",
           chatId: '3',
           name: "Dev",
-          description: "This is a place where stuff gets developped.",
+          descriptionription: "This is a place where stuff gets developped.",
           picture: "/img/forest-compressed.png",
-          handle: "Dev"
         }
       ]);
     }, 700);
@@ -204,83 +89,77 @@ export function fetchInventory(universeId) {
   
   return new Promise(function (resolve, reject) {
     setTimeout(function () {
-      let pasCustom = [{
-          id: 2,
+      let pasCustom = 
+      [{
+          id: 'Topic-Id-' + universeId + '-1',
           universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
-          author: "Cicero2",
-          desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+          author: "Cicero"  + universeId + '1',
+          description: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           picture: "",
           timestamp:"a long time",
-          handle: 'handle-2',
           chatId: "111"
         },
         {
-          id: 3,
+          id: 'Topic-Id-' + universeId + '-2',
           universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
-          author: "Cicero3",
-          desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+          author: "Cicero"  + universeId + '2',
+          description: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           picture: "",
           timestamp:"a long time",
-          handle: 'handle-3',
           chatId: "111"
         },
         {
-          id: 4,
+          id: 'Topic-Id-' + universeId + '-3',
           universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
-          author: "Cicero4",
-          desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+          author: "Cicero"  + universeId + '3',
+          description: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           picture: "/img/image2.png",
           timestamp:"a long time",
-          handle: 'handle-4',
           chatId: "111"
         },
         {
-          id: 5,
+          id: 'Topic-Id-' + universeId + '-4',
           universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
-          author: "Cicero5",
-          desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+          author: "Cicero"  + universeId + '4',
+          description: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           picture: "",
           timestamp:"a long time",
-          handle: 'handle-5',
           chatId: "111"
         },
         {
-          id: 6,
+          id: 'Topic-Id-' + universeId + '-5',
           universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
-          author: "Cicero6",
-          desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+          author: "Cicero"  + universeId + '5',
+          description: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           picture: "",
           timestamp:"a long time",
-          handle: 'handle-6',
           chatId: "111"
         },
         {
-          id: 7,
+          id: 'Topic-Id-' + universeId + '-6',
           universeId,
           title: "Lorem ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
-          author: "Cicero7",
-          desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+          author: "Cicero"  + universeId + '6',
+          description: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           picture: "/img/image1.png",
           timestamp:"a long time",
-          handle: 'handle-7',
           chatId: "111"
         }];
         
       resolve(
         [{
-          id: 1,
+          id: 'Topic-Id-' + universeId + '-0000',
           universeId,
           title: universeId + " ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
-          desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+          description: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           picture: "/img/image1.png",
           timestamp:"a long time",
-          handle: 'handle-1',
           chatId: "111"
         }].concat(pasCustom)
       );
@@ -288,9 +167,8 @@ export function fetchInventory(universeId) {
   });
 }
 
-export function fetchChat(chatId) {
-  //chatId = chatId.toString();
-  log('+++ Fetching chat ' + chatId);
+export function fetchChat(id) {
+  log('+++ Fetching chat ' + id);
   let messages = [];
   for (let i = 0; i < 100; i++) {
     messages.push({
@@ -305,7 +183,7 @@ export function fetchChat(chatId) {
     // a remote server somewhere.
     setTimeout(function () {
       // resolve with some mock data
-      switch (chatId) {
+      switch (id) {
         case '1':
          resolve({
           id: '1',
@@ -358,8 +236,8 @@ export function fetchTopicContent(id) {
   });
 }
 
-export function fetchTopicByHandle(handle) {
-  log('+++ Fetching topicByHandle ' + handle);
+export function fetchTopic(id) {
+  log('+++ Fetching topic ' + id);
   // returning a Promise because that is what fetch does.
   return new Promise(function (resolve, reject) {
     // simulate an asynchronous action where data is fetched on
@@ -368,13 +246,12 @@ export function fetchTopicByHandle(handle) {
       // resolve with some mock data
       resolve(
         {
-          id: '111',
+          id: 'handle-111',
           title: "topicByHandle ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
-          desc: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
+          description: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           picture: "",
           timestamp:"a long time",
-          handle: handle,
           content: "topicByHandle topicByHandle topicByHandle topicByHandle",
           chatId: '111'
         }
@@ -382,3 +259,111 @@ export function fetchTopicByHandle(handle) {
     }, 250);
   });
 }
+
+// Obso
+/*export function fetchUniverseByName(universeName) {
+  log('+++ Fetching universeByName ' + universeName);
+  // returning a Promise because that is what fetch does.
+  return new Promise(function (resolve, reject) {
+    // simulate an asynchronous action where data is fetched on
+    // a remote server somewhere.
+    setTimeout(function () {
+      // resolve with some mock data
+      switch (universeName) {
+        case "Startups":
+         resolve({
+          id: '1',
+          chatId: '1',
+          name: "Startups",
+          descriptionription: "This is a place where stuff gets done.",
+          picture: "/img/pillars_compressed.png",
+          handle: "Startups"
+        });
+        break;
+        case "Design":
+         resolve({
+          id: '2',
+          chatId: '2',
+          name: "Design",
+          descriptionription: "This is a place where stuff gets designed.",
+          picture: "/img/designer_compressed.png",
+          handle: "Design"
+        });
+        break;
+        case "Dev":
+         resolve({
+          id: '3',
+          chatId: '3',
+          name: "Dev",
+          descriptionription: "This is a place where stuff gets developped.",
+          picture: "/img/forest-compressed.png",
+          handle: "Dev"
+        });
+        break;
+      default:
+        resolve({
+          id: '1',
+          chatId: '1',
+          name: "Startups",
+          descriptionription: "This is a place where stuff gets done.",
+          picture: "/img/pillars_compressed.png",
+          handle: "Startups"
+        });
+      }
+    }, 250);
+  });
+}*/
+
+//Obso
+/*export function fetchUniverseByHandle(handle) {
+  log('+++ Fetching universeByHandle ' + handle);
+  // returning a Promise because that is what fetch does.
+  return new Promise(function (resolve, reject) {
+    // simulate an asynchronous action where data is fetched on
+    // a remote server somewhere.
+    setTimeout(function () {
+      // resolve with some mock data
+      switch (handle) {
+        case "Startups":
+         resolve({
+          id: '1',
+          chatId: '1',
+          name: "Startups",
+          descriptionription: "This is a place where stuff gets done.",
+          picture: "/img/pillars_compressed.png",
+          handle: "Startups"
+        });
+        break;
+        case "Design":
+         resolve({
+          id: '2',
+          chatId: '2',
+          name: "Design",
+          descriptionription: "This is a place where stuff gets designed.",
+          picture: "/img/designer_compressed.png",
+          handle: "Design"
+        });
+        break;
+        case "Dev":
+         resolve({
+          id: '3',
+          chatId: '3',
+          name: "Dev",
+          descriptionription: "This is a place where stuff gets developped.",
+          picture: "/img/forest-compressed.png",
+          handle: "Dev"
+        });
+        break;
+      default:
+        resolve({
+          id: '1',
+          chatId: '1',
+          name: "Startups",
+          descriptionription: "This is a place where stuff gets done.",
+          picture: "/img/pillars_compressed.png",
+          handle: "Startups"
+        });
+      }
+    }, 250);
+  });
+}*/

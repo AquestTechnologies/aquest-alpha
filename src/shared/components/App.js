@@ -10,8 +10,8 @@ import LoadingBar           from './common/LoadingBar';
 
 function select(state) {
   return { 
-    globals:    state.globals,
     universes:  state.universes.toJS(),
+    topics:     state.topics.toJS(),
     chats:      state.chats.toJS(),
     records:    state.records,
   };
@@ -24,20 +24,18 @@ export default class App extends React.Component {
       <Connector select={select}>
         {
           ({ 
-            globals,
             universes,
+            topics,
             chats,
             records,
             dispatch,
           }) => 
           <div>
-            <LoadingBar 
-              records = {records}
-            />
+            <LoadingBar records = {records} />
             <RouteHandler 
-              globals={globals}
-              universes={universes}
-              chats={chats}
+              universes = {universes}
+              topics = {topics}
+              chats = {chats}
               {...bindActionCreators(actionCreators, dispatch)} 
             />
           </div>

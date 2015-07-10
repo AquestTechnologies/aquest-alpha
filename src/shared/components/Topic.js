@@ -31,7 +31,7 @@ class Topic extends React.Component {
   // Sauf que pour l'instant il n'y a pas de bouton back
   render() {
     // Pas ouf
-    const topic = this.props.universe.topics.filter(topic => topic.handle === this.props.params.topicHandle)[0];
+    const topic = this.props.topics[this.props.params.topicId];
     
     return (
       <div>

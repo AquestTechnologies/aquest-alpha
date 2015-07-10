@@ -5,23 +5,23 @@ class Node extends React.Component {
   constructor() {
     super();
     
-    this.handleSelectUniverse = universe => {
-      console.log('-c- Node.handleSelectUniverse ' + universe.handle);
-      this.props.setUniverse(universe);
-      this.context.router.transitionTo('universe', {universeHandle: universe.handle});
+    this.handleSelectUniverse = universeId => {
+      console.log('-C- Node.handleSelectUniverse ' + universeId);
+      this.context.router.transitionTo('universe', {universeId});
     };
   }
   
   render() {
     const universe = this.props.universe;
     
+      // <div onClick={this.handleSelectUniverse.bind(null, universe.id)}>
     return (
-      <div onClick={this.handleSelectUniverse.bind(null, universe)}>
-          <div >
-            {universe.name}
+      <div onClick={this.handleSelectUniverse(universe.get('id'))}>
+          <div>
+            {universe.get('name')}
           </div>
-          <div >
-            {universe.description}
+          <div>
+            {universe.get('description')}
           </div>
       </div>
     );

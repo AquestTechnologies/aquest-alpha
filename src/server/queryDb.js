@@ -100,42 +100,47 @@ export default function queryDb(queryInfo) {
         
       case 'fetchUniverseByHandle':
   
-        sql = 'SELECT \
-                row_to_json(universe_topics) \
-              FROM ( \
-                SELECT \
-                  universe, array_agg(row_to_json(row(topics.topic_title, topics.topic_handle))) as topics \
-                FROM ( \
-                  SELECT \
-              	universe, topic.title topic_title, topic.handle topic_handle \
-                  FROM \
-                    aquest_schema.topic, \
-                    (SELECT universe.id, universe.name, universe.handle, universe.description FROM aquest_schema.universe WHERE universe.handle = \'' + params +  '\') universe \
-                  WHERE \
-                    topic.universe_id = universe.id \
-                ) topics \
-                GROUP BY topics.universe \
-               ) universe_topics;'
-               
-        /* Format des données retournées
+        //
+        sql = 'SELECT ' + 
+              	'row_to_json(universe_topics) ' +
+              'FROM ( ' +
+              	'SELECT ' +
+              	  'topics.universe, array_agg(row_to_json((SELECT topic_columns FROM (SELECT topics.title, topics.handle) topic_columns))) as topics ' +
+              	'FROM ( ' +
+              	  'SELECT  '+
+              	    'universe, topic.title title, topic.handle handle ' +
+              	  'FROM '+
+              	    '(SELECT universe.id, universe.name, universe.handle FROM aquest_schema.universe WHERE universe.handle = \'' + params + '\') universe ' +
+              	    'LEFT JOIN aquest_schema.topic ON universe.id = topic.universe_id ' +
+              	') topics GROUP BY topics.universe ' +
+              ') universe_topics';
+        /**
+         *              |
+         *              |
+         *              _
+         *             \ /
+         *              v
+         * Format des données retournées
+         * 
         {
           "universe": {
               "id": 3,
               "name": "cuteCats",
-              "handle": "cuteCats",
-              "description": "This is a universe for cute cats :)"
+              "handle": "cuteCats"
           },
           "topics": [
               {
-                  "f1": "David s Cute Cat",
-                  "f2": "DavidCuteCat"
+                  "title": "David s Cute Cat",
+                  "handle": "DavidCuteCat"
               },
               {
-                  "f1": "David Cute Dog",
-                  "f2": "DavidCuteDog"
+                  "title": "David Cute Dog",
+                  "handle": "DavidCuteDog"
               }
           ]
-        }*/
+        }
+        
+        */
   
         sql = 'SELECT id, name, description, picture, handle, chat_id FROM aquest_schema.universe WHERE handle=\'' + params + '\'';
         

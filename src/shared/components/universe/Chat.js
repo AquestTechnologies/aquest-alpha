@@ -14,6 +14,7 @@ class Chat extends React.Component {
   }
   
   componentWillMount() {
+    console.log('.C. Chat.componentWillMount');
     let chat = this.props.chat;
     let isLoading = false;
     if(this.props.chat === undefined) {
@@ -25,9 +26,10 @@ class Chat extends React.Component {
   }
   
   componentWillReceiveProps(nextProps) {
+    console.log('.C. Chat.componentWillReceiveProps');
     if (nextProps.chat === undefined) {
       if (!this.state.isLoading) {
-        this.props.loadChat(nextProps.chatId);
+        this.props.loadChat(this.props.chatId);
         this.setState({ 
           chat:      {},
           isLoading: true
@@ -60,7 +62,7 @@ class Chat extends React.Component {
   render() {
     const chat     = this.state.chat || {};
     const messages = chat.messages || [];
-    const samuel = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
+    const samuel   = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
     const messagesList = messages.length ? 'chat_list_visible' : 'chat_list_hidden';
     
     return (

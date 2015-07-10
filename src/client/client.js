@@ -79,6 +79,7 @@ io.on('message', function (message) {
     );
   });
   
+  
   key('ctrl+shift+1', () => {
     console.log('state :', store.getState());
     return false;
@@ -88,22 +89,30 @@ io.on('message', function (message) {
     return false;
   });
   key('ctrl+shift+3', () => {
-    const state = store.getState();
-    console.log('topics :', state.universes.toJS()[state.globals.universeId].topics);
+    const {universeId} = router.getCurrentParams();
+    console.log('universe :', store.getState().universes.toJS()[universeId]);
     return false;
   });
   key('ctrl+shift+4', () => {
     const state = store.getState();
-    console.log('topic :', state.universes.toJS()[state.globals.universeId].topics[state.globals.topicId]);
+    console.log('topics :', state.topics.toJS());
     return false;
   });
   key('ctrl+shift+5', () => {
-    console.log('chats :', store.getState().chats.toJS());
+    const state = store.getState();
+    const {topicId} = router.getCurrentParams();
+    console.log('topic :', state.topics.toJS()[topicId]);
     return false;
   });
   key('ctrl+shift+6', () => {
+    console.log('chats :', store.getState().chats.toJS());
+    return false;
+  });
+  key('ctrl+shift+7', () => {
     const state = store.getState();
-    console.log('chat :', state.chats.toJS()[state.globals.chatId]);
+    const {universeId, topicId} = router.getCurrentParams();
+    const chatId = topicId === undefined ? state.universes.toJS()[universeId].chatId : state.topics.toJS()[topicId].chatId;
+    console.log('chat :', state.chats.toJS()[chatId]);
     return false;
   });
   key('ctrl+shift+9', () => {

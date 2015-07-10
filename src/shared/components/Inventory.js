@@ -1,6 +1,6 @@
 import React    from 'react';
-import Card     from './Card';
-import CardNew  from './CardNew';
+import Card     from './inventory/Card';
+import CardNew  from './inventory/CardNew';
 
 class Inventory extends React.Component {
   
@@ -18,14 +18,14 @@ class Inventory extends React.Component {
   constructor() {
     super();
     this.state = {
-      // inventory: {},
       nameVisible: true
     };
     this.handleHeaderHover = () => this.setState({ nameVisible: !this.state.nameVisible });
   }
   
   componentWillMount() {
-    if (!this.props.universe.topics.length) this.props.loadInventory(this.props.universe.id);
+    // console.log(this.props.topics);
+    if (!Object.keys(this.props.topics).length) this.props.loadInventory(this.props.universe.id);
     // // if(this.props.universe.id !== this.props.inventory.universeId) {
     // if(false) {
     //   this.props.loadInventory(this.props.universe.id);
@@ -42,42 +42,28 @@ class Inventory extends React.Component {
   
   
   render() {
-    const universe  = this.props.universe;
-    const inventoryListClassName = universe.topics.length ? 'inventory_list_visible' : 'inventory_list_hidden';
-    
+    const universe = this.props.universe;
+    const topics = this.props.topics;
+    const inventoryListClassName = Object.keys(topics).length ? 'inventory_list_visible' : 'inventory_list_hidden';
     return (
       <div>      
         <div className="inventory_header">
-          {this.renderHeader(universe)}
+          <div className={this.state.nameVisible ? 'inventory_header_name' : 'inventory_header_desc'} onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
+            {this.state.nameVisible ? universe.name : universe.description}
+          </div>
         </div>
         
         <div className={inventoryListClassName} >
-          <CardNew universeName={universe.name} />
-          {this.renderCards()}
+          <CardNew universeName={universe.id} />
+          {Object.keys(topics).map(key => {
+            return <Card
+              key = {key} 
+              topic = {topics[key]} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
+            />;
+          })}
         </div>
         
       </div>
-    );
-  }
-  
-  renderHeader(universe) {
-    return(
-      <div className={this.state.nameVisible ? 'inventory_header_name' : 'inventory_header_desc'} onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
-        {this.state.nameVisible ? universe.name : universe.description}
-      </div>
-    );
-  }
-  
-  renderCards() {
-    return (
-      this.props.universe.topics.map(topic => {
-        return <Card 
-          key={topic.id} 
-          universeHandle={this.props.universe.handle}
-          topic={topic} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
-          setTopic={this.props.setTopic}
-        />;
-      })
     );
   }
   

@@ -1,11 +1,8 @@
 import log      from './logTailor.js';
-import isClient from './isClient.js';
 
-import * as universeActions from '../actions/universeActions';
-import * as chatActions     from '../actions/chatActions';
-import * as topicActions    from '../actions/topicActions';
+import * as actionCreators from '../actionCreators';
 
-export default function phidippides(routerState, fluxState, dispatch) {
+export default function phidippides(routerState, dispatch) {
   
   // Qui d'autre que phidippides peut dedecter les 404 ? 
   // Exemple :'/_aefzgrjeflkvn' fait actuelement un fetch
@@ -15,21 +12,14 @@ export default function phidippides(routerState, fluxState, dispatch) {
   // Dans componentDidMount or WillMount ?
   
   // Configuration
-  const VERBOSE         = false;            // Affiche les log
-  const DEVELOPMENT     = true;             // Permet de ne pas appeller checkFormat en production !!! A remplacer par une constante de projet ? !!!
-  const PLACEHOLDER     = '__dependency.';  // Le placeholder pour les arguments des actions
-  const METHOD_NAME     = 'runPhidippides'; // Le nom de la méthode des composants react
-  const STATE           = fluxState;        // Immutabilité ?
-  const ENVIRONMENT     = isClient() ? 'client' : 'server';
-  const ACTION_CREATORS = {                 // Si la 1.0 de Redux propose une méthode alternative alors MAJ
-    universeActions: universeActions,
-    chatActions: chatActions,
-    topicActions: topicActions
-  };
+  const VERBOSE       = false;            // Affiche les log
+  const PLACEHOLDER   = '__dependency.';  // Le placeholder pour les arguments des actions
+  const METHOD_NAME   = 'runPhidippides'; // Le nom de la méthode des composants react
+  const DEVELOPMENT   = process.env.NODE_ENV === 'production' ? false : true;
   
-  let completedTasks    = []; // Les tâches terminée
-  let failedTasks       = []; // Les tâches non terminées car il manque les dépendances
-  let preventInfinite   = 0;  // Compte le nombre de cycles pour empecher les boucles infinies (-_-)
+  let completedTasks  = []; // Les tâches terminée
+  let failedTasks     = []; // Les tâches non terminées car il manque les dépendances
+  let preventInfinite = 0;  // Compte le nombre de cycles pour empecher les boucles infinies (-_-)
   
   // Récupère les tâches
   const TASKS = routerState.routes
@@ -38,19 +28,17 @@ export default function phidippides(routerState, fluxState, dispatch) {
   .map    ( method   => method(routerState)          )  // Appel de runPhidippides
   .filter ( returned => returned instanceof Array    )  // Filtre si runPhidippides retourne un array (de tâches)
   .reduce ( (a, b)   => a.concat(b), []              )  // Réduction de l'array d'array de tâches en array de tâches
-  .filter ( task     => checkFormat(task)            )  // Évince les tâches hors format
-  .filter ( task     => checkEnvironment(task.on)    ); // Évince les tâches ne devant pas tourner côté client/server
+  .filter ( task     => checkFormat(task)            ); // Évince les tâches hors format
   
-  let nbTasks      = TASKS.length;
-  let spkEnglish   = nbTasks > 1 ? ' tasks : ' : ' task : ';
+  let nbTasks    = TASKS.length;
+  let spkEnglish = nbTasks > 1 ? ' tasks : ' : ' task : ';
   if (nbTasks === 0) return Promise.resolve();
-  log('*** Resolving ' + nbTasks + spkEnglish + TASKS.map(task => task.shouldBePresent));
+  log('*** Resolving ' + nbTasks + spkEnglish + TASKS.map(task => task.id));
   
   // Exécute les tâches
   return clearTasks(TASKS);
   
   // ___Fonctions___
-  
   
   // Log
   function logMeOrNot(type, ...messages) {
@@ -63,81 +51,44 @@ export default function phidippides(routerState, fluxState, dispatch) {
     logMeOrNot('*** _ checkDependency named ' + dependency);
     if (dependency === undefined) return true;
     for (let t of completedTasks) {
-      if (t.task.shouldBePresent === dependency) return true;
+      if (t.task.id === dependency) return true;
     }
     return false;
   }
   
-  
-  // Détermine si l'action doit être executée en fonction de l'environnement et de task.on
-  function checkEnvironment(taskOn) {
-    for (let item of taskOn) {
-      if (item === ENVIRONMENT) return true;
-    }
-    return false;
-  }
-  
-  // Vérifie la présence et la valeur de la donnée derrière dataString
-  function checkData(dataString, shouldHaveValue) {
-    let data = STATE;
-    let x = dataString.split('.');
-    for (let i in x) data = data[x[i]]; // 'truc.machin.id' --> truc[machin][id]
-    logMeOrNot('*** _ checkData of ' + dataString + ' --> ' + JSON.stringify(data));
-    
-    if (data === undefined || data === null || data === '') return false;
-    if (data instanceof Array && data.length === 0) return false; // Si data === []
-    if (data instanceof Object && Object.keys(data).length === 0) return false; // Si data === {}
-    if (shouldHaveValue === undefined) return true;
-    logMeOrNot('*** _ ' + ' should contain ' + JSON.stringify(shouldHaveValue));
-    // Si shouldHaveValue est un object on vérifie que data est identique
-    if (data instanceof Object) {
-      if (data instanceof Array) {
-        // Ici phidippides n'est pas codé (!)
-        // Soit data doit etre strictement egal à shouldHaveValue
-        // Soit data doit contenir un exemplaire de shouldHaveValue
-        log('error', '!!! Code non implémenté !');
-      }
-      else {
-        for (let key in shouldHaveValue) {
-          if (data[key] !== shouldHaveValue[key]) return false;
-        }
-      }
-    }
-    else if (data !== shouldHaveValue) {
-      return false;
-    }
-    return true;
-  }
   
   // Complete toutes les tâches
   function clearTasks(tasks) {
     preventInfinite++;
     failedTasks = []; // RAZ des tâches irrésolues devenues tâches à accomplir
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
+      
       // Attend que toutes les tâches soient résolues
-      Promise.all(tasks.map(task => clearOneTask(task))).then(function() {
+      Promise.all(tasks.map(task => clearOneTask(task))).then(() => {
       
         logMeOrNot('\n');
         logMeOrNot('*** * clearTasks ended * ');
-        logMeOrNot('*** completed tasks : ' + completedTasks.map(task => task.task.shouldBePresent));
-        logMeOrNot('*** failed tasks : ' + failedTasks.map(task => task.shouldBePresent));
+        logMeOrNot('*** completed tasks : ' + completedTasks.map(task => task.task.id));
+        logMeOrNot('*** failed tasks : ' + failedTasks.map(task => task.id));
         logMeOrNot('\n');
+        
         // Si aucune tache n'a échoué c'est terminé
         if (failedTasks.length === 0) {
           resolve();
-        }
+          
         // Sinon on rappel les tâches échouées (possible boucle infinie ici)
-        else { 
+        } else { 
           if (preventInfinite > 10) throw('!!! Infinite loop detected');
+          
           // Inception des promises 8)
-          clearTasks(failedTasks).then(function() {
+          clearTasks(failedTasks).then(() => {
             resolve();
-          }).catch(function(why) {
+          }).catch(why => {
             log('error', '*** ERROR ! clearTasks failed after some failled tasks');
             reject(why);
           });
         }
-      }).catch(function(why) {
+      }).catch(why => {
         log('error', '*** ERROR ! clearTasks failed 1');
         reject(why);
       });
@@ -147,39 +98,23 @@ export default function phidippides(routerState, fluxState, dispatch) {
   
   // Complete une tâche
   function clearOneTask(task) {
-    logMeOrNot('*** clearOneTask ' + task.shouldBePresent);
-    return new Promise(function(resolve, reject) {
-      
-      // [dependency ok]
+    logMeOrNot('*** clearOneTask ' + task.id);
+    return new Promise((resolve, reject) => {
       if(checkDependency(task.dependency)) {
-        // [dependency ok -> data ok]
-        if (checkData(task.shouldBePresent, task.shouldHaveValue)) {
-          logMeOrNot('*** clearOneTask OK ' + task.shouldBePresent + ' [dependency ok -> data ok]');
+        callActionCreator(task).then(data => {
           completedTasks.push({
             task: task,
-            result: null
+            result: data
           });
+          logMeOrNot('*** clearOneTask OK ' + task.id + ' [dependency ok -> fetch ok]');
           resolve();
-        } 
-        // [dependency ok -> data failed]
-        else {
-          callActionCreator(task).then(function(data) {
-            completedTasks.push({
-              task: task,
-              result: data
-            });
-            logMeOrNot('*** clearOneTask OK ' + task.shouldBePresent + ' [dependency ok -> data failed -> fetch ok]');
-            resolve();
-          }).catch(function(why) {
-            log('error', '*** clearOneTask FAILED ' + task.shouldBePresent + ' [dependency ok -> data failed -> fetch failed]');
-            reject(why);
-          });
-        }
-      } 
-      // [dependency failed]
-      else {
+        }).catch(why => {
+          log('error', '*** clearOneTask FAILED ' + task.id + ' [dependency ok -> fetch failed]');
+          reject(why);
+        });
+      } else {
         failedTasks.push(task);
-        logMeOrNot('*** clearOneTask FAILED ' + task.shouldBePresent + ' [dependency failed]');
+        logMeOrNot('*** clearOneTask FAILED ' + task.id + ' [dependency failed]');
         resolve();
       }
     });
@@ -189,21 +124,15 @@ export default function phidippides(routerState, fluxState, dispatch) {
   // Appel l'action associée à une task
   function callActionCreator(task) {
     
-    const ifNot  = task.ifNot;
-    const callMe = ifNot[0].split('.'); //'module.creator' -> ['module', 'creator']
-    let creator, realArgs = [], realArg;
+    logMeOrNot('*** _ callActionCreator ' + task.creator);
     
-    logMeOrNot('*** _ callActionCreator ' + callMe[1]);
+    const creator = actionCreators[task.creator];
+    let realArgs = [], realArg;
     
-    try { // Je ne sais pas si try catch est une bonne façon de faire ça
-      creator = ACTION_CREATORS[callMe[0]][callMe[1]]; //ACTION_CREATORS[module][creator]
-    }
-    catch(err) {
-      log('error', '*** ERROR ! callActionCreator ' + callMe[0] + '.' + callMe[1] + ' does not exist', err);
-    }
+    if (creator === undefined || typeof creator !== 'function') return new Promise.reject('*** ERROR ! callActionCreator creator called ' + task.creator + ' does not exist.');
 
     // Traitement des arguments
-    for (let arg of ifNot[1]) {
+    task.args.forEach(arg => {
       logMeOrNot('*** ___ processing arg ' + arg);
       realArg = arg;
       // Si un argument string possède PLACEHOLDER alors il faut le traiter
@@ -211,95 +140,69 @@ export default function phidippides(routerState, fluxState, dispatch) {
         logMeOrNot('*** ___ dependency found');
         // à commenter
         let dataTree = arg.replace(PLACEHOLDER, '').split('.'); // '__dependency.truc.machin.id' --> ['truc', 'machin', 'id']
-        for (let t of completedTasks) {
-          if (t.task.shouldBePresent === task.dependency) {
+        completedTasks.forEach(t => {
+          if (t.task.id === task.dependency) {
             logMeOrNot('*** ___ dependency resolved');
             // Quand on l'a trouvée on recupère le résultat de la tache pour le passer en argument à l'action
             realArg = t.result;
             for (let i = 0, l = dataTree.length; i < l; i++) {
               realArg = realArg[dataTree[i]]; // ['truc', 'machin', 'id'] --> t.result[truc][machin][id]
             }
+            logMeOrNot('*** ___ realArg is ' + realArg.toString().substring(0,9));
           }
-        }
+        });
       }
       realArgs.push(realArg);
-      logMeOrNot('*** ___ realArg is ' + realArg.toString().substring(0,9));
-    }
+    });
     
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       // Appel de l'action creator et dispatch de l'action
       logMeOrNot('*** ___ calling with args ' + realArgs);
-      dispatch(creator.apply(null, realArgs)).then(function(data) { // ICI !! le then ne doit pas s'appliquer à dispatch
-        logMeOrNot('***  _ Dispatch for ' + task.shouldBePresent + ' resolved');
-        logMeOrNot(data);
+      const action = creator.apply(null, realArgs);
+      dispatch(action);
+      if (action.promise === undefined) resolve(action.payload);
+      else action.promise.then(data => {
+        logMeOrNot('***  _ Dispatch for ' + task.id + ' resolved');
+        // logMeOrNot(data);
         resolve(data);
-        return data; // ...
-      }).catch(function(why) {
+      }).catch(why => {
         log('error', '*** callActionCreator dispatch failed');
         reject(why);
-        return why;
       });
     });
   }
   
   
   // Vérifie l'intégrité du markup des handlers
-  // Peut mieux faire... ^^
   function checkFormat(task) {
-    if (DEVELOPMENT) {    // Absolument inutile, il faut plutot exporter checkFormat pour épargner le client
-      let whatIsWrong     = '';
+    if (DEVELOPMENT) {
+      let whatIsWrong = '';
       
-      if (task.hasOwnProperty('on')) {
-        if (task.on instanceof Array) {
-          task.on.forEach(function(item) {
-            if (item !== 'client' && item !== 'server') whatIsWrong += 'Incorrect \'on\' property on item ' + item + '\n';
-          });
-        }
-        else {
-          whatIsWrong += '\'on\' property should be an array\n';
-        }
-      }
-      else {
-        whatIsWrong += 'Task is missing \'on\' property\n';
+      if (task.hasOwnProperty('id')) {
+        if (typeof task.id !== 'string') whatIsWrong += '\'id\' property should be a string\n';
+      } else {
+        whatIsWrong += 'task is missing \'id\' property\n';
       }
       
-      if (task.hasOwnProperty('ifNot')) {
-        if (task.ifNot instanceof Array) {
-          if (task.ifNot.length === 2) {
-            let action = task.ifNot[0];
-            if (!(task.ifNot[1] instanceof Array)) whatIsWrong += 'ifNot[1] should be an array of args\n';
-            if (typeof action !== 'string' || action.replace('.', '') === action) whatIsWrong += 'ifNot[0] should be a string \'actionmodule.actioncreator\'\n';
-          }
-          else {
-            whatIsWrong += 'ifNot.length should be 2\n';
-          }
-        }
-        else {
-          whatIsWrong += '\'ifNot\' property should be an array\n';
-        }
-      }
-      else {
-        whatIsWrong += 'task is missing \'ifNot\' property\n';
+      if (task.hasOwnProperty('creator')) {
+        if (typeof task.creator !== 'string') whatIsWrong += '\'creator\' property should be a string\n';
+      } else {
+        whatIsWrong += 'task is missing \'creator\' property\n';
       }
       
-      if (task.hasOwnProperty('shouldBePresent')) {
-        let data = task.shouldBePresent;
-        if (typeof data !== 'string' || data.replace('.', '') === data) whatIsWrong += '\'shouldBePresent\' property should be a string \'store.state\'\n';
-      }
-      else {
-        whatIsWrong += 'task is missing \'shouldBePresent\' property\n';
+      if (task.hasOwnProperty('args')) {
+        if (!(task.args instanceof Array)) whatIsWrong += '\'args\' property should be an array\n';
+      } else {
+        whatIsWrong += 'task is missing \'args\' property\n';
       }
       
       if (task.hasOwnProperty('dependency') && typeof task.dependency !== 'string') whatIsWrong += '\'dependency\' property should be a string\n';
       
-      if (whatIsWrong.length > 0) {
+      if (whatIsWrong.length) {
         log('error', '*** ERROR ! Please check task format for task : ' + JSON.stringify(task), whatIsWrong);
         return false;
       }
-      return true;
     }
-    else {
-      return true;
-    }
+    return true;
   }
 }
