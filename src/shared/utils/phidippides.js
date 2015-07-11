@@ -160,10 +160,11 @@ export default function phidippides(routerState, dispatch) {
       logMeOrNot('*** ___ calling with args ' + realArgs);
       const action = creator.apply(null, realArgs);
       dispatch(action);
+      
       if (action.promise === undefined) resolve(action.payload);
       else action.promise.then(data => {
         logMeOrNot('***  _ Dispatch for ' + task.id + ' resolved');
-        // logMeOrNot(data);
+        logMeOrNot(JSON.stringify(data).substr(0,100));
         resolve(data);
       }).catch(why => {
         log('error', '*** callActionCreator dispatch failed');

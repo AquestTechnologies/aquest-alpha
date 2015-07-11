@@ -9,30 +9,30 @@ export function fetchUniverse(id) {
     setTimeout(function () {
       // resolve with some mock data
       switch (id) {
-        case '1':
+        case 'Startups':
          resolve({
           id: "Startups",
           chatId: '1',
           name: "Startups",
-          descriptionription: "This is a place where stuff gets done.",
+          description: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
         });
         break;
-        case '2':
+        case 'Design':
          resolve({
           id: "Design",
           chatId: '2',
           name: "Design",
-          descriptionription: "This is a place where stuff gets designed.",
+          description: "This is a place where stuff gets designed.",
           picture: "/img/designer_compressed.png",
         });
         break;
-        case '3':
+        case 'Dev':
          resolve({
           id: "Dev",
           chatId: '3',
           name: "Dev",
-          descriptionription: "This is a place where stuff gets developped.",
+          description: "This is a place where stuff gets developped.",
           picture: "/img/forest-compressed.png",
         });
         break;
@@ -41,7 +41,7 @@ export function fetchUniverse(id) {
           id: "Startups",
           chatId: '1',
           name: "Startups",
-          descriptionription: "This is a place where stuff gets done.",
+          description: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
         });
       }
@@ -62,21 +62,21 @@ export function fetchUniverses() {
           id: "Startups",
           chatId: '1',
           name: "Startups",
-          descriptionription: "This is a place where stuff gets done.",
+          description: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
         },
         {
           id: "Design",
           chatId: '2',
           name: "Design",
-          descriptionription: "This is a place where stuff gets designed.",
+          description: "This is a place where stuff gets designed.",
           picture: "/img/designer_compressed.png",
         },
         {
           id: "Dev",
           chatId: '3',
           name: "Dev",
-          descriptionription: "This is a place where stuff gets developped.",
+          description: "This is a place where stuff gets developped.",
           picture: "/img/forest-compressed.png",
         }
       ]);
@@ -246,14 +246,15 @@ export function fetchTopic(id) {
       // resolve with some mock data
       resolve(
         {
-          id: 'handle-111',
+          id,
           title: "topicByHandle ipsum dolor sit amet, consectetur adipisc ing elit, sed do eiusmod tempor incididunt ut lab",
           author: "Cicero",
           description: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass. Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows. Some pilots get picked and become television programs. Some don't, become nothing. She starred in one of the ones that became nothing.",
           picture: "",
           timestamp:"a long time",
           content: "topicByHandle topicByHandle topicByHandle topicByHandle",
-          chatId: '111'
+          chatId: '111',
+          universeId: id.split('-')[2]
         }
       );
     }, 250);
@@ -275,7 +276,7 @@ export function fetchTopic(id) {
           id: '1',
           chatId: '1',
           name: "Startups",
-          descriptionription: "This is a place where stuff gets done.",
+          description: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });
@@ -285,7 +286,7 @@ export function fetchTopic(id) {
           id: '2',
           chatId: '2',
           name: "Design",
-          descriptionription: "This is a place where stuff gets designed.",
+          description: "This is a place where stuff gets designed.",
           picture: "/img/designer_compressed.png",
           handle: "Design"
         });
@@ -295,7 +296,7 @@ export function fetchTopic(id) {
           id: '3',
           chatId: '3',
           name: "Dev",
-          descriptionription: "This is a place where stuff gets developped.",
+          description: "This is a place where stuff gets developped.",
           picture: "/img/forest-compressed.png",
           handle: "Dev"
         });
@@ -305,7 +306,7 @@ export function fetchTopic(id) {
           id: '1',
           chatId: '1',
           name: "Startups",
-          descriptionription: "This is a place where stuff gets done.",
+          description: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });
@@ -329,7 +330,7 @@ export function fetchTopic(id) {
           id: '1',
           chatId: '1',
           name: "Startups",
-          descriptionription: "This is a place where stuff gets done.",
+          description: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });
@@ -339,7 +340,7 @@ export function fetchTopic(id) {
           id: '2',
           chatId: '2',
           name: "Design",
-          descriptionription: "This is a place where stuff gets designed.",
+          description: "This is a place where stuff gets designed.",
           picture: "/img/designer_compressed.png",
           handle: "Design"
         });
@@ -349,7 +350,7 @@ export function fetchTopic(id) {
           id: '3',
           chatId: '3',
           name: "Dev",
-          descriptionription: "This is a place where stuff gets developped.",
+          description: "This is a place where stuff gets developped.",
           picture: "/img/forest-compressed.png",
           handle: "Dev"
         });
@@ -359,7 +360,7 @@ export function fetchTopic(id) {
           id: '1',
           chatId: '1',
           name: "Startups",
-          descriptionription: "This is a place where stuff gets done.",
+          description: "This is a place where stuff gets done.",
           picture: "/img/pillars_compressed.png",
           handle: "Startups"
         });

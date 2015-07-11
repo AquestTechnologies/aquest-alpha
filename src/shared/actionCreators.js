@@ -45,12 +45,12 @@ export function loadInventory(universeId) {
   };
 }
 
-export function loadTopic(handle) {
-  log(`.A. loadTopic ${handle}`);
+export function loadTopic(id) {
+  log(`.A. loadTopic ${id}`);
   return {
     types: [REQUEST_TOPIC, SUCCESS_TOPIC, FAILURE_TOPIC],
-    promise: fetchTopic(handle),
-    params: handle
+    promise: fetchTopic(id),
+    params: id
   };
 }
 
@@ -64,12 +64,12 @@ export function loadTopicContent(id) {
 }
 
 
-export function loadChat(chatId) {
-  log(`.A. loadChat : ${chatId}`);
+export function loadChat(id) {
+  log(`.A. loadChat : ${id}`);
   return {
     types: [REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT],
-    promise: fetchChat(chatId),
-    params: chatId
+    promise: fetchChat(id),
+    params: id
   };
 }
 

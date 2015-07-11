@@ -25,7 +25,8 @@ class Inventory extends React.Component {
   
   componentWillMount() {
     // console.log(this.props.topics);
-    if (!Object.keys(this.props.topics).length) this.props.loadInventory(this.props.universe.id);
+    // if (!Object.keys(this.props.topics).length) this.props.loadInventory(this.props.universe.id);
+    if (!this.props.universe.lastInventoryUpdate) this.props.loadInventory(this.props.universe.id);
     // // if(this.props.universe.id !== this.props.inventory.universeId) {
     // if(false) {
     //   this.props.loadInventory(this.props.universe.id);
@@ -45,6 +46,7 @@ class Inventory extends React.Component {
     const universe = this.props.universe;
     const topics = this.props.topics;
     const inventoryListClassName = Object.keys(topics).length ? 'inventory_list_visible' : 'inventory_list_hidden';
+    // const inventoryListClassName = this.props.universe.lastInventoryUpdate ? 'inventory_list_visible' : 'inventory_list_hidden';
     return (
       <div>      
         <div className="inventory_header">

@@ -11,7 +11,7 @@ class Universe extends React.Component {
     return [{
       id:         'universe',
       creator:    'loadUniverse',
-      args:       [routerState.pathname === '/' ? 'Startups' : routerState.params.universeId]
+      args:       [routerState.params.universeId || 'Startups']
     },{
       id:         'chat',
       dependency: routerState.params.topicId ? 'topic' : 'universe',
@@ -29,13 +29,15 @@ class Universe extends React.Component {
   }
   
   render() {
-    const universeId = this.props.params.universeId;
+    // console.log('.C. Universe.render');
+    const universeId = this.props.params.universeId || 'Startups';
     const topicId    = this.props.params.topicId;
     const universe   = this.props.universes[universeId];
     const topics     = this.filterTopics(this.props.topics, universeId);
-    const chatId     = topicId === undefined ? universe.chatId : topics[topicId].chatId;
-    // console.log('universes :', this.props.universes);
+    const chatId     = topicId ? topics[topicId].chatId : universe.chatId;
+    // console.log('topics :',this.props.topics);
     // console.log('universe :', universe);
+    // console.log('universes :', this.props.universes);
     
     return (
       <div> 
@@ -53,7 +55,7 @@ class Universe extends React.Component {
               />
             </div>
           </div>
-        </div>
+        </div>  
         
         <Chat 
           chatId   = {chatId}
@@ -66,30 +68,30 @@ class Universe extends React.Component {
 }
 
 // à supprimer ?
-Universe.defaultProps = { 
-  universe: {
-    id: 0,
-    name: 'defaultProps name',
-    description: 'defaultProps description',
-    imgPath: '/static/img/pillars_compressed.png',
-    chatId: 0
-  },
-  inventory: {
-    universeId: 0,
-    topics: []
-  },
-  chat: {
-    id: 0,
-    name: 'defaultProps name',
-    messages: []
-  },
-  topic: {
-    id: 0,
-    author: 'defaultProps author',
-    title: 'defaultProps title',
-    content: 'defaultProps content',
-    timestamp: 'defaultProps timestamp'
-  }
-};
+// Universe.defaultProps = { 
+//   universe: {
+//     id: 0,
+//     name: 'defaultProps name',
+//     description: 'defaultProps description',
+//     imgPath: '/static/img/pillars_compressed.png',
+//     chatId: 0
+//   },
+//   inventory: {
+//     universeId: 0,
+//     topics: []
+//   },
+//   chat: {
+//     id: 0,
+//     name: 'defaultProps name',
+//     messages: []
+//   },
+//   topic: {
+//     id: 0,
+//     author: 'defaultProps author',
+//     title: 'defaultProps title',
+//     content: 'defaultProps content',
+//     timestamp: 'defaultProps timestamp'
+//   }
+// };
 
 export default Universe;

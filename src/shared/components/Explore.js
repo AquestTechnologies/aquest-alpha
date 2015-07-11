@@ -31,10 +31,10 @@ export default class Explore extends React.Component {
       fontSize: '2rem'
     };
     
+    const universes = this.props.universes;
     return (
       <div style={divStyle}>
-        {this.renderBackLink()}
-        {this.renderGraph()}
+        {this.renderGraph(universes)}
         <br />
         <br />
         <div id="graph" />
@@ -45,26 +45,21 @@ export default class Explore extends React.Component {
     );
   }
   
-  renderBackLink() {
-    let universe = this.props.universes.get(this.props.params.universeId);
-    if(universe) {
-      return <Link to='universe' params={{universeId: universe.get('id')}}>Back</Link>;
-    } else {
-      return <Link to='home'>Starting Universe</Link>;
-    }
-  }
+  // renderBackLink(universeId) {
+  //   let universe = this.props.universes(this.props.params.universeId);
+  //   if(universe) {
+  //     return <Link to='universe' params={{universeId: universe.get('id')}}>Back</Link>;
+  //   } else {
+  //     return <Link to='home'>Starting Universe</Link>;
+  //   }
+  // }
   
-  renderGraph() {
-    // const universesProps = this.props.universes;
-    // let universes = [];
-    // for (let key in universesProps) {
-    //   if (universesProps.hasOwnProperty(key)) universes.push(universesProps[key]);
-    // }
-    return this.props.universes.values().map(universe => {
+  renderGraph(universes) {
+    return Object.keys(universes).map(key => {
       return(
         <Node 
-          key={universe.get('id')} 
-          universe={universe} 
+          key={key} 
+          universe={universes[key]} 
         />
       );
     });

@@ -10,6 +10,17 @@ import {
   REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT
 } from './actionsTypes';
 
+// Doit être exporté en premier pour logger avant les autres
+export function records(state = [], action) {
+  log('.R. ' + action.type);
+  return [
+    ...state,
+    {
+      action: action,
+      date: new Date()
+    }
+  ];
+}
 
 export function universes(state = Immutable.Map(), action) {
   let newState;
@@ -22,6 +33,10 @@ export function universes(state = Immutable.Map(), action) {
     newState = state;
     action.payload.forEach(universe => newState = newState.set(universe.id, Immutable.fromJS(universe)));
     return newState;
+    
+  case SUCCESS_INVENTORY:
+    const d = new Date();
+    return state.setIn([action.params, 'lastInventoryUpdate'], d.getTime());
   
   default:
     return state;
@@ -53,24 +68,13 @@ export function topics(state = Immutable.Map(), action) {
     
   
   case SUCCESS_TOPIC_CONTENT:
-    return state.updateIn([action.params, 'content'], Immutable.fromJS(action.payload));
+    return state.setIn([action.params, 'content'], Immutable.fromJS(action.payload));
     
   default:
     return state;
   }
 }
 
-export function records(state = [], action) {
-  log('.R. ' + action.type);
-  // log(action);
-  return [
-    ...state,
-    {
-      action: action,
-      date: new Date()
-    }
-  ];
-}
 
 /*export function globals(state = {}, action) {
   switch (action.type) {

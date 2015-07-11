@@ -2,34 +2,29 @@ import React from 'react';
 
 class Node extends React.Component {
   
-  constructor() {
-    super();
-    
-    this.handleSelectUniverse = universeId => {
-      console.log('-C- Node.handleSelectUniverse ' + universeId);
-      this.context.router.transitionTo('universe', {universeId});
-    };
-  }
+  handleSelectedUniverse(universeId) {
+    console.log('-C- Node.handleSelectedUniverse ' + universeId);
+    this.context.router.transitionTo('universe', {universeId});
+  };  
   
   render() {
     const universe = this.props.universe;
     
-      // <div onClick={this.handleSelectUniverse.bind(null, universe.id)}>
     return (
-      <div onClick={this.handleSelectUniverse(universe.get('id'))}>
+      <div onClick={this.handleSelectedUniverse.bind(this, universe.id)} style={{marginTop: 10}}>
           <div>
-            {universe.get('name')}
+            {universe.name}
           </div>
           <div>
-            {universe.get('description')}
+            {universe.description}
           </div>
       </div>
     );
   }
 }
 
-Node.defaultProps = {
-};
+// Node.defaultProps = {
+// };
 
 // Permet d'acceder a this.context.router
 Node.contextTypes = {

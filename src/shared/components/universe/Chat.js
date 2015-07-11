@@ -14,7 +14,7 @@ class Chat extends React.Component {
   }
   
   componentWillMount() {
-    console.log('.C. Chat.componentWillMount');
+    // console.log('.C. Chat.componentWillMount');
     let chat = this.props.chat;
     let isLoading = false;
     if(this.props.chat === undefined) {
@@ -26,10 +26,10 @@ class Chat extends React.Component {
   }
   
   componentWillReceiveProps(nextProps) {
-    console.log('.C. Chat.componentWillReceiveProps');
+    // console.log('.C. Chat.componentWillReceiveProps');
     if (nextProps.chat === undefined) {
       if (!this.state.isLoading) {
-        this.props.loadChat(this.props.chatId);
+        nextProps.loadChat(nextProps.chatId);
         this.setState({ 
           chat:      {},
           isLoading: true

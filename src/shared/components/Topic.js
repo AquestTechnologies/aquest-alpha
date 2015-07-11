@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router';
 
 class Topic extends React.Component {
   
@@ -6,37 +7,35 @@ class Topic extends React.Component {
   static runPhidippides(routerState) {
     return [{
       id:         'topic',
-      creator:    'loadTopicByHandle',
-      args:       [routerState.params.topicHandle]
+      creator:    'loadTopic',
+      args:       [routerState.params.topicId]
     }];
   }
   
-  /*constructor() {
-    super();
-    this.state = { topic: {} };
-  }*/
-  
-  /*componentWillMount() {
-    if (!this.props.topic.content) this.props.loadTopicContent(this.props.topic.handle);
-    this.setState({ topic: this.props.topic });
+  componentWillMount() {
+    // console.log('.C. Topic.componentWillMount');
+    const topic = this.props.topics[this.props.params.topicId];
+    if (!topic.content) this.props.loadTopicContent(topic.id);
   }
   
-  componentWillReceiveProps(nextProps) {
-    this.setState({ topic: nextProps.topic });
-  }*/
+  // componentWillReceiveProps(nextProps) {
+  //   this.setState({ topic: nextProps.topic });
+  // }
   
   // ALERTE GROS BUG !!
-  // faire : startups > topic > bouton back > autre topic puis 2 fois history back !!!!
+  // faire : startups > topic > bouton back UI > autre topic puis 2 fois history back !!!!
   // Normalement c'est la merde
-  // Sauf que pour l'instant il n'y a pas de bouton back
+  // Sauf que pour l'instant il n'y a pas de bouton back UI
   render() {
     // Pas ouf
     const topic = this.props.topics[this.props.params.topicId];
     
     return (
       <div>
-        
-        <div className="topic">
+        <div className="topic" style={{fontSize: '2rem'}}>
+          <Link to='universe' params={{universeId: this.props.universe.id}}>
+            Back to {this.props.universe.name}
+          </Link>
           <div className="topic_title">
             {topic.title}
           </div>
@@ -44,7 +43,7 @@ class Topic extends React.Component {
             {topic.author}
           </div>
           <div className="topic_content">
-            {topic.content}
+            {topic.content || 'no content yet'}
           </div>
         </div>
           
@@ -53,16 +52,16 @@ class Topic extends React.Component {
   }
 }
 
-Topic.defaultProps = {
-  universe: {},
-  topic: {
-   title: 'A default title is better than no title!' ,
-   author: 'Someone',
-   timestamp: '0',
-   content: 'Hello world',
-   handle: '000-A default'
-  }
-};
+// Topic.defaultProps = {
+//   universe: {},
+//   topic: {
+//   title: 'A default title is better than no title!' ,
+//   author: 'Someone',
+//   timestamp: '0',
+//   content: 'Hello world',
+//   handle: '000-A default'
+//   }
+// };
 
 // Permet d'acceder a this.context.router
 Topic.contextTypes = {
