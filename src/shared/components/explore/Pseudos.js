@@ -6,8 +6,8 @@ export default class Pseudos extends React.Component {
   constructor() {
     super();
     this.state={
-      x: generatePseudos(6),
-      pseudos: generatePseudos(50),
+      x: [],
+      pseudos: [],
       big: '',
       small: '',
       pos: ''
@@ -17,9 +17,17 @@ export default class Pseudos extends React.Component {
     this.handleSmall = () => this.setState({small: getSmallestPseudo()});
     this.handlePos   = () => this.setState({pos: getPossibilitiesNumber()});
   }
+  
   again() {
     console.log('!');
     this.setState({x: generatePseudos(6)});
+  }
+  
+  componentDidMount() {
+    this.setState({
+      x: generatePseudos(6),
+      pseudos: generatePseudos(50),
+    });
   }
   
   render() {

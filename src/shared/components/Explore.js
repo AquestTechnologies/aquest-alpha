@@ -5,6 +5,8 @@ import Node from './explore/Node';
 import Pseudos from './explore/Pseudos';
 import Graph from './explore/Graph';
 
+import {generateGraph} from '../utils/graphGenerator';
+
 export default class Explore extends React.Component {
   
   static runPhidippides(routerState) {
@@ -35,20 +37,23 @@ export default class Explore extends React.Component {
     const divStyle = {
       width: '60%',
       margin: 'auto',
-      fontSize: '2rem'
+      fontSize: '2rem',
     };
     
     const {universes} = this.props;
+    const {vertices, edges} = generateGraph(30);
     
     return (
-      <div style={divStyle}>
-        {this.renderGraph(universes)}
+      <div>
+        <div style={divStyle}>
+          {this.renderGraph(universes)}
+        </div>
+        <Graph vertices={vertices} edges={edges} />
         <br />
         <br />
-        <Graph />
-        <br />
-        <br />
-        <Pseudos />
+        <div style={divStyle}>
+          <Pseudos />
+        </div>
       </div>
     );
   }
