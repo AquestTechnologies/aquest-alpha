@@ -11,7 +11,7 @@ class Universe extends React.Component {
     return [{
       id:         'universe',
       creator:    'loadUniverse',
-      args:       [routerState.params.universeId || 'Startups']
+      args:       [routerState.params.universeId]
     },{
       id:         'chat',
       dependency: routerState.params.topicId ? 'topic' : 'universe',
@@ -30,7 +30,7 @@ class Universe extends React.Component {
   
   render() {
     // console.log('.C. Universe.render');
-    const universeId = this.props.params.universeId || 'Startups';
+    const universeId = this.props.params.universeId;
     const topicId    = this.props.params.topicId;
     const universe   = this.props.universes[universeId];
     const topics     = this.filterTopics(this.props.topics, universeId);

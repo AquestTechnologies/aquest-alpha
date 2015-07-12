@@ -1,6 +1,6 @@
 import React from 'react';
 
-class TopicNew extends React.Component {
+class NewTopic extends React.Component {
   
   render() {
     return (
@@ -19,4 +19,4 @@ class TopicNew extends React.Component {
   }
 }
 
-export default TopicNew;
+export default NewTopic;

@@ -22,12 +22,7 @@ class Topic extends React.Component {
   //   this.setState({ topic: nextProps.topic });
   // }
   
-  // ALERTE GROS BUG !!
-  // faire : startups > topic > bouton back UI > autre topic puis 2 fois history back !!!!
-  // Normalement c'est la merde
-  // Sauf que pour l'instant il n'y a pas de bouton back UI
   render() {
-    // Pas ouf
     const topic = this.props.topics[this.props.params.topicId];
     
     return (

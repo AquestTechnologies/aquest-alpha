@@ -248,14 +248,14 @@ RETURNS JSON AS $$
       o[key] = topic_array[i][key];
     }
   }
-  return o
+  return o -- ; ?
 $$ LANGUAGE plv8 IMMUTABLE STRICT;
 
 INSERT INTO aquest_schema.universe 
     (id, name, description, picture, chat_id) 
   VALUES 
     ('Startups', 'Startups', 'This is the description of the Startups universe', 'img/pillars_compressed.png', '0');
-    
+    -- Pk chat_id ? Il est pas créé automatiquement ?
 INSERT INTO aquest_schema.universe 
     (id, name, description, picture, chat_id) 
   VALUES 
@@ -265,7 +265,7 @@ INSERT INTO aquest_schema.user
     (email, pseudo, first_name, last_name, start_universe_id, password_salt, password_hash) 
   VALUES 
     ('johndoe@gmail.com', 'johnDoe', 'John', 'Doe', 'Startups', 'fsfgfdgsdfgsdfokoksqlsd', 'dskjfsdkfjks
-    
+    -- '); ?
 INSERT INTO aquest_schema.topic 
     (id, user_id, universe_id, title) 
   VALUES 

@@ -9,6 +9,8 @@ import * as actionCreators from '../actionCreators';
 import LoadingBar           from './common/LoadingBar';
 
 function select(state) {
+  // console.log('___select___');
+  // console.log(state.universes.toJS()['Design'].lastInventoryUpdate);
   return { 
     universes:  state.universes.toJS(),
     topics:     state.topics.toJS(),

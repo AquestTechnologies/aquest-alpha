@@ -31,7 +31,10 @@ export function universes(state = Immutable.Map(), action) {
 
   case SUCCESS_UNIVERSES:
     newState = state;
-    action.payload.forEach(universe => newState = newState.set(universe.id, Immutable.fromJS(universe)));
+    action.payload.forEach(universe => {
+      //Tout ça va changer de toutes façons
+      if (!newState.get(universe.id)) newState = newState.set(universe.id, Immutable.fromJS(universe));
+    });
     return newState;
     
   case SUCCESS_INVENTORY:

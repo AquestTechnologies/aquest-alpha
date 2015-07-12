@@ -8,7 +8,7 @@ class Node extends React.Component {
   };  
   
   render() {
-    const universe = this.props.universe;
+    const {universe} = this.props;
     
     return (
       <div onClick={this.handleSelectedUniverse.bind(this, universe.id)} style={{marginTop: 10}}>

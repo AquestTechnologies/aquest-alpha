@@ -1,6 +1,6 @@
 import React from 'react';
 
-class CardNew extends React.Component {
+class NewTopicCard extends React.Component {
   
   constructor() {
     super();
@@ -27,7 +27,7 @@ class CardNew extends React.Component {
   }
 }
 
-CardNew.defaultProps = {
+NewTopicCard.defaultProps = {
     title: "Tell them what you love,",
     title2: "Ask for the impossible.",
     author: "By you, in a minute.",
@@ -37,8 +37,8 @@ CardNew.defaultProps = {
 };
 
 // Permet d'acceder a this.context.router
-CardNew.contextTypes = {
+NewTopicCard.contextTypes = {
   router: React.PropTypes.func.isRequired
 };
 
-export default CardNew;
+export default NewTopicCard;
