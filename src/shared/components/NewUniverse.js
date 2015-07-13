@@ -1,38 +1,63 @@
 import React from 'react';
+import {Link} from 'react-router';
 
 class NewUniverse extends React.Component {
   
   constructor() {
     super();
     
-    this.handleInputName = event => { this.setState({newUniverseName: event.target.value}) };
-    this.handleInputDescription = event => { this.setState({newUniverseDescription: event.target.value}) };
+    this.handleInputName = event => { this.setState({name: event.target.value}) };
+    this.handleInputDescription = event => { this.setState({description: event.target.value}) };
+    this.handleInputParents = event => { this.setState({parents: event.target.value}) };
     this.handleSubmit = () => this.props.actions.newUniverse();
     
     this.state = {
-      universeName: 'Awesomeness',
-      universeDescription: 'Some description'
+      name: '',
+      description: 'Awesomeness',
+      parents: '',
     };
+  }
+  
+  componentDidMount() {
+    this.setState({
+      name: (Math.random() + 1).toString(36).substring(2, 14)
+      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
+      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
+      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
+      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
+      .replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
+      .trim()
+    });
   }
   
   render() {
     let divStyle = {
-      marginTop: '3rem',
+      width: '60%',
+      margin: '20 auto 0 auto',
+      fontSize: '2rem',
     };
     
-    const {universeName, universeDescription} = this.state;
+    const {name, description, parents} = this.state;
     
     return (
       <div style={divStyle} >
-        <span>Create New Universe</span>
+        <Link to='explore'>Back</Link>
+        <h1>Create New Universe</h1>
         <div>
-          <span>Name (unique)</span>
-          <input type="text" value={universeName} onChange={this.handleInputName} />
+          <div>Name (unique)</div>
+          <input type="text" value={name} onChange={this.handleInputName} />
         </div>
+        <br />
         <div>
-          <span>Description</span>
-          <input type="text" value={universeDescription} onChange={this.handleInputDescription} />
+          <div>Description</div>
+          <input type="text" value={description} onChange={this.handleInputDescription} />
         </div>
+        <br />
+        <div>
+          <div>Parent universes</div>
+          <input type="text" value={parents} onChange={this.handleInputParents} />
+        </div>
+        <br />
         <button type="button" onClick={this.handleSubmit}>Submit</button>
       </div>
     );

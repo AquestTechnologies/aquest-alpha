@@ -4,7 +4,7 @@ class ChatFooter extends React.Component {
   
   constructor() {
     super();
-    this.state = {value: 'Press Enter to chat.'};
+    this.state = {value: 'Press Enter to discuss'};
     this.handleChange = (event) => this.setState({value: event.target.value});
   }
   

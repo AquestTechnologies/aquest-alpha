@@ -1,12 +1,54 @@
 import randomInteger from './randomInteger.js';
 
 const VERTEX_RADIUS = 30;
+const MARGIN = 30;
+const FORCE_CORRECTOR = 1;
+
+// Generates a random graph for test purpose
+export function generateGraphForD3(size) {
+  
+  const MIN_EDGES = 1;
+  const MAX_EDGES = 5;
+  const MIN_FORCE = 1;
+  const MAX_FORCE = 5;
+  
+  let vertices = [{name: 'first', description: 'first'}];
+  let edges = [];
+  let name, description, parents, nextParent;
+  
+  for (let i = 0; i < size; i++) {
+    
+    // Vertex definition
+    name = (Math.random() + 1).toString(36).substring(2, 7);
+    description = `description for ${name}`;
+    
+    // Parents selection
+    parents = [];
+    for (let i = 0, j = randomInteger(MIN_EDGES, MAX_EDGES); i < j; i++) {
+      nextParent = vertices[randomInteger(0, vertices.length - 1)];
+      if (parents.indexOf(nextParent) === -1) parents.push(nextParent);
+    }
+    
+    parents.forEach(parent => {
+      edges.push({
+        source: parent,
+        target: name,
+        value: randomInteger(MIN_FORCE, MAX_FORCE)
+      });
+    });
+    
+    // Vertex creation
+    vertices.push({name, description});
+  }
+  
+  return({vertices, edges});
+}
 
 // Generates a random graph for test purpose
 export function generateGraph(size) {
   
   const MIN_EDGES = 1;
-  const MAX_EDGES = 5;
+  const MAX_EDGES = 1;
   const MIN_FORCE = 1;
   const MAX_FORCE = 5;
   
@@ -54,18 +96,22 @@ export function drawGraph(svg, vertices, edges) {
   // console.log(vertices);
   // console.log(edges);
   
+  const K_CORRECTOR = 10;
+  const ITERATIONS = 50;
+  
   const svgVertices = initializeGraph(svg, vertices, edges);
   const keys = Object.keys(svgVertices);
+  
   const svgWidth = svg.node.clientWidth;
   const svgHeight = svg.node.clientHeight;
-  const K = Math.sqrt(svgWidth * svgHeight / keys.length);
-  const ITERATIONS = 10;
-  let temperature = svgWidth / 10;
-  const originalTemperature = temperature;
+  const K = Math.sqrt(svgWidth * svgHeight / keys.length) / K_CORRECTOR;
+  
+  const originalTemperature = svgWidth / 10;
+  let temperature = originalTemperature;
   
   // Main algorithm
   for (let i = 0; i < ITERATIONS; i++) {
-    console.log('iteration ' + i);
+    
     keys.forEach(key => {
       const v = svgVertices[key];
       // Displacement vector
@@ -73,6 +119,7 @@ export function drawGraph(svg, vertices, edges) {
         x: 0,
         y: 0
       };
+      
       keys.forEach(key2 => {
         if (key2 !== key) {
           const u = svgVertices[key2];
@@ -81,7 +128,6 @@ export function drawGraph(svg, vertices, edges) {
             x: u.x - v.x,
             y: u.y - v.y
           };
-          // console.log(delta.x, delta.y  )
           let distance = Math.sqrt(delta.x * delta.x + delta.y * delta.y);
           distance = distance ? distance : 0.1;
           const frResult = fr(distance, K) / distance;
@@ -90,11 +136,10 @@ export function drawGraph(svg, vertices, edges) {
         }
       });
     });
+    
     edges.forEach(edge => {
       const v = svgVertices[edge.parent];
       const u = svgVertices[edge.child];
-      // console.log(v);
-      // console.log(u);
       const delta = {
         x: u.x - v.x,
         y: u.y - v.y
@@ -107,22 +152,44 @@ export function drawGraph(svg, vertices, edges) {
       u.displacement.x -= faResult * delta.x;
       u.displacement.y -= faResult * delta.y;
     });
-    console.log(svgVertices[keys[0]]);
+    
     keys.forEach(key => {
       const v = svgVertices[key];
       const delta = v.displacement;
       let distance = Math.sqrt(delta.x * delta.x + delta.y * delta.y);
       distance = distance ? distance : 0.1;
-      // console.log(delta.x);
       v.x += delta.x * Math.min(delta.x, temperature) / distance;
       v.y += delta.y * Math.min(delta.y, temperature) / distance;
-      v.x = Math.min(svgWidth - VERTEX_RADIUS, Math.max(0 + VERTEX_RADIUS, v.x));
-      v.y = Math.min(svgHeight - VERTEX_RADIUS, Math.max(0 + VERTEX_RADIUS, v.y));
+      v.x = Math.min(svgWidth - VERTEX_RADIUS - MARGIN, Math.max(0 + VERTEX_RADIUS + MARGIN, v.x));
+      v.y = Math.min(svgHeight - VERTEX_RADIUS - MARGIN, Math.max(0 + VERTEX_RADIUS + MARGIN, v.y));
     });
+    
+    correctPosition(svgVertices, svgWidth, svgHeight);
+    
     temperature = temperature - originalTemperature / ITERATIONS;
   }
+  
+  // Draws graph
   edges.forEach(edge => drawEdge(svg, svgVertices[edge.parent], svgVertices[edge.child]));
-  Object.keys(svgVertices).forEach(key => drawVertex(svg, svgVertices[key]));
+  keys.forEach(key => drawVertex(svg, svgVertices[key]));
+}
+
+// Not part of the original algorithm
+function correctPosition(svgVertices, svgWidth, svgHeight) {
+  const keys = Object.keys(svgVertices);
+  // Strong assomption that te first vertex is the graph center
+  const {x, y} = svgVertices[keys[0]];
+  const delta = {
+    x: svgWidth / 2 - x,
+    y: svgHeight / 2 - y
+  };
+  keys.forEach(key => {
+    const v = svgVertices[key];
+    v.x += delta.x;
+    v.y += delta.y;
+      v.x = Math.min(svgWidth - VERTEX_RADIUS - MARGIN, Math.max(0 + VERTEX_RADIUS + MARGIN, v.x));
+      v.y = Math.min(svgHeight - VERTEX_RADIUS - MARGIN, Math.max(0 + VERTEX_RADIUS + MARGIN, v.y));
+  });
 }
 
 // Places vertices at random
@@ -180,11 +247,11 @@ function drawEdge(svg, parent, child) {
 
 // Repulsive force
 function fr(x, k) {
-  return k * k / x;
+  return (k * k / x) * FORCE_CORRECTOR;
 }
 
 // Attractive force
 function fa(x, k) {
-  return x * x / k;
+  return (x * x / k) * FORCE_CORRECTOR;
 }
 

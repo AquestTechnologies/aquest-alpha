@@ -42,7 +42,7 @@ class Inventory extends React.Component {
         </div>
         
         <div className={inventoryListClassName} >
-          <NewTopicCard universeName={universe.id} />
+          <NewTopicCard universeId={universe.id} />
           {Object.keys(topics).map(key => {
             return <Card
               key = {key} 
