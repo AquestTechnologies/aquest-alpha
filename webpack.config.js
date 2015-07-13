@@ -24,29 +24,29 @@ var config = {
     // new webpack.ContextReplacementPlugin(/queryDb/, null),
     new webpack.ContextReplacementPlugin(/chalk/, null)
   ],
-  node: {
-    fs: 'empty'
-  },
   resolve: {
     extensions: ['', '.js', '.jsx']
   },
   module: {
-    //noParse: [],
     loaders: [
       {
         test: /\.jsx?$/,
         loaders: ['react-hot', 'babel'],
-        include: [
-          __dirname + '/src'
-        ],
+        include: [__dirname + '/src'],
         exclude: /node_modules/
       },
       {
-        test: /\.less$/,
-        loader: 'style!css!less',
+        test:   /\.css$/,
+        loader: "style!css!cssnext"
       }
     ]
-  }
+  },
+  node: {
+    fs: 'empty'
+  },
+  cssnext: {
+    browsers: "last 2 versions",
+  },
 };
 
 /*let deps = [

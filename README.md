@@ -24,7 +24,8 @@ Aquest Technologies © 2015
 - [ ] mettre en place un outil scrum, exemple : https://github.com/aliasaria/scrumblr
 - [ ] mettre en place RabbitMQ
 - [ ] faire les liens Hapijs <-> webSocket <-> rabbitMQ <-> postgres 
-- [ ] SASS
+- [ ] NextCSS
+- [ ] liens comme sur [ce site](http://hugogiraudel.com/2014/02/06/calc-css-riddle/)
 - [ ] responsive design
 - [x] IsoFetch
 - [x] changer trucActions par trucsActions

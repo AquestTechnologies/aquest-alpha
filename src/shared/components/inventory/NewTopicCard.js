@@ -2,26 +2,29 @@ import React from 'react';
 
 class NewTopicCard extends React.Component {
   
-  constructor() {
-    super();
-    this.handleClick = () => { 
-      this.context.router.transitionTo('newTopic', {universeId: this.props.universeId});
-    };
-  }
+  handleClick() { 
+    this.context.router.transitionTo('newTopic', {universeId: this.props.universeId});
+  };
   
   render() {
+    const {title, title2, author, description} = this.props;
+    
     return (
-      <div className="cardNew" onClick={this.handleClick}>
+      <div className="newTopicCard" onClick={this.handleClick.bind(this)}>
+      
         <div className="card_content">
-          <div className="cardNew_title">
-            <div>{this.props.title}</div>
-            <div>{this.props.title2}</div>
+          <div className="newTopicCard_title">
+            <div>{title}</div>
+            <div>{title2}</div>
           </div>
-          <div className="cardNew_author">{this.props.author}</div>
-          <div className="cardNew_description">
-            {this.props.desc}
+          <div className="newTopicCard_author">
+            {author}
+          </div>
+          <div className="newTopicCard_description">
+            {description}
           </div>
         </div>
+        
       </div>
     );
   }
@@ -31,8 +34,7 @@ NewTopicCard.defaultProps = {
     title: "Tell them what you love,",
     title2: "Ask for the impossible.",
     author: "By you, in a minute.",
-    desc: "Start a revolution, or a new topic, or both!",
-    imgPath: "",
+    description: "Start a revolution, or a new topic, or both!",
     timestamp:"timestamp"
 };
 

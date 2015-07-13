@@ -1,4 +1,4 @@
-require('./less/app.less');
+require('./css/app.css');
 import React                            from 'react';
 import {createStore, composeReducers}   from 'redux';
 import Immutable                        from 'immutable';

@@ -14,7 +14,6 @@ class Inventory extends React.Component {
     }];
   }
   
-  
   constructor() {
     super();
     this.state = {
@@ -30,20 +29,23 @@ class Inventory extends React.Component {
   }
   
   render() {
-    const {universe, topics} = this.props;
     const {nameVisible} = this.state;
-    const inventoryListClassName = Object.keys(topics).length ? 'inventory_list_visible' : 'inventory_list_hidden';
+    const {universe, topics} = this.props;
+    const keys = Object.keys(topics);
+    
     return (
       <div>      
-        <div className="inventory_header">
-          <div className={nameVisible ? 'inventory_header_name' : 'inventory_header_desc'} onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
-            {nameVisible ? universe.name : universe.description}
+        <div className='inventory_header'>
+          <div className='inventory_header_content' onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
+            <div className={nameVisible ? 'inventory_header_content_name' : 'inventory_header_content_desc'}>
+              {nameVisible ? universe.name : universe.description}
+            </div>
           </div>
         </div>
         
-        <div className={inventoryListClassName} >
+        <div className={keys.length ? 'inventory_list-visible' : 'inventory_list-hidden'} >
           <NewTopicCard universeId={universe.id} />
-          {Object.keys(topics).map(key => {
+          {keys.map(key => {
             return <Card
               key = {key} 
               topic = {topics[key]} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)

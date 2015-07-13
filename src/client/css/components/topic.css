@@ -1,0 +1,7 @@
+/*___Topic___*/
+
+.topic {
+  margin: 					var(--chatHeader_h) 0 var(--chatHeader_h) 0;
+  background-color: var(--white_color);
+  min-height: 			10%;
+}
