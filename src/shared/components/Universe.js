@@ -28,6 +28,10 @@ class Universe extends React.Component {
     return result;
   }
   
+  componentDidMount() {
+    require('../../client/lib/menuScroll')('main_scrollable');
+  }
+  
   render() {
     // console.log('.C. Universe.render');
     const universeId = this.props.params.universeId;
@@ -44,7 +48,7 @@ class Universe extends React.Component {
         <Menu />
         
         <div className='universe_main' style={{backgroundImage: `url(${universe.picture})`}}>
-          <div className='universe_main_scrollable'>
+          <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'>
               <RouteHandler
                 topics           = {topics}
