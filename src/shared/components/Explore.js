@@ -41,7 +41,7 @@ export default class Explore extends React.Component {
     };
     
     const {universes} = this.props;
-    const {vertices, edges} = generateGraph(30);
+    const {vertices, edges} = generateGraph(10);
     
     return (
       <div>

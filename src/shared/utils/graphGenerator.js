@@ -54,50 +54,109 @@ export function drawGraph(svg, vertices, edges) {
   // console.log(vertices);
   // console.log(edges);
   
-  initializeGraph(svg, vertices, edges);
-  
+  const svgVertices = initializeGraph(svg, vertices, edges);
+  const keys = Object.keys(svgVertices);
   const svgWidth = svg.node.clientWidth;
   const svgHeight = svg.node.clientHeight;
-  const size = Object.keys(vertices).length;
-  const K = Math.sqrt(svgWidth * svgHeight / size);
+  const K = Math.sqrt(svgWidth * svgHeight / keys.length);
+  const ITERATIONS = 10;
+  let temperature = svgWidth / 10;
+  const originalTemperature = temperature;
   
+  // Main algorithm
+  for (let i = 0; i < ITERATIONS; i++) {
+    console.log('iteration ' + i);
+    keys.forEach(key => {
+      const v = svgVertices[key];
+      // Displacement vector
+      v.displacement = {
+        x: 0,
+        y: 0
+      };
+      keys.forEach(key2 => {
+        if (key2 !== key) {
+          const u = svgVertices[key2];
+          // The distance between the two vertices
+          const delta = {
+            x: u.x - v.x,
+            y: u.y - v.y
+          };
+          // console.log(delta.x, delta.y  )
+          let distance = Math.sqrt(delta.x * delta.x + delta.y * delta.y);
+          distance = distance ? distance : 0.1;
+          const frResult = fr(distance, K) / distance;
+          v.displacement.x += frResult * delta.x;
+          v.displacement.y += frResult * delta.y;
+        }
+      });
+    });
+    edges.forEach(edge => {
+      const v = svgVertices[edge.parent];
+      const u = svgVertices[edge.child];
+      // console.log(v);
+      // console.log(u);
+      const delta = {
+        x: u.x - v.x,
+        y: u.y - v.y
+      };
+      let distance = Math.sqrt(delta.x * delta.x + delta.y * delta.y);
+      distance = distance ? distance : 0.1;
+      const faResult = fa(distance, K) / distance;
+      v.displacement.x -= faResult * delta.x;
+      v.displacement.y -= faResult * delta.y;
+      u.displacement.x -= faResult * delta.x;
+      u.displacement.y -= faResult * delta.y;
+    });
+    console.log(svgVertices[keys[0]]);
+    keys.forEach(key => {
+      const v = svgVertices[key];
+      const delta = v.displacement;
+      let distance = Math.sqrt(delta.x * delta.x + delta.y * delta.y);
+      distance = distance ? distance : 0.1;
+      // console.log(delta.x);
+      v.x += delta.x * Math.min(delta.x, temperature) / distance;
+      v.y += delta.y * Math.min(delta.y, temperature) / distance;
+      v.x = Math.min(svgWidth - VERTEX_RADIUS, Math.max(0 + VERTEX_RADIUS, v.x));
+      v.y = Math.min(svgHeight - VERTEX_RADIUS, Math.max(0 + VERTEX_RADIUS, v.y));
+    });
+    temperature = temperature - originalTemperature / ITERATIONS;
+  }
+  edges.forEach(edge => drawEdge(svg, svgVertices[edge.parent], svgVertices[edge.child]));
+  Object.keys(svgVertices).forEach(key => drawVertex(svg, svgVertices[key]));
 }
 
 // Places vertices at random
 function initializeGraph(svg, vertices, edges) {
   console.log('initializeGraph');
-  // console.log(svg);
-  // console.log(vertices);
-  // console.log(edges);
   
   const svgWidth = svg.node.clientWidth;
   const svgHeight = svg.node.clientHeight;
   let x, y;
-  let newVertices = {};
-  let newEdges = [];
+  let svgVertices = {};
   
   Object.keys(vertices).forEach(key => {
-    x = randomInteger(VERTEX_RADIUS, svgWidth - VERTEX_RADIUS);
-    y = randomInteger(VERTEX_RADIUS, svgHeight - VERTEX_RADIUS);
-    newVertices[key] = drawVertex(svg, vertices[key], x, y);
+    svgVertices[key] = {};
+    svgVertices[key].data = vertices[key];
+    svgVertices[key].x = randomInteger(VERTEX_RADIUS, svgWidth - VERTEX_RADIUS);
+    svgVertices[key].y = randomInteger(VERTEX_RADIUS, svgHeight - VERTEX_RADIUS);
   });
-  // console.log(newVertices['0'].getBBox());
-  edges.forEach(edge => {
-    drawEdge(svg, edge, newVertices);
-  });
+  // edges.forEach(edge => drawEdge(svg, svgVertices[edge.parent], svgVertices[edge.child]));
+  // Object.keys(svgVertices).forEach(key => drawVertex(svg, svgVertices[key]));
   
+  return svgVertices;
 }
 
 // Draws a given vertex at a given position
-function drawVertex(svg, vertex, x, y) {
+function drawVertex(svg, svgVertex) {
   console.log('drawVertex');
+  const {x, y} = svgVertex;
   const circle = svg.circle(x, y, VERTEX_RADIUS);
   const text = svg.text();
   circle.attr({
     fill: '#2FD359'
   });
   text.attr({
-    text: vertex.name,
+    text: svgVertex.data.name,
     style: 'font-size: 1.5rem; fill: #fff',
   });
   const {width, height} = text.getBBox();
@@ -105,27 +164,27 @@ function drawVertex(svg, vertex, x, y) {
     x: x - width / 2,
     y: y + height / 4
   });
-  return svg.group(circle, text);
+  
+  svgVertex.element = svg.group(circle, text);
 }
 
-function drawEdge(svg, edge, newVertices) {
-  const dimParent = newVertices[edge.parent].getBBox();
-  const dimChild = newVertices[edge.child].getBBox();
-  
-  const x1 = dimParent.x + dimParent.width / 2;
-  const y1 = dimParent.y + dimParent.height / 2;
-  const x2 = dimChild.x + dimChild.width / 2;
-  const y2 = dimChild.y + dimChild.height / 2;
-  
-  const line = svg.line(x1, y1, x2, y2);
+function drawEdge(svg, parent, child) {
+  console.log('drawEdge');
+  const line = svg.line(parent.x, parent.y, child.x, child.y);
   
   line.attr({
-    stroke: '#999',
+    stroke: '#bbb',
     'stroke-width': 2
   });
-  
-  return line;
 }
 
+// Repulsive force
+function fr(x, k) {
+  return k * k / x;
+}
 
+// Attractive force
+function fa(x, k) {
+  return x * x / k;
+}
 

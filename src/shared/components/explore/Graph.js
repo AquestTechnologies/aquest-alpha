@@ -33,7 +33,7 @@ export default class Graph extends React.Component {
   
   renderGraph() {
     console.log('.C. Graph.renderGraph');
-    const svg = Snap('100%', 400);
+    const svg = Snap('100%', 600);
     const {vertices, edges} = this.props;
     document.getElementById('graphArea').appendChild(svg.node);
     drawGraph(svg, vertices, edges);
