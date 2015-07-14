@@ -27,14 +27,20 @@ class Chat extends React.Component {
   
   componentWillReceiveProps(nextProps) {
     // console.log('.C. Chat.componentWillReceiveProps');
-    let chat = nextProps.chat;
-    let isLoading = false;
-    if (!nextProps.chat && !this.state.isLoading) {
-      nextProps.loadChat(nextProps.chatId);
-      chat      = {};
-      isLoading = true;
-    } 
-    this.setState({chat, isLoading});
+    if (!nextProps.chat) {
+      if (!this.state.isLoading) {
+        nextProps.loadChat(nextProps.chatId);
+        this.setState({ 
+          chat:      {},
+          isLoading: true
+        });
+      }
+    } else {
+      this.setState({ 
+        chat:      nextProps.chat,
+        isLoading: false
+      });
+    }
   }
   
   componentDidMount() {
@@ -43,7 +49,7 @@ class Chat extends React.Component {
     setTimeout(() => { // Pourquoi un timeout de merde ? Pke sans ça chrome le fait pas ! 
       let scrollable = document.getElementById('scrollMeDown');
       scrollable.scrollTop = scrollable.scrollHeight;
-    }, 10);
+    }, 100);
   }
   
   componentDidUpdate() {

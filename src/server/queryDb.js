@@ -105,12 +105,12 @@ export default function queryDb(queryInfo) {
               	'row_to_json(universe_topics) ' +
               'FROM ( ' +
               	'SELECT ' +
-              	  'topics.universe, array_agg(row_to_json((SELECT topic_columns FROM (SELECT topics.title, topics.handle) topic_columns))) as topics ' +
+              	  'topics.universe, concat_json(array_agg(row_to_json((SELECT topic_columns FROM (SELECT topics.title, topics.description) topic_columns)))) as topics ' +
               	'FROM ( ' +
               	  'SELECT  '+
-              	    'universe, topic.title title, topic.handle handle ' +
+              	    'universe, topic.title title, topics.description description' +
               	  'FROM '+
-              	    '(SELECT universe.id, universe.name, universe.handle FROM aquest_schema.universe WHERE universe.handle = \'' + params + '\') universe ' +
+              	    '(SELECT universe.id, universe.name FROM aquest_schema.universe WHERE universe.id = \'' + params + '\') universe ' +
               	    'LEFT JOIN aquest_schema.topic ON universe.id = topic.universe_id ' +
               	') topics GROUP BY topics.universe ' +
               ') universe_topics';

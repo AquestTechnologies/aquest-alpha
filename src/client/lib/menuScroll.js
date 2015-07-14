@@ -9,7 +9,9 @@ export default function menuScroll(elementId) {
 	let previousScrollTop = 0;
 	let inflexion = 0;
 	let scrollTop = 0;
-	let h, distance, top, newTopUp ;
+	let h, distance, top, newTop, newTopUp;
+	const classList = document.querySelector('.menu').classList;
+	const menuScrolledClass = 'menu-scrolled';
 	
 	scrollableElement.onscroll = e => {
 		
@@ -26,7 +28,7 @@ export default function menuScroll(elementId) {
 		
 		// La différence de pixel depuis le dernier scroll = distance scrollée
 		distance = previousScrollTop - scrollTop;
-		isScrollingUp = previousScrollTop - scrollTop > 0;
+		isScrollingUp = distance > 0;
 		
 		// Si changement de direction on enregistre la position de l'inflexion
 		if (wasScrollingUp !== isScrollingUp) inflexion = scrollTop;
@@ -37,10 +39,18 @@ export default function menuScroll(elementId) {
 		newTopUp = top ? newTopUp : 0;
 		
 		// Application de la nouvelle position, bornée par [-h, 0]
-		menuElement.style.top = Math.min(Math.max(isScrollingUp ? newTopUp : top + distance, -h), 0);
+		newTop = Math.min(Math.max(isScrollingUp ? newTopUp : top + distance, -h), 0);
+		menuElement.style.top = newTop;
 		
 		wasScrollingUp = isScrollingUp;
 		previousScrollTop = scrollTop;
+		
+		// Peut être optimisé ?
+		if (scrollTop + newTop) {
+			if (!classList.contains(menuScrolledClass)) classList.toggle(menuScrolledClass);
+		} else {
+			if (classList.contains(menuScrolledClass)) classList.toggle(menuScrolledClass);
+		}
 	};
 	
 }

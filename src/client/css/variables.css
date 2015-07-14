@@ -54,10 +54,10 @@
   --card_w:           	calc((var(--main_w) - 2 * var(--doubleMargin_w) - var(--margin_w)) / 2);
   --card_h:           	calc(var(--card_w) / var(--phi));
   
-  --chatHeader_h:     	calc(8 * var(--col_w));
+  --menu_h:     				calc(8 * var(--col_w));
   --chatFooter_h:     	calc(8 * var(--col_w));
   
-  --inventoryHeader_h: 	calc(14 * var(--col_w));
   --inventoryHeader_w:  calc(60 * var(--col_w));
+  --inventoryHeader_h: 	calc(14 * var(--col_w));
 
 }

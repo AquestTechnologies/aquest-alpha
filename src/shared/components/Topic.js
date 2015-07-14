@@ -1,5 +1,4 @@
 import React from 'react';
-import {Link} from 'react-router';
 
 class Topic extends React.Component {
   
@@ -27,15 +26,12 @@ class Topic extends React.Component {
     
     return (
       <div>
-        <div className="topic" style={{fontSize: '2rem'}}>
-          <Link to='universe' params={{universeId: this.props.universe.id}}>
-            Back to {this.props.universe.name}
-          </Link>
+        <div className="topic">
           <div className="topic_title">
             {topic.title}
           </div>
           <div className="topic_author">
-            {topic.author}
+            {`By ${topic.author}, ${topic.timestamp} ago.`}
           </div>
           <div className="topic_content">
             {topic.content || 'no content yet'}

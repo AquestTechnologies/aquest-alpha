@@ -1,24 +1,35 @@
 /*___Menu___*/
 
 .menu {
-  box-sizing: border-box;
-  position: 	fixed;
-  top: 				0;
-  width: 			var(--main_w);
-  padding: 		var(--margin_w) var(--doubleMargin_w) 0 var(--doubleMargin_w);
-  z-index: 		100;
+	color: 						var(--white_color);
+  box-sizing: 			border-box;
+  position: 				fixed;
+  top: 							0;
+  width: 						var(--main_w);
+  padding: 					var(--margin_w) var(--doubleMargin_w) 0 var(--doubleMargin_w);
+  z-index: 					100;
+	transition: 			background-color 0.2s linear;
+	max-height: 			var(--menu_h);
+	display: 					flex;
+	justify-content: 	space-between;
 }
 
-.menu_left {
-  float: left;
+.menu-scrolled {
+	background-color: rgba(0, 0, 0, 0.5);
 }
 
-.menu_right {
-  float: right;
+.menu_left .menu_item {
+  float: 				left;
+  margin-right: var(--margin_w);
+}
+
+.menu_right .menu_item {
+  float: 				right;
+  margin-left: 	var(--margin_w);
 }
 
 .menu_item {
-  color: 			var(--white_color);
+  
   font-size: 	var(--base_txt);
   width: 			var(--doubleMargin_w);
   overflow-x: visible;
@@ -44,17 +55,7 @@
 }
 
 
-.menu_left .menu_item {
-  float: 				left;
-  margin-right: var(--margin_w);
-}
-
-.menu_right .menu_item {
-  float: 				right;
-  margin-left: 	var(--margin_w);
-}
-
-.menu_right .menu_item .menu_item_label {
+.menu_right .menu_item_label {
   text-align: 	right;
   float: 				right;
   white-space: 	nowrap
@@ -63,5 +64,16 @@
 .menu_item_icon {
   width: 					calc(3.6 * var(--col_w));
   height: 				calc(3.6 * var(--col_w));
-  margin-bottom: 	calc(var(--halfMargin_w) / 2);
+  margin-bottom: 	calc(var(--halfMargin_w) / 3);
 }   
+
+.menu_backTo {
+	font-size: var(--small_txt);
+	text-align: center;
+	min-width: calc(20 * var(--col_w));
+}
+
+.menu_backTo_label {
+	margin-top: -6px;
+	font-size: var(--large_txt);
+}

@@ -45,7 +45,11 @@ class Universe extends React.Component {
     
     return (
       <div> 
-        <Menu />
+        <Menu 
+          universeId={universeId} 
+          universeName={universe.name} 
+          topicId={topicId}
+        />
         
         <div className='universe_main' style={{backgroundImage: `url(${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>

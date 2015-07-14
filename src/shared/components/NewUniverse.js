@@ -6,10 +6,10 @@ class NewUniverse extends React.Component {
   constructor() {
     super();
     
-    this.handleInputName = event => { this.setState({name: event.target.value}) };
-    this.handleInputDescription = event => { this.setState({description: event.target.value}) };
-    this.handleInputParents = event => { this.setState({parents: event.target.value}) };
-    this.handleSubmit = () => this.props.actions.newUniverse();
+    this.handleInputName = event => this.setState({name: event.target.value});
+    this.handleInputDescription = event => this.setState({description: event.target.value});
+    this.handleInputParents = event => this.setState({parents: event.target.value});
+    this.handleSubmit = () => this.props.actions.newUniverse(this.state);
     
     this.state = {
       name: '',

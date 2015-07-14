@@ -1,14 +1,14 @@
 require('./css/app.css');
 import React                            from 'react';
-import {createStore, composeReducers}   from 'redux';
 import Immutable                        from 'immutable';
-import {Provider}                       from 'redux/react';
+import {Provider}                       from 'react-redux';
 import Router                           from 'react-router';  
 import key                              from './vendor/keymaster';
 import * as reducers                    from '../shared/reducers';
 import routes                           from '../shared/routes.jsx';
 import {default as log, logWelcome}     from '../shared/utils/logTailor.js';
 import promiseMiddleware                from '../shared/utils/promiseMiddleware.js';
+import {createStore, combineReducers, applyMiddleware}   from 'redux';
 
 
 /*import Websocket from 'socket.io-client';
@@ -43,11 +43,7 @@ io.on('message', function (message) {
   }
   // log('info', 'clientState :', clientState);
   
-  const store = createStore(
-    composeReducers(reducers),
-    clientState,
-    [promiseMiddleware]
-  );
+  const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), clientState);
   // log('info', 'state :', store.getState());
   
   // Initialise le router

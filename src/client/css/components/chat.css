@@ -9,7 +9,7 @@
 
 .chat_scrollable {
   position: 	absolute;
-  top: 				var(--chatHeader_h);
+  top: 				var(--menu_h);
   bottom: 		var(--chatFooter_h);
   width: 			111%;
   overflow-Y: scroll;
@@ -35,7 +35,7 @@
 
 .chatHeader {
   width: 						100%;
-  height: 					var(--chatHeader_h);
+  height: 					var(--menu_h);
   border-bottom: 		0.1rem solid var(--lightGrey_color);
   
   display: 					flex;

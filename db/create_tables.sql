@@ -248,7 +248,7 @@ RETURNS JSON AS $$
       o[key] = topic_array[i][key];
     }
   }
-  return o -- ; ?
+  return o;
 $$ LANGUAGE plv8 IMMUTABLE STRICT;
 
 INSERT INTO aquest_schema.universe 

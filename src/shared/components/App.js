@@ -2,7 +2,7 @@ import React                from 'react';
 import {RouteHandler}       from 'react-router';
 
 import {bindActionCreators} from 'redux';
-import {Connector}          from 'redux/react';
+import {Connector}          from 'react-redux';
 
 import * as actionCreators from '../actionCreators';
 

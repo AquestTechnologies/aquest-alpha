@@ -1,7 +1,24 @@
 /*___Topic___*/
 
 .topic {
-  margin: 					var(--chatHeader_h) 0 var(--chatHeader_h) 0;
+  margin-top:				var(--menu_h);
   background-color: var(--white_color);
-  min-height: 			10%;
+  padding: 					var(--margin_w);
 }
+
+.topic_title {
+	font-size: var(--large_txt);
+	font-weight: 700;
+}
+
+.topic_author {
+	margin-top: var(--margin_w);
+	color: var(--grey_color);
+}
+
+.topic_content {
+	margin-top: var(--margin_w);
+}
+
+
+

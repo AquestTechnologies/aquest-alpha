@@ -4,8 +4,8 @@ import React      from 'react';
 import Router     from 'react-router';
 import Immutable  from 'immutable';
 
-import { createStore, composeReducers } from 'redux';
-import { Provider }                     from 'redux/react';
+import { createStore, combineReducers, applyMiddleware  } from 'redux';
+import { Provider }                     from 'react-redux';
 
 import * as reducers      from '../shared/reducers';
 import routes             from '../shared/routes.jsx';
@@ -115,12 +115,8 @@ server.route({
     router.run((Handler, routerState) => {
       log('_____________ router.run _____________');
 
-      // Initialise une nouvelle instance flux
-      const store = createStore(
-        composeReducers(reducers),
-        {},
-        [promiseMiddleware]
-      );
+      // Initialise une nouvelle instance flux  
+      const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), {});
       
       // Initialise les stores
       log('... Entering phidippides');
