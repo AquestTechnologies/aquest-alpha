@@ -246,22 +246,35 @@ CREATE TRIGGER update_timestamp
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
 
 -- concat an array of JSON object into JSON properties  
-CREATE OR REPLACE FUNCTION aquest_schema.concat_json(topic_array JSON)
+CREATE OR REPLACE FUNCTION aquest_schema.concat_json_array(json_array JSON)
 RETURNS JSON AS $$
   var o = {};
-  for(var i = 0, topic_array_length = topic_array.length ; i < topic_array_length ; i++){
-    for(var key in topic_array[i]){
-      o[key] = topic_array[i][key];
+  for(var i = 0, json_array_length = json_array.length ; i < json_array_length ; i++){
+    for(var key in json_array[i]){
+      o[key] = json_array[i][key];
     }
   }
   return o;
 $$ LANGUAGE plv8 IMMUTABLE STRICT;
 
+-- concat two JSON objects in one JSON object
+CREATE OR REPLACE FUNCTION aquest_schema.concat_json_object(obj1 JSON, obj2 JSON)
+RETURNS JSON AS $$
+	var o = {};
+	for(var key1 in obj1){
+		o[key1] = obj1[key1];
+	}
+	for(var key2 in obj2){
+		o[key2] = obj2[key2];
+	}
+  return o;
+$$ LANGUAGE plv8 IMMUTABLE STRICT;
+
 -- insert a bunch of data
 INSERT INTO aquest_schema.user 
-    (email, pseudo, first_name, last_name, password_salt, password_hash) 
+    (email, pseudo, first_name, last_name, password_salt, password_hash, creation_ip) 
   VALUES 
-    ('johndoe@gmail.com', 'johnDoe', 'John', 'Doe', 'fsfgfdgsdfgsdfokoksqlsd', 'dskjfsdkfjks');
+    ('johndoe@gmail.com', 'johnDoe', 'John', 'Doe', 'fsfgfdgsdfgsdfokoksqlsd', 'dskjfsdkfjks', '192.168.0.1');
 
 INSERT INTO aquest_schema.universe 
     (id, name, user_id, description, picture) 
@@ -299,11 +312,11 @@ VALUES
   (1, 1, '{"text":"hello"}');
   
 INSERT INTO aquest_schema.atom_topic 
-  (atome_id, topic_id, content, position) 
+  (atom_id, topic_id, content, position) 
 VALUES 
   (1,'newStartup','{"text":"Topic about nothing"}',0);
 
 INSERT INTO aquest_schema.atom_topic 
-  (atome_id, topic_id, content, position) 
+  (atom_id, topic_id, content, position) 
 VALUES 
   (1,'newStartup','{"text":"WITH NOTHING !!!"}',1);
