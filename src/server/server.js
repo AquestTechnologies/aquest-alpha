@@ -14,6 +14,8 @@ import devConfig          from '../../config/development.js';
 import phidippides        from '../shared/utils/phidippides.js';
 import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
 
+import {createActivists} from './lib/activityGenerator';
+
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log('node', `Starting Node in ${process.env.NODE_ENV} mode`);
 
@@ -169,3 +171,8 @@ server.route({
     });
   });
 })();
+
+if (true) {
+  const {startActivists, stopActivists} = createActivists(10, 1000, 10000);
+  startActivists();
+}

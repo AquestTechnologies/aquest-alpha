@@ -1,4 +1,4 @@
-import randomInteger from './randomInteger.js';
+import {randomInteger} from './randomGenerator';
 
 const VERTEX_RADIUS = 30;
 const MARGIN = 30;
