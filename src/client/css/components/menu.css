@@ -29,7 +29,6 @@
 }
 
 .menu_item {
-  
   font-size: 	var(--base_txt);
   width: 			var(--doubleMargin_w);
   overflow-x: visible;

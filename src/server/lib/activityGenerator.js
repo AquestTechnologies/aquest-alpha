@@ -2,13 +2,16 @@ import log from '../../shared/utils/logTailor';
 import {randomInteger, randomString, randomText} from '../../shared/utils/randomGenerator';
 import {generateOnePseudo} from '../../shared/utils/pseudosGenerator';
 // import {} from '../../shared/utils/fetchers';
+import queryDb from '../queryDb';
 
 // I can't succeed in using for..in loops in here... Babel ?
 export default class Activist {
 	
 	constructor() {
 		this.id = randomString(10);
+		this.isStarted = false;
 		this.counter = 0; // Counts the number of actions taken
+		this.actionProbabilities = {}; // Will be constructed from this.probabilities
 		this.probabilities = { // Reflects the chances to perform a given action
 			'createMessage': 0.53,
 			'createVote': 0.3,
@@ -16,57 +19,80 @@ export default class Activist {
 			'createUser': 0.05,
 			'createUniverse': 0.03
 		};
-		this.actionProbabilities = {}; // Will be constructed from this.probabilities
-	}
-	
-	initialize() {
-		const {probabilities, actionProbabilities} = this;
-		
-		// Check if sum of probabilities === 1
-		let sum = 0;
-		const keys = Object.keys(probabilities);
-		keys.forEach(key => sum += probabilities[key]);
-		if (sum !== 1) return false;
-		
-		// actionProbabilities construction
-		let lastValue = 0;
-		keys.forEach(key => {
-			actionProbabilities[key] = [lastValue, lastValue + probabilities[key]];
-			lastValue += probabilities[key];
-		});
-		
-		return true;
 	}
 	
 	// Starts the show at a given pace
 	start(pace) {
-		if(!this.initialize()) throw 'Check failed.';
-		this.timer = setInterval(this.generateActivity.bind(this), pace);
+		if(!this._initialize()) throw 'Initialization failed.';
+		this.isStarted = true;
+		const loopActivities = () => this._generateActivity()
+		.then(data => {
+			const result = data.rows[0];
+			const id = result ? result.id : result;
+			console.log(id);
+			if (this.isStarted) setTimeout(loopActivities, pace);
+		})
+		.catch(why => log('error', why));
+		loopActivities();
 	}
 	
 	// Stops the activity
 	stop() {
-		const {timer} = this;
-		if (timer) clearInterval(timer);
+		this.isStarted = false;
+	}
+	
+	_initialize() {
+		const {probabilities, actionProbabilities} = this;
+		let sum = 0;
+		let lastValue = 0;
+		
+		// actionProbabilities construction
+		Object.keys(probabilities).forEach(key => {
+			sum += probabilities[key];
+			actionProbabilities[key] = [lastValue, lastValue + probabilities[key]];
+			lastValue += probabilities[key];
+		});
+		
+		// Checks if sum of probabilities === 1
+		// if (sum !== 1) return false;
+		// return true;
+		return sum === 1;
 	}
 	
 	// The main loop
-	generateActivity() {
+	_generateActivity() {
 		this.counter++;
-		const {id, selectAction, actionProbabilities, counter} = this;
-		console.log(`generateActivity ${id} ${counter} ${selectAction(actionProbabilities)}`);
+		const {id, _selectAction, _fetchRandomRow, actionProbabilities, counter} = this;
+		
+		return new Promise((resolve, reject) => {
+			console.log(`generateActivity ${id} ${counter} ${_selectAction(actionProbabilities)}`);
+			_fetchRandomRow('universe')
+			.then(data => resolve(data))
+			.catch(why => reject(why));
+		});
 	}
 	
 	// Returns a random action 
-	selectAction(actionProbabilities) {
+	_selectAction(actionProbabilities) {
 		const x = Math.random();
-		const keys = Object.keys(actionProbabilities);
 		let action;
-		keys.forEach(key => {
+		Object.keys(actionProbabilities).forEach(key => {
 			const array = actionProbabilities[key];
 			if (x >= array[0] && x < array[1]) action = key;
 		});
 		return action;
+	}
+	
+	_fetchRandomRow(table) {
+		const query = {
+			source: 'randomRow',
+			params: table
+		};
+		return new Promise((resolve, reject) => {
+			queryDb(query)
+			.then(data => resolve(data))
+			.catch(why => reject(why));
+		});
 	}
 	
 }

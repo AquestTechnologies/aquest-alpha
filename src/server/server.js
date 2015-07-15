@@ -172,7 +172,7 @@ server.route({
   });
 })();
 
-if (true) {
-  const {startActivists, stopActivists} = createActivists(10, 1000, 10000);
+if (1) {
+  const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
   startActivists();
 }
