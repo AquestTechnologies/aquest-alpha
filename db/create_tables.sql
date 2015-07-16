@@ -32,8 +32,8 @@ CREATE DOMAIN aquest_schema.pseudo AS VARCHAR(15) CHECK (
 CREATE TABLE aquest_schema.CHAT(
   id                  BIGSERIAL PRIMARY KEY,
   name                TEXT NOT NULL,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now()
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 CREATE TABLE aquest_schema.USER (
@@ -46,8 +46,8 @@ CREATE TABLE aquest_schema.USER (
   bio                  TEXT,
   picture              TEXT,
   creation_ip          INET NOT NULL,
-  created_at           TIMESTAMP DEFAULT now(),
-  updated_at           TIMESTAMP DEFAULT now()
+  created_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at           TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 CREATE TABLE aquest_schema.UNIVERSE(
@@ -58,8 +58,8 @@ CREATE TABLE aquest_schema.UNIVERSE(
   description          TEXT,
   rules                TEXT,
   picture              TEXT,
-  created_at           TIMESTAMP DEFAULT now(),
-  updated_at           TIMESTAMP DEFAULT now(),
+  created_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id),
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo)
 );
@@ -68,8 +68,8 @@ CREATE TABLE aquest_schema.UNIVERSE_UNIVERSE(
   id                   BIGSERIAL PRIMARY KEY,
   universe1_id         TEXT NOT NULL,
   universe2_id         TEXT NOT NULL,
-  created_at           TIMESTAMP DEFAULT now(),
-  updated_at           TIMESTAMP DEFAULT now(),
+  created_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (universe1_id) REFERENCES aquest_schema.UNIVERSE(id),
   FOREIGN KEY (universe2_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
@@ -79,8 +79,8 @@ CREATE TABLE aquest_schema.RANK(
   universe_id         TEXT NOT NULL,
   title               TEXT NOT NULL,
   level               SMALLINT NOT NULL,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now(),
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   deleted             BOOLEAN,
   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
@@ -89,8 +89,8 @@ CREATE TABLE aquest_schema.MESSAGE(
   id                  BIGSERIAL PRIMARY KEY,
   user_id             TEXT NOT NULL,
   chat_id             BIGINT NOT NULL,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now(),
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id)
 );
@@ -102,8 +102,8 @@ CREATE TABLE aquest_schema.VOTE_MESSAGE(
   universe_id         TEXT NOT NULL,
   message_id          BIGINT NOT NULL,
   content             TEXT NOT NULL,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now(),
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   deleted             BOOLEAN,
   FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(pseudo),
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
@@ -118,8 +118,8 @@ CREATE TABLE aquest_schema.VOTE_TOPIC(
   universe_id         TEXT NOT NULL,
   topic_id            TEXT NOT NULL,
   content             TEXT NOT NULL,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now(),
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   deleted             BOOLEAN,
   FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(pseudo),
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
@@ -131,8 +131,8 @@ CREATE TABLE aquest_schema.GOALS(
   id                  BIGSERIAL PRIMARY KEY,
   rank_id             BIGINT NOT NULL,
   content             JSON,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now(),
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (rank_id) REFERENCES aquest_schema.RANK
 );
 
@@ -140,8 +140,8 @@ CREATE TABLE aquest_schema.USER_UNIVERSE(
   id                  BIGSERIAL PRIMARY KEY,
   user_id             TEXT NOT NULL,
   universe_id         TEXT NOT NULL,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now(),
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   start_universe      BOOLEAN,
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id)
@@ -154,9 +154,9 @@ CREATE TABLE aquest_schema.TOPIC(
   universe_id         TEXT NOT NULL,
   title               TEXT NOT NULL,
   description         TEXT,
-  picture             TEXT,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now(),
+  picture             TEXT DEFAULT '',
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id)
@@ -166,18 +166,19 @@ CREATE TABLE aquest_schema.ATOM(
   id                  BIGSERIAL PRIMARY KEY,
   type                TEXT,
   structure           JSON,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now()
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 CREATE TABLE aquest_schema.ATOM_TOPIC(
   id                  BIGSERIAL PRIMARY KEY,
   atom_id             BIGINT NOT NULL,
   topic_id            TEXT NOT NULL,
+  type                TEXT NOT NULL,
   content             JSON NOT NULL,
   position            INTEGER NOT NULL,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now(),
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (topic_id) REFERENCES aquest_schema.TOPIC(id),
   FOREIGN KEY (atom_id) REFERENCES aquest_schema.ATOM(id)
 );
@@ -186,9 +187,10 @@ CREATE TABLE aquest_schema.ATOM_MESSAGE(
   id                  BIGSERIAL PRIMARY KEY,
   atom_id             BIGINT NOT NULL,
   message_id          BIGINT NOT NULL,
+  type                TEXT NOT NULL,
   content             JSON NOT NULL,
-  created_at          TIMESTAMP DEFAULT now(),
-  updated_at          TIMESTAMP DEFAULT now(),
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (message_id) REFERENCES aquest_schema.MESSAGE(id),
   FOREIGN KEY (atom_id) REFERENCES aquest_schema.ATOM(id)
 );
@@ -289,12 +291,12 @@ INSERT INTO aquest_schema.universe
 INSERT INTO aquest_schema.topic 
     (id, user_id, universe_id, title) 
   VALUES 
-    ('newStartup', 'johnDoe', 'Startups', 'Aquest Technologies');
+    ('AquestTechnologies', 'johnDoe', 'Startups', 'Aquest Technologies');
     
 INSERT INTO aquest_schema.topic 
     (id, user_id, universe_id, title) 
   VALUES 
-    ('newStartup-oi8', 'johnDoe', 'Startups', 'David et Augustin');
+    ('DavidEtAugustin', 'johnDoe', 'Startups', 'David et Augustin');
     
 INSERT INTO aquest_schema.atom 
   (type,structure) 
@@ -307,16 +309,16 @@ VALUES
   ('johnDoe','1');
 
 INSERT INTO aquest_schema.atom_message 
-  (atom_id, message_id, content) 
+  (atom_id, message_id, type, content) 
 VALUES 
-  (1, 1, '{"text":"hello"}');
+  (1, 1,'text','{"text":"hello"}');
   
 INSERT INTO aquest_schema.atom_topic 
-  (atom_id, topic_id, content, position) 
+  (atom_id, topic_id, type, content, position) 
 VALUES 
-  (1,'newStartup','{"text":"Topic about nothing"}',0);
+  (1,'AquestTechnologies','text','{"text":"Topic about nothing"}',0);
 
 INSERT INTO aquest_schema.atom_topic 
-  (atom_id, topic_id, content, position) 
+  (atom_id, topic_id, type, content, position) 
 VALUES 
-  (1,'newStartup','{"text":"WITH NOTHING !!!"}',1);
+  (1,'AquestTechnologies','text','{"text":"WITH NOTHING !!!"}',1);

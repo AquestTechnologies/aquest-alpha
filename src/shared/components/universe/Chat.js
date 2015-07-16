@@ -74,7 +74,7 @@ class Chat extends React.Component {
           
             <Message author='Extreme firster' content='First!' />
             {messages.map(message => { 
-              return <Message key={message.id} author={message.author} content={message.content} />;
+              return <Message key={message.id} author={message.author} content={message.content.text} />;
             })}
             <Message author='Jackie Chan' content='I live in the USA' />
             <Message author={chat.name + ' L. Jackson'} content={samuel}/>

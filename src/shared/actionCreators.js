@@ -1,15 +1,25 @@
 import log from './utils/logTailor';
-import { 
+// import { 
+//   fetchUniverse,
+//   fetchUniverses,
+//   fetchInventory,
+//   fetchTopic,
+//   fetchTopicContent,
+//   fetchChat
+// } from './utils/fetchers';
+import {
   fetchUniverse,
   fetchUniverses,
   fetchInventory,
   fetchTopic,
   fetchTopicContent,
-  fetchChat
-} from './utils/fetchers';
+  fetchChat,
+  addUniverse,
+  addTopic
+} from './utils/fetchers.new';
 import { 
   SET_UNIVERSE, SET_TOPIC,
-  REQUEST_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE,
+  ADD_UNIVERSE, REQUEST_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE,
   REQUEST_UNIVERSES, SUCCESS_UNIVERSES, FAILURE_UNIVERSES,
   REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY,
   REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT,
@@ -70,6 +80,26 @@ export function loadChat(id) {
     types: [REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT],
     promise: fetchChat(id),
     params: id
+  };
+}
+
+export function newUniverse(universe) {
+  log('.A. newUniverse');
+  
+  return {
+    types: [ADD_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE],
+    promise: addUniverse(universe),
+    params: universe
+  };
+}
+
+export function newTopic(topic) {
+  log('.A. newTopic');
+  
+  return {
+    types: [ADD_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE],
+    promise: addTopic(topic),
+    params: topic
   };
 }
 

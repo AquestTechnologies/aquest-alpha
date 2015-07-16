@@ -13,8 +13,8 @@ class Topic extends React.Component {
   
   componentWillMount() {
     // console.log('.C. Topic.componentWillMount');
-    const topic = this.props.topics[this.props.params.topicId];
-    if (!topic.content) this.props.loadTopicContent(topic.id);
+    const {id, content} = this.props.topics[this.props.params.topicId];
+    if (!content) this.props.loadTopicContent(id);
   }
   
   // componentWillReceiveProps(nextProps) {
@@ -23,18 +23,20 @@ class Topic extends React.Component {
   
   render() {
     const topic = this.props.topics[this.props.params.topicId];
+    const {title, author, timestamp} = topic;
+    const content = topic.content || ['Loading...'];
     
     return (
       <div>
         <div className="topic">
           <div className="topic_title">
-            {topic.title}
+            {title}
           </div>
           <div className="topic_author">
-            {`By ${topic.author}, ${topic.timestamp} ago.`}
+            {`By ${author}, ${timestamp} ago.`}
           </div>
           <div className="topic_content">
-            {topic.content || 'no content yet'}
+            {content.map((atom, index) => <div key={index}>{JSON.stringify(atom.content.text)}</div>)}
           </div>
         </div>
           

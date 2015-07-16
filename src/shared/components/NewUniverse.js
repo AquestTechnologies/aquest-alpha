@@ -8,13 +8,14 @@ class NewUniverse extends React.Component {
     
     this.handleInputName = event => this.setState({name: event.target.value});
     this.handleInputDescription = event => this.setState({description: event.target.value});
-    this.handleInputParents = event => this.setState({parents: event.target.value});
-    this.handleSubmit = () => this.props.actions.newUniverse(this.state);
+    this.handleInputRelated = event => this.setState({related: event.target.value});
+    this.handleSubmit = () => this.props.newUniverse(this.state);
     
     this.state = {
       name: '',
       description: 'Awesomeness',
-      parents: '',
+      related: '',
+      userId: 'johnDoe'
     };
   }
   
@@ -37,7 +38,7 @@ class NewUniverse extends React.Component {
       fontSize: '2rem',
     };
     
-    const {name, description, parents} = this.state;
+    const {name, description, related} = this.state;
     
     return (
       <div style={divStyle} >
@@ -54,8 +55,8 @@ class NewUniverse extends React.Component {
         </div>
         <br />
         <div>
-          <div>Parent universes</div>
-          <input type="text" value={parents} onChange={this.handleInputParents} />
+          <div>Related universes</div>
+          <input type="text" value={related} onChange={this.handleInputRelated} />
         </div>
         <br />
         <button type="button" onClick={this.handleSubmit}>Submit</button>

@@ -1,126 +1,158 @@
 import isClient from './isClient';
 import log from './logTailor';
 
-let isServer = !isClient();
+const isServer = !isClient();
 
 
 
-var q = isServer ? require('../../server/queryDb') : {};
-// console.log(q);
+const q = isServer ? require('../../server/queryDb') : {};
 
-export function fetchUniverseByHandle(handle) {
+export function fetchUniverse(id) {
   
-  /*let formData = new FormData();
-  formData.append('params', handle);
-  
-  log(formData);*/
-  
-  let query = {
-    source: 'fetchUniverseByHandle',
+  const query = {
+    source: 'fetchUniverse',
     type: 'GET',
-    params: handle
+    params: id
   };
   
-  // log('+++ ' + query.source + ' | params : ' + query.params);
-  
-  return promiseFetch(query, 'api/universe/'+handle);
+  return promiseFetch(query, '/api/universe/'+id);
 }
 
 export function fetchUniverses() {
 
-  let query = {
+  const query = {
     source: 'fetchUniverses',
     type: 'GET',
     params: ''
   };
   
-  // log('+++ ' + query.source + ' | params : ' + query.params);
-  
-  return promiseFetch(query, 'api/universes/');
+  return promiseFetch(query, '/api/universes/');
 }
 
 export function fetchChat(id) {
-  let query = {
+  const query = {
     source: 'fetchChat',
     type: 'GET',
     params: id
   };
   
-  // log('+++ ' + query.source + ' | params : ' + query.params);
-  
-  return promiseFetch(query, 'api/chat/'+id);
+  return promiseFetch(query, '/api/chat/'+id);
 }
 
 export function fetchInventory(universeId){
-  let query = {
+  const query = {
     source: 'fetchInventory',
     type: 'GET',
     params: universeId
   };
   
-  // log('+++ ' + query.source + ' | params : ' + query.params);
-  
-  return promiseFetch(query, 'api/inventory/'+universeId);
+  return promiseFetch(query, '/api/inventory/'+universeId);
 }
 
-export function fetchTopicByHandle(handle) {
-  let query = {
+export function fetchTopic(universeId) {
+  const query = {
     source: 'fetchTopicByHandle',
     type: 'GET',
-    params: handle
+    params: universeId
   };
   
-  // log('+++ ' + query.source + ' | params : ' + query.params);
-  
-  return promiseFetch(query, 'api/topic/'+handle);
+  return promiseFetch(query, '/api/topic/'+universeId);
 }
 
 export function fetchTopicContent(id) {
-  let query = {
+  const query = {
     source: 'fetchTopicContent',
     type: 'GET',
     params: id
   };
   
-  // log('+++ ' + query.source + ' | params : ' + query.params);
+  return promiseFetch(query, '/api/topic/content/'+id);
+}
+
+export function addUniverse(universe) {
   
-  return promiseFetch(query, 'api/topic/content/'+id);
+  const query = {
+    source: 'addUniverse',
+    type: 'POST',
+    params: universe
+  };
+  
+  return promiseFetch(query, '/api/universe/');
+}
+
+export function addTopic(topic) {
+  
+  const query = {
+    source: 'addTopic',
+    type: 'POST',
+    params: topic
+  };
+  
+  return promiseFetch(query, '/api/topic/');
+}
+
+export function addChatMessage(message) {
+  
+  const query = {
+    source: 'addChatMessage',
+    type: 'POST',
+    params: message
+  };
+  
+  return promiseFetch(query, '/api/chatMessage/');
 }
 
 function promiseFetch(query, url) {
-  return new Promise(function(resolve, reject) {
+  
+  return new Promise((resolve, reject) => {
     if (isServer) {
-      q(query).then(function(result) {
-        if (result != null) {
-          // log('+++ ' + query.source + ' ' + JSON.stringify(result));
-          return resolve(result);
-        }
-        else {
-          return reject('!!! promiseFetch error');
-        }
-      });
-    }
-    else {
-      var req = new XMLHttpRequest();
+      
+      q(query).then(
+        result => {
+          if (result) {
+            log(`+++ ${query.source} ${result instanceof Array} ${result}`);
+            resolve(result);
+          }
+          else {
+            reject('!!! promiseFetch error');
+          }
+        },
+        error => reject(error)
+      );
+      
+    } else {
+      
+      const req = new XMLHttpRequest();
+      const {type, source, params} = query;
       req.open(query.type, url);
-
-      req.onload = function() {
-        if (req.status == 200) {
-          log('+++ ' + query.source + ' ' + JSON.stringify(req.response));
-          resolve(JSON.parse(req.response));
+      
+      req.onload = () => {
+        if (req.status === 200) {
+          log('+++ ' + source + ' ' + req.response);
+          let result = JSON.parse(req.response);
+          resolve(result);
         }
         else {
           reject(Error(req.statusText));
         }
       };
-
-      req.onerror = function() {
+      
+      req.onerror = () => {
         reject(Error("Erreur réseau"));
       };
-
-      req.send();
+      
+      if (type === 'POST') {
+        const form  = new FormData();
+        
+        // We push our data into our FormData object
+        for(let key in params) {
+          form.append(key, params[key]);
+        }
+        
+        req.send(form);
+      } else {
+        req.send();
+      }
     }
-  }).catch(function(err) {
-    log('error', err);
   });
 }

@@ -7,17 +7,17 @@ class NewTopic extends React.Component {
     
     this.handleInputTitle = event => this.setState({title: event.target.value});
     this.handleInputContent = event => this.setState({content: event.target.value});
-    this.handleSubmit = () => this.props.actions.newTopic(this.state);
+    this.handleSubmit = () => this.props.newTopic(this.state);
     
     this.state = {
       title:    'Topic Title',
       content:  'Awesomeness',
-      author:   'ici mettre le userId',
+      author:   'johnDoe',
     };
   }
   
   render() {
-    const {title, content} = this.state;
+    const {title, content, author} = this.state;
     
     return (
       <div className='topic'>
@@ -27,15 +27,15 @@ class NewTopic extends React.Component {
         </div>
       
         <div className="topic_title">
-          {title}
+          <input type="text" value={title} onChange={this.handleInputTitle} />
         </div>
         
         <div className="topic_author">
-          {'By you, in a minute'}
+          {`By ${author}`}
         </div>
         
         <div className="topic_content">
-          {content}
+          <input type="text" value={content} onChange={this.handleInputContent} />
         </div>
     </div>
     );

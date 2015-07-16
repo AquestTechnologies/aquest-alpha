@@ -1,7 +1,7 @@
 export default function() {
   
   const main = '130.211.68.244';
-  const offset = parseInt(process.env.PORTS_OFFSET) || 0;
+  const offset = parseInt(process.env.PORTS_OFFSET, 10) || 0;
   return {
     api: {
       host: main,

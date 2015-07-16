@@ -4,20 +4,12 @@ import fs from 'fs';
 
 export default function log(type, ...messages) {
   
-  const client = isClient();
-  
-  if (messages[0] === undefined) {
-    logOneEntry('info', type);
-  } 
-  else {
-    messages.forEach(function(msg) {
-      logOneEntry(type, msg);
-    });
-  }
+  if (messages[0]) messages.forEach(msg => logOneEntry(type, msg));
+  else logOneEntry('info', type);
   
   function logOneEntry(type, message) {
   
-    if (client) {
+    if (isClient()) {
       switch (type) {
         case 'error':
           console.error(message);
@@ -48,16 +40,16 @@ export default function log(type, ...messages) {
               '+++': 'bgMagenta',
               '_w_': 'gbBlack'
             };
-            let prefix = message.slice(0,3);
-            let match  = colorMatching[prefix];
+            const prefix = message.slice(0,3);
+            const match  = colorMatching[prefix];
             console.log(match ? chalk[match](prefix) + message.slice(3) : message);
           }
           else {
             console.log(message);
           }
       }
-      let d = new Date();
-      let whatToLog = {
+      const d = new Date();
+      const whatToLog = {
         type:  type,
         data:  message,
         date:  d.toLocaleString('fr'), // :'( pas très local...
@@ -68,12 +60,30 @@ export default function log(type, ...messages) {
         m:     d.getMinutes(),
         s:     d.getSeconds()
       };
-      fs.appendFile('log/server.log', JSON.stringify(whatToLog) +'\n', function(err) {
-        if (err) return console.log(err);
+      fs.appendFile('log/server.log', JSON.stringify(whatToLog) +'\n', err => {
+        if (err) console.log(err);
       });
     }
   }
   
+}
+
+let c = 0;
+export function logRequest(request) {
+  
+  function preprendZero(i) {
+    const ii = i.toString();
+    return ii.length > 1 ? ii : '0' + ii;
+  }
+  
+  const d = new Date();
+  const Y = d.getFullYear();
+  const D = preprendZero(d.getDate());
+  const M = preprendZero(d.getMonth());
+  const h = preprendZero(d.getHours());
+  const m = preprendZero(d.getMinutes());
+  const s = preprendZero(d.getSeconds());
+  log(`\n[${c}] ${D}-${M}-${Y} ${h}:${m}:${s} ${request.info.remoteAddress}:${request.info.remotePort} ${request.method} ${request.url.path}`);
 }
 
 export function logWelcome(x) {

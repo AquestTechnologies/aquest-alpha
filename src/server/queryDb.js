@@ -7,21 +7,24 @@ let client;
 
 export default function queryDb(queryInfo) {
   
-  log(`+++ --> ${queryInfo.source} ${queryInfo.params}.`);
+  log(`+++ --> ${queryInfo.source} - ${queryInfo.params}`);
   const d = new Date();
-  
   
   return new Promise((resolve, reject) => {
     connect() 
-    .then(() => {
-      const {sql, callback} = buildQuery(queryInfo);
-      
-      if (sql) performQuery(sql)
-        .then(result => resolve(typeof callback === 'function' ? callback(result) : result))
-        .catch(error => reject(error));
-      else reject('queryDb.buildQuery did not produce any SQL, check your query.source');
-    })
-    .catch(why => reject(why));
+    .then(
+      () => {
+        const {sql, callback} = buildQuery(queryInfo);
+        // log(`+++ REQUETE --> ${sql}`);
+        if (sql) performQuery(sql)
+          .then(
+            result => resolve(typeof callback === 'function' ? callback(result) : result),
+            error => reject(error)
+          );
+        else reject('queryDb.buildQuery did not produce any SQL, check your query.source');
+      },
+      why => reject(why)
+    );
   });
   
   
@@ -32,6 +35,7 @@ export default function queryDb(queryInfo) {
     const {user, password, host, port, database} = devConfig().pg;
     
     log(`... queryDb connecting to ${database}`);
+
     client = new pg.Client(`postgres://${user}:${password}@${host}:${port}/${database}`);
     
     return new Promise((resolve, reject) => {
@@ -55,7 +59,7 @@ export default function queryDb(queryInfo) {
           log('error', '!!! Error queryDb.performQuery : ', err);
           reject(`error running query : ${sql}`);
         }
-        log(result.rowCount ? `+++ <-- ${result.rowCount} rows after ${new Date() - d}ms.` : `+++ <-- nothing after ${new Date() - d}ms.`);
+        log(result.rowCount ? `+++ <-- ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- nothing after ${new Date() - d}ms`);
         resolve(result);
       });
     });
@@ -65,31 +69,28 @@ export default function queryDb(queryInfo) {
   // Builds the SQL query and optionnal callback from params
   function buildQuery(queryInfo) {
     
-    let sql, callback;
     const {source, params} = queryInfo;
+    
+    const {userId, universeId, title, chatId, messageContent, name, description} = (
+      () => typeof params === 'object' && !(params instanceof Array) ? params : {}
+    )();
+    
+    let sql, callback;
     
     switch (source) {
       
       case 'fetchUniverses':
-        
         // sql = 'SELECT id, name, description, picture, chat_id FROM aquest_schema.universe';
         sql = 
         'SELECT ' + 
-          'array_to_json(' +
-            'array_agg(' +
-              'json_build_object('+
-                `'id',id,` +
-                `'name',name,` +
-                `'description',description,` +
-                `'picture',picture,` +
-                `'chatId', chat_id` +
-              ')' +
-            ')' +
-          ') as universes ' +
-        'FROM aquest_schema.universe';
+          'id, name, description, picture, chat_id "chatId" ' +
+        'FROM ' + 
+          'aquest_schema.universe';
+        
+        callback = result => result.rows;
         
         // log('+++ ' + sql.replace('','').substring(0,29));
-        callback = result => { // Il serait utile de se debarasser de ce callback 
+        /*callback = result => { // Il serait utile de se debarasser de ce callback 
           let universes = [];             // La bdd devrait renvoyer des données admissibles par l'application
             
           for(let row in result.rows){
@@ -105,29 +106,26 @@ export default function queryDb(queryInfo) {
           }
           
           return universes;
-        };
+        };*/
+        
         break;
         
-      case 'fetchUniverseById':
+      case 'fetchUniverse':
         
         sql = 
-        'SELECT ' +
-          'json_build_object(' + 
-            `'id',id,` +
-            `'name',name,` +
-            `'description',description,` +
-            `'picture',picture,` +
-            `'chatId', chat_id` +
-          ') as universe ' +
+        'SELECT ' + 
+          'id, name, description, picture, chat_id "chatId" ' +
         'FROM ' +
           'aquest_schema.universe ' +
         'WHERE ' +
           `id = '${params}'`;
-        
+          
+        callback = result => result.rows[0];
+          
         break;
         
       case 'fetchUniverseWithTopics':
-
+        
         sql =
         'SELECT ' + 
           'aquest_schema.concat_json_object(' +
@@ -144,17 +142,19 @@ export default function queryDb(queryInfo) {
                 ')' + 
               ')' +
             ')' +
-          ')' +   
+          ') as "UniverseWithTopics"' +   
         'FROM (' +
           'SELECT ' +    
             'universe, topic.* ' +
           'FROM' +   
-            `(SELECT universe.id, universe.name, universe.description, universe.picture, universe.chat_id FROM aquest_schema.universe WHERE universe.id = '${params}') universe ` +  
+            `(SELECT universe.id, universe.name, universe.description, universe.picture, universe.chat_id "chatId" FROM aquest_schema.universe WHERE universe.id = '${params}') universe ` +  
             'LEFT JOIN aquest_schema.topic ON universe.id = topic.universe_id ' +
         ') topics GROUP BY universe';
         
+        callback = result => result.rows[0].UniverseWithTopics;
+        
         // log('+++ ' + sql.replace('','').substring(0,29));
-        callback = result => {
+        /*callback = result => {
           let r=result.rows[0];
           // log(r);
           return ({
@@ -165,10 +165,10 @@ export default function queryDb(queryInfo) {
             picture:		 r.picture,
             handle:      r.handle
           });
-        };
+        };*/
         break;
         
-      case 'fetchChatById':
+      case 'fetchChat':
         
         /*sql = 
         'SELECT \
@@ -200,8 +200,10 @@ export default function queryDb(queryInfo) {
             'RIGHT JOIN  aquest_schema.atom_message ON message.id = atom_message.message_id ' +
         `WHERE chat.id = '${params}' GROUP BY chat.id`;
         
+        callback = result => result.rows[0].chat;
+        
         // log('+++ ' + sql.replace('','').substring(0,29));
-        callback = result => {
+        /*callback = result => {
           let messages = [];
           let chatName;
           
@@ -221,30 +223,38 @@ export default function queryDb(queryInfo) {
             name: chatName,
             messages: messages
           });
-        };
+        };*/
         break;
         
       case 'fetchInventory':
           
-        sql = 
+        /*sql = 
         'SELECT ' +  
-          'array_to_json(' +  
-            'array_agg(' +  
-              'json_build_object(' +  
-                `'id',topic.id,` +
-                `'title',topic.title,` +
-                `'universeId',topic.universe_id,` +
-                `'author',topic.user_id,` +
-                `'description',topic.description,` +
-                `'picture',topic.picture,` +
-                `'timestamp',topic.updated_at,` + 
-                `'chatId',topic.chat_id` + 
-              ')' + 
+          'array_agg(' +  
+            'json_build_object(' +  
+              `'id',topic.id,` +
+              `'title',topic.title,` +
+              `'universeId',topic.universe_id,` +
+              `'author',topic.user_id,` +
+              `'description',topic.description,` +
+              `'picture',topic.picture,` +
+              `'timestamp',topic.updated_at,` + 
+              `'chatId',topic.chat_id` + 
             ')' + 
           ') as topics ' +
         'FROM ' +   
+          'aquest_schema.topic, aquest_schema.universe ' +
+        `WHERE universe.id = '${params}'`;*/
+        
+        sql =
+        'SELECT ' + 
+          'id, title, topic.universe_id "universeId", topic.user_id author, topic.description, topic.picture, topic.updated_at "timestamp", topic.chat_id "chatId" ' +
+        'FROM ' +    
           'aquest_schema.topic ' +
-        `WHERE id = '${params}`;
+        `WHERE topic.universe_id= '${params}'`;
+        
+        callback = result => result.rows;
+        // callback = result => result.rows.map(row => row.topics);
         
         break;  
         
@@ -276,26 +286,19 @@ export default function queryDb(queryInfo) {
         
         sql =
         'SELECT ' +
-          'json_build_object(' + 
-            `'id',topic.id,` +
-            `'title',topic.title,` +
-            `'universeId',topic.universe_id,` +
-            `'author',topic.user_id,` +
-            `'description',topic.description,` +
-            `'picture',topic.picture,` +
-            `'timestamp',topic.updated_at,` + 
-            `'chatId',topic.chat_id` + 
-          ')' +
+          'id, title, universe_id "universeId", user_id author, description, picture, updated_at "timestamp", chat_id "chatId" '+
         'FROM '+
           'aquest_schema.topic ' +
-        `WHERE id = '${params}'`;
+        `WHERE topic.universe_id = '${params}'`;
+        
+        callback = result => result.rows[0];
         
         break;
       
       case 'fetchTopicContent':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
-        sql =
+        /*sql =
         'SELECT ' + 
           'aquest_schema.concat_json_object(' +
             'to_json(topic), json_build_object(' +
@@ -305,15 +308,27 @@ export default function queryDb(queryInfo) {
                 ')' +
               ')' +
             ')' +
-          ') ' +
+          ') as "topicWithContent" ' +
         'FROM ' +
-          `(SELECT topic.id, topic.title, topic.universe_id "universeId", topic.user_id author, topic.description, topic.picture, topic.updated_at "timestamp", topic.chat_id "chatId" FROM aquest_schema.topic WHERE topic.id = '${params}') topic, ` +
+          '(SELECT ' + 
+            'topic.id, topic.title, topic.universe_id "universeId", topic.user_id author, topic.description, topic.picture, topic.updated_at "timestamp", topic.chat_id "chatId" ' +
+          'FROM ' +
+            `aquest_schema.topic WHERE topic.id = '${params}'`+
+          ') topic, ' +
           'aquest_schema.atom_topic ' +
         'WHERE ' +
           'atom_topic.topic_id = topic.id ' +
-        'GROUP BY topic';
+        'GROUP BY topic';*/
+        sql = 
+        'SELECT ' +
+          'atom_topic.content ' +
+        'FROM ' +
+          'aquest_schema.atom_topic ' +
+        'WHERE ' +
+          `atom_topic.topic_id = '${params}' ` +
+        'ORDER BY atom_topic.position';
         
-        callback = result => {
+        /*callback = result => {
           let topicContents = [];
           
           for(let row in result.rows){
@@ -322,23 +337,25 @@ export default function queryDb(queryInfo) {
           }
           
           return topicContents;
-        };
+        };*/
+        
+        callback = result => result.rows;
+        
         break;
         
       case 'addChatMessage':
         // atomTopicId, content, ordered, deleted, topicId, atomId
-        const {userId, chatId, messageContent} = params;
         
         sql = 
         'with addMessage as ( ' +
           'INSERT INTO aquest_schema.message ' +
             '(user_id, chat_id, created_at) ' +
           'VALUES ' +
-            `('${userId}','${chatId}', CURRENT_TIMESTAMP)` +
+            `('${userId}','${chatId}', CURRENT_TIMESTAMP) ` +
           'RETURNING message.id' +
         ')' +
-        'INSERT INTO aquest_schema.atom_message (message_id, content)' +
-        `SELECT id, '{"text": "${messageContent}"}' FROM addMessage` +
+        'INSERT INTO aquest_schema.atom_message (message_id, content) ' +
+        `SELECT id, '{"text": "${messageContent}"}' FROM addMessage ` +
         'RETURNING id';
         
         break;
@@ -346,13 +363,13 @@ export default function queryDb(queryInfo) {
         
       case 'addUniverse':
         // id, universe1Id, universe2Id, force, createdAt, updatedAt, deleted
-        const {name, handle, description} = params;
         
         sql = 
         'INSERT INTO aquest_schema.universe ' +
-          '(id, description, chat_id) ' +
+          '(id, name, user_id, description) ' +
         'VALUES ' +
-          `('${name}', '${name}', '${handle}', '${description}', 0)`;
+          // `('${name}', '${name}', 'johnDoe', '${description}')`;
+        `('${name}', '${name}', '${userId}', '${description}')`;
         
         break;
         
@@ -361,18 +378,18 @@ export default function queryDb(queryInfo) {
         //atom_topic : id; atom_id, topic_id, content, order, created_at, updated_at, deleted
         //atom : id, type, structure, created_at, updated_at, deleted
         
-        const {userId, universeId, title, handle} = params;
         sql = 
-        'INSERT INTO aquest_schema.topic ' +
-          '(user_id, universe_id, title, chat_id) ' +
+        'INSERT INTO aquest_schema.topic, aquest_schema.type ' +
+          '(user_id, universe_id, title) ' +
         'VALUES ' +
-          `('${userId}','${universeId}', '${handle}', 0)`;
+          `('${userId}','${universeId}', '${title}')`;
         
         break;
         
       case 'randomRow':
-        // sql = `SELECT * FROM aquest_schema.${params} OFFSET random() * (select count(*) FROM aquest_schema.${params}) LIMIT 1`;
+        
         sql = `SELECT * FROM aquest_schema.${params} ORDER BY RANDOM() LIMIT 1`;
+        callback = result => result.rows[0];
         break;
     }
     

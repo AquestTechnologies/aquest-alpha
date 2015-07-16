@@ -3,7 +3,7 @@
 // Mais Immutable...
 export default function simpleCopy(obj) {
   const copy = {};
-  for (const key in obj) {
+  for (let key in obj) {
     copy[key] = obj[key];
   }
 

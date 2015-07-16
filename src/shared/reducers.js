@@ -9,6 +9,7 @@ import {
   REQUEST_TOPIC, SUCCESS_TOPIC, FAILURE_TOPIC,
   REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT
 } from './actionsTypes';
+import simpleCopy from './utils/simpleCopy';
 
 // Doit être exporté en premier pour logger avant les autres
 export function records(state = [], action) {
@@ -27,13 +28,13 @@ export function universes(state = Immutable.Map(), action) {
   switch (action.type) {
     
   case SUCCESS_UNIVERSE:
-    return state.set(action.payload.id, Immutable.fromJS(action.payload));
+    return state.set(action.payload.id, fromJSGreedy(action.payload));
 
   case SUCCESS_UNIVERSES:
     newState = state;
     action.payload.forEach(universe => {
       //Tout ça va changer de toutes façons
-      if (!newState.get(universe.id)) newState = newState.set(universe.id, Immutable.fromJS(universe));
+      if (!newState.get(universe.id)) newState = newState.set(universe.id, fromJSGreedy(universe));
     });
     return newState;
     
@@ -50,7 +51,7 @@ export function chats(state = Immutable.Map(), action) {
   switch (action.type) {
     
   case SUCCESS_CHAT:
-    return state.set(action.payload.id, Immutable.fromJS(action.payload));
+    return state.set(action.payload.id, fromJSGreedy(action.payload));
     
   default:
     return state;
@@ -63,50 +64,24 @@ export function topics(state = Immutable.Map(), action) {
     
   case SUCCESS_INVENTORY:
     newState = state;
-    action.payload.forEach(topic => newState = newState.set(topic.id, Immutable.fromJS(topic)));
+    action.payload.forEach(topic => newState = newState.set(topic.id, fromJSGreedy(topic)));
     return newState;
     
   case SUCCESS_TOPIC:
-    return state.set(action.payload.id, Immutable.fromJS(action.payload));
+    return state.set(action.payload.id, fromJSGreedy(action.payload));
     
   
   case SUCCESS_TOPIC_CONTENT:
-    return state.setIn([action.params, 'content'], Immutable.fromJS(action.payload));
+    return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
     
   default:
     return state;
   }
 }
 
-
-/*export function globals(state = {}, action) {
-  switch (action.type) {
-  
-  case SET_UNIVERSE:
-    return {
-      userId:     state.userId,
-      chatId:     action.payload.chatId,
-      topicId:    state.topicId,
-      universeId: action.payload.id,
-    };
-    
-  case SET_TOPIC:
-    return {
-      userId:     state.userId,
-      chatId:     action.payload.chatId,
-      topicId:    action.payload.id,
-      universeId: state.universeId,
-    };
-    
-  case SUCCESS_UNIVERSE:
-    return {
-      userId:     state.userId,
-      chatId:     action.payload.chatId,
-      topicId:    state.topicId,
-      universeId: action.payload.id,
-    };
-    
-  default:
-    return state;
-  }
-}*/
+function fromJSGreedy(js) {
+  return typeof js !== 'object' || js === null ? js :
+    Array.isArray(js) ? 
+      Immutable.Seq(js).map(fromJSGreedy).toList() :
+      Immutable.Seq(js).map(fromJSGreedy).toMap();
+}

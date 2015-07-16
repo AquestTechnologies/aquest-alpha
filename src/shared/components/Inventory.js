@@ -41,7 +41,7 @@ class Inventory extends React.Component {
               {nameVisible ? universe.name : universe.description}
             </div>
           </div>
-        </div>
+        </div>  
         
         <div className={keys.length ? 'inventory_list-visible' : 'inventory_list-hidden'} >
           <NewTopicCard universeId={universe.id} />

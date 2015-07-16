@@ -25,14 +25,13 @@ export default class Activist {
 	start(pace) {
 		if(!this._initialize()) throw 'Initialization failed.';
 		this.isStarted = true;
-		const loopActivities = () => this._generateActivity()
-		.then(data => {
-			const result = data.rows[0];
-			const id = result ? result.id : result;
-			console.log(id);
-			if (this.isStarted) setTimeout(loopActivities, pace);
-		})
-		.catch(why => log('error', why));
+		const loopActivities = () => this._generateActivity().then(
+			data => {
+				console.log(data.id);
+				if (this.isStarted) setTimeout(loopActivities, pace);
+			},
+			error => log('error', error)
+		);
 		loopActivities();
 	}
 	
@@ -66,9 +65,10 @@ export default class Activist {
 		
 		return new Promise((resolve, reject) => {
 			console.log(`generateActivity ${id} ${counter} ${_selectAction(actionProbabilities)}`);
-			_fetchRandomRow('universe')
-			.then(data => resolve(data))
-			.catch(why => reject(why));
+			_fetchRandomRow('universe').then(
+				data => resolve(data),
+				error => reject(error)
+			);
 		});
 	}
 	
@@ -89,9 +89,10 @@ export default class Activist {
 			params: table
 		};
 		return new Promise((resolve, reject) => {
-			queryDb(query)
-			.then(data => resolve(data))
-			.catch(why => reject(why));
+			queryDb(query).then(
+				data => resolve(data),
+				error => reject(error)
+			);
 		});
 	}
 	
