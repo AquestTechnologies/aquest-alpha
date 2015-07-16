@@ -307,7 +307,7 @@ export default function queryDb(queryInfo) {
             ')' +
           ') ' +
         'FROM ' +
-          `(SELECT * FROM aquest_schema.topic WHERE topic.id = '${params}') topic, ` +
+          `(SELECT topic.id, topic.title, topic.universe_id "universeId", topic.user_id author, topic.description, topic.picture, topic.updated_at "timestamp", topic.chat_id "chatId" FROM aquest_schema.topic WHERE topic.id = '${params}') topic, ` +
           'aquest_schema.atom_topic ' +
         'WHERE ' +
           'atom_topic.topic_id = topic.id ' +
@@ -338,7 +338,7 @@ export default function queryDb(queryInfo) {
           'RETURNING message.id' +
         ')' +
         'INSERT INTO aquest_schema.atom_message (message_id, content)' +
-        `SELECT id, '{"text": "${messageContent}"}\' FROM addMessage` +
+        `SELECT id, '{"text": "${messageContent}"}' FROM addMessage` +
         'RETURNING id';
         
         break;
