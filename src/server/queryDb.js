@@ -42,6 +42,7 @@ export default function queryDb(queryInfo) {
         if (err) {
           log('error', '!!! Could not connect to postgres', err);
           reject('queryDb connection failed.');
+          return;
         } 
         resolve();
       });
@@ -57,6 +58,7 @@ export default function queryDb(queryInfo) {
         if (err) {
           log('error', '!!! Error queryDb.performQuery : ', err);
           reject(`error running query : ${sql}`);
+          return;
         }
         log(result.rowCount ? `+++ <-- ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- nothing after ${new Date() - d}ms`);
         resolve(result);
@@ -70,7 +72,7 @@ export default function queryDb(queryInfo) {
     
     const {source, params} = queryInfo;
     
-    const {userId, universeId, title, chatId, messageContent, name, description} = 
+    const {userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback;
@@ -170,11 +172,11 @@ export default function queryDb(queryInfo) {
         
         /*sql = 
         'SELECT \
-          message.id, aquest_user.pseudo, atom_message.content, chat.name as chat_name \
+          message.id, aquest_user.id, atom_message.content, chat.name as chat_name \
         FROM \
           aquest_schema.message \
             RIGHT OUTER JOIN aquest_schema.chat ON chat.id = message.chat_id \
-            LEFT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.pseudo \
+            LEFT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.id \
             LEFT JOIN  aquest_schema.atom_message ON message.id = atom_message.message_id \
         WHERE chat.id = \'' + params + `'';*/
         
@@ -186,7 +188,7 @@ export default function queryDb(queryInfo) {
             `'messages', array_agg(` + 
               'json_build_object(' + 
                 `'id',message.id,` + 
-                `'author',aquest_user.pseudo,` + 
+                `'author',aquest_user.id,` + 
                 `'content',atom_message.content` + 
               ')' + 
             ')' + 
@@ -194,7 +196,7 @@ export default function queryDb(queryInfo) {
         'FROM ' +
           'aquest_schema.chat ' +
             'LEFT JOIN aquest_schema.message ON chat.id = message.chat_id ' +
-            'LEFT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.pseudo ' +
+            'LEFT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.id ' +
             'LEFT JOIN  aquest_schema.atom_message ON message.id = atom_message.message_id ' +
         `WHERE chat.id = '${params}' GROUP BY chat.id`;
         
@@ -211,7 +213,7 @@ export default function queryDb(queryInfo) {
             
             messages.push({
               id:      r.message_id,
-              author:  r.pseudo,
+              author:  r.id,
               content: r.content.text
             });
           }
@@ -261,7 +263,7 @@ export default function queryDb(queryInfo) {
         // id, title, author, desc, imgPath, timestamp, handle, content, chatId
         sql = 
         'SELECT \
-          topic.id, topic.title, aquest_user.pseudo, topic.handle, atom_topic.content, topic.chat_id \
+          topic.id, topic.title, aquest_user.id, topic.handle, atom_topic.content, topic.chat_id \
         FROM \
           aquest_schema.topic, aquest_schema.atom_topic, aquest_schema.user as aquest_user \
         WHERE handle=\'' + params + `' AND topic.id = atom_topic.topic_id AND topic.user_id = aquest_user.id';
@@ -272,7 +274,7 @@ export default function queryDb(queryInfo) {
           return ({
             id:          r.id, 
             title:       r.title,
-            pseudo:      r.pseudo,
+            id:      r.id,
             handle:      r.handle,
             content:     r.content,
             chatId:      r.chat_id,
@@ -394,6 +396,19 @@ export default function queryDb(queryInfo) {
           '(user_id, universe_id, title) ' +
         'VALUES ' +
           `('${userId}','${universeId}', '${title}')`;
+        
+        break;
+        
+      case 'postUser':
+        
+        sql = 
+        'INSERT INTO aquest_schema.user ' +
+          '(id, email, password_salt, password_hash, creation_ip) ' +
+        'VALUES ' +
+          `('${pseudo}','${email}', '${passwordHash}', '${passwordSalt}', '${ip}')` +
+        'RETURNING id';
+        
+        callback = result => result.rows[0];
         
         break;
         

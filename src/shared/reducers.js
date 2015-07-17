@@ -7,7 +7,8 @@ import {
   REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY,
   REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT,
   REQUEST_TOPIC, SUCCESS_TOPIC, FAILURE_TOPIC,
-  REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT
+  REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT,
+  REQUEST_CREATE_USER, SUCCESS_CREATE_USER, FAILURE_CREATE_USER
 } from './actionsTypes';
 
 // Doit être exporté en premier pour logger avant les autres
@@ -72,6 +73,19 @@ export function topics(state = Immutable.Map(), action) {
   
   case SUCCESS_TOPIC_CONTENT:
     return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
+    
+  default:
+    return state;
+  }
+}
+
+export function users(state = Immutable.Map(), action) {
+  let newState;
+  switch (action.type) {
+    
+  case SUCCESS_CREATE_USER:
+    action.params.redirect();
+    return state.set(action.payload.id, fromJSGreedy(action.payload));
     
   default:
     return state;
