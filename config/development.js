@@ -1,6 +1,8 @@
+import ip from './ip';
+
 export default function() {
   
-  const main = '130.211.68.244';
+  const main = ip.ip;
   const offset = parseInt(process.env.PORTS_OFFSET, 10) || 0;
   return {
     api: {

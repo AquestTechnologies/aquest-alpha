@@ -1,5 +1,4 @@
 import pg        from 'pg';
-import query     from 'pg-query';
 import devConfig from '../../config/development.js';
 import log       from '../shared/utils/logTailor.js';
 

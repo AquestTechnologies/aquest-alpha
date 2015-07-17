@@ -1,4 +1,6 @@
+import ip from './ip';
+
 export default {
   production: false,
-  wsUrl: 'http://130.211.68.244:' + 9090
+  wsUrl: 'http://'+ ip.ip + ':' + 9090
 };
