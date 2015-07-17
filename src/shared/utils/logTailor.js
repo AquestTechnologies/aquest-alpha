@@ -70,7 +70,7 @@ export default function log(type, ...messages) {
 
 let c = 0;
 export function logRequest(request) {
-  
+  c++;
   function preprendZero(i) {
     const ii = i.toString();
     return ii.length > 1 ? ii : '0' + ii;

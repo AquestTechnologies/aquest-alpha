@@ -7,31 +7,31 @@ function apiPlugin(server, options, next) {
   server.route({
     method: 'GET',
     path: '/api/universes/',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'fetchUniverses')
+    handler: (request, reply) => reply.callQueryDb(request, reply, 'getUniverses')
   });
   
   server.route({
     method: 'GET',
     path: '/api/universe/{id}',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'fetchUniverse', request.params.id)
+    handler: (request, reply) => reply.callQueryDb(request, reply, 'getUniverse', request.params.id)
   });
   
   server.route({
     method: 'GET',
     path: '/api/inventory/{universeId}',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'fetchInventory', request.params.universeId)
+    handler: (request, reply) => reply.callQueryDb(request, reply, 'getInventory', request.params.universeId)
   });
   
   server.route({
     method: 'GET',
     path: '/api/topic/content/{topicId}',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'fetchTopicContent', request.params.topicId)
+    handler: (request, reply) => reply.callQueryDb(request, reply, 'getTopicContent', request.params.topicId)
   });
   
   server.route({
     method: 'GET',
     path: '/api/chat/{id}',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'fetchChat', request.params.id)
+    handler: (request, reply) => reply.callQueryDb(request, reply, 'getChat', request.params.id)
   });
   
   server.route({
@@ -62,7 +62,7 @@ function apiPlugin(server, options, next) {
       //payload {userId}&{chatId}&{messageContent}
         const {payload} = request;
         // TODO check request.payload before send to DB !
-        reply.callQueryDb(request, reply, 'postChatMessage', payload);
+        reply.callQueryDb(request, reply, 'postMessage', payload);
       }
   });
   
@@ -85,7 +85,7 @@ function apiPlugin(server, options, next) {
       }
   });
   
-  /*function promiseRestFetch(query){
+  /*function promiseRestget(query){
     return new Promise((resolve, reject) => {
       queryDb(query).then(
         result => resolve(result),
