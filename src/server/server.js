@@ -15,9 +15,11 @@ import log, {logRequest}  from '../shared/utils/logTailor.js';
 import phidippides        from '../shared/utils/phidippides.js';
 import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
 
-
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-log('node', `Starting Node in ${process.env.NODE_ENV} mode`);
+log('node', `Starting server in ${process.env.NODE_ENV} mode...`);
+
+//lance webpack-dev-server si on est pas en production
+if (process.env.NODE_ENV === 'development') require('./dev_server.js')();
 
 const config = devConfig();
 const server = new Hapi.Server();
@@ -26,31 +28,18 @@ const server = new Hapi.Server();
 server.connection({ port: config.api.port, labels: ['api'] });
 server.connection({ port: config.ws.port,  labels: ['ws']  });
 
-//lance webpack-dev-server si on est pas en production
-if (process.env.NODE_ENV === 'development') require('./dev_server.js')();
-
 // Registration des plugins websocket et API
-server.register([
-  {register: require('./plugins/websocket')},
-  {register: require('./plugins/api')}
-], err => {
-  if (err) throw err;
-  
-  server.start(() => {
-    log(`Make it rain! API server started at ${server.info.uri}`);
-    log(`              ws  server started at ${server.select('ws').info.uri}`);
-    console.log('  ___                        _        \n' + // !
-                ' / _ \\                      | |      \n' +
-                '/ /_\\ \\ __ _ _   _  ___  ___| |_    \n' +
-                "|  _  |/ _` | | | |/ _ \\/ __| __|    \n" +
-                '| | | | (_| | |_| |  __/\\__ \\ |_    \n' +
-                '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
-                '          | |\n' +
-                '          |_|'
-               );
-  });
-});
+server.register(
+  [
+    {register: require('./plugins/websocket')},
+    {register: require('./plugins/api')}
+  ], 
+  err => {
+    if (err) throw err;
+  }
+);
 
+// Routes
 server.route({
   method: 'GET',
   path: '/img/{filename}',
@@ -167,7 +156,23 @@ server.decorate('reply', 'prerenderer', (request, reply) => {
   });
 });
 
-if (0) {
-  const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
-  startActivists();
-}
+// Démarrage du server
+server.start(
+  () => {
+    log(`Make it rain! API server started at ${server.info.uri}`);
+    log(`              ws  server started at ${server.select('ws').info.uri}`);
+    console.log('  ___                        _        \n' + // !
+                ' / _ \\                      | |      \n' +
+                '/ /_\\ \\ __ _ _   _  ___  ___| |_    \n' +
+                "|  _  |/ _` | | | |/ _ \\/ __| __|    \n" +
+                '| | | | (_| | |_| |  __/\\__ \\ |_    \n' +
+                '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
+                '          | |\n' +
+                '          |_|'
+               );
+    if (0) {
+      const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
+      startActivists();
+    }
+  }
+);

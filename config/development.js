@@ -23,7 +23,7 @@ export default function() {
       proxyPathRegex: '^(?!.*\/static\/)(.*)$'
     },
     pg: {  
-      host:     '146.148.13.18', 
+      host:     '130.211.111.160', 
       port:     '5432', 
       user:     'aquestuser',
       password: 'aquestuser',

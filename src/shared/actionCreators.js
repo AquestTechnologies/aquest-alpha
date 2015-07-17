@@ -15,7 +15,8 @@ import {
   fetchTopicContent,
   fetchChat,
   addUniverse,
-  addTopic
+  addTopic,
+  postUser
 } from './utils/fetchers.new';
 import { 
   SET_UNIVERSE, SET_TOPIC,
@@ -24,7 +25,8 @@ import {
   REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY,
   REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT,
   REQUEST_TOPIC, SUCCESS_TOPIC, FAILURE_TOPIC,
-  REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT
+  REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT,
+  REQUEST_CREATE_USER, SUCCESS_CREATE_USER, FAILURE_CREATE_USER
 } from './actionsTypes';
 
 
@@ -103,18 +105,15 @@ export function newTopic(topic) {
   };
 }
 
-/*export function setUniverse(universe) {
-  log('.A. setUniverse : ' + universe.handle);
+export function createUser(user) {
+  log('.A. createUser');
+  const {pseudo, email, password} = user; // Évince redirect
+  
   return {
-    type: SET_UNIVERSE,
-    payload: universe
+    types: [REQUEST_CREATE_USER, SUCCESS_CREATE_USER, FAILURE_CREATE_USER],
+    promise: postUser({pseudo, email, password}),
+    params: user
   };
-}*/
+}
 
-/*export function setTopic(topic) {
-  log('.A. setTopic : ' + topic.handle);
-  return {
-    type: SET_TOPIC,
-    payload: topic
-  };
-}*/
+

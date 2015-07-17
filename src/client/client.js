@@ -91,6 +91,8 @@ io.on('message', function (message) {
     console.log('chat : ', universe ? chats.toJS()[topicId ? topic.chatId : universe.chatId] : undefined);
   });
   
+  key('ctrl+shift+8', () => console.log('users :', store.getState().users.toJS()));
+  
   key('ctrl+shift+9', () => console.log('records :', store.getState().records));
 
 })();
