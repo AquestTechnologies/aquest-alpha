@@ -1,5 +1,6 @@
 import log, {logRequest} from '../../../shared/utils/logTailor.js';
 import queryDb from '../../queryDb.js';
+import bcrypt from 'bcrypt';
 
 function apiPlugin(server, options, next) {
   
@@ -62,6 +63,25 @@ function apiPlugin(server, options, next) {
         const {payload} = request;
         // TODO check request.payload before send to DB !
         reply.callQueryDb(request, reply, 'postChatMessage', payload);
+      }
+  });
+  
+  server.route({
+    method: 'POST',
+    path: '/api/user/',
+    handler: (request, reply) => {
+        const {payload, info} = request;
+        
+        bcrypt.genSalt(10, (err, salt) => {
+          if (err) throw(err);
+          bcrypt.hash('B4c0/\/', salt, (err, hash) => {
+            if (err) throw(err);
+            payload.passwordHash = hash;
+            payload.passwordSalt = salt;
+            payload.ip = info.remoteAddress;
+            reply.callQueryDb(request, reply, 'postUser', payload);
+          });
+        });
       }
   });
   

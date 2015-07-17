@@ -44,6 +44,7 @@ export default function queryDb(queryInfo) {
         if (err) {
           log('error', '!!! Could not connect to postgres', err);
           reject('queryDb connection failed.');
+          return;
         } 
         resolve();
       });
@@ -59,6 +60,7 @@ export default function queryDb(queryInfo) {
         if (err) {
           log('error', '!!! Error queryDb.performQuery : ', err);
           reject(`error running query : ${sql}`);
+          return;
         }
         log(result.rowCount ? `+++ <-- ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- nothing after ${new Date() - d}ms`);
         resolve(result);
@@ -72,7 +74,7 @@ export default function queryDb(queryInfo) {
     
     const {source, params} = queryInfo;
     
-    const {userId, universeId, title, chatId, messageContent, name, description} = 
+    const {userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback;
@@ -398,6 +400,19 @@ export default function queryDb(queryInfo) {
           '(id, user_id, universe_id, title) ' +
         'VALUES ' +
           `('${title}', '${userId}','${universeId}', '${title}')`;
+        
+        break;
+        
+      case 'postUser':
+        
+        sql = 
+        'INSERT INTO aquest_schema.user ' +
+          '(id, email, password_salt, password_hash, creation_ip) ' +
+        'VALUES ' +
+          `('${pseudo}','${email}', '${passwordHash}', '${passwordSalt}', '${ip}')` +
+        'RETURNING id';
+        
+        callback = result => result.rows[0];
         
         break;
         

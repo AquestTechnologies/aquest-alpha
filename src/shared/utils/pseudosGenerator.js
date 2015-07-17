@@ -23,9 +23,9 @@ export function generateOnePseudo() {
   const ad  = adjectives, an = animals, st = istwords;
   const adl = ad.length, anl = an.length, stl = st.length;
   if (true || randomInteger(0,1) === 1) {
-    return ad[randomInteger(0, adl)] + an[randomInteger(0, anl)];
+    return ad[randomInteger(0, adl-1)] + an[randomInteger(0, anl-1)];
   } else {
-    return ad[randomInteger(0, adl)] + st[randomInteger(0, stl)];
+    return ad[randomInteger(0, adl-1)] + st[randomInteger(0, stl-1)];
   }
 }
 

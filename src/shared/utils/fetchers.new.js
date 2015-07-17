@@ -99,6 +99,17 @@ export function postChatMessage(message) {
   return promiseFetch(query, '/api/chatMessage/');
 }
 
+export function postUser(user) {
+  
+  const query = {
+    source: 'postUser',
+    type: 'POST',
+    params: user
+  };
+  
+  return promiseFetch(query, '/api/user/');
+}
+
 function promiseFetch(query, url) {
   
   return new Promise((resolve, reject) => {
