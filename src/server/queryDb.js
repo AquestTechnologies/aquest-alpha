@@ -4,6 +4,8 @@ import log       from '../shared/utils/logTailor.js';
 
 let client;
 
+// checkout -b API_rest
+
 export default function queryDb(queryInfo) {
   
   log(`+++ --> ${queryInfo.source} - ${queryInfo.params}`);
