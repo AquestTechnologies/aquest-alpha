@@ -1,5 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router';
+import NewUser from './home/NewUser';
 
 class Home extends React.Component {
   
@@ -14,6 +15,8 @@ class Home extends React.Component {
         <br/>
         <br/>
         <Link to='explore'>Explore</Link>
+        
+        <NewUser />
       </div>
     );
   }
