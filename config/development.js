@@ -1,8 +1,7 @@
 import ip from './ip';
 
 export default function() {
-  
-  const main = ip.ip;
+  const main = ip.localServer;
   const offset = parseInt(process.env.PORTS_OFFSET, 10) || 0;
   return {
     api: {
@@ -23,7 +22,7 @@ export default function() {
       proxyPathRegex: '^(?!.*\/static\/)(.*)$'
     },
     pg: {  
-      host:     '146.148.13.18', 
+      host:     ip.postgresql, 
       port:     '5432', 
       user:     'aquestuser',
       password: 'aquestuser',

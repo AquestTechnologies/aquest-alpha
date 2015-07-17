@@ -14,12 +14,14 @@ import {
   fetchTopic,
   fetchTopicContent,
   fetchChat,
-  addUniverse,
-  addTopic
+  postUniverse,
+  postTopic
 } from './utils/fetchers.new';
 import { 
   SET_UNIVERSE, SET_TOPIC,
-  ADD_UNIVERSE, REQUEST_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE,
+  CREATE_UNIVERSE, SUCCESS_CREATE_UNIVERSE, FAILURE_CREATE_UNIVERSE,
+  CREATE_TOPIC, SUCCESS_CREATE_TOPIC, FAILURE_CREATE_TOPIC,
+  REQUEST_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE,
   REQUEST_UNIVERSES, SUCCESS_UNIVERSES, FAILURE_UNIVERSES,
   REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY,
   REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT,
@@ -83,22 +85,22 @@ export function loadChat(id) {
   };
 }
 
-export function newUniverse(universe) {
-  log('.A. newUniverse');
+export function createUniverse(universe) {
+  log('.A. postniverse');
   
   return {
-    types: [ADD_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE],
-    promise: addUniverse(universe),
+    types: [CREATE_UNIVERSE, SUCCESS_CREATE_UNIVERSE, FAILURE_CREATE_UNIVERSE],
+    promise: postUniverse(universe),
     params: universe
   };
 }
 
-export function newTopic(topic) {
-  log('.A. newTopic');
+export function createTopic(topic) {
+  log('.A. postTopic');
   
   return {
-    types: [ADD_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE],
-    promise: addTopic(topic),
+    types: [CREATE_TOPIC, SUCCESS_CREATE_TOPIC, FAILURE_CREATE_TOPIC],
+    promise: postTopic(topic),
     params: topic
   };
 }
