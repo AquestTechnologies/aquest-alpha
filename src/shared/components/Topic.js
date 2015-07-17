@@ -36,7 +36,7 @@ class Topic extends React.Component {
             {`By ${author}, ${timestamp} ago.`}
           </div>
           <div className="topic_content">
-            {content.map((atom, index) => <div key={index}>{JSON.stringify(atom.content.text)}</div>)}
+            {content.map((atom, index) => <div key={index}>{JSON.stringify(atom.text)}</div>)}
           </div>
         </div>
           

@@ -2,9 +2,6 @@ import isClient from './isClient';
 import log from './logTailor';
 
 const isServer = !isClient();
-
-
-
 const q = isServer ? require('../../server/queryDb') : {};
 
 export function fetchUniverse(id) {
@@ -51,7 +48,7 @@ export function fetchInventory(universeId){
 
 export function fetchTopic(universeId) {
   const query = {
-    source: 'fetchTopicByHandle',
+    source: 'fetchTopic',
     type: 'GET',
     params: universeId
   };
@@ -108,37 +105,28 @@ function promiseFetch(query, url) {
     if (isServer) {
       
       q(query).then(
-        result => {
-          if (result) {
-            log(`+++ ${query.source} ${result instanceof Array} ${result}`);
-            resolve(result);
-          }
-          else {
-            reject('!!! promiseFetch error');
-          }
-        },
+        result => resolve(result),
         error => reject(error)
       );
       
     } else {
       
-      const req = new XMLHttpRequest();
       const {type, source, params} = query;
+      console.log(`+++ --> ${type} ${source} : `, params); //logTailor ne peut être utilisé ici
+      
+      const req = new XMLHttpRequest();
       req.open(query.type, url);
+      req.onerror = () => reject(Error("Error during HTTP request"));
       
       req.onload = () => {
         if (req.status === 200) {
-          log('+++ ' + source + ' ' + req.response);
-          let result = JSON.parse(req.response);
+          const result = JSON.parse(req.response);
+          console.log(`+++ <-- ${source} : `, result);
           resolve(result);
         }
         else {
           reject(Error(req.statusText));
         }
-      };
-      
-      req.onerror = () => {
-        reject(Error("Erreur réseau"));
       };
       
       if (type === 'POST') {

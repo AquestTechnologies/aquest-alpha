@@ -9,7 +9,6 @@ import {
   REQUEST_TOPIC, SUCCESS_TOPIC, FAILURE_TOPIC,
   REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT
 } from './actionsTypes';
-import simpleCopy from './utils/simpleCopy';
 
 // Doit être exporté en premier pour logger avant les autres
 export function records(state = [], action) {
@@ -79,6 +78,7 @@ export function topics(state = Immutable.Map(), action) {
   }
 }
 
+// From the Immutable.js Github wiki
 function fromJSGreedy(js) {
   return typeof js !== 'object' || js === null ? js :
     Array.isArray(js) ? 

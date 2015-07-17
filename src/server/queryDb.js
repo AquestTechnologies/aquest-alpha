@@ -15,7 +15,7 @@ export default function queryDb(queryInfo) {
     .then(
       () => {
         const {sql, callback} = buildQuery(queryInfo);
-        // log(`+++ REQUETE --> ${sql}`);
+        log(`+++ REQUETE --> ${sql}`);
         if (sql) performQuery(sql)
           .then(
             result => resolve(typeof callback === 'function' ? callback(result) : result),
@@ -23,7 +23,7 @@ export default function queryDb(queryInfo) {
           );
         else reject('queryDb.buildQuery did not produce any SQL, check your query.source');
       },
-      why => reject(why)
+      error => reject(error)
     );
   });
   
@@ -71,9 +71,8 @@ export default function queryDb(queryInfo) {
     
     const {source, params} = queryInfo;
     
-    const {userId, universeId, title, chatId, messageContent, name, description} = (
-      () => typeof params === 'object' && !(params instanceof Array) ? params : {}
-    )();
+    const {userId, universeId, title, chatId, messageContent, name, description} = 
+      typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback;
     
@@ -196,8 +195,8 @@ export default function queryDb(queryInfo) {
         'FROM ' +
           'aquest_schema.chat ' +
             'LEFT JOIN aquest_schema.message ON chat.id = message.chat_id ' +
-            'RIGHT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.pseudo ' +
-            'RIGHT JOIN  aquest_schema.atom_message ON message.id = atom_message.message_id ' +
+            'LEFT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.pseudo ' +
+            'LEFT JOIN  aquest_schema.atom_message ON message.id = atom_message.message_id ' +
         `WHERE chat.id = '${params}' GROUP BY chat.id`;
         
         callback = result => result.rows[0].chat;
@@ -286,10 +285,10 @@ export default function queryDb(queryInfo) {
         
         sql =
         'SELECT ' +
-          'id, title, universe_id "universeId", user_id author, description, picture, updated_at "timestamp", chat_id "chatId" '+
+          'id, title, universe_id "universeId", user_id author, description, picture, updated_at "timestamp", chat_id "chatId" ' +
         'FROM '+
           'aquest_schema.topic ' +
-        `WHERE topic.universe_id = '${params}'`;
+        `WHERE topic.id = '${params}'`;
         
         callback = result => result.rows[0];
         
@@ -321,12 +320,25 @@ export default function queryDb(queryInfo) {
         'GROUP BY topic';*/
         sql = 
         'SELECT ' +
-          'atom_topic.content ' +
+          'array_to_json(' +
+            'array_agg(' +
+              'aquest_schema.concat_json_object(' +
+                'atom_topics.content, json_build_object(' +
+                  `'type',atom_topics.type`+
+                ')' +
+              ')' +
+            ')' +
+          ') AS content ' +
         'FROM ' +
-          'aquest_schema.atom_topic ' +
-        'WHERE ' +
-          `atom_topic.topic_id = '${params}' ` +
-        'ORDER BY atom_topic.position';
+          '(SELECT ' +
+        		'atom_topic.content, atom_topic.type ' +
+        	'FROM ' +
+        		'aquest_schema.atom_topic ' +
+        	'WHERE ' +
+        		`atom_topic.topic_id = '${params}' ` + 	
+        	'ORDER BY ' + 
+        		'atom_topic.position' +
+        	') atom_topics';
         
         /*callback = result => {
           let topicContents = [];
@@ -339,7 +351,7 @@ export default function queryDb(queryInfo) {
           return topicContents;
         };*/
         
-        callback = result => result.rows;
+        callback = result => result.rows[0].content;
         
         break;
         
@@ -379,7 +391,7 @@ export default function queryDb(queryInfo) {
         //atom : id, type, structure, created_at, updated_at, deleted
         
         sql = 
-        'INSERT INTO aquest_schema.topic, aquest_schema.type ' +
+        'INSERT INTO aquest_schema.topic ' +
           '(user_id, universe_id, title) ' +
         'VALUES ' +
           `('${userId}','${universeId}', '${title}')`;

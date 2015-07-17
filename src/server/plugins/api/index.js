@@ -61,7 +61,7 @@ function apiPlugin(server, options, next) {
       //payload {userId}&{chatId}&{messageContent}
         const {payload} = request;
         // TODO check request.payload before send to DB !
-        reply.callQueryDb(request, reply, 'addChatMessage', payload)
+        reply.callQueryDb(request, reply, 'addChatMessage', payload);
       }
   });
   

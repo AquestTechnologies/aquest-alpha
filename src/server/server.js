@@ -29,7 +29,7 @@ server.connection({ port: config.ws.port,  labels: ['ws']  });
 //lance webpack-dev-server si on est pas en production
 if (process.env.NODE_ENV === 'development') require('./dev_server.js')();
 
-// Registration du plugin websocket
+// Registration des plugins websocket et API
 server.register([
   {register: require('./plugins/websocket')},
   {register: require('./plugins/api')}
@@ -159,10 +159,10 @@ server.decorate('reply', 'prerenderer', (request, reply) => {
             response.send();
             log(`Served ${url} in ${new Date() - d}ms.\n`);
           },
-          err => log('error', '!!! Error while reading HTML.', err)
+          error => log('error', '!!! Error while reading HTML.', error)
         );
       },
-      err => log('error', '!!! Error while Phidippides.', err)
+      error => log('error', '!!! Error while Phidippides.', error)
     );
   });
 });
