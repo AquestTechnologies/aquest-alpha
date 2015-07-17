@@ -4,6 +4,8 @@ import log       from '../shared/utils/logTailor.js';
 
 let client;
 
+// checkout -b API_rest
+
 export default function queryDb(queryInfo) {
   
   log(`+++ --> ${queryInfo.source} - ${queryInfo.params}`);
@@ -251,7 +253,8 @@ export default function queryDb(queryInfo) {
           'id, title, topic.universe_id "universeId", topic.user_id author, topic.description, topic.picture, topic.updated_at "timestamp", topic.chat_id "chatId" ' +
         'FROM ' +    
           'aquest_schema.topic ' +
-        `WHERE topic.universe_id= '${params}'`;
+        'WHERE ' + 
+          `topic.universe_id= '${params}'`;
         
         callback = result => result.rows;
         // callback = result => result.rows.map(row => row.topics);
@@ -289,7 +292,8 @@ export default function queryDb(queryInfo) {
           'id, title, universe_id "universeId", user_id author, description, picture, updated_at "timestamp", chat_id "chatId" ' +
         'FROM '+
           'aquest_schema.topic ' +
-        `WHERE topic.id = '${params}'`;
+        'WHERE ' + 
+          `topic.id = '${params}'`;
         
         callback = result => result.rows[0];
         
@@ -356,7 +360,7 @@ export default function queryDb(queryInfo) {
         
         break;
         
-      case 'addChatMessage':
+      case 'postChatMessage':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
         sql = 
@@ -374,7 +378,7 @@ export default function queryDb(queryInfo) {
         break;
         
         
-      case 'addUniverse':
+      case 'postUniverse':
         // id, universe1Id, universe2Id, force, createdAt, updatedAt, deleted
         
         sql = 
@@ -386,16 +390,16 @@ export default function queryDb(queryInfo) {
         
         break;
         
-      case 'addTopic':
+      case 'postTopic':
         //topic : id, user_id, chat_id, universe_id, title, handle, created_at, updated_at, deleted
         //atom_topic : id; atom_id, topic_id, content, order, created_at, updated_at, deleted
         //atom : id, type, structure, created_at, updated_at, deleted
         
         sql = 
         'INSERT INTO aquest_schema.topic ' +
-          '(user_id, universe_id, title) ' +
+          '(id, user_id, universe_id, title) ' +
         'VALUES ' +
-          `('${userId}','${universeId}', '${title}')`;
+          `('${title}', '${userId}','${universeId}', '${title}')`;
         
         break;
         

@@ -23,7 +23,7 @@ GRANT ALL ON FUNCTIONS TO admin WITH GRANT OPTION;
 ALTER DEFAULT PRIVILEGES IN SCHEMA aquest_schema
 GRANT USAGE ON TYPES TO users;
 
-CREATE DOMAIN aquest_schema.pseudo AS VARCHAR(15) CHECK (
+CREATE DOMAIN aquest_schema.id AS VARCHAR(15) CHECK (
   LENGTH(VALUE) > 0 AND
   LENGTH(VALUE) < 16 AND
   VALUE ~ '^[A-Za-z0-9]+$'
@@ -37,8 +37,8 @@ CREATE TABLE aquest_schema.CHAT(
 );
 
 CREATE TABLE aquest_schema.USER (
-  pseudo               aquest_schema.pseudo PRIMARY KEY,
-  email                TEXT UNIQUE,
+  id                   TEXT PRIMARY KEY,
+  email                TEXT NOT NULL UNIQUE,
   first_name           TEXT,
   last_name            TEXT,
   password_salt        TEXT NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE aquest_schema.UNIVERSE(
   created_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id),
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo)
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id)
 );
 
 CREATE TABLE aquest_schema.UNIVERSE_UNIVERSE(
@@ -91,7 +91,7 @@ CREATE TABLE aquest_schema.MESSAGE(
   chat_id             BIGINT NOT NULL,
   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id)
 );
 
@@ -105,8 +105,8 @@ CREATE TABLE aquest_schema.VOTE_MESSAGE(
   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(pseudo),
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
+  FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
   FOREIGN KEY (message_id) REFERENCES aquest_schema.MESSAGE(id)
 );
@@ -121,8 +121,8 @@ CREATE TABLE aquest_schema.VOTE_TOPIC(
   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   deleted             BOOLEAN,
-  FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(pseudo),
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
+  FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
   FOREIGN KEY (topic_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
@@ -143,7 +143,7 @@ CREATE TABLE aquest_schema.USER_UNIVERSE(
   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   start_universe      BOOLEAN,
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
 
@@ -157,7 +157,7 @@ CREATE TABLE aquest_schema.TOPIC(
   picture             TEXT DEFAULT '',
   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(pseudo),
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id)
 );
@@ -274,7 +274,7 @@ $$ LANGUAGE plv8 IMMUTABLE STRICT;
 
 -- insert a bunch of data
 INSERT INTO aquest_schema.user 
-    (email, pseudo, first_name, last_name, password_salt, password_hash, creation_ip) 
+    (email, id, first_name, last_name, password_salt, password_hash, creation_ip) 
   VALUES 
     ('johndoe@gmail.com', 'johnDoe', 'John', 'Doe', 'fsfgfdgsdfgsdfokoksqlsd', 'dskjfsdkfjks', '192.168.0.1');
 

@@ -9,7 +9,7 @@ class NewUniverse extends React.Component {
     this.handleInputName = event => this.setState({name: event.target.value});
     this.handleInputDescription = event => this.setState({description: event.target.value});
     this.handleInputRelated = event => this.setState({related: event.target.value});
-    this.handleSubmit = () => this.props.newUniverse(this.state);
+    this.handleSubmit = () => this.props.createUniverse(this.state);
     
     this.state = {
       name: '',
@@ -44,22 +44,24 @@ class NewUniverse extends React.Component {
       <div style={divStyle} >
         <Link to='explore'>Back</Link>
         <h1>Create New Universe</h1>
-        <div>
-          <div>Name (unique)</div>
-          <input type="text" value={name} onChange={this.handleInputName} />
-        </div>
-        <br />
-        <div>
-          <div>Description</div>
-          <input type="text" value={description} onChange={this.handleInputDescription} />
-        </div>
-        <br />
-        <div>
-          <div>Related universes</div>
-          <input type="text" value={related} onChange={this.handleInputRelated} />
-        </div>
-        <br />
-        <button type="button" onClick={this.handleSubmit}>Submit</button>
+        <form className='universeFrom' onSubmit={this.handleSubmit}>
+          <div>
+            <div>Name (unique)</div>
+            <input type="text" value={name} onChange={this.handleInputName} />
+          </div>
+          <br />
+          <div>
+            <div>Description</div>
+            <input type="text" value={description} onChange={this.handleInputDescription} />
+          </div>
+          <br />
+          <div>
+            <div>Related universes</div>
+            <input type="text" value={related} onChange={this.handleInputRelated} />
+          </div>
+          <br />
+          <input type="submit" value='Create universe' />
+        </form>
       </div>
     );
   }

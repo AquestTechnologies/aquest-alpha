@@ -66,10 +66,10 @@ export function fetchTopicContent(id) {
   return promiseFetch(query, '/api/topic/content/'+id);
 }
 
-export function addUniverse(universe) {
+export function postUniverse(universe) {
   
   const query = {
-    source: 'addUniverse',
+    source: 'postUniverse',
     type: 'POST',
     params: universe
   };
@@ -77,10 +77,10 @@ export function addUniverse(universe) {
   return promiseFetch(query, '/api/universe/');
 }
 
-export function addTopic(topic) {
+export function postTopic(topic) {
   
   const query = {
-    source: 'addTopic',
+    source: 'postTopic',
     type: 'POST',
     params: topic
   };
@@ -88,10 +88,10 @@ export function addTopic(topic) {
   return promiseFetch(query, '/api/topic/');
 }
 
-export function addChatMessage(message) {
+export function postChatMessage(message) {
   
   const query = {
-    source: 'addChatMessage',
+    source: 'postChatMessage',
     type: 'POST',
     params: message
   };
@@ -141,12 +141,14 @@ function promiseFetch(query, url) {
       };
       
       if (type === 'POST') {
-        const form  = new FormData();
+        let form  = new FormData();
         
         // We push our data into our FormData object
         for(let key in params) {
           form.append(key, params[key]);
         }
+        
+        log(form);
         
         req.send(form);
       } else {

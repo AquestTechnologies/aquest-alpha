@@ -40,7 +40,7 @@ function apiPlugin(server, options, next) {
     handler: (request, reply) => {
         const {payload} = request;
         // TODO check request.payload before send to DB !
-        reply.callQueryDb(request, reply, 'addUniverse', payload);
+        reply.callQueryDb(request, reply, 'postUniverse', payload);
       }
   });
   
@@ -51,7 +51,7 @@ function apiPlugin(server, options, next) {
         //payload {user_id}&{universe_id}&{title}
         const {payload} = request;
         // TODO check request.payload before send to DB !
-        reply.callQueryDb(request, reply, 'addTopic', payload);
+        reply.callQueryDb(request, reply, 'postTopic', payload);
       }
   });
   
@@ -62,7 +62,7 @@ function apiPlugin(server, options, next) {
       //payload {userId}&{chatId}&{messageContent}
         const {payload} = request;
         // TODO check request.payload before send to DB !
-        reply.callQueryDb(request, reply, 'addChatMessage', payload);
+        reply.callQueryDb(request, reply, 'postChatMessage', payload);
       }
   });
   

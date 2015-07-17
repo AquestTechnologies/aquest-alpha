@@ -60,6 +60,7 @@ class Universe extends React.Component {
                 setTopic         = {this.props.setTopic}
                 loadInventory    = {this.props.loadInventory} //passer les actions par le context, a faire
                 loadTopicContent = {this.props.loadTopicContent} //passer les actions par le context, a faire
+                createTopic      = {this.props.createTopic}
               />
             </div>
           </div>
