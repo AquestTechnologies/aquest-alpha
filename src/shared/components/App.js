@@ -15,6 +15,7 @@ function select(state) {
     universes:  state.universes.toJS(),
     topics:     state.topics.toJS(),
     chats:      state.chats.toJS(),
+    users:      state.users.toJS(),
     records:    state.records,
   };
 }
@@ -29,6 +30,7 @@ export default class App extends React.Component {
             universes,
             topics,
             chats,
+            users,
             records,
             dispatch,
           }) => 

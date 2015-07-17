@@ -12,14 +12,13 @@ export default class Explore extends React.Component {
   static runPhidippides(routerState) {
     return [{
       id:      'universes',
-      creator: 'loadUniverses',
+      creator: 'readUniverses',
       args:    []
     }];
   }
   
   componentDidMount() {
-    if (Object.keys(this.props.universes).length < 2) this.props.loadUniverses();
-    
+    if (Object.keys(this.props.universes).length < 2) this.props.readUniverses();
   }
   
   renderGraph(universes) {
@@ -68,14 +67,5 @@ export default class Explore extends React.Component {
       </div>
     );
   }
-  
-  // renderBackLink(universeId) {
-  //   let universe = this.props.universes(this.props.params.universeId);
-  //   if(universe) {
-  //     return <Link to='universe' params={{universeId: universe.get('id')}}>Back</Link>;
-  //   } else {
-  //     return <Link to='home'>Starting Universe</Link>;
-  //   }
-  // }
   
 }

@@ -4,13 +4,6 @@ import * as actionCreators from '../actionCreators';
 
 export default function phidippides(routerState, dispatch) {
   
-  // Qui d'autre que phidippides peut dedecter les 404 ? 
-  // Exemple :'/_aefzgrjeflkvn' fait actuelement un fetch
-  
-  // Phidippides doit-il considérer un 404 si le fetch à échouer et rediriger ?
-  // ou cela doit-il etre fait plus loin dans le stack ?
-  // Dans componentDidMount or WillMount ?
-  
   // Configuration
   const VERBOSE       = false;            // Affiche les log
   const PLACEHOLDER   = '__dependency.';  // Le placeholder pour les arguments des actions
@@ -23,12 +16,12 @@ export default function phidippides(routerState, dispatch) {
   
   // Récupère les tâches
   const TASKS = routerState.routes
-  .map    ( route    => route.handler[METHOD_NAME]   )  // Recherche de runPhidippides dans chaque handler
-  .filter ( method   => typeof method === 'function' )  // Filtre si c'est une fonction
-  .map    ( method   => method(routerState)          )  // Appel de runPhidippides
-  .filter ( returned => returned instanceof Array    )  // Filtre si runPhidippides retourne un array (de tâches)
-  .reduce ( (a, b)   => a.concat(b), []              )  // Réduction de l'array d'array de tâches en array de tâches
-  .filter ( task     => checkFormat(task)            ); // Évince les tâches hors format
+  .map    (route    => route.handler[METHOD_NAME]  )  // Recherche de runPhidippides dans chaque handler
+  .filter (method   => typeof method === 'function')  // Filtre si c'est une fonction
+  .map    (method   => method(routerState)         )  // Appel de runPhidippides
+  .filter (returned => returned instanceof Array   )  // Filtre si runPhidippides retourne un array (de tâches)
+  .reduce ((a, b)   => a.concat(b), []             )  // Réduction de l'array d'array de tâches en array de tâches
+  .filter (task     => checkFormat(task)           ); // Évince les tâches hors format
   
   let nbTasks    = TASKS.length;
   let spkEnglish = nbTasks > 1 ? ' tasks : ' : ' task : ';
@@ -64,34 +57,31 @@ export default function phidippides(routerState, dispatch) {
     return new Promise((resolve, reject) => {
       
       // Attend que toutes les tâches soient résolues
-      Promise.all(tasks.map(task => clearOneTask(task))).then(() => {
-      
-        logMeOrNot('\n');
-        logMeOrNot('*** * clearTasks ended * ');
-        logMeOrNot('*** completed tasks : ' + completedTasks.map(task => task.task.id));
-        logMeOrNot('*** failed tasks : ' + failedTasks.map(task => task.id));
-        logMeOrNot('\n');
-        
-        // Si aucune tache n'a échoué c'est terminé
-        if (failedTasks.length === 0) {
-          resolve();
+      Promise.all(tasks.map(task => clearOneTask(task))).then(
+        () => {
+          logMeOrNot('\n');
+          logMeOrNot('*** * clearTasks ended * ');
+          logMeOrNot('*** completed tasks : ' + completedTasks.map(task => task.task.id));
+          logMeOrNot('*** failed tasks : ' + failedTasks.map(task => task.id));
+          logMeOrNot('\n');
           
-        // Sinon on rappel les tâches échouées (possible boucle infinie ici)
-        } else { 
-          if (preventInfinite > 10) throw('!!! Infinite loop detected');
-          
-          // Inception des promises 8)
-          clearTasks(failedTasks).then(() => {
+          // Si aucune tache n'a échoué c'est terminé
+          if (failedTasks.length === 0) {
             resolve();
-          }).catch(why => {
-            log('error', '*** ERROR ! clearTasks failed after some failled tasks');
-            reject(why);
-          });
-        }
-      }).catch(why => {
-        log('error', '*** ERROR ! clearTasks failed 1');
-        reject(why);
-      });
+            
+          // Sinon on rappel les tâches échouées (possible boucle infinie ici)
+          } else { 
+            if (preventInfinite > 10) throw('!!! Infinite loop detected');
+            
+            // Inception des promises 8)
+            clearTasks(failedTasks).then(
+              () => resolve(),
+              error => reject(error)
+            );
+          }
+        },
+        error => reject(error)
+      );
     });
   }
   
@@ -101,17 +91,17 @@ export default function phidippides(routerState, dispatch) {
     logMeOrNot('*** clearOneTask ' + task.id);
     return new Promise((resolve, reject) => {
       if(checkDependency(task.dependency)) {
-        callActionCreator(task).then(data => {
-          completedTasks.push({
-            task: task,
-            result: data
-          });
-          logMeOrNot('*** clearOneTask OK ' + task.id + ' [dependency ok -> fetch ok]');
-          resolve();
-        }).catch(why => {
-          log('error', '*** clearOneTask FAILED ' + task.id + ' [dependency ok -> fetch failed]');
-          reject(why);
-        });
+        callActionCreator(task).then(
+          data => {
+            completedTasks.push({
+              task: task,
+              result: data
+            });
+            logMeOrNot('*** clearOneTask OK ' + task.id + ' [dependency ok -> fetch ok]');
+            resolve();
+          },
+          error => reject(error)
+        );
       } else {
         failedTasks.push(task);
         logMeOrNot('*** clearOneTask FAILED ' + task.id + ' [dependency failed]');
@@ -129,7 +119,7 @@ export default function phidippides(routerState, dispatch) {
     const creator = actionCreators[task.creator];
     let realArgs = [], realArg;
     
-    if (creator === undefined || typeof creator !== 'function') return new Promise.reject('*** ERROR ! callActionCreator creator called ' + task.creator + ' does not exist.');
+    if (creator === undefined || typeof creator !== 'function') return Promise.reject('callActionCreator creator ' + task.creator + ' does not exist.');
 
     // Traitement des arguments
     task.args.forEach(arg => {
@@ -162,14 +152,14 @@ export default function phidippides(routerState, dispatch) {
       dispatch(action);
       
       if (action.promise === undefined) resolve(action.payload);
-      else action.promise.then(data => {
-        logMeOrNot('***  _ Dispatch for ' + task.id + ' resolved');
-        logMeOrNot(JSON.stringify(data).substr(0,100));
-        resolve(data);
-      }).catch(why => {
-        log('error', '*** callActionCreator dispatch failed');
-        reject(why);
-      });
+      else action.promise.then(
+        data => {
+          logMeOrNot('***  _ Dispatch for ' + task.id + ' resolved');
+          logMeOrNot(JSON.stringify(data).substr(0,100));
+          resolve(data);
+        },
+        error => reject(error)
+      );
     });
   }
   

@@ -4,21 +4,21 @@ import log from './logTailor';
 const isServer = !isClient();
 const q = isServer ? require('../../server/queryDb') : {};
 
-export function fetchUniverse(id) {
+export function getUniverse(id) {
   
   const query = {
-    source: 'fetchUniverse',
+    source: 'getUniverse',
     type: 'GET',
     params: id
   };
   
-  return promiseFetch(query, '/api/universe/'+id);
+  return promiseFetch(query, `/api/universe/${id}`);
 }
 
-export function fetchUniverses() {
+export function getUniverses() {
 
   const query = {
-    source: 'fetchUniverses',
+    source: 'getUniverses',
     type: 'GET',
     params: ''
   };
@@ -26,44 +26,44 @@ export function fetchUniverses() {
   return promiseFetch(query, '/api/universes/');
 }
 
-export function fetchChat(id) {
+export function getChat(id) {
   const query = {
-    source: 'fetchChat',
+    source: 'getChat',
     type: 'GET',
     params: id
   };
   
-  return promiseFetch(query, '/api/chat/'+id);
+  return promiseFetch(query, `/api/chat/${id}`);
 }
 
-export function fetchInventory(universeId){
+export function getInventory(universeId){
   const query = {
-    source: 'fetchInventory',
+    source: 'getInventory',
     type: 'GET',
     params: universeId
   };
   
-  return promiseFetch(query, '/api/inventory/'+universeId);
+  return promiseFetch(query, `/api/inventory/${universeId}`);
 }
 
-export function fetchTopic(universeId) {
+export function getTopic(universeId) {
   const query = {
-    source: 'fetchTopic',
+    source: 'getTopic',
     type: 'GET',
     params: universeId
   };
   
-  return promiseFetch(query, '/api/topic/'+universeId);
+  return promiseFetch(query, `/api/topic/${universeId}`);
 }
 
-export function fetchTopicContent(id) {
+export function getTopicContent(id) {
   const query = {
-    source: 'fetchTopicContent',
+    source: 'getTopicContent',
     type: 'GET',
     params: id
   };
   
-  return promiseFetch(query, '/api/topic/content/'+id);
+  return promiseFetch(query, `/api/topic/content/${id}`);
 }
 
 export function postUniverse(universe) {
@@ -88,10 +88,10 @@ export function postTopic(topic) {
   return promiseFetch(query, '/api/topic/');
 }
 
-export function postChatMessage(message) {
+export function postMessage(message) {
   
   const query = {
-    source: 'postChatMessage',
+    source: 'postMessage',
     type: 'POST',
     params: message
   };

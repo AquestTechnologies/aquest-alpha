@@ -18,7 +18,7 @@ class Chat extends React.Component {
     let chat = this.props.chat;
     let isLoading = false;
     if (!this.props.chat) {
-      this.props.loadChat(this.props.chatId);
+      this.props.readChat(this.props.chatId);
       chat      = {};
       isLoading = true;
     }
@@ -29,7 +29,7 @@ class Chat extends React.Component {
     // console.log('.C. Chat.componentWillReceiveProps');
     if (!nextProps.chat) {
       if (!this.state.isLoading) {
-        nextProps.loadChat(nextProps.chatId);
+        nextProps.readChat(nextProps.chatId);
         this.setState({ 
           chat:      {},
           isLoading: true

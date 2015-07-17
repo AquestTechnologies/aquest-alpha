@@ -148,10 +148,10 @@ server.decorate('reply', 'prerenderer', (request, reply) => {
             response.send();
             log(`Served ${url} in ${new Date() - d}ms.\n`);
           },
-          error => log('error', '!!! Error while reading HTML.', error)
+          error => log('error', '!!! Error while reading HTML', error)
         );
       },
-      error => log('error', '!!! Error while Phidippides.', error)
+      error => log('error', '!!! Error while Phidippides', error)
     );
   });
 });

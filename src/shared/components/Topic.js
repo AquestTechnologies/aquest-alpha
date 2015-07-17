@@ -6,7 +6,7 @@ class Topic extends React.Component {
   static runPhidippides(routerState) {
     return [{
       id:         'topic',
-      creator:    'loadTopic',
+      creator:    'readTopic',
       args:       [routerState.params.topicId]
     }];
   }
@@ -14,7 +14,7 @@ class Topic extends React.Component {
   componentWillMount() {
     // console.log('.C. Topic.componentWillMount');
     const {id, content} = this.props.topics[this.props.params.topicId];
-    if (!content) this.props.loadTopicContent(id);
+    if (!content) this.props.readTopicContent(id);
   }
   
   // componentWillReceiveProps(nextProps) {

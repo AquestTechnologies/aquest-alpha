@@ -9,7 +9,7 @@ class Inventory extends React.Component {
     return [{
       id:         'inventory',
       dependency: 'universe',
-      creator:    'loadInventory',
+      creator:    'readInventory',
       args:       ['__dependency.id']
     }];
   }
@@ -25,7 +25,7 @@ class Inventory extends React.Component {
   componentWillMount() {
     // console.log(this.props.topics);
     // console.log(this.props.universe);
-    if (!this.props.universe.lastInventoryUpdate) this.props.loadInventory(this.props.universe.id);
+    if (!this.props.universe.lastInventoryUpdate) this.props.readInventory(this.props.universe.id);
   }
   
   render() {

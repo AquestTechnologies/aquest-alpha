@@ -4,8 +4,6 @@ import log       from '../shared/utils/logTailor.js';
 
 let client;
 
-// checkout -b API_rest
-
 export default function queryDb(queryInfo) {
   
   log(`+++ --> ${queryInfo.source} - ${queryInfo.params}`);
@@ -81,7 +79,7 @@ export default function queryDb(queryInfo) {
     
     switch (source) {
       
-      case 'fetchUniverses':
+      case 'getUniverses':
         // sql = 'SELECT id, name, description, picture, chat_id FROM aquest_schema.universe';
         sql = 
         'SELECT ' + 
@@ -91,28 +89,9 @@ export default function queryDb(queryInfo) {
         
         callback = result => result.rows;
         
-        // log('+++ ' + sql.replace('','').substring(0,29));
-        /*callback = result => { // Il serait utile de se debarasser de ce callback 
-          let universes = [];             // La bdd devrait renvoyer des données admissibles par l'application
-            
-          for(let row in result.rows){
-            let r = result.rows[row];
-            
-            universes.push({
-              id:          r.id,
-              chatId:      r.chat_id,
-              name:        r.name,
-              description: r.description,
-              picture:		 r.picture
-            });
-          }
-          
-          return universes;
-        };*/
-        
         break;
         
-      case 'fetchUniverse':
+      case 'getUniverse':
         
         sql = 
         'SELECT ' + 
@@ -126,7 +105,7 @@ export default function queryDb(queryInfo) {
           
         break;
         
-      case 'fetchUniverseWithTopics':
+      case 'getUniverseWithTopics':
         
         sql =
         'SELECT ' + 
@@ -155,22 +134,9 @@ export default function queryDb(queryInfo) {
         
         callback = result => result.rows[0].UniverseWithTopics;
         
-        // log('+++ ' + sql.replace('','').substring(0,29));
-        /*callback = result => {
-          let r=result.rows[0];
-          // log(r);
-          return ({
-            id:          r.id,
-            chatId:      r.chat_id,
-            name:        r.name,
-            description: r.description,
-            picture:		 r.picture,
-            handle:      r.handle
-          });
-        };*/
         break;
         
-      case 'fetchChat':
+      case 'getChat':
         
         /*sql = 
         'SELECT \
@@ -204,31 +170,9 @@ export default function queryDb(queryInfo) {
         
         callback = result => result.rows[0].chat;
         
-        // log('+++ ' + sql.replace('','').substring(0,29));
-        /*callback = result => {
-          let messages = [];
-          let chatName;
-          
-          for(let row in result.rows){
-            let r=result.rows[row];
-            chatName = r.chat_name;
-            
-            messages.push({
-              id:      r.message_id,
-              author:  r.id,
-              content: r.content.text
-            });
-          }
-          
-          return ({
-            id: queryInfo.params,
-            name: chatName,
-            messages: messages
-          });
-        };*/
         break;
         
-      case 'fetchInventory':
+      case 'getInventory':
           
         /*sql = 
         'SELECT ' +  
@@ -257,11 +201,10 @@ export default function queryDb(queryInfo) {
           `topic.universe_id= '${params}'`;
         
         callback = result => result.rows;
-        // callback = result => result.rows.map(row => row.topics);
         
         break;  
         
-      /*case 'fetchTopicByHandle':
+      /*case 'getTopicByHandle':
         
         // id, title, author, desc, imgPath, timestamp, handle, content, chatId
         sql = 
@@ -285,7 +228,7 @@ export default function queryDb(queryInfo) {
         };
         break;*/
       
-      case 'fetchTopic':
+      case 'getTopic':
         
         sql =
         'SELECT ' +
@@ -299,7 +242,7 @@ export default function queryDb(queryInfo) {
         
         break;
       
-      case 'fetchTopicContent':
+      case 'getTopicContent':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
         /*sql =
@@ -345,22 +288,12 @@ export default function queryDb(queryInfo) {
         		'atom_topic.position' +
         	') atom_topics';
         
-        /*callback = result => {
-          let topicContents = [];
-          
-          for(let row in result.rows){
-            const {id, content} = result.rows[row];
-            topicContents.push({id, content});
-          }
-          
-          return topicContents;
-        };*/
         
         callback = result => result.rows[0].content;
         
         break;
         
-      case 'postChatMessage':
+      case 'postMessage':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
         sql = 

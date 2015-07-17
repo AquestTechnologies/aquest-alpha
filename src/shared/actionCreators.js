@@ -1,107 +1,98 @@
 import log from './utils/logTailor';
-// import { 
-//   fetchUniverse,
-//   fetchUniverses,
-//   fetchInventory,
-//   fetchTopic,
-//   fetchTopicContent,
-//   fetchChat
-// } from './utils/fetchers';
 import {
-  fetchUniverse,
-  fetchUniverses,
-  fetchInventory,
-  fetchTopic,
-  fetchTopicContent,
-  fetchChat,
+  getUniverse,
+  getUniverses,
+  getInventory,
+  getTopic,
+  getTopicContent,
+  getChat,
   postUniverse,
   postTopic,
   postUser
-} from './utils/fetchers.new';
+} from './utils/APIMiddleware';
 import { 
-  SET_UNIVERSE, SET_TOPIC,
-  CREATE_UNIVERSE, SUCCESS_CREATE_UNIVERSE, FAILURE_CREATE_UNIVERSE,
-  CREATE_TOPIC, SUCCESS_CREATE_TOPIC, FAILURE_CREATE_TOPIC,
-  REQUEST_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE,
-  REQUEST_UNIVERSES, SUCCESS_UNIVERSES, FAILURE_UNIVERSES,
-  REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY,
-  REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT,
-  REQUEST_TOPIC, SUCCESS_TOPIC, FAILURE_TOPIC,
-  REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT,
+  REQUEST_READ_UNIVERSE, SUCCESS_READ_UNIVERSE, FAILURE_READ_UNIVERSE,
+  REQUEST_READ_UNIVERSES, SUCCESS_READ_UNIVERSES, FAILURE_READ_UNIVERSES,
+  REQUEST_READ_INVENTORY, SUCCESS_READ_INVENTORY, FAILURE_READ_INVENTORY,
+  REQUEST_READ_TOPIC_CONTENT, SUCCESS_READ_TOPIC_CONTENT, FAILURE_READ_TOPIC_CONTENT,
+  REQUEST_READ_TOPIC, SUCCESS_READ_TOPIC, FAILURE_READ_TOPIC,
+  REQUEST_READ_CHAT, SUCCESS_READ_CHAT, FAILURE_READ_CHAT,
+  REQUEST_CREATE_UNIVERSE, SUCCESS_CREATE_UNIVERSE, FAILURE_CREATE_UNIVERSE,
+  REQUEST_CREATE_TOPIC, SUCCESS_CREATE_TOPIC, FAILURE_CREATE_TOPIC,
   REQUEST_CREATE_USER, SUCCESS_CREATE_USER, FAILURE_CREATE_USER
 } from './actionsTypes';
 
 
-export function loadUniverse(id) {
-  log(`.A. loadUniverse : ${id}`);
+export function readUniverse(id) {
+  log(`.A. readUniverse : ${id}`);
   return {
-    types: [REQUEST_UNIVERSE, SUCCESS_UNIVERSE, FAILURE_UNIVERSE],
-    promise: fetchUniverse(id),
+    types: [REQUEST_READ_UNIVERSE, SUCCESS_READ_UNIVERSE, FAILURE_READ_UNIVERSE],
+    promise: getUniverse(id),
     params: id
   };
 }
 
-export function loadUniverses() {
-  log('.A. loadUniverses');
+export function readUniverses() {
+  log('.A. readUniverses');
   return {
-    types: [REQUEST_UNIVERSES, SUCCESS_UNIVERSES, FAILURE_UNIVERSES],
-    promise: fetchUniverses()
+    types: [REQUEST_READ_UNIVERSES, SUCCESS_READ_UNIVERSES, FAILURE_READ_UNIVERSES],
+    promise: getUniverses()
   };
 }
 
 
-export function loadInventory(universeId) {
-  log(`.A. loadInventory : ${universeId}`);
+export function readInventory(universeId) {
+  log(`.A. readInventory : ${universeId}`);
   return {
-    types: [REQUEST_INVENTORY, SUCCESS_INVENTORY, FAILURE_INVENTORY],
-    promise: fetchInventory(universeId),
+    types: [REQUEST_READ_INVENTORY, SUCCESS_READ_INVENTORY, FAILURE_READ_INVENTORY],
+    promise: getInventory(universeId),
     params: universeId
   };
 }
 
-export function loadTopic(id) {
-  log(`.A. loadTopic ${id}`);
+export function readTopic(id) {
+  log(`.A. readTopic ${id}`);
   return {
-    types: [REQUEST_TOPIC, SUCCESS_TOPIC, FAILURE_TOPIC],
-    promise: fetchTopic(id),
+    types: [REQUEST_READ_TOPIC, SUCCESS_READ_TOPIC, FAILURE_READ_TOPIC],
+    promise: getTopic(id),
     params: id
   };
 }
 
-export function loadTopicContent(id) {
-  log(`.A. loadTopicContent : ${id}`);
+export function readTopicContent(id) {
+  log(`.A. readTopicContent : ${id}`);
   return {
-    types: [REQUEST_TOPIC_CONTENT, SUCCESS_TOPIC_CONTENT, FAILURE_TOPIC_CONTENT],
-    promise: fetchTopicContent(id),
+    types: [REQUEST_READ_TOPIC_CONTENT, SUCCESS_READ_TOPIC_CONTENT, FAILURE_READ_TOPIC_CONTENT],
+    promise: getTopicContent(id),
     params: id
   };
 }
 
 
-export function loadChat(id) {
-  log(`.A. loadChat : ${id}`);
+export function readChat(id) {
+  log(`.A. readChat : ${id}`);
   return {
-    types: [REQUEST_CHAT, SUCCESS_CHAT, FAILURE_CHAT],
-    promise: fetchChat(id),
+    types: [REQUEST_READ_CHAT, SUCCESS_READ_CHAT, FAILURE_READ_CHAT],
+    promise: getChat(id),
     params: id
   };
 }
 
 export function createUniverse(universe) {
-  log('.A. postniverse');
+  log('.A. createUniverse');
   
   return {
-    types: [CREATE_UNIVERSE, SUCCESS_CREATE_UNIVERSE, FAILURE_CREATE_UNIVERSE],
+    types: [REQUEST_CREATE_UNIVERSE, SUCCESS_CREATE_UNIVERSE, FAILURE_CREATE_UNIVERSE],
     promise: postUniverse(universe),
     params: universe
   };
 }
 
 export function createTopic(topic) {
-  log('.A. postTopic');
+  log('.A. createTopic');
   
   return {
-    types: [CREATE_TOPIC, SUCCESS_CREATE_TOPIC, FAILURE_CREATE_TOPIC],
+    types: [REQUEST_CREATE_TOPIC, SUCCESS_CREATE_TOPIC, FAILURE_CREATE_TOPIC],
     promise: postTopic(topic),
     params: topic
   };
@@ -109,7 +100,7 @@ export function createTopic(topic) {
 
 export function createUser(user) {
   log('.A. createUser');
-  const {pseudo, email, password} = user; // Évince redirect
+  const {pseudo, email, password} = user; // Évince user.redirect
   
   return {
     types: [REQUEST_CREATE_USER, SUCCESS_CREATE_USER, FAILURE_CREATE_USER],

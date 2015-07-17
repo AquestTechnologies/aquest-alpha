@@ -14,9 +14,9 @@ class NewTopic extends React.Component {
     }
     
     this.state = {
-      title:      'Topic Title',
-      content:    'Awesomeness',
-      userId:     'johnDoe'
+      title:   'Topic Title',
+      content: 'Awesomeness',
+      userId:  'johnDoe'
     };
   }
   

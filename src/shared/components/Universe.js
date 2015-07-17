@@ -10,12 +10,12 @@ class Universe extends React.Component {
   static runPhidippides(routerState) {
     return [{
       id:         'universe',
-      creator:    'loadUniverse',
+      creator:    'readUniverse',
       args:       [routerState.params.universeId]
     },{
       id:         'chat',
       dependency: routerState.params.topicId ? 'topic' : 'universe',
-      creator:    'loadChat',
+      creator:    'readChat',
       args:       ['__dependency.chatId']
     }];
   }
@@ -58,8 +58,8 @@ class Universe extends React.Component {
                 topics           = {topics}
                 universe         = {universe}
                 setTopic         = {this.props.setTopic}
-                loadInventory    = {this.props.loadInventory} //passer les actions par le context, a faire
-                loadTopicContent = {this.props.loadTopicContent} //passer les actions par le context, a faire
+                readInventory    = {this.props.readInventory} //passer les actions par le context, a faire
+                readTopicContent = {this.props.readTopicContent} //passer les actions par le context, a faire
                 createTopic      = {this.props.createTopic}
               />
             </div>
@@ -69,7 +69,7 @@ class Universe extends React.Component {
         <Chat 
           chatId   = {chatId}
           chat     = {this.props.chats[chatId]} 
-          loadChat = {this.props.loadChat} //passer les actions par le context, a faire
+          readChat = {this.props.readChat} //passer les actions par le context, a faire
         />
       </div>
     );
