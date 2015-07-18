@@ -4,7 +4,7 @@ import {RouteHandler}       from 'react-router';
 import {bindActionCreators} from 'redux';
 import {Connector}          from 'react-redux';
 
-import * as actionCreators from '../actionCreators';
+import * as actionCreators from '../experiment';
 
 import LoadingBar           from './common/LoadingBar';
 

@@ -1,8 +1,25 @@
 import log, {logRequest} from '../../../shared/utils/logTailor.js';
 import queryDb from '../../queryDb.js';
 import bcrypt from 'bcrypt';
+import * as actionCreators from '../../../shared/experiment';
 
 function apiPlugin(server, options, next) {
+  
+  console.log(actionCreators);
+  console.log('///');
+  console.log(Object.keys(actionCreators)
+    .map(key => actionCreators[key].getTypes())
+    .reduce((a, b) => a.concat(b)));
+  console.log('///');
+  
+  // for (let key in actionCreators) {
+  //   const {intention, method, path} = actionCreators[key].getModel();
+  //   server.route({
+  //     method,
+  //     path: '/api/universes/',
+  //     handler: (request, reply) => reply.callQueryDb(request, reply, intention)
+  //   });
+  // }
   
   server.route({
     method: 'GET',
@@ -94,13 +111,13 @@ function apiPlugin(server, options, next) {
     });
   }*/
   
-  server.decorate('reply', 'callQueryDb', (request, reply, source, params) => {
+  server.decorate('reply', 'callQueryDb', (request, reply, intention, params) => {
       
     const response = reply.response().hold();
     
     logRequest(request);
     
-    queryDb({source, params}).then(
+    queryDb(intention, params).then(
       result => {
         response.source = result;
         response.send();

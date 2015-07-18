@@ -1,6 +1,6 @@
 import log      from './logTailor.js';
 
-import * as actionCreators from '../actionCreators';
+import * as actionCreators from '../experiment';
 
 export default function phidippides(routerState, dispatch) {
   

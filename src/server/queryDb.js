@@ -4,23 +4,23 @@ import log       from '../shared/utils/logTailor.js';
 
 let client;
 
-export default function queryDb(queryInfo) {
+export default function queryDb(intention, params) {
   
-  log(`+++ --> ${queryInfo.source} - ${queryInfo.params}`);
+  log(`+++ --> ${intention} - ${params}`);
   const d = new Date();
   
   return new Promise((resolve, reject) => {
     connect() 
     .then(
       () => {
-        const {sql, callback} = buildQuery(queryInfo);
+        const {sql, callback} = buildQuery(intention, params);
         log(`+++ REQUETE --> ${sql}`);
         if (sql) performQuery(sql)
           .then(
             result => resolve(typeof callback === 'function' ? callback(result) : result),
             error => reject(error)
           );
-        else reject('queryDb.buildQuery did not produce any SQL, check your query.source');
+        else reject('queryDb.buildQuery did not produce any SQL, check your query.intention');
       },
       error => reject(error)
     );
@@ -68,16 +68,14 @@ export default function queryDb(queryInfo) {
   
   
   // Builds the SQL query and optionnal callback from params
-  function buildQuery(queryInfo) {
-    
-    const {source, params} = queryInfo;
+  function buildQuery(intention, params) {
     
     const {userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback;
     
-    switch (source) {
+    switch (intention) {
       
       case 'getUniverses':
         // sql = 'SELECT id, name, description, picture, chat_id FROM aquest_schema.universe';
