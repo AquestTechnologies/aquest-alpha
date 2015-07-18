@@ -5,20 +5,24 @@ import * as actionCreators from '../../../shared/actionCreators';
 
 function apiPlugin(server, options, next) {
   
+  // Dynamic construction of the API routes
   for (let key in actionCreators) {
-    const {intention, method, path} = actionCreators[key].getModel();
+    const {intention, method, path} = actionCreators[key].getShape();
+    
+    // Applies only to actionCreators with the correct shape
     if (method && path) server.route({
       method,
       path,
       handler: (request, reply) => {
-        const params = method === 'POST' ? request.payload : request.params.p;
-        if (overrideCallQueryDb[intention]) overrideCallQueryDb[intention](request, reply, intention, params);
-        else reply.callQueryDb(request, reply, intention, params);
+        const params = method === 'post' ? request.payload : request.params.p;
+        if (overrideReply[intention]) overrideReply[intention](request, reply, intention, params);
+        else reply.dbResults(request, reply, intention, params);
       }
     });
   }
   
-  const overrideCallQueryDb = {
+  // Allows to perform server-side function like validations and params manipulation
+  const overrideReply = {
     
     createUser: (request, reply, intention, params) => {
       bcrypt.genSalt(10, (err, salt) => {
@@ -29,13 +33,14 @@ function apiPlugin(server, options, next) {
           params.passwordSalt = salt;
           params.ip = request.info.remoteAddress;
           delete params.password;
-          reply.callQueryDb(request, reply, intention, params);
+          reply.dbResults(request, reply, intention, params);
         });
       });
     }
   };
   
-  server.decorate('reply', 'callQueryDb', (request, reply, intention, params) => {
+  // Asks db middleware for data then sends results back
+  server.decorate('reply', 'dbResults', (request, reply, intention, params) => {
     logRequest(request);
     if (request.method === 'post') log(`+++ params : ${JSON.stringify(params)}`);
     

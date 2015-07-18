@@ -10,12 +10,12 @@ export default function queryDb(intention, params) {
   const d = new Date();
   
   return new Promise((resolve, reject) => {
-    connect() 
+    connect() // Connection attempt
     .then(
       () => {
-        const {sql, callback} = buildQuery(intention, params);
-        // log(`+++ REQUETE --> ${sql}`);
-        if (sql) performQuery(sql)
+        const {sql, callback} = buildQuery(intention, params); // Query construction
+        // log(`+++ REQUETE --> ${sql}`); 
+        if (sql) performQuery(sql)  // Queries the database
           .then(
             result => resolve(typeof callback === 'function' ? callback(result) : result),
             error => reject(error)
@@ -67,7 +67,7 @@ export default function queryDb(intention, params) {
   }
   
   
-  // Builds the SQL query and optionnal callback from params
+  // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
     const {userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip} = 
