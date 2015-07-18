@@ -6,7 +6,7 @@ let client;
 
 export default function queryDb(intention, params) {
   
-  log(`+++ --> ${intention} - ${params}`);
+  // log(`+++ --> ${intention} - ${params}`);
   const d = new Date();
   
   return new Promise((resolve, reject) => {
@@ -14,7 +14,7 @@ export default function queryDb(intention, params) {
     .then(
       () => {
         const {sql, callback} = buildQuery(intention, params);
-        log(`+++ REQUETE --> ${sql}`);
+        // log(`+++ REQUETE --> ${sql}`);
         if (sql) performQuery(sql)
           .then(
             result => resolve(typeof callback === 'function' ? callback(result) : result),
@@ -60,7 +60,7 @@ export default function queryDb(intention, params) {
           reject(`error running query : ${sql}`);
           return;
         }
-        log(result.rowCount ? `+++ <-- ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- nothing after ${new Date() - d}ms`);
+        log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
         resolve(result);
       });
     });
@@ -77,7 +77,7 @@ export default function queryDb(intention, params) {
     
     switch (intention) {
       
-      case 'getUniverses':
+      case 'readUniverses':
         // sql = 'SELECT id, name, description, picture, chat_id FROM aquest_schema.universe';
         sql = 
         'SELECT ' + 
@@ -89,7 +89,7 @@ export default function queryDb(intention, params) {
         
         break;
         
-      case 'getUniverse':
+      case 'readUniverse':
         
         sql = 
         'SELECT ' + 
@@ -103,7 +103,7 @@ export default function queryDb(intention, params) {
           
         break;
         
-      case 'getUniverseWithTopics':
+      case 'readUniverseWithTopics':
         
         sql =
         'SELECT ' + 
@@ -134,7 +134,7 @@ export default function queryDb(intention, params) {
         
         break;
         
-      case 'getChat':
+      case 'readChat':
         
         /*sql = 
         'SELECT \
@@ -170,7 +170,7 @@ export default function queryDb(intention, params) {
         
         break;
         
-      case 'getInventory':
+      case 'readInventory':
           
         /*sql = 
         'SELECT ' +  
@@ -202,7 +202,7 @@ export default function queryDb(intention, params) {
         
         break;  
         
-      /*case 'getTopicByHandle':
+      /*case 'readTopicByHandle':
         
         // id, title, author, desc, imgPath, timestamp, handle, content, chatId
         sql = 
@@ -226,7 +226,7 @@ export default function queryDb(intention, params) {
         };
         break;*/
       
-      case 'getTopic':
+      case 'readTopic':
         
         sql =
         'SELECT ' +
@@ -240,7 +240,7 @@ export default function queryDb(intention, params) {
         
         break;
       
-      case 'getTopicContent':
+      case 'readTopicContent':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
         /*sql =
@@ -291,7 +291,7 @@ export default function queryDb(intention, params) {
         
         break;
         
-      case 'postMessage':
+      case 'createMessage':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
         sql = 
@@ -309,7 +309,7 @@ export default function queryDb(intention, params) {
         break;
         
         
-      case 'postUniverse':
+      case 'createUniverse':
         // id, universe1Id, universe2Id, force, createdAt, updatedAt, deleted
         
         sql = 
@@ -321,7 +321,7 @@ export default function queryDb(intention, params) {
         
         break;
         
-      case 'postTopic':
+      case 'createTopic':
         //topic : id, user_id, chat_id, universe_id, title, handle, created_at, updated_at, deleted
         //atom_topic : id; atom_id, topic_id, content, order, created_at, updated_at, deleted
         //atom : id, type, structure, created_at, updated_at, deleted
@@ -334,7 +334,7 @@ export default function queryDb(intention, params) {
         
         break;
         
-      case 'postUser':
+      case 'createUser':
         
         sql = 
         'INSERT INTO aquest_schema.user ' +

@@ -1,16 +1,16 @@
 import log from './utils/logTailor';
 import Immutable from 'immutable';
 
-import * as actionCreators from './experiment';
+import * as actionCreators from './actionCreators';
 
 const { 
-  SUCCESS_getUniverse,
-  SUCCESS_getUniverses,
-  SUCCESS_getInventory,
-  SUCCESS_getChat,
-  SUCCESS_getTopic,
-  SUCCESS_getTopicContent,
-  SUCCESS_postUser
+  SUCCESS_readUniverse,
+  SUCCESS_readUniverses,
+  SUCCESS_readInventory,
+  SUCCESS_readChat,
+  SUCCESS_readTopic,
+  SUCCESS_readTopicContent,
+  SUCCESS_createUser
 } = (() => {
   let at = {};
   const types = Object.keys(actionCreators)
@@ -36,17 +36,17 @@ export function universes(state = Immutable.Map(), action) {
   let newState;
   switch (action.type) {
     
-  case SUCCESS_getUniverse:
+  case SUCCESS_readUniverse:
     return state.set(action.payload.id, fromJSGreedy(action.payload));
 
-  case SUCCESS_getUniverses:
+  case SUCCESS_readUniverses:
     newState = state;
     action.payload.forEach(universe => {
       if (!newState.get(universe.id)) newState = newState.set(universe.id, fromJSGreedy(universe));
     });
     return newState;
     
-  case SUCCESS_getInventory:
+  case SUCCESS_readInventory:
     const d = new Date();
     return state.setIn([action.params, 'lastInventoryUpdate'], d.getTime());
   
@@ -58,7 +58,7 @@ export function universes(state = Immutable.Map(), action) {
 export function chats(state = Immutable.Map(), action) {
   switch (action.type) {
     
-  case SUCCESS_getChat:
+  case SUCCESS_readChat:
     return state.set(action.payload.id, fromJSGreedy(action.payload));
     
   default:
@@ -70,16 +70,16 @@ export function topics(state = Immutable.Map(), action) {
   let newState;
   switch (action.type) {
     
-  case SUCCESS_getInventory:
+  case SUCCESS_readInventory:
     newState = state;
     action.payload.forEach(topic => newState = newState.set(topic.id, fromJSGreedy(topic)));
     return newState;
     
-  case SUCCESS_getTopic:
+  case SUCCESS_readTopic:
     return state.set(action.payload.id, fromJSGreedy(action.payload));
     
   
-  case SUCCESS_getTopicContent:
+  case SUCCESS_readTopicContent:
     return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
     
   default:
@@ -91,7 +91,7 @@ export function users(state = Immutable.Map(), action) {
   let newState;
   switch (action.type) {
     
-  case SUCCESS_postUser:
+  case SUCCESS_createUser:
     action.params.redirect();
     return state.set(action.payload.id, fromJSGreedy(action.payload));
     
