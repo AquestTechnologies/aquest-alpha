@@ -4,56 +4,56 @@ import {isServer} from './utils/isClient';
 export const readUniverse = createActionCreator({
   intention: 'readUniverse',
   method: 'get',
-  path: '/api/universe/{p}',
+  pathx: '/api/universe/{p}',
 });
 
 export const readUniverses = createActionCreator({
   intention: 'readUniverses',
   method: 'get',
-  path: '/api/universes/',
+  pathx: '/api/universes/',
 });
 
 export const readInventory = createActionCreator({
   intention: 'readInventory',
   method: 'get',
-  path: '/api/inventory/{p}',
+  pathx: '/api/inventory/{p}',
 });
 
 export const readTopic = createActionCreator({
   intention: 'readTopic',
   method: 'get',
-  path: '/api/topic/{p}',
+  pathx: '/api/topic/{p}',
 });
 
 export const readTopicContent = createActionCreator({
   intention: 'readTopicContent',
   method: 'get',
-  path: '/api/topic/content/{p}',
+  pathx: '/api/topic/content/{p}',
 });
 
 export const readChat = createActionCreator({
   intention: 'readChat',
   method: 'get',
-  path: '/api/chat/{p}',
+  pathx: '/api/chat/{p}',
 });
 
 export const createUniverse = createActionCreator({
   intention: 'createUniverse',
   method: 'post',
-  path: '/api/universe/',
+  pathx: '/api/universe/',
 });
 
 export const createTopic = createActionCreator({
   intention: 'createTopic',
   method: 'post',
-  path: '/api/topic/',
+  pathx: '/api/topic/',
 });
 
 export const createUser = createActionCreator({
   intention: 'createUser',
   method: 'post',
-  path: '/api/user/',
-  overrideParams: ({pseudo, email, password}) => {
+  pathx: '/api/user/',
+  mutateParams: ({pseudo, email, password}) => {
     return {pseudo, email, password};
   }
 });
@@ -64,17 +64,47 @@ function createActionCreator(shape) {
   // (string)   method          HTTP method
   // (string)   path            API path. If (method && path) an corresponding API route gets created
   // (function) overrideParams  allows to mutate the params before the fetching cycle
-  const {intention, method, path, overrideParams} = shape;
+  const {intention, method, pathx, mutateParams} = shape;
   const types = ['REQUEST', 'SUCCESS', 'FAILURE'].map(type => `${type}_${intention}`);
   
   const actionCreator = params => {
     log(`.A. ${intention} ${JSON.stringify(params)}`);
-    return {
-      types,
-      params,
-      promise: selectChannelToDB(intention, method, path.replace(/\{\S*\}/, ''), overrideParams ? overrideParams(params) : params),
-    };
+    
+    const promise = new Promise((resolve, reject) => {
+      // API override, calling directly middleware
+      if (isServer()) { 
+        require('../server/queryDb')(intention, params).then(
+          result => resolve(result),
+          error => reject(error));
+      
+      // API call through XMLHttpRequest from client
+      } else {
+        const path = pathx.replace(/\{\S*\}/, '');
+        const isPost = method === 'post';
+        const req = new XMLHttpRequest();
+        console.log(`+++ --> ${method} ${path}`, params);
+        
+        req.onerror = err => reject(err);
+        req.open(method, isPost ? path : params ? path + params : path);
+        req.onload = () => {
+          if (req.status === 200) {
+            const result = JSON.parse(req.response);
+            console.log(`+++ <-- ${intention}`, result);
+            resolve(result);
+            
+          } else reject(Error(req.statusText));
+        };
+        
+        if (isPost) req.send(createForm(mutateParams ? mutateParams(params) : params));
+        else req.send();
+      }
+    });
+    
+    promise.then(() => {}, error => log('error', 'Action error', 'shape:', shape, 'params:', JSON.stringify(params), error));
+    
+    return {types, params, promise,};
   };
+  
   // getters
   actionCreator.getTypes = () => types;
   actionCreator.getShape = () => shape;
@@ -82,46 +112,11 @@ function createActionCreator(shape) {
   return actionCreator;
 }
 
-// Selects the data fetching channel based on environnement
-function selectChannelToDB(intention, method, path, params) {
+function createForm(params) {
+  let f  = new FormData();
+  for(let key in params) {
+    f.append(key, params[key]);
+  }
   
-  return new Promise((resolve, reject) => {
-    
-    if (isServer()) {
-      // API override, calling directly middleware
-      require('../server/queryDb')(intention, params).then(
-        result => resolve(result),
-        error => reject(error)
-      );
-      
-    } else {
-      // API call through XMLHttpRequest from client
-      console.log(`+++ --> ${method} ${intention} : `, params);
-      const isPost = method === 'post';
-      const req = new XMLHttpRequest();
-      req.open(method, isPost ? path : params ? path + params : path);
-      
-      req.onerror = () => reject(Error("Error during HTTP request"));
-      req.onload = () => {
-        if (req.status === 200) {
-          const result = JSON.parse(req.response);
-          console.log(`+++ <-- ${intention} : `, result);
-          resolve(result);
-        } else {
-          reject(Error(req.statusText));
-        }
-      };
-      
-      const createForm = () => {
-        let f  = new FormData();
-        for(let key in params) {
-          f.append(key, params[key]);
-        }
-        return f;
-      };
-      
-      if (isPost) req.send(createForm());
-      else req.send();
-    }
-  });
+  return f;
 }

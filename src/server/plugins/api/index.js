@@ -5,38 +5,46 @@ import * as actionCreators from '../../../shared/actionCreators';
 
 function apiPlugin(server, options, next) {
   
-  // Dynamic construction of the API routes
+  // Dynamic construction of the API routes from actionCreator with API calls
   for (let key in actionCreators) {
-    const {intention, method, path} = actionCreators[key].getShape();
+    const {intention, method, pathx} = actionCreators[key].getShape();
     
-    // Applies only to actionCreators with the correct shape
-    if (method && path) server.route({
+    if (method && pathx) server.route({
       method,
-      path,
+      path: pathx,
       handler: (request, reply) => {
         const params = method === 'post' ? request.payload : request.params.p;
-        if (overrideReply[intention]) overrideReply[intention](request, reply, intention, params);
-        else reply.dbResults(request, reply, intention, params);
-      }
+        
+        if (!validators[intention]) reply.dbResults(request, reply, intention, params);
+        else validators[intention](request, params).then(
+          () => reply.dbResults(request, reply, intention, params),
+          error => log('error', error)
+        );
+      },
     });
   }
-  
-  // Allows to perform server-side function like validations and params manipulation
-  const overrideReply = {
+
+  // Allows validation and params mutation before querying db
+  const validators = {
     
-    createUser: (request, reply, intention, params) => {
-      bcrypt.genSalt(10, (err, salt) => {
-        if (err) throw(err);
-        bcrypt.hash(params.password, salt, (err, hash) => {
-          if (err) throw(err);
-          params.passwordHash = hash;
-          params.passwordSalt = salt;
-          params.ip = request.info.remoteAddress;
-          delete params.password;
-          reply.dbResults(request, reply, intention, params);
+    createUser: (request, params) => {
+      console.log('validation');
+      console.log(params);
+      return new Promise((resolve, reject) => {
+        bcrypt.genSalt(10, (err, salt) => {
+          if (err) reject(err);
+          bcrypt.hash(params.password, salt, (err, hash) => {
+            if (err) reject(err);
+            params.passwordHash = hash;
+            params.passwordSalt = salt;
+            params.ip = request.info.remoteAddress;
+            delete params.password;
+            console.log(params);
+            resolve();
+          });
         });
       });
-    }
+    },
   };
   
   // Asks db middleware for data then sends results back

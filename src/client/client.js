@@ -60,14 +60,19 @@ io.on('message', function (message) {
     c++;
     const d = new Date();
     log(`__________ ${c} router.run ${url} __________`);
-  
-    React.render(
-      <Provider store={store}>
-        {() => <Handler {...routerState} />}
-      </Provider>,
-      document.getElementById('mountNode'),
-      () => log(`... App rendered in ${new Date() - d}ms.`)
-    );
+    
+    try { 
+      React.render(
+        <Provider store={store}>
+          {() => <Handler {...routerState} />}
+        </Provider>,
+        document.getElementById('mountNode'),
+        () => log(`... App rendered in ${new Date() - d}ms.`)
+      );
+    } 
+    catch(err) {
+      log('error', '!!! Error while React.renderToString', err);
+    }
   });
   
   

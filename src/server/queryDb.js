@@ -6,21 +6,27 @@ let client;
 
 export default function queryDb(intention, params) {
   
-  // log(`+++ --> ${intention} - ${params}`);
   const d = new Date();
   
   return new Promise((resolve, reject) => {
-    connect() // Connection attempt
-    .then(
+    
+    // Connection attempt
+    connect().then( 
       () => {
         const {sql, callback} = buildQuery(intention, params); // Query construction
+        
         // log(`+++ REQUETE --> ${sql}`); 
-        if (sql) performQuery(sql)  // Queries the database
-          .then(
-            result => resolve(typeof callback === 'function' ? callback(result) : result),
-            error => reject(error)
-          );
-        else reject('queryDb.buildQuery did not produce any SQL, check your query.intention');
+        if (sql) new Promise((resolve, reject) => {
+          client.query(sql, (err, result) => {
+            if (err) return reject(err);
+            log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
+            resolve(result);
+          });
+        }).then(
+          result => resolve(typeof callback === 'function' ? callback(result) : result),
+          error => reject(error)
+        );
+        else reject('queryDb.buildQuery did not produce any SQL, check your intention');
       },
       error => reject(error)
     );
@@ -39,29 +45,8 @@ export default function queryDb(intention, params) {
     
     return new Promise((resolve, reject) => {
       client.connect(err => {
-        if (err) {
-          log('error', '!!! Could not connect to postgres', err);
-          reject('queryDb connection failed.');
-          return;
-        } 
+        if (err) return reject(err);
         resolve();
-      });
-    });
-  }
-  
-  
-  // Performs a given SQL string
-  function performQuery(sql) {
-    
-    return new Promise((resolve, reject) => {
-      client.query(sql, (err, result) => {
-        if (err) {
-          log('error', '!!! Error queryDb.performQuery : ', err);
-          reject(`error running query : ${sql}`);
-          return;
-        }
-        log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
-        resolve(result);
       });
     });
   }
