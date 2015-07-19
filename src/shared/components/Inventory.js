@@ -34,7 +34,7 @@ class Inventory extends React.Component {
       topic = {topics[key]} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
     />);
   }
-  
+    
   render() {
     const {nameVisible} = this.state;
     const {universe, topics} = this.props;

@@ -15,9 +15,9 @@ function apiPlugin(server, options, next) {
       handler: (request, reply) => {
         const params = method === 'post' ? request.payload : request.params.p;
         
-        if (!validators[intention]) reply.dbResults(request, reply, intention, params);
+        if (!validators[intention]) sendResults(request, reply, intention, params);
         else validators[intention](request, params).then(
-          () => reply.dbResults(request, reply, intention, params),
+          () => sendResults(request, reply, intention, params),
           error => log('error', error)
         );
       },
@@ -28,8 +28,6 @@ function apiPlugin(server, options, next) {
   const validators = {
     
     createUser: (request, params) => {
-      console.log('validation');
-      console.log(params);
       return new Promise((resolve, reject) => {
         bcrypt.genSalt(10, (err, salt) => {
           if (err) reject(err);
@@ -39,7 +37,6 @@ function apiPlugin(server, options, next) {
             params.passwordSalt = salt;
             params.ip = request.info.remoteAddress;
             delete params.password;
-            console.log(params);
             resolve();
           });
         });
@@ -48,7 +45,7 @@ function apiPlugin(server, options, next) {
   };
   
   // Asks db middleware for data then sends results back
-  server.decorate('reply', 'dbResults', (request, reply, intention, params) => {
+  function sendResults(request, reply, intention, params) {
     logRequest(request);
     if (request.method === 'post') log(`+++ params : ${JSON.stringify(params)}`);
     
@@ -63,14 +60,14 @@ function apiPlugin(server, options, next) {
         response.send();
       }
     );
-  });
+  }
   
   next();
 }
 
 apiPlugin.attributes = {
-  name:         'restAPI',
-  description:  'restAPI for client queries',
+  name:         'apiPlugin',
+  description:  'REST API for client queries',
   main:         'index.js'
 };
 

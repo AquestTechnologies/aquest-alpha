@@ -49,13 +49,13 @@ server.route({
 server.route({
   method: 'GET',
   path: '/',
-  handler: (request, reply) => reply.prerenderer(request, reply)
+  handler: (request, reply) => prerender(request, reply)
 });
 
 server.route({
   method: 'GET',
   path: '/{p*}',
-  handler: (request, reply) => reply.prerenderer(request, reply)
+  handler: (request, reply) => prerender(request, reply)
 });
 
 server.route({
@@ -65,7 +65,7 @@ server.route({
 });
 
 // Prerendering
-server.decorate('reply', 'prerenderer', (request, reply) => {
+function prerender(request, reply) {
   
   // Intercepte la réponse
   const response = reply.response().hold();
@@ -98,7 +98,7 @@ server.decorate('reply', 'prerenderer', (request, reply) => {
   router.run((Handler, routerState) => {
     log('_____________ router.run _____________');
 
-    // Initialise une nouvelle instance flux  
+    // Initialise une nouvelle instance redux  
     const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), {});
     
     // Initialise les stores
@@ -154,25 +154,22 @@ server.decorate('reply', 'prerenderer', (request, reply) => {
       error => log('error', '!!! Error while Phidippides', error)
     );
   });
-});
+}
 
 // Démarrage du server
-server.start(
-  () => {
-    log(`Make it rain! API server started at ${server.info.uri}`);
-    log(`              ws  server started at ${server.select('ws').info.uri}`);
-    console.log('  ___                        _        \n' + // !
-                ' / _ \\                      | |      \n' +
-                '/ /_\\ \\ __ _ _   _  ___  ___| |_    \n' +
-                "|  _  |/ _` | | | |/ _ \\/ __| __|    \n" +
-                '| | | | (_| | |_| |  __/\\__ \\ |_    \n' +
-                '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
-                '          | |\n' +
-                '          |_|'
-               );
-    if (0) {
-      const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
-      startActivists();
-    }
+server.start(() => {
+  log(`Make it rain! API server started at ${server.info.uri}`);
+  log(`              ws  server started at ${server.select('ws').info.uri}`);
+  console.log('  ___                        _        \n' + // !
+              ' / _ \\                      | |      \n' +
+              '/ /_\\ \\ __ _ _   _  ___  ___| |_    \n' +
+              "|  _  |/ _` | | | |/ _ \\/ __| __|    \n" +
+              '| | | | (_| | |_| |  __/\\__ \\ |_    \n' +
+              '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
+              '          | |\n' +
+              '          |_|');
+  if (0) {
+    const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
+    startActivists();
   }
-);
+});

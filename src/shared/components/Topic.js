@@ -12,14 +12,9 @@ class Topic extends React.Component {
   }
   
   componentWillMount() {
-    // console.log('.C. Topic.componentWillMount');
     const {id, content} = this.props.topics[this.props.params.topicId];
     if (!content) this.props.readTopicContent(id);
   }
-  
-  // componentWillReceiveProps(nextProps) {
-  //   this.setState({ topic: nextProps.topic });
-  // }
   
   render() {
     const topic = this.props.topics[this.props.params.topicId];
@@ -44,17 +39,6 @@ class Topic extends React.Component {
     );
   }
 }
-
-// Topic.defaultProps = {
-//   universe: {},
-//   topic: {
-//   title: 'A default title is better than no title!' ,
-//   author: 'Someone',
-//   timestamp: '0',
-//   content: 'Hello world',
-//   handle: '000-A default'
-//   }
-// };
 
 // Permet d'acceder a this.context.router
 Topic.contextTypes = {

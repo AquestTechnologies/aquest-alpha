@@ -55,7 +55,7 @@ export default function queryDb(intention, params) {
   // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
-    const {userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip} = 
+    const {id, userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback;
@@ -313,9 +313,9 @@ export default function queryDb(intention, params) {
         
         sql = 
         'INSERT INTO aquest_schema.topic ' +
-          '(id, user_id, universe_id, title) ' +
+          '(id, user_id, universe_id, title, description) ' +
         'VALUES ' +
-          `('${title}', '${userId}','${universeId}', '${title}')`;
+          `('${id}', '${userId}','${universeId}', '${title}', '${description})`;
         
         break;
         

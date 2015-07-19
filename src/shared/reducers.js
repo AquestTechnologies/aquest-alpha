@@ -10,13 +10,14 @@ const {
   SUCCESS_readChat,
   SUCCESS_readTopic,
   SUCCESS_readTopicContent,
-  SUCCESS_createUser
+  SUCCESS_createUser,
+  SUCCESS_createTopic,
 } = (() => {
-  let at = {};
-  const types = Object.keys(actionCreators)
+  const at = {};
+  Object.keys(actionCreators)
     .map(key => actionCreators[key].getTypes())
-    .reduce((a, b) => a.concat(b));
-  types.forEach(type => at[type] = type);
+    .reduce((a, b) => a.concat(b), [])
+    .map(type => at[type] = type);
   return at;
 })();
 
@@ -25,10 +26,7 @@ export function records(state = [], action) {
   log('.R. ' + action.type);
   return [
     ...state,
-    {
-      action: action,
-      date: new Date()
-    }
+    {action: action, date: new Date()}
   ];
 }
 
@@ -81,6 +79,10 @@ export function topics(state = Immutable.Map(), action) {
   
   case SUCCESS_readTopicContent:
     return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
+    
+  case SUCCESS_createTopic:
+    action.params.redirect();
+    return state.set(action.params.id, fromJSGreedy(action.params));
     
   default:
     return state;
