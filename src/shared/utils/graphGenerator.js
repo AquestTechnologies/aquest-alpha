@@ -1,4 +1,4 @@
-import {randomInteger} from './randomGenerator';
+import {randomInteger, randomString} from './randomGenerators';
 
 const VERTEX_RADIUS = 30;
 const MARGIN = 30;
@@ -8,37 +8,76 @@ const FORCE_CORRECTOR = 1;
 export function generateGraphForD3(size) {
   
   const MIN_EDGES = 1;
-  const MAX_EDGES = 5;
+  const MAX_EDGES = 4;
   const MIN_FORCE = 1;
-  const MAX_FORCE = 5;
+  const MAX_FORCE = 1;
+  const fracDisconnected = 0.00;
+  const nGoups = Math.floor(Math.sqrt(size) - 2);
+  const t = Math.floor(size * (1 - fracDisconnected) / nGoups);
   
-  let vertices = [{name: 'first', description: 'first'}];
+  let vertices = [];
   let edges = [];
-  let name, description, parents, nextParent;
+  let groups = [];
   
   for (let i = 0; i < size; i++) {
-    
-    // Vertex definition
-    name = (Math.random() + 1).toString(36).substring(2, 7);
-    description = `description for ${name}`;
-    
-    // Parents selection
-    parents = [];
-    for (let i = 0, j = randomInteger(MIN_EDGES, MAX_EDGES); i < j; i++) {
-      nextParent = vertices[randomInteger(0, vertices.length - 1)];
-      if (parents.indexOf(nextParent) === -1) parents.push(nextParent);
+    const name = randomString(5);
+    vertices.push({
+      name, 
+      description: `description for ${name}`, 
+    });
+  }
+  
+  let offset = 0;
+  for (let i = 0; i < nGoups; i++) {
+    const group = [];
+    for (let j = offset; j < t + offset && j < size -1 ; j++) {
+      group.push(vertices[j]);
     }
-    
-    parents.forEach(parent => {
-      edges.push({
-        source: parent,
-        target: name,
-        value: randomInteger(MIN_FORCE, MAX_FORCE)
+    groups.push(group);
+    offset += t;
+  }
+  
+  const gl = groups.length;
+  const numberOfLuckyGroups = randomInteger(1, Math.floor(gl / 2));
+  
+  for (let i = 0; i < numberOfLuckyGroups; i++) {
+    const group = groups[i];
+    group.splice(0, 0, ...groups[numberOfLuckyGroups + i].splice(0, randomInteger(0, group.length)));
+  }
+  
+  groups.forEach((group, index) => {
+    const gl = group.length;
+    group.forEach(node => {
+      node.group = index;
+      let parents = [];
+      const nodeIndex = vertices.indexOf(node);
+      const nodeEdges = edges.filter(edge => edge.target === nodeIndex).length;
+      let nextParentIndex, nextParentEdges;
+      
+      for (let i = 0, j = randomInteger(Math.max(0, MIN_EDGES - nodeEdges), MAX_EDGES - nodeEdges); i < j; i++) {
+        let k = 0;
+        do {
+          k++;
+          nextParentIndex = vertices.indexOf(group[randomInteger(0, gl - 1)]);
+          nextParentEdges = edges.filter(edge => edge.source === nextParentIndex || edge.target === nextParentIndex).length;
+          if (k > gl) break;
+        } while (nextParentIndex === nodeIndex || parents.indexOf(nextParentIndex) !== -1)
+        if (nextParentEdges < MAX_EDGES) {
+          parents.push(nextParentIndex);
+        }
+      }
+      parents.forEach(parent => {
+        edges.push({
+          source: nodeIndex,
+          target: parent,
+          value: randomInteger(MIN_FORCE, MAX_FORCE)
+        });
       });
     });
-    
-    // Vertex creation
-    vertices.push({name, description});
+  });
+  
+  for (let i = edges.length - 1; i > -1; i-- ) {
+    if (Math.random() > 0.9) edges.splice(i, 1);
   }
   
   return({vertices, edges});
