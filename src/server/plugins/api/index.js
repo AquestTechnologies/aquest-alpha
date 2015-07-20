@@ -1,106 +1,56 @@
 import log, {logRequest} from '../../../shared/utils/logTailor.js';
 import queryDb from '../../queryDb.js';
 import bcrypt from 'bcrypt';
+import * as actionCreators from '../../../shared/actionCreators';
 
 function apiPlugin(server, options, next) {
   
-  server.route({
-    method: 'GET',
-    path: '/api/universes/',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'getUniverses')
-  });
-  
-  server.route({
-    method: 'GET',
-    path: '/api/universe/{id}',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'getUniverse', request.params.id)
-  });
-  
-  server.route({
-    method: 'GET',
-    path: '/api/inventory/{universeId}',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'getInventory', request.params.universeId)
-  });
-  
-  server.route({
-    method: 'GET',
-    path: '/api/topic/content/{topicId}',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'getTopicContent', request.params.topicId)
-  });
-  
-  server.route({
-    method: 'GET',
-    path: '/api/chat/{id}',
-    handler: (request, reply) => reply.callQueryDb(request, reply, 'getChat', request.params.id)
-  });
-  
-  server.route({
-    method: 'POST',
-    path: '/api/universe/',
-    handler: (request, reply) => {
-        const {payload} = request;
-        // TODO check request.payload before send to DB !
-        reply.callQueryDb(request, reply, 'postUniverse', payload);
-      }
-  });
-  
-  server.route({
-    method: 'POST',
-    path: '/api/topic/',
-    handler: (request, reply) => {
-        //payload {user_id}&{universe_id}&{title}
-        const {payload} = request;
-        // TODO check request.payload before send to DB !
-        reply.callQueryDb(request, reply, 'postTopic', payload);
-      }
-  });
-  
-  server.route({
-    method: 'POST',
-    path: '/api/chatMessage/',
-    handler: (request, reply) => {
-      //payload {userId}&{chatId}&{messageContent}
-        const {payload} = request;
-        // TODO check request.payload before send to DB !
-        reply.callQueryDb(request, reply, 'postMessage', payload);
-      }
-  });
-  
-  server.route({
-    method: 'POST',
-    path: '/api/user/',
-    handler: (request, reply) => {
-        const {payload, info} = request;
+  // Dynamic construction of the API routes from actionCreator with API calls
+  for (let key in actionCreators) {
+    const {intention, method, pathx} = actionCreators[key].getShape();
+    
+    if (method && pathx) server.route({
+      method,
+      path: pathx,
+      handler: (request, reply) => {
+        const params = method === 'post' ? request.payload : request.params.p;
         
+        if (!validators[intention]) sendResults(request, reply, intention, params);
+        else validators[intention](request, params).then(
+          () => sendResults(request, reply, intention, params),
+          error => log('error', error)
+        );
+      },
+    });
+  }
+
+  // Allows validation and params mutation before querying db
+  const validators = {
+    
+    createUser: (request, params) => {
+      return new Promise((resolve, reject) => {
         bcrypt.genSalt(10, (err, salt) => {
-          if (err) throw(err);
-          bcrypt.hash('B4c0/\/', salt, (err, hash) => {
-            if (err) throw(err);
-            payload.passwordHash = hash;
-            payload.passwordSalt = salt;
-            payload.ip = info.remoteAddress;
-            reply.callQueryDb(request, reply, 'postUser', payload);
+          if (err) reject(err);
+          bcrypt.hash(params.password, salt, (err, hash) => {
+            if (err) reject(err);
+            params.passwordHash = hash;
+            params.passwordSalt = salt;
+            params.ip = request.info.remoteAddress;
+            delete params.password;
+            resolve();
           });
         });
-      }
-  });
+      });
+    },
+  };
   
-  /*function promiseRestget(query){
-    return new Promise((resolve, reject) => {
-      queryDb(query).then(
-        result => resolve(result),
-        error => reject(error)
-      );
-    });
-  }*/
-  
-  server.decorate('reply', 'callQueryDb', (request, reply, source, params) => {
-      
-    const response = reply.response().hold();
-    
+  // Asks db middleware for data then sends results back
+  function sendResults(request, reply, intention, params) {
     logRequest(request);
+    if (request.method === 'post') log(`+++ params : ${JSON.stringify(params)}`);
     
-    queryDb({source, params}).then(
+    const response = reply.response().hold();
+    queryDb(intention, params).then(
       result => {
         response.source = result;
         response.send();
@@ -110,14 +60,14 @@ function apiPlugin(server, options, next) {
         response.send();
       }
     );
-  });
+  }
   
   next();
 }
 
 apiPlugin.attributes = {
-  name:         'restAPI',
-  description:  'restAPI for client queries',
+  name:         'apiPlugin',
+  description:  'REST API for client queries',
   main:         'index.js'
 };
 

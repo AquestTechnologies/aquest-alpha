@@ -28,6 +28,13 @@ class Inventory extends React.Component {
     if (!this.props.universe.lastInventoryUpdate) this.props.readInventory(this.props.universe.id);
   }
   
+  renderCards(keys, topics) {
+    return keys.map(key => <Card
+      key = {key} 
+      topic = {topics[key]} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
+    />);
+  }
+    
   render() {
     const {nameVisible} = this.state;
     const {universe, topics} = this.props;
@@ -43,14 +50,9 @@ class Inventory extends React.Component {
           </div>
         </div>  
         
-        <div className={keys.length ? 'inventory_list-visible' : 'inventory_list-hidden'} >
+        <div className='inventory_list'>
           <NewTopicCard universeId={universe.id} />
-          {keys.map(key => {
-            return <Card
-              key = {key} 
-              topic = {topics[key]} // topic represente le contenu necessaire pour la card, pas le topic au complet (avec contenu)
-            />;
-          })}
+          {this.renderCards(keys, topics)}
         </div>
         
       </div>

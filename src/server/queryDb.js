@@ -4,23 +4,29 @@ import log       from '../shared/utils/logTailor.js';
 
 let client;
 
-export default function queryDb(queryInfo) {
+export default function queryDb(intention, params) {
   
-  log(`+++ --> ${queryInfo.source} - ${queryInfo.params}`);
   const d = new Date();
   
   return new Promise((resolve, reject) => {
-    connect() 
-    .then(
+    
+    // Connection attempt
+    connect().then( 
       () => {
-        const {sql, callback} = buildQuery(queryInfo);
-        log(`+++ REQUETE --> ${sql}`);
-        if (sql) performQuery(sql)
-          .then(
-            result => resolve(typeof callback === 'function' ? callback(result) : result),
-            error => reject(error)
-          );
-        else reject('queryDb.buildQuery did not produce any SQL, check your query.source');
+        const {sql, callback} = buildQuery(intention, params); // Query construction
+        
+        // log(`+++ REQUETE --> ${sql}`); 
+        if (sql) new Promise((resolve, reject) => {
+          client.query(sql, (err, result) => {
+            if (err) return reject(err);
+            log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
+            resolve(result);
+          });
+        }).then(
+          result => resolve(typeof callback === 'function' ? callback(result) : result),
+          error => reject(error)
+        );
+        else reject('queryDb.buildQuery did not produce any SQL, check your intention');
       },
       error => reject(error)
     );
@@ -39,47 +45,24 @@ export default function queryDb(queryInfo) {
     
     return new Promise((resolve, reject) => {
       client.connect(err => {
-        if (err) {
-          log('error', '!!! Could not connect to postgres', err);
-          reject('queryDb connection failed.');
-          return;
-        } 
+        if (err) return reject(err);
         resolve();
       });
     });
   }
   
   
-  // Performs a given SQL string
-  function performQuery(sql) {
+  // Builds the SQL query and optionnal callback
+  function buildQuery(intention, params) {
     
-    return new Promise((resolve, reject) => {
-      client.query(sql, (err, result) => {
-        if (err) {
-          log('error', '!!! Error queryDb.performQuery : ', err);
-          reject(`error running query : ${sql}`);
-          return;
-        }
-        log(result.rowCount ? `+++ <-- ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- nothing after ${new Date() - d}ms`);
-        resolve(result);
-      });
-    });
-  }
-  
-  
-  // Builds the SQL query and optionnal callback from params
-  function buildQuery(queryInfo) {
-    
-    const {source, params} = queryInfo;
-    
-    const {userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip} = 
+    const {id, userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback;
     
-    switch (source) {
+    switch (intention) {
       
-      case 'getUniverses':
+      case 'readUniverses':
         // sql = 'SELECT id, name, description, picture, chat_id FROM aquest_schema.universe';
         sql = 
         'SELECT ' + 
@@ -91,7 +74,7 @@ export default function queryDb(queryInfo) {
         
         break;
         
-      case 'getUniverse':
+      case 'readUniverse':
         
         sql = 
         'SELECT ' + 
@@ -105,7 +88,7 @@ export default function queryDb(queryInfo) {
           
         break;
         
-      case 'getUniverseWithTopics':
+      case 'readUniverseWithTopics':
         
         sql =
         'SELECT ' + 
@@ -136,7 +119,7 @@ export default function queryDb(queryInfo) {
         
         break;
         
-      case 'getChat':
+      case 'readChat':
         
         /*sql = 
         'SELECT \
@@ -172,7 +155,7 @@ export default function queryDb(queryInfo) {
         
         break;
         
-      case 'getInventory':
+      case 'readInventory':
           
         /*sql = 
         'SELECT ' +  
@@ -204,7 +187,7 @@ export default function queryDb(queryInfo) {
         
         break;  
         
-      /*case 'getTopicByHandle':
+      /*case 'readTopicByHandle':
         
         // id, title, author, desc, imgPath, timestamp, handle, content, chatId
         sql = 
@@ -228,7 +211,7 @@ export default function queryDb(queryInfo) {
         };
         break;*/
       
-      case 'getTopic':
+      case 'readTopic':
         
         sql =
         'SELECT ' +
@@ -242,7 +225,7 @@ export default function queryDb(queryInfo) {
         
         break;
       
-      case 'getTopicContent':
+      case 'readTopicContent':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
         /*sql =
@@ -293,7 +276,7 @@ export default function queryDb(queryInfo) {
         
         break;
         
-      case 'postMessage':
+      case 'createMessage':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
         sql = 
@@ -311,7 +294,7 @@ export default function queryDb(queryInfo) {
         break;
         
         
-      case 'postUniverse':
+      case 'createUniverse':
         // id, universe1Id, universe2Id, force, createdAt, updatedAt, deleted
         
         sql = 
@@ -323,20 +306,20 @@ export default function queryDb(queryInfo) {
         
         break;
         
-      case 'postTopic':
+      case 'createTopic':
         //topic : id, user_id, chat_id, universe_id, title, handle, created_at, updated_at, deleted
         //atom_topic : id; atom_id, topic_id, content, order, created_at, updated_at, deleted
         //atom : id, type, structure, created_at, updated_at, deleted
         
         sql = 
         'INSERT INTO aquest_schema.topic ' +
-          '(id, user_id, universe_id, title) ' +
+          '(id, user_id, universe_id, title, description) ' +
         'VALUES ' +
-          `('${title}', '${userId}','${universeId}', '${title}')`;
+          `('${id}', '${userId}','${universeId}', '${title}', '${description})`;
         
         break;
         
-      case 'postUser':
+      case 'createUser':
         
         sql = 
         'INSERT INTO aquest_schema.user ' +

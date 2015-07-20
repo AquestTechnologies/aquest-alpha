@@ -1,11 +1,7 @@
 /*___Inventory___*/
 
     
-.inventory_list-hidden {
-  display: none; 
-}
-
-.inventory_list-visible {
+.inventory_list {
   display: 					flex; /*https://youtu.be/5JSCbEKsguQ*/
   flex-flow: 				row wrap;
   justify-content: 	space-between;

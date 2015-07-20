@@ -1,112 +1,123 @@
-import log from './utils/logTailor';
-import {
-  getUniverse,
-  getUniverses,
-  getInventory,
-  getTopic,
-  getTopicContent,
-  getChat,
-  postUniverse,
-  postTopic,
-  postUser
-} from './utils/APIMiddleware';
-import { 
-  REQUEST_READ_UNIVERSE, SUCCESS_READ_UNIVERSE, FAILURE_READ_UNIVERSE,
-  REQUEST_READ_UNIVERSES, SUCCESS_READ_UNIVERSES, FAILURE_READ_UNIVERSES,
-  REQUEST_READ_INVENTORY, SUCCESS_READ_INVENTORY, FAILURE_READ_INVENTORY,
-  REQUEST_READ_TOPIC_CONTENT, SUCCESS_READ_TOPIC_CONTENT, FAILURE_READ_TOPIC_CONTENT,
-  REQUEST_READ_TOPIC, SUCCESS_READ_TOPIC, FAILURE_READ_TOPIC,
-  REQUEST_READ_CHAT, SUCCESS_READ_CHAT, FAILURE_READ_CHAT,
-  REQUEST_CREATE_UNIVERSE, SUCCESS_CREATE_UNIVERSE, FAILURE_CREATE_UNIVERSE,
-  REQUEST_CREATE_TOPIC, SUCCESS_CREATE_TOPIC, FAILURE_CREATE_TOPIC,
-  REQUEST_CREATE_USER, SUCCESS_CREATE_USER, FAILURE_CREATE_USER
-} from './actionsTypes';
+import log        from './utils/logTailor';
+import isClient from './utils/isClient';
+const isServer = !isClient();
 
+export const readUniverse = createActionCreator({
+  intention:  'readUniverse',
+  method:     'get',
+  pathx:      '/api/universe/{p}',
+});
 
-export function readUniverse(id) {
-  log(`.A. readUniverse : ${id}`);
-  return {
-    types: [REQUEST_READ_UNIVERSE, SUCCESS_READ_UNIVERSE, FAILURE_READ_UNIVERSE],
-    promise: getUniverse(id),
-    params: id
-  };
-}
+export const readUniverses = createActionCreator({
+  intention:  'readUniverses',
+  method:     'get',
+  pathx:      '/api/universes/',
+});
 
-export function readUniverses() {
-  log('.A. readUniverses');
-  return {
-    types: [REQUEST_READ_UNIVERSES, SUCCESS_READ_UNIVERSES, FAILURE_READ_UNIVERSES],
-    promise: getUniverses()
-  };
-}
+export const readInventory = createActionCreator({
+  intention:  'readInventory',
+  method:     'get',
+  pathx:      '/api/inventory/{p}',
+});
 
+export const readTopic = createActionCreator({
+  intention:  'readTopic',
+  method:     'get',
+  pathx:      '/api/topic/{p}',
+});
 
-export function readInventory(universeId) {
-  log(`.A. readInventory : ${universeId}`);
-  return {
-    types: [REQUEST_READ_INVENTORY, SUCCESS_READ_INVENTORY, FAILURE_READ_INVENTORY],
-    promise: getInventory(universeId),
-    params: universeId
-  };
-}
+export const readTopicContent = createActionCreator({
+  intention:  'readTopicContent',
+  method:     'get',
+  pathx:      '/api/topic/content/{p}',
+});
 
-export function readTopic(id) {
-  log(`.A. readTopic ${id}`);
-  return {
-    types: [REQUEST_READ_TOPIC, SUCCESS_READ_TOPIC, FAILURE_READ_TOPIC],
-    promise: getTopic(id),
-    params: id
-  };
-}
+export const readChat = createActionCreator({
+  intention:  'readChat',
+  method:     'get',
+  pathx:      '/api/chat/{p}',
+});
 
-export function readTopicContent(id) {
-  log(`.A. readTopicContent : ${id}`);
-  return {
-    types: [REQUEST_READ_TOPIC_CONTENT, SUCCESS_READ_TOPIC_CONTENT, FAILURE_READ_TOPIC_CONTENT],
-    promise: getTopicContent(id),
-    params: id
-  };
-}
+export const createUniverse = createActionCreator({
+  intention:  'createUniverse',
+  method:     'post',
+  pathx:      '/api/universe/',
+});
 
+export const createTopic = createActionCreator({
+  intention:  'createTopic',
+  method:     'post',
+  pathx:      '/api/topic/',
+  mutateParams: ({id, userId, universeId, title, content, picture, description}) => {
+    return {id, userId, universeId, title, content, picture, description};
+  }
+});
 
-export function readChat(id) {
-  log(`.A. readChat : ${id}`);
-  return {
-    types: [REQUEST_READ_CHAT, SUCCESS_READ_CHAT, FAILURE_READ_CHAT],
-    promise: getChat(id),
-    params: id
-  };
-}
+export const createUser = createActionCreator({
+  intention:  'createUser',
+  method:     'post',
+  pathx:      '/api/user/',
+  mutateParams: ({pseudo, email, password}) => {
+    return {pseudo, email, password};
+  }
+});
 
-export function createUniverse(universe) {
-  log('.A. createUniverse');
+// (string)   intention       the queryDb hook, used also to create actionTypes
+// (string)   method          HTTP method
+// (string)   path            API path. If (method && path) an corresponding API route gets created
+// (function) overrideParams  allows to mutate the params before the fetching cycle
+function createActionCreator(shape) {
   
-  return {
-    types: [REQUEST_CREATE_UNIVERSE, SUCCESS_CREATE_UNIVERSE, FAILURE_CREATE_UNIVERSE],
-    promise: postUniverse(universe),
-    params: universe
-  };
-}
-
-export function createTopic(topic) {
-  log('.A. createTopic');
+  const {intention, method, pathx, mutateParams} = shape;
+  const types = ['REQUEST', 'SUCCESS', 'FAILURE'].map(type => `${type}_${intention}`);
   
-  return {
-    types: [REQUEST_CREATE_TOPIC, SUCCESS_CREATE_TOPIC, FAILURE_CREATE_TOPIC],
-    promise: postTopic(topic),
-    params: topic
+  const actionCreator = params => {
+    log(`.A. ${intention} ${JSON.stringify(params)}`);
+    
+    const promise = new Promise((resolve, reject) => {
+      
+      // Server : direct db middleware call
+      if (isServer) require('../server/queryDb')(intention, params).then(
+          result => resolve(result),
+          error => reject(error));
+      
+      // Client : API call through XMLHttpRequest
+      else {
+        const path = pathx.replace(/\{\S*\}/, '');
+        const isPost = method === 'post';
+        const req = new XMLHttpRequest();
+        
+        console.log(`+++ --> ${method} ${path}`, params);
+        
+        req.onerror = err => reject(err);
+        req.open(method, isPost ? path : params ? path + params : path);
+        req.onload = () => {
+          if (req.status === 200) resolve(JSON.parse(req.response));
+          else reject(Error(req.statusText));
+        };
+        
+        if (isPost) req.send(createForm(mutateParams ? mutateParams(params) : params));
+        else req.send();
+      }
+    });
+    
+    promise.then(
+      result => {if (!isServer) console.log(`+++ <-- ${intention}`, result)}, 
+      error => log('error', 'Action error', 'shape:', shape, 'params:', JSON.stringify(params), error));
+    
+    return {types, params, promise};
   };
-}
-
-export function createUser(user) {
-  log('.A. createUser');
-  const {pseudo, email, password} = user; // Évince user.redirect
   
-  return {
-    types: [REQUEST_CREATE_USER, SUCCESS_CREATE_USER, FAILURE_CREATE_USER],
-    promise: postUser({pseudo, email, password}),
-    params: user
-  };
+  // getters
+  actionCreator.getTypes = () => types;
+  actionCreator.getShape = () => shape;
+  
+  return actionCreator;
 }
 
-
+function createForm(o) {
+  let f  = new FormData();
+  for(let k in o) {
+    f.append(k, o[k]);
+  } return f;
+}

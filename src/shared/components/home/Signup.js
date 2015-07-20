@@ -1,6 +1,6 @@
 import React from 'react';
 import {generateOnePseudo} from '../../utils/pseudosGenerator';
-import {randomString} from '../../utils/randomGenerator';
+import {randomString, randomText} from '../../utils/randomGenerators';
 
 class Signup extends React.Component {
   
@@ -11,30 +11,24 @@ class Signup extends React.Component {
     this.handleInputEmail = event => this.setState({email: event.target.value});
     this.handleInputPassword = event => this.setState({password: event.target.value});
     this.handleSubmit = () => this.props.createUser(this.state);
-    
-    this.state = {
-      pseudo: '',
-      email: '',
-      password: '',
-    };
+    this.state = {};
   }
   
   componentDidMount() {
     this.setState({
       pseudo: generateOnePseudo(),
-      email: (randomString(3) + '@' + randomString(3) + '.' + randomString(3)).toLowerCase(),
+      email: (randomText(1).slice(0, -1) + '@' + randomText(1).slice(0, -1) + '.' + randomString(3)).toLowerCase(),
       password: randomString(10),
       redirect: this.context.router.transitionTo.bind(null, 'explore')
     });
   }
   
   render() {
-    let divStyle = {
+    const {pseudo, password, email} = this.state;
+    const divStyle = {
       width: '50%',
       fontSize: '2rem',
     };
-    
-    const {pseudo, password, email} = this.state;
     
     return (
       <div style={divStyle} >

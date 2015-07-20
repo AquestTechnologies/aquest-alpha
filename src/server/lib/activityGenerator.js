@@ -1,5 +1,5 @@
 import log from '../../shared/utils/logTailor';
-import {randomInteger, randomString, randomText} from '../../shared/utils/randomGenerator';
+import {randomInteger, randomString, randomText} from '../../shared/utils/randomGenerators';
 import {generateOnePseudo} from '../../shared/utils/pseudosGenerator';
 // import {} from '../../shared/utils/fetchers';
 import queryDb from '../queryDb';

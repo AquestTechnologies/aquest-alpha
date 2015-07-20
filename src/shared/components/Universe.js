@@ -51,7 +51,7 @@ class Universe extends React.Component {
           topicId={topicId}
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(http://104.155.1.36:8080/${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'>
               <RouteHandler
