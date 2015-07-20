@@ -3,9 +3,8 @@ import { Link } from 'react-router';
 
 import Node from './explore/Node';
 // import Pseudos from './explore/Pseudos';
-// import Graph from './explore/Graph';
+import Graph from './explore/Graph';
 
-// import {generateGraph} from '../utils/graphGenerator';
 
 export default class Explore extends React.Component {
   
@@ -49,7 +48,6 @@ export default class Explore extends React.Component {
     };
     
     const {universes} = this.props;
-    // const {vertices, edges} = generateGraph(10);
     
     return (
       <div style={exploreStyle}>
@@ -58,8 +56,8 @@ export default class Explore extends React.Component {
           <br/>
           <Link to='newUniverse'>Create a new universe</Link>
         </div>
-        {/*<Graph vertices={vertices} edges={edges} />
-        <br />
+        <Graph />
+        {/*<br />
         <br />
         <div style={divStyle}>
           <Pseudos />
