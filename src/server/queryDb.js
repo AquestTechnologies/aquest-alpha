@@ -328,6 +328,12 @@ export default function queryDb(intention, params) {
         //atom_topic : id; atom_id, topic_id, content, order, created_at, updated_at, deleted
         //atom : id, type, structure, created_at, updated_at, deleted
         
+        /*sql = 
+        'INSERT INTO aquest_schema.topic ' +
+          '(id, user_id, universe_id, title, description) ' +
+        'VALUES ' +
+          '($1, $2, $3, $4, $5)';*/
+          
         sql = 
         'INSERT INTO aquest_schema.topic ' +
           '(id, user_id, universe_id, title, description) ' +

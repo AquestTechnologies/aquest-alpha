@@ -248,29 +248,47 @@ CREATE TRIGGER update_timestamp
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
   
 -- automaticaly create atoms associated with the created topic
-CREATE OR REPLACE FUNCTION aquest_schema.create_atoms_topic() 
-  RETURNS trigger AS $$
-  plv8.elog(NOTICE, "NEW = ", JSON.stringify(NEW));
-  var topic_id = NEW.id;
-  var content = NEW.content;
-  var i = 0;
-  for(var type in content){
-    var rq = plv8.execute( 
-      'INSERT INTO aquest_schema.atom_topic ' +
-        '(atom_id, topic_id, type, content, position)' +
-      'VALUES ' + 
-        '($1, $2, $3, $4, $5)',
-      [topic_id, type, content[type], i] 
-    );
-    
-    plv8.elog(NOTICE, "resultat requête = ", rq);
-    i++;
-  }
+CREATE OR REPLACE FUNCTION aquest_schema.create_atoms_topic(content JSON[], topic_id TEXT) 
+  RETURNS JSON AS $$
+  plv8.subtransaction(function(){
+    for(var i = 0, content_length = content.length ; i < content_length ; i++){
+       plv8.elog(NOTICE, "type = ", type);
+       plv8.elog(NOTICE, "content = ", content[i][type]);
+      var rq = plv8.execute( 
+        'INSERT INTO aquest_schema.atom_topic ' +
+          '(atom_id, topic_id, type, content, position)' +
+        'VALUES ' + 
+          '($1, $2, $3, $4, $5)',
+        [1, topic_id, content[i]['type'], content[i], i] 
+      );
+      plv8.elog(NOTICE, "resultat requête = ", rq);
+      i++;
+    }
+  });
 $$ LANGUAGE plv8;
+
+CREATE OR REPLACE FUNCTION aquest_schema.create_atoms_topic() 
+  RETURNS TRIGGER AS $create_atom_topic$
+  var content = NEW.content;
+  plv8.elog(NOTICE, "content = ", content);
+  plv8.subtransaction(function(){
+    for(var i = 0, content_length = content.length ; i < content_length ; i++){
+      var rq = plv8.execute( 
+        'INSERT INTO aquest_schema.atom_topic ' +
+          '(atom_id, topic_id, type, content, position)' +
+        'VALUES ' + 
+          '($1, $2, $3, $4, $5)',
+        [1, topic_id, content[i]['type'], content[i], i] 
+      );
+      plv8.elog(NOTICE, "resultat requête = ", rq);
+      i++;
+    }
+  });
+$create_atom_topic$ LANGUAGE plv8;
   
 -- Create atom_topic after topic insert  
 CREATE TRIGGER create_atom_topic
-  AFTER INSERT
+  BEFORE INSERT
   ON aquest_schema.topic
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.create_atoms_topic();
 
