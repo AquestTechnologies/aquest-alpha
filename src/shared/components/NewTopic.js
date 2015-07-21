@@ -16,6 +16,12 @@ class NewTopic extends React.Component {
       this.state.id = topicId;
       this.state.universeId = universeId;
       this.state.description = content.substr(0, 600);
+      
+      /**
+       * TODO :
+       * create a function that modify the content to match atom like version 
+       * --> [{'atom_type':'sub_content'}] */
+      this.state.content = [{text: content}];
       this.state.redirect = this.context.router.transitionTo.bind(null, 'universe', {universeId});
       this.props.createTopic(this.state);
     };

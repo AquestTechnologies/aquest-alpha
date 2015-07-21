@@ -38,7 +38,7 @@ class Universe extends React.Component {
     const topicId    = this.props.params.topicId;
     const universe   = this.props.universes[universeId];
     const topics     = this.filterTopics(this.props.topics, universeId);
-    const chatId     = topicId ? topics[topicId].chatId : universe.chatId;
+    const chatId     = topicId ? topics[topicId].id : universe.chatId;
     // console.log('topics :',this.props.topics);
     // console.log('universe :', universe);
     // console.log('universes :', this.props.universes);
@@ -51,7 +51,7 @@ class Universe extends React.Component {
           topicId={topicId}
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(http://104.155.1.36:8080/${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(http://130.211.59.69:8080/${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'>
               <RouteHandler

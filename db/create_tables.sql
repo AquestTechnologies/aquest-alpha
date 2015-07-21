@@ -246,6 +246,33 @@ CREATE TRIGGER update_timestamp
   BEFORE UPDATE 
   ON aquest_schema.universe 
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
+  
+-- automaticaly create atoms associated with the created topic
+CREATE OR REPLACE FUNCTION aquest_schema.create_atoms_topic() 
+  RETURNS trigger AS $$
+  plv8.elog(NOTICE, "NEW = ", JSON.stringify(NEW));
+  var topic_id = NEW.id;
+  var content = NEW.content;
+  var i = 0;
+  for(var type in content){
+    var rq = plv8.execute( 
+      'INSERT INTO aquest_schema.atom_topic ' +
+        '(atom_id, topic_id, type, content, position)' +
+      'VALUES ' + 
+        '($1, $2, $3, $4, $5)',
+      [topic_id, type, content[type], i] 
+    );
+    
+    plv8.elog(NOTICE, "resultat requête = ", rq);
+    i++;
+  }
+$$ LANGUAGE plv8;
+  
+-- Create atom_topic after topic insert  
+CREATE TRIGGER create_atom_topic
+  AFTER INSERT
+  ON aquest_schema.topic
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.create_atoms_topic();
 
 -- concat an array of JSON object into JSON properties  
 CREATE OR REPLACE FUNCTION aquest_schema.concat_json_array(json_array JSON)
