@@ -1,24 +1,24 @@
 import {randomInteger, randomString} from './randomGenerators';
 
-const VERTEX_RADIUS = 30;
 const MARGIN = 30;
+const VERTEX_RADIUS = 30;
 const FORCE_CORRECTOR = 1;
 
 // Generates a random graph for test purpose
-export function generateGraphForD3(size) {
+export function generateWorkingGraph(size) {
   
+  const CUT = 0.9;
   const MIN_EDGES = 1;
   const MAX_EDGES = 4;
   const MIN_FORCE = 1;
   const MAX_FORCE = 1;
   const fracDisconnected = 0.00;
-  const nGoups = Math.floor(Math.sqrt(size) - 2);
-  const t = Math.floor(size * (1 - fracDisconnected) / nGoups);
+  const ng = Math.floor(Math.sqrt(size) - 2);
+  const t = Math.floor(size * (1 - fracDisconnected) / ng);
   
-  let vertices = [];
-  let edges = [];
-  let groups = [];
+  let vertices = [], edges = [], groups = [];
   
+  // Vertices creation
   for (let i = 0; i < size; i++) {
     const name = randomString(5);
     vertices.push({
@@ -27,8 +27,9 @@ export function generateGraphForD3(size) {
     });
   }
   
+  // Groups creation
   let offset = 0;
-  for (let i = 0; i < nGoups; i++) {
+  for (let i = 0; i < ng; i++) {
     const group = [];
     for (let j = offset; j < t + offset && j < size -1 ; j++) {
       group.push(vertices[j]);
@@ -36,48 +37,49 @@ export function generateGraphForD3(size) {
     groups.push(group);
     offset += t;
   }
-  
-  const gl = groups.length;
-  const numberOfLuckyGroups = randomInteger(1, Math.floor(gl / 2));
-  
-  for (let i = 0; i < numberOfLuckyGroups; i++) {
+
+  // Randoming group size with vertices tributes 
+  const nLuckyGroups = randomInteger(1, Math.floor(ng / 2));
+  for (let i = 0; i < nLuckyGroups; i++) {
     const group = groups[i];
-    group.splice(0, 0, ...groups[numberOfLuckyGroups + i].splice(0, randomInteger(0, group.length)));
+    group.splice(0, 0, ...groups[nLuckyGroups + i].splice(0, randomInteger(0, group.length)));
   }
   
+  // Edges creation
   groups.forEach((group, index) => {
-    const gl = group.length;
+    const groupL = group.length;
     group.forEach(node => {
-      node.group = index;
-      let parents = [];
-      const nodeIndex = vertices.indexOf(node);
-      const nodeEdges = edges.filter(edge => edge.target === nodeIndex).length;
-      let nextParentIndex, nextParentEdges;
+      node.group = index; // Sets group attr for coloring
+      let parents = []; // Others nodes from group to connect to
+      const nIndex = vertices.indexOf(node);
       
-      for (let i = 0, j = randomInteger(Math.max(0, MIN_EDGES - nodeEdges), MAX_EDGES - nodeEdges); i < j; i++) {
-        let k = 0;
-        do {
-          k++;
-          nextParentIndex = vertices.indexOf(group[randomInteger(0, gl - 1)]);
-          nextParentEdges = edges.filter(edge => edge.source === nextParentIndex || edge.target === nextParentIndex).length;
-          if (k > gl) break;
-        } while (nextParentIndex === nodeIndex || parents.indexOf(nextParentIndex) !== -1)
-        if (nextParentEdges < MAX_EDGES) {
-          parents.push(nextParentIndex);
-        }
+      // Number of current edges
+      const edgesL = edges.filter(edge => edge.target === nIndex).length;
+      let pIndex, pEdgesL; // of parent
+      
+      // Random parent selection
+      for (let i = 0, j = randomInteger(Math.max(0, MIN_EDGES - edgesL), MAX_EDGES - edgesL); i < j; i++) {
+        let k = 0; do {
+          k++; // Sometimes the while conditions are too strict for the configuration
+          pIndex = vertices.indexOf(group[randomInteger(0, groupL - 1)]);
+          pEdgesL = edges.filter(edge => edge.source === pIndex || edge.target === pIndex).length;
+        } while ((pIndex === index || parents.indexOf(pIndex) !== -1) && k < groupL) // So we limit
+        if (pEdgesL < MAX_EDGES) parents.push(pIndex);
       }
-      parents.forEach(parent => {
+      
+      parents.forEach(pIndex => {
         edges.push({
-          source: nodeIndex,
-          target: parent,
+          source: nIndex,
+          target: pIndex,
           value: randomInteger(MIN_FORCE, MAX_FORCE)
         });
       });
     });
   });
   
+  // Special treat for newborn edges
   for (let i = edges.length - 1; i > -1; i-- ) {
-    if (Math.random() > 0.9) edges.splice(i, 1);
+    if (Math.random() > CUT) edges.splice(i, 1);
   }
   
   return({vertices, edges});
@@ -128,12 +130,9 @@ export function generateGraph(size) {
   return({vertices, edges});
 }
 
-// Draws the graph on a provided SVG DOM element
+// Draws the graph on a provided SVG element
+// Does not work
 export function drawGraph(svg, vertices, edges) {
-  
-  // console.log(svg);
-  // console.log(vertices);
-  // console.log(edges);
   
   const K_CORRECTOR = 10;
   const ITERATIONS = 50;
@@ -143,12 +142,17 @@ export function drawGraph(svg, vertices, edges) {
   
   const svgWidth = svg.node.clientWidth;
   const svgHeight = svg.node.clientHeight;
-  const K = Math.sqrt(svgWidth * svgHeight / keys.length) / K_CORRECTOR;
   
+  const K = Math.sqrt(svgWidth * svgHeight / keys.length) / K_CORRECTOR;
+  const fr = x => (K * K / x) * FORCE_CORRECTOR;
+  const fa = x => (x * x / K) * FORCE_CORRECTOR;
   const originalTemperature = svgWidth / 10;
   let temperature = originalTemperature;
   
   // Main algorithm
+  // http://arxiv.org/pdf/1201.3011v1.pdf
+  // http://arxiv.org/pdf/1209.0748v1.pdf
+  // http://www.cs.arizona.edu/~kobourov/fdl.pdf
   for (let i = 0; i < ITERATIONS; i++) {
     
     keys.forEach(key => {
@@ -216,8 +220,7 @@ export function drawGraph(svg, vertices, edges) {
 // Not part of the original algorithm
 function correctPosition(svgVertices, svgWidth, svgHeight) {
   const keys = Object.keys(svgVertices);
-  // Strong assomption that te first vertex is the graph center
-  const {x, y} = svgVertices[keys[0]];
+  const {x, y} = svgVertices[keys[0]]; // Strong assomption that the first vertex is the graph center
   const delta = {
     x: svgWidth / 2 - x,
     y: svgHeight / 2 - y
@@ -283,14 +286,3 @@ function drawEdge(svg, parent, child) {
     'stroke-width': 2
   });
 }
-
-// Repulsive force
-function fr(x, k) {
-  return (k * k / x) * FORCE_CORRECTOR;
-}
-
-// Attractive force
-function fa(x, k) {
-  return (x * x / k) * FORCE_CORRECTOR;
-}
-

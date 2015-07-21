@@ -1,12 +1,10 @@
-import fs         from 'fs';
-import Hapi       from 'hapi';
-import React      from 'react';
-import Immutable  from 'immutable';
-import {Provider} from 'react-redux';
-import Router     from 'react-router';
-
-import {createStore, combineReducers, applyMiddleware} from 'redux';
-
+import fs                 from 'fs';
+import Hapi               from 'hapi';
+import React              from 'react';
+import Immutable          from 'immutable';
+import {Provider}         from 'react-redux';
+import Router             from 'react-router';
+import validateJWT        from './lib/validateJWT';
 import * as reducers      from '../shared/reducers';
 import routes             from '../shared/routes.jsx';
 import {createActivists}  from './lib/activityGenerator';
@@ -14,6 +12,7 @@ import devConfig          from '../../config/development.js';
 import log, {logRequest}  from '../shared/utils/logTailor.js';
 import phidippides        from '../shared/utils/phidippides.js';
 import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
+import {createStore, combineReducers, applyMiddleware} from 'redux';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log('node', `Starting server in ${process.env.NODE_ENV} mode...`);
@@ -21,68 +20,69 @@ log('node', `Starting server in ${process.env.NODE_ENV} mode...`);
 //lance webpack-dev-server si on est pas en production
 if (process.env.NODE_ENV === 'development') require('./dev_server.js')();
 
-const config = devConfig();
+const {api, ws, wds, jwtKey} = devConfig();
 const server = new Hapi.Server();
 
 // Distribution des ports pour l'API et les websockets
-server.connection({ port: config.api.port, labels: ['api'] });
-server.connection({ port: config.ws.port,  labels: ['ws']  });
+server.connection({ port: api.port, labels: ['api'] });
+server.connection({ port: ws.port,  labels: ['ws']  });
 
+// Auth strategy registration
+server.register(
+  [
+    {register: require('hapi-auth-jwt2')},
+  ], 
+  err => {
+    if (err) throw err;
+    
+    server.auth.strategy('jwt', 'jwt', true, {
+      key: jwtKey,      
+      validateFunc: validateJWT,         
+      verifyOptions: { algorithms: ['HS256'] }
+    });
+  });
+  
 // Registration des plugins websocket et API
 server.register(
   [
     {register: require('./plugins/websocket')},
-    {register: require('./plugins/api')}
+    {register: require('./plugins/api')},
   ], 
   err => {
     if (err) throw err;
-  }
-);
-
-// Routes
-server.route({
-  method: 'GET',
-  path: '/img/{filename}',
-  handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
-});
-
-server.route({
-  method: 'GET',
-  path: '/',
-  handler: (request, reply) => prerender(request, reply)
-});
-
-server.route({
-  method: 'GET',
-  path: '/{p*}',
-  handler: (request, reply) => prerender(request, reply)
-});
-
-server.route({
-  method: 'GET',
-  path: '/favicon.ico',
-  handler: (request, reply) => reply({}) // Haha je kif
-});
+    
+    // Routes
+    server.route({
+      method: 'GET',
+      path: '/',
+      config: { auth: false },
+      handler: (request, reply) => prerender(request, reply)
+    });
+    
+    server.route({
+      method: 'GET',
+      path: '/{p*}',
+      config: { auth: false },
+      handler: (request, reply) => prerender(request, reply)
+    });
+    
+    server.route({
+      method: 'GET',
+      path: '/img/{filename}',
+      config: { auth: false },
+      handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
+    });
+  });
 
 // Prerendering
 function prerender(request, reply) {
   
-  // Intercepte la réponse
-  const response = reply.response().hold();
-  const d = new Date();
-  
   // Affiche les infos de la requete
   logRequest(request);
   
-  // Servira à lire le fichier HTML
-  function readFile (filename, enc) {
-    return new Promise((resolve, reject) => {
-      fs.readFile(filename, enc, (err, res) => {
-        if (err) reject(err);
-        else resolve(res);
-      });
-    });
-  }
+  // Intercepte la réponse
+  const response = reply.response().hold();
+  const d = new Date();
   
   // transforme coco.com/truc/ en coco.com/truc
   const requestUrl = request.url.path;
@@ -119,11 +119,15 @@ function prerender(request, reply) {
         catch(err) {
           log('error', '!!! Error while React.renderToString', err);
         }
-        
         log('... Exiting React.renderToString');
         
         // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
-        readFile('index.html', 'utf8').then(
+        new Promise((resolve, reject) => {
+          fs.readFile('index.html', 'utf8', (err, res) => {
+            if (err) reject(err);
+            else resolve(res);
+          });
+        }).then(
           html => {
             
             // On extrait le contenu du mountNode 
@@ -141,8 +145,8 @@ function prerender(request, reply) {
               .replace(placeholder, mountMeImFamous)
               .replace('</body>',
                 `\t<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>\n` +
-                `\t<script src="${config.wds.hotFile }"></script>\n` +
-                `\t<script src="${config.wds.publicPath + config.wds.filename}"></script>\n` +
+                `\t<script src="${wds.hotFile }"></script>\n` +
+                `\t<script src="${wds.publicPath + wds.filename}"></script>\n` +
                 '</body>'
               );
             response.send();

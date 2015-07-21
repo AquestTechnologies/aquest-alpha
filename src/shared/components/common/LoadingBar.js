@@ -4,9 +4,7 @@ export default class LoadingBar extends React.Component {
   
   constructor() {
     super();
-    this.state = {
-      loadings: []
-    };
+    this.state = {loadings: []};
   }
   
   componentWillReceiveProps(nextProps) {
@@ -15,34 +13,24 @@ export default class LoadingBar extends React.Component {
     
     nextRecords.forEach(record => {
       const type = record.action.type;
-      const subType = type.substr(8); //pratique :)
-      if (type.match(/REQUEST/)) {
-        needsResolving.push(subType);
-      }
-      else if (type.match(/SUCCESS|FAILURE/)) {
-        needsResolving.forEach(needs => {
-          if (needs === subType) needsResolving.splice(needsResolving.indexOf(needs), 1);
-        });
-      }
+      const intention = type.substr(8); //pratique :)
+      if (type.match(/REQUEST/)) needsResolving.push(intention);
+      else if (type.match(/SUCCESS|FAILURE/)) needsResolving.forEach((awaiting, i) => {
+        if (awaiting === intention) needsResolving.splice(i, 1);
+      });
     });
     
-    this.setState({
-      loadings: needsResolving
-    });
+    this.setState({loadings: needsResolving});
   }
   
   render() {
-    
-    // CSS temporaire
-    let divStyle = {
+    const divStyle = {
       width: 'auto',
       height: 'auto',
       position: 'fixed',
       left: '4rem',
-      // right: '0',
       top: '0',
       zIndex: '1000',
-      // backgroundColor: '#fff',
       fontSize: '1.7rem',
       fontWeight: '700',
       color: '#FF6600'

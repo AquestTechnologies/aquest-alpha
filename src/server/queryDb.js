@@ -20,10 +20,10 @@ export default function queryDb(intention, params) {
           client.query(sql, (err, result) => {
             if (err) return reject(err);
             log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
-            resolve(result);
+            resolve(typeof callback === 'function' ? callback(result) : result);
           });
         }).then(
-          result => resolve(typeof callback === 'function' ? callback(result) : result),
+          result => resolve(result),
           error => reject(error)
         );
         else reject('queryDb.buildQuery did not produce any SQL, check your intention');
@@ -322,14 +322,20 @@ export default function queryDb(intention, params) {
       case 'createUser':
         
         sql = 
-        'INSERT INTO aquest_schema.user ' +
+        'INSERT INTO aquest_schema."user" ' +
           '(id, email, password_salt, password_hash, creation_ip) ' +
         'VALUES ' +
-          `('${pseudo}','${email}', '${passwordHash}', '${passwordSalt}', '${ip}')` +
+          `('${pseudo}','${email}', '${passwordSalt}', '${passwordHash}', '${ip}')` +
         'RETURNING id';
         
         callback = result => result.rows[0];
         
+        break;
+        
+      case 'login':
+        
+        sql = `SELECT * FROM aquest_schema."user" WHERE "user".id = '${email}' OR "user".email = '${email}' LIMIT 1`;
+        callback = result => result.rows[0];
         break;
         
       case 'randomRow':

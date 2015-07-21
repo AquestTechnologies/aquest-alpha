@@ -27,7 +27,8 @@ export default function() {
       user:     'aquestuser',
       password: 'aquestuser',
       database: 'aquestdb'
-    }
+    },
+    jwtKey: 'ohPleaseHackMe'
   };
 }
   

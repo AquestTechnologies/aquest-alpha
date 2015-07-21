@@ -5,13 +5,13 @@ class Login extends React.Component {
   constructor() {
     super();
     
-    this.handleInputPseudoOrEmail = event => this.setState({pseudoOrEmail: event.target.value});
+    this.handleInputEmail = event => this.setState({email: event.target.value});
     this.handleInputPassword = event => this.setState({password: event.target.value});
-    this.handleSubmit = () => this.props.authenticateUser(this.state);
+    this.handleSubmit = () => this.props.login(this.state);
     
     this.state = {
-      pseudoOrEmail: '',
-      password: '',
+      email: 'admin',
+      password: 'admin',
     };
   }
   
@@ -21,14 +21,14 @@ class Login extends React.Component {
       fontSize: '2rem',
     };
     
-    const {pseudoOrEmail, password} = this.state;
+    const {email, password} = this.state;
     
     return (
       <div style={divStyle} >
         <h2>Log in</h2>
         <div>
           <div>Pseudo or email</div>
-          <input type="text" value={pseudoOrEmail} onChange={this.handleInputPseudoOrEmail} />
+          <input type="text" value={email} onChange={this.handleInputEmail} />
         </div>
         <br />
         <div>
