@@ -60,7 +60,7 @@ io.on('message', function (message) {
     c++;
     const d = new Date();
     log(`__________ ${c} router.run ${url} __________`);
-    
+    log(routerState);
     try { 
       React.render(
         <Provider store={store}>

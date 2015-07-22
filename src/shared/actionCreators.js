@@ -96,7 +96,11 @@ function createActionCreator(shape) {
           else reject(Error(req.statusText));
         };
         
-        if (isPost) req.send(createForm(mutateParams ? mutateParams(params) : params));
+        if (isPost){ 
+          //stringify objects before POST XMLHttpRequest
+          Object.keys(params).map((value, index) =>  params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
+          req.send(createForm(mutateParams ? mutateParams(params) : params));
+        }
         else req.send();
       }
     });

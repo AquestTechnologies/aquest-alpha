@@ -333,14 +333,19 @@ export default function queryDb(intention, params) {
           '(id, user_id, universe_id, title, description) ' +
         'VALUES ' +
           '($1, $2, $3, $4, $5)';*/
-          
-        sql = 
-        'INSERT INTO aquest_schema.topic ' +
-          '(id, user_id, universe_id, title, description) ' +
-        'VALUES ' +
-          '($1, $2, $3, $4, $5)';
         
-        paramaterized = [id, userId, universeId, title, description];
+        sql = 
+        'SELECT ' + 
+          'aquest_schema.create_atoms_topic(' + 
+            '$1 ::TEXT, $2 ::TEXT, $3 ::TEXT, $4 ::TEXT, $5 ::TEXT, $6 ::TEXT' +
+          ') AS create_topic';
+        
+        paramaterized = [id, userId, universeId, title, description, content];
+        
+        callback = result => result.rows[0].create_topic;
+        /* +
+        'SELECT create_atoms_topic(\'' + content + '\', $1)';
+        paramaterized = [id, userId, universeId, title, description];*/
         
         break;
         

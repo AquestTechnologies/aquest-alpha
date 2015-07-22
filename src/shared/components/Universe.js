@@ -38,7 +38,7 @@ class Universe extends React.Component {
     const topicId    = this.props.params.topicId;
     const universe   = this.props.universes[universeId];
     const topics     = this.filterTopics(this.props.topics, universeId);
-    const chatId     = topicId ? topics[topicId].id : universe.chatId;
+    const chatId     = topicId ? topics[topicId].chatId : universe.chatId;
     // console.log('topics :',this.props.topics);
     // console.log('universe :', universe);
     // console.log('universes :', this.props.universes);

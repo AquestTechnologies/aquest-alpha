@@ -57,6 +57,10 @@ export function chats(state = Immutable.Map(), action) {
   switch (action.type) {
     
   case SUCCESS_readChat:
+    log('action.params');
+    log(action.params);
+    log('action.payload');
+    log(action.payload);
     return state.set(action.payload.id, fromJSGreedy(action.payload));
     
   default:
@@ -81,8 +85,7 @@ export function topics(state = Immutable.Map(), action) {
     return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
     
   case SUCCESS_createTopic:
-    action.params.redirect();
-    return state.set(action.params.id, fromJSGreedy(action.params));
+    return state.set(action.params.id, fromJSGreedy(action.payload));
     
   default:
     return state;
