@@ -12,6 +12,7 @@ const {
   SUCCESS_readTopicContent,
   SUCCESS_createUser,
   SUCCESS_createTopic,
+  SUCCESS_login,
 } = (() => {
   const at = {};
   Object.keys(actionCreators)
@@ -21,6 +22,7 @@ const {
   return at;
 })();
 
+
 // Doit être exporté en premier pour logger avant les autres
 export function records(state = [], action) {
   log('.R. ' + action.type);
@@ -28,6 +30,17 @@ export function records(state = [], action) {
     ...state,
     {action: action, date: new Date()}
   ];
+}
+
+export function token(state = '', action) {
+  switch (action.type) {
+  
+  case SUCCESS_login:
+    return action.payload.token;
+    
+  default:
+    return state;
+  }
 }
 
 export function universes(state = Immutable.Map(), action) {
@@ -96,6 +109,11 @@ export function users(state = Immutable.Map(), action) {
   case SUCCESS_createUser:
     action.params.redirect();
     return state.set(action.payload.id, fromJSGreedy(action.payload));
+    
+  case SUCCESS_login:
+    const {payload} = action;
+    delete payload.token;
+    return state.set(payload.id, fromJSGreedy(payload));
     
   default:
     return state;

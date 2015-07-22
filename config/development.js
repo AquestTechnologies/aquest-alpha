@@ -2,33 +2,37 @@ import ip from './ip';
 
 export default function() {
   const main = ip.localServer;
-  const offset = parseInt(process.env.PORTS_OFFSET, 10) || 0;
+  const wdsPost = 3000;
+  
   return {
     api: {
       host: main,
-      port: 8080 + offset
+      port: 8080
     },
     ws : {
       host: main,
-      port: 9090 + offset
+      port: 9090
     },
     wds: {
-      host: '0.0.0.0',
-      port: 3000 + offset,
-      filename:   'bundle.js',
-      path :__dirname + '/dist',
-      publicPath: 'http://' + main + ':' + (3000 + offset) + '/static/',
-      hotFile: 'http://' + main + ':' + (3000 + offset) + '/webpack-dev-server.js',
+      host:           '0.0.0.0',
+      port:           wdsPost,
+      filename:       'bundle.js',
+      path:           __dirname + '/dist',
+      publicPath:     'http://' + main + ':' + wdsPost + '/static/',
+      hotFile:        'http://' + main + ':' + wdsPost + '/webpack-dev-server.js',
       proxyPathRegex: '^(?!.*\/static\/)(.*)$'
     },
     pg: {  
-      host:     ip.postgresql, 
+      host:     '130.211.111.160', 
       port:     '5432', 
       user:     'aquestuser',
       password: 'aquestuser',
       database: 'aquestdb'
     },
-    jwtKey: 'ohPleaseHackMe'
+    jwt: {
+      key: 'ohPleaseHackMe',
+      ttl: 1 * 60 * 1000
+    }
   };
 }
   

@@ -13,14 +13,14 @@ export const readUniverses = createActionCreator({
   intention:  'readUniverses',
   method:     'get',
   pathx:      '/api/universes/',
-  auth:       false,
+  auth:       'jwt',
 });
 
 export const readInventory = createActionCreator({
   intention:  'readInventory',
   method:     'get',
   pathx:      '/api/inventory/{p}',
-  auth:       false,
+  auth:       'jwt',
 });
 
 export const readTopic = createActionCreator({
@@ -48,14 +48,14 @@ export const createUniverse = createActionCreator({
   intention:  'createUniverse',
   method:     'post',
   pathx:      '/api/universe/',
-  auth:       false,
+  auth:       'jwt',
 });
 
 export const createTopic = createActionCreator({
   intention:  'createTopic',
   method:     'post',
   pathx:      '/api/topic/',
-  auth:       false,
+  auth:       'jwt',
   mutateParams: ({id, userId, universeId, title, content, picture, description}) => {
     return {id, userId, universeId, title, content, picture, description};
   }
@@ -65,7 +65,7 @@ export const createUser = createActionCreator({
   intention:  'createUser',
   method:     'post',
   pathx:      '/api/user/',
-  auth:       false,
+  auth:       'jwt',
   mutateParams: ({pseudo, email, password}) => {
     return {pseudo, email, password};
   }
@@ -90,38 +90,43 @@ function createActionCreator(shape) {
   const actionCreator = params => {
     log(`.A. ${intention} ${JSON.stringify(params)}`);
     
-    const promise = new Promise((resolve, reject) => {
+    const APICall = token => {
+      console.log('token', token);
+      const promise = new Promise((resolve, reject) => {
+        // Server : direct db middleware call
+        if (isServer) require('../server/queryDb')(intention, params).then(
+            result => resolve(result),
+            error => reject(error));
+        
+        // Client : API call through XMLHttpRequest
+        else {
+          const path = pathx.replace(/\{\S*\}/, '');
+          const isPost = method === 'post';
+          const req = new XMLHttpRequest();
+          
+          console.log(`+++ --> ${method} ${path}`, params);
+          
+          req.onerror = err => reject(err);
+          req.open(method, isPost ? path : params ? path + params : path);
+          req.setRequestHeader('Authorization', token);
+          req.onload = () => {
+            if (req.status === 200) resolve(JSON.parse(req.response));
+            else reject(Error(req.statusText));
+          };
+          
+          if (isPost) req.send(createForm(mutateParams ? mutateParams(params) : params));
+          else req.send();
+        }
+      });
       
-      // Server : direct db middleware call
-      if (isServer) require('../server/queryDb')(intention, params).then(
-          result => resolve(result),
-          error => reject(error));
-      
-      // Client : API call through XMLHttpRequest
-      else {
-        const path = pathx.replace(/\{\S*\}/, '');
-        const isPost = method === 'post';
-        const req = new XMLHttpRequest();
+      promise.then(
+        result => {if (!isServer) console.log(`+++ <-- ${intention}`, result)}, 
+        error => log('error', 'Action error', 'shape:', shape, 'params:', JSON.stringify(params), error));
         
-        console.log(`+++ --> ${method} ${path}`, params);
-        
-        req.onerror = err => reject(err);
-        req.open(method, isPost ? path : params ? path + params : path);
-        req.onload = () => {
-          if (req.status === 200) resolve(JSON.parse(req.response));
-          else reject(Error(req.statusText));
-        };
-        
-        if (isPost) req.send(createForm(mutateParams ? mutateParams(params) : params));
-        else req.send();
-      }
-    });
+      return promise;
+    };
     
-    promise.then(
-      result => {if (!isServer) console.log(`+++ <-- ${intention}`, result)}, 
-      error => log('error', 'Action error', 'shape:', shape, 'params:', JSON.stringify(params), error));
-    
-    return {types, params, promise};
+    return {types, params, APICall};
   };
   
   // getters

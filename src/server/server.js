@@ -20,7 +20,7 @@ log('node', `Starting server in ${process.env.NODE_ENV} mode...`);
 //lance webpack-dev-server si on est pas en production
 if (process.env.NODE_ENV === 'development') require('./dev_server.js')();
 
-const {api, ws, wds, jwtKey} = devConfig();
+const {api, ws, wds, jwt} = devConfig();
 const server = new Hapi.Server();
 
 // Distribution des ports pour l'API et les websockets
@@ -28,27 +28,26 @@ server.connection({ port: api.port, labels: ['api'] });
 server.connection({ port: ws.port,  labels: ['ws']  });
 
 // Auth strategy registration
-server.register(
-  [
-    {register: require('hapi-auth-jwt2')},
-  ], 
-  err => {
-    if (err) throw err;
-    
-    server.auth.strategy('jwt', 'jwt', true, {
-      key: jwtKey,      
-      validateFunc: validateJWT,         
-      verifyOptions: { algorithms: ['HS256'] }
-    });
+server.register(require('hapi-auth-jwt2'), err => {
+  if (err) throw err;
+  
+  server.auth.strategy('jwt', 'jwt', true, {
+    key: jwt.key,      
+    validateFunc: validateJWT,         
+    verifyOptions: { algorithms: ['HS256'] }
   });
+  
+  log('JWT Authentication registered');
+});
   
 // Registration des plugins websocket et API
 server.register(
   [
-    {register: require('./plugins/websocket')},
     {register: require('./plugins/api')},
+    {register: require('./plugins/websocket')},
   ], 
   err => {
+    log('API and WS plugins registered');
     if (err) throw err;
     
     // Routes
@@ -72,7 +71,8 @@ server.register(
       config: { auth: false },
       handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
     });
-  });
+  }
+);
 
 // Prerendering
 function prerender(request, reply) {
@@ -136,6 +136,7 @@ function prerender(request, reply) {
             
             // Passage du state dans window
             const serverState = store.getState();
+            delete serverState.records;
             serverState.immutableKeys = [];
             for (let key in serverState) {
               if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !

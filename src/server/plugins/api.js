@@ -8,7 +8,7 @@ import JWT from 'jsonwebtoken';
 import devConfig from '../../../config/development.js';
 
 function apiPlugin(server, options, next) {
-  const {jwtKey} = devConfig();
+  const {key, ttl} = devConfig().jwt;
   
   // Allows validation and params mutation before querying db
   const beforeQuery = {
@@ -31,33 +31,24 @@ function apiPlugin(server, options, next) {
     },
   };
   
+  // ...
   const afterQuery = {
     
-    login: (params, result) => {
-      
+    login: ({email, password}, result) => {
       return new Promise((resolve, reject) => {
-        const {email, password} = params;
-        if (!(email && password)) reject();
-        
-        console.log(result);
-        if (result && Object.keys(result).length) bcrypt.compare(password, result.password_hash, (err, isValid) => {
-          log('valid');
-          log(isValid);
-          if (err) reject(err);
+        if (result) bcrypt.compare(password, result.password_hash, (err, isValid) => {
+          if (err) return reject(err);
           if (isValid) {
-            const session = {
-              valid: true, // this will be set to false when the person logs out
-              id: aguid(email), // a random session id
-              exp: new Date().getTime() + 30 * 60 * 1000 // expires in 30 minutes time
-            };
-            cache.set(session.id, session);
-            const token = JWT.sign(session, jwtKey); // synchronous
-            console.log(token);
+            result.token = JWT.sign({
+              valid: true, 
+              id: result.id, 
+              exp: Math.floor((new Date().getTime() + ttl) / 1000)
+            }, key); // synchronous
             resolve();
           }
-          else reject();
+          else reject('password mismatch');
         });
-        else reject();
+        else reject('user not found');
       });
     },
   };

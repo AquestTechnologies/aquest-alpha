@@ -104,10 +104,11 @@ export default class Graph extends React.Component {
   }
   
   render() {
+    const graphStyle = '.node { stroke: #fff; stroke-width: 1.5px;}.link {  stroke: #999;  stroke-opacity: .6;';
     
     return(
       <div>
-        <style> {'.node { stroke: #fff; stroke-width: 1.5px;}.link {  stroke: #999;  stroke-opacity: .6;'}</style>
+        <style>{graphStyle}</style>
         <button type="button" onClick={this.again.bind(this)}>render</button>
         <div id='graphArea'/>
       </div>
