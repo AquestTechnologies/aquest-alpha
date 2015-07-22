@@ -17,8 +17,6 @@ export default function queryDb(intention, params) {
         
         // log(`+++ REQUETE --> ${sql}`); 
         if (sql) new Promise((resolve, reject) => {
-          log(sql);
-          log(paramaterized);
           client.query(sql, paramaterized, (err, result) => {
             if (err) return reject(err);
             log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
@@ -328,12 +326,6 @@ export default function queryDb(intention, params) {
         //atom_topic : id; atom_id, topic_id, content, order, created_at, updated_at, deleted
         //atom : id, type, structure, created_at, updated_at, deleted
         
-        /*sql = 
-        'INSERT INTO aquest_schema.topic ' +
-          '(id, user_id, universe_id, title, description) ' +
-        'VALUES ' +
-          '($1, $2, $3, $4, $5)';*/
-        
         sql = 
         'SELECT ' + 
           'aquest_schema.create_atoms_topic(' + 
@@ -343,9 +335,6 @@ export default function queryDb(intention, params) {
         paramaterized = [id, userId, universeId, title, description, content];
         
         callback = result => result.rows[0].create_topic;
-        /* +
-        'SELECT create_atoms_topic(\'' + content + '\', $1)';
-        paramaterized = [id, userId, universeId, title, description];*/
         
         break;
         
