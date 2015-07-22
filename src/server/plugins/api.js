@@ -44,6 +44,7 @@ function apiPlugin(server, options, next) {
               id: result.id, 
               exp: Math.floor((new Date().getTime() + ttl) / 1000)
             }, key); // synchronous
+            log('... signed JWT ' + result.token);
             resolve();
           }
           else reject('password mismatch');
@@ -78,6 +79,7 @@ function apiPlugin(server, options, next) {
               queryDb(intention, params).then(
                 result => after(params, result).then(
                   () => {
+                    console.log(result.token);
                     response.source = result;
                     response.send();
                   },

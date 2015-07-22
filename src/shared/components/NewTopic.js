@@ -16,7 +16,6 @@ class NewTopic extends React.Component {
       this.state.id = topicId;
       this.state.universeId = universeId;
       this.state.description = content.substr(0, 600);
-      this.state.redirect = this.context.router.transitionTo.bind(null, 'universe', {universeId});
       this.props.createTopic(this.state);
     };
     

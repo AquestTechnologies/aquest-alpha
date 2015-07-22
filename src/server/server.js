@@ -137,6 +137,7 @@ function prerender(request, reply) {
             // Passage du state dans window
             const serverState = store.getState();
             delete serverState.records;
+            delete serverState.effects;
             serverState.immutableKeys = [];
             for (let key in serverState) {
               if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !

@@ -56,9 +56,6 @@ export const createTopic = createActionCreator({
   method:     'post',
   pathx:      '/api/topic/',
   auth:       'jwt',
-  mutateParams: ({id, userId, universeId, title, content, picture, description}) => {
-    return {id, userId, universeId, title, content, picture, description};
-  }
 });
 
 export const createUser = createActionCreator({
@@ -66,9 +63,6 @@ export const createUser = createActionCreator({
   method:     'post',
   pathx:      '/api/user/',
   auth:       'jwt',
-  mutateParams: ({pseudo, email, password}) => {
-    return {pseudo, email, password};
-  }
 });
 
 export const login = createActionCreator({
@@ -84,49 +78,44 @@ export const login = createActionCreator({
 // (function) overrideParams  allows to mutate the params before the fetching cycle
 function createActionCreator(shape) {
   
-  const {intention, method, pathx, mutateParams} = shape;
+  const {intention, method, pathx, auth} = shape;
   const types = ['REQUEST', 'SUCCESS', 'FAILURE'].map(type => `${type}_${intention}`);
   
   const actionCreator = params => {
     log(`.A. ${intention} ${JSON.stringify(params)}`);
-    
-    const APICall = token => {
-      console.log('token', token);
-      const promise = new Promise((resolve, reject) => {
-        // Server : direct db middleware call
-        if (isServer) require('../server/queryDb')(intention, params).then(
-            result => resolve(result),
-            error => reject(error));
-        
-        // Client : API call through XMLHttpRequest
-        else {
-          const path = pathx.replace(/\{\S*\}/, '');
-          const isPost = method === 'post';
-          const req = new XMLHttpRequest();
-          
-          console.log(`+++ --> ${method} ${path}`, params);
-          
-          req.onerror = err => reject(err);
-          req.open(method, isPost ? path : params ? path + params : path);
-          req.setRequestHeader('Authorization', token);
-          req.onload = () => {
-            if (req.status === 200) resolve(JSON.parse(req.response));
-            else reject(Error(req.statusText));
-          };
-          
-          if (isPost) req.send(createForm(mutateParams ? mutateParams(params) : params));
-          else req.send();
-        }
-      });
+    const promise = new Promise((resolve, reject) => {
       
-      promise.then(
-        result => {if (!isServer) console.log(`+++ <-- ${intention}`, result)}, 
-        error => log('error', 'Action error', 'shape:', shape, 'params:', JSON.stringify(params), error));
+      // Server : direct db middleware call
+      if (isServer) require('../server/queryDb')(intention, params).then(
+          result => resolve(result),
+          error => reject(error));
+      
+      // Client : API call through XMLHttpRequest
+      else {
+        const path = pathx.replace(/\{\S*\}/, '');
+        const isPost = method === 'post';
+        const req = new XMLHttpRequest();
         
-      return promise;
-    };
+        console.log(`+++ --> ${method} ${path}`, params);
+        
+        req.onerror = err => reject(err);
+        req.open(method, isPost ? path : params ? path + params : path);
+        req.setRequestHeader('Authorization', localStorage.getItem('jwt'));
+        req.onload = () => {
+          if (req.status === 200) resolve(JSON.parse(req.response));
+          else reject(Error(req.statusText));
+        };
+        
+        if (isPost) req.send(createForm(params));
+        else req.send();
+      }
+    });
     
-    return {types, params, APICall};
+    promise.then(
+      result => {if (!isServer) console.log(`+++ <-- ${intention}`, result)}, 
+      error => log('error', 'Action error', 'shape:', shape, 'params:', JSON.stringify(params), error));
+    
+    return {types, params, promise};
   };
   
   // getters

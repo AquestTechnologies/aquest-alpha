@@ -146,10 +146,10 @@ export default function phidippides(routerState, dispatch) {
       // Appel de l'action creator et dispatch de l'action
       logMeOrNot('*** ___ calling with args ' + realArgs);
       const action = creator.apply(null, realArgs);
-      const dispatched = dispatch(action);
+      dispatch(action);
       
-      if (!action.APICall) resolve(action.payload);
-      else dispatched.then(
+      if (!action.promise) resolve(action.payload);
+      else action.promise.then(
         data => {
           logMeOrNot('***  _ Dispatch for ' + task.id + ' resolved');
           logMeOrNot(JSON.stringify(data).substr(0,150));

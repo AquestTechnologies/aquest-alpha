@@ -32,17 +32,6 @@ export function records(state = [], action) {
   ];
 }
 
-export function token(state = '', action) {
-  switch (action.type) {
-  
-  case SUCCESS_login:
-    return action.payload.token;
-    
-  default:
-    return state;
-  }
-}
-
 export function universes(state = Immutable.Map(), action) {
   let newState;
   switch (action.type) {
@@ -89,12 +78,10 @@ export function topics(state = Immutable.Map(), action) {
   case SUCCESS_readTopic:
     return state.set(action.payload.id, fromJSGreedy(action.payload));
     
-  
   case SUCCESS_readTopicContent:
     return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
     
   case SUCCESS_createTopic:
-    action.params.redirect();
     return state.set(action.params.id, fromJSGreedy(action.params));
     
   default:
@@ -103,21 +90,39 @@ export function topics(state = Immutable.Map(), action) {
 }
 
 export function users(state = Immutable.Map(), action) {
-  let newState;
   switch (action.type) {
     
   case SUCCESS_createUser:
-    action.params.redirect();
     return state.set(action.payload.id, fromJSGreedy(action.payload));
     
   case SUCCESS_login:
-    const {payload} = action;
-    delete payload.token;
-    return state.set(payload.id, fromJSGreedy(payload));
+    return state.set(action.payload.id, fromJSGreedy(action.payload)); // le token est dedans !
     
   default:
     return state;
   }
+}
+
+export function effects(state = {}, action) {
+  switch (action.type) {
+    case SUCCESS_createUser:
+      return { did: 'createUser' };
+    
+    case SUCCESS_login:
+      return {
+        did: 'login',
+        jwt: action.payload.token
+      };
+    
+    case SUCCESS_createTopic:
+      return {
+        did: 'createTopic',
+        topic: action.payload
+      };
+    
+    default:
+      return {};
+  } 
 }
 
 // From the Immutable.js Github wiki

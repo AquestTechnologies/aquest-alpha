@@ -7,11 +7,11 @@ class Signup extends React.Component {
   constructor() {
     super();
     
+    this.state = {};
     this.handleInputPseudo = event => this.setState({pseudo: event.target.value});
     this.handleInputEmail = event => this.setState({email: event.target.value});
     this.handleInputPassword = event => this.setState({password: event.target.value});
     this.handleSubmit = () => this.props.createUser(this.state);
-    this.state = {};
   }
   
   componentDidMount() {
@@ -19,7 +19,6 @@ class Signup extends React.Component {
       pseudo: generateOnePseudo(),
       email: (randomText(1).slice(0, -1) + '@' + randomText(1).slice(0, -1) + '.' + randomString(3)).toLowerCase(),
       password: randomString(10),
-      redirect: this.context.router.transitionTo.bind(null, 'explore')
     });
   }
   
