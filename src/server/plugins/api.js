@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import * as actionCreators from '../../shared/actionCreators';
 import JWT from 'jsonwebtoken';
 import devConfig from '../../../config/development.js';
+import Joi from 'joi';
 
 function apiPlugin(server, options, next) {
   const {key, ttl} = devConfig().jwt;
@@ -50,6 +51,46 @@ function apiPlugin(server, options, next) {
         else reject('user not found');
       });
     },
+    createUser: (result) => {
+      
+    }
+  };
+  
+  const validationSchema = {
+    post: {
+      createUser: {
+        payload: {
+          pseudo:           Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/),
+          email:            Joi.string().email(),
+          password:         Joi.string().min(5).regex(/^(?=.*){6,}$/), //temporaire pour accepter admin
+          confirmPassword:  Joi.string().valid(Joi.ref('password'))
+        }
+      },
+      createUniverse: {
+        payload: {
+          name:         Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,15}$/),
+          description:  Joi.string().max(200),
+          related:      Joi.string(),
+          userId:       Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/)
+        }
+      },
+      createTopic: {
+        payload: {
+          title:    Joi.string().trim().required().min(1).regex(/^$/),
+          content:  [{type: Joi.string().trim().required(),content:Joi.object().required()}],
+          userId:   Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/),
+          picture:  Joi.string() 
+        }
+      }
+    },
+    get: {
+      login: {
+        params: {
+          email:   Joi.string().trim().required().regex(/^$/),
+          password:  Joi.string().trim().required().min(5).regex(/^$/) //temporaire pour accepter admin
+        }
+      }
+    }
   };
   
   // Dynamic construction of the API routes from actionCreator with API calls
@@ -60,10 +101,12 @@ function apiPlugin(server, options, next) {
       const before = beforeQuery[intention] || (() => Promise.resolve());
       const after  = afterQuery[intention]  || (() => Promise.resolve());
       
+      const validate = validationSchema[method][intention];
+      
       server.route({
         method,
         path: pathx,
-        config : {auth},
+        config : {auth, validate},
         handler: (request, reply) => {
           const params = method === 'post' ? request.payload : request.params.p;
           const response = reply.response().hold();

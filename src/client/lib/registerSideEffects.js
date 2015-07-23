@@ -26,6 +26,8 @@ export default function registerSideEffects(store, router) {
           break;
           
         case 'SUCCESS_CREATE_USER':
+          log('... setting jwt', payload.token);
+          localStorage.setItem('jwt', payload.token);
           router.transitionTo('explore');
           break;
           
