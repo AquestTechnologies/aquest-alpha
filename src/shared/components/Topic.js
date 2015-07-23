@@ -19,7 +19,8 @@ class Topic extends React.Component {
   render() {
     const topic = this.props.topics[this.props.params.topicId];
     const {title, author, timestamp} = topic;
-    const content = topic.content || ['Loading...'];
+    console.log(typeof(topic.content));
+    const content = topic.content ? typeof(topic.content) === 'object' ? topic.content : JSON.parse(topic.content) : ['Loading...'];
     
     return (
       <div>

@@ -13,11 +13,11 @@ export default function queryDb(intention, params) {
     // Connection attempt
     connect().then( 
       () => {
-        const {sql, callback} = buildQuery(intention, params); // Query construction
+        const {sql, paramaterized, callback} = buildQuery(intention, params); // Query construction
         
         // log(`+++ REQUETE --> ${sql}`); 
         if (sql) new Promise((resolve, reject) => {
-          client.query(sql, (err, result) => {
+          client.query(sql, paramaterized, (err, result) => {
             if (err) return reject(err);
             log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
             resolve(result);
@@ -55,10 +55,10 @@ export default function queryDb(intention, params) {
   // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
-    const {id, userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip} = 
+    const {id, userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip, content} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
-    let sql, callback;
+    let sql, callback, paramaterized;
     
     switch (intention) {
       
@@ -82,7 +82,9 @@ export default function queryDb(intention, params) {
         'FROM ' +
           'aquest_schema.universe ' +
         'WHERE ' +
-          `id = '${params}'`;
+          'id = $1';
+        
+        paramaterized = [params];
           
         callback = result => result.rows[0];
           
@@ -111,9 +113,11 @@ export default function queryDb(intention, params) {
           'SELECT ' +    
             'universe, topic.* ' +
           'FROM' +   
-            `(SELECT universe.id, universe.name, universe.description, universe.picture, universe.chat_id "chatId" FROM aquest_schema.universe WHERE universe.id = '${params}') universe ` +  
+            '(SELECT universe.id, universe.name, universe.description, universe.picture, universe.chat_id "chatId" FROM aquest_schema.universe WHERE universe.id = $1) universe ' +  
             'LEFT JOIN aquest_schema.topic ON universe.id = topic.universe_id ' +
         ') topics GROUP BY universe';
+        
+        paramaterized = [params];
         
         callback = result => result.rows[0].UniverseWithTopics;
         
@@ -149,7 +153,9 @@ export default function queryDb(intention, params) {
             'LEFT JOIN aquest_schema.message ON chat.id = message.chat_id ' +
             'LEFT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.id ' +
             'LEFT JOIN  aquest_schema.atom_message ON message.id = atom_message.message_id ' +
-        `WHERE chat.id = '${params}' GROUP BY chat.id`;
+        'WHERE chat.id = $1 GROUP BY chat.id';
+        
+        paramaterized = [params];
         
         callback = result => result.rows[0].chat;
         
@@ -181,7 +187,9 @@ export default function queryDb(intention, params) {
         'FROM ' +    
           'aquest_schema.topic ' +
         'WHERE ' + 
-          `topic.universe_id= '${params}'`;
+          'topic.universe_id = $1';
+        
+        paramaterized = [params];
         
         callback = result => result.rows;
         
@@ -219,7 +227,9 @@ export default function queryDb(intention, params) {
         'FROM '+
           'aquest_schema.topic ' +
         'WHERE ' + 
-          `topic.id = '${params}'`;
+          'topic.id = $1';
+        
+        paramaterized = [params];
         
         callback = result => result.rows[0];
         
@@ -266,11 +276,12 @@ export default function queryDb(intention, params) {
         	'FROM ' +
         		'aquest_schema.atom_topic ' +
         	'WHERE ' +
-        		`atom_topic.topic_id = '${params}' ` + 	
+        		'atom_topic.topic_id = $1 ' + 	
         	'ORDER BY ' + 
         		'atom_topic.position' +
         	') atom_topics';
         
+        paramaterized = [params];
         
         callback = result => result.rows[0].content;
         
@@ -284,12 +295,14 @@ export default function queryDb(intention, params) {
           'INSERT INTO aquest_schema.message ' +
             '(user_id, chat_id, created_at) ' +
           'VALUES ' +
-            `('${userId}','${chatId}', CURRENT_TIMESTAMP) ` +
+            '($1,$2, CURRENT_TIMESTAMP) ' +
           'RETURNING message.id' +
         ')' +
         'INSERT INTO aquest_schema.atom_message (message_id, content) ' +
-        `SELECT id, '{"text": "${messageContent}"}' FROM addMessage ` +
+        `SELECT id, '{"text": "$3"}' FROM addMessage ` +
         'RETURNING id';
+        
+        paramaterized = [userId, chatId, messageContent];
         
         break;
         
@@ -302,7 +315,9 @@ export default function queryDb(intention, params) {
           '(id, name, user_id, description) ' +
         'VALUES ' +
           // `('${name}', '${name}', 'johnDoe', '${description}')`;
-        `('${name}', '${name}', '${userId}', '${description}')`;
+        '($1, $2, $3, $4)';
+        
+        paramaterized = [name, name, userId, description];
         
         break;
         
@@ -312,10 +327,14 @@ export default function queryDb(intention, params) {
         //atom : id, type, structure, created_at, updated_at, deleted
         
         sql = 
-        'INSERT INTO aquest_schema.topic ' +
-          '(id, user_id, universe_id, title, description) ' +
-        'VALUES ' +
-          `('${id}', '${userId}','${universeId}', '${title}', '${description})`;
+        'SELECT ' + 
+          'aquest_schema.create_atoms_topic(' + 
+            '$1 ::TEXT, $2 ::TEXT, $3 ::TEXT, $4 ::TEXT, $5 ::TEXT, $6 ::TEXT' +
+          ') AS create_topic';
+        
+        paramaterized = [id, userId, universeId, title, description, content];
+        
+        callback = result => result.rows[0].create_topic;
         
         break;
         
@@ -325,8 +344,10 @@ export default function queryDb(intention, params) {
         'INSERT INTO aquest_schema.user ' +
           '(id, email, password_salt, password_hash, creation_ip) ' +
         'VALUES ' +
-          `('${pseudo}','${email}', '${passwordHash}', '${passwordSalt}', '${ip}')` +
+          '($1, $2, $3, $4, $5)' +
         'RETURNING id';
+        
+        paramaterized = [pseudo, email, passwordHash, passwordSalt, ip];
         
         callback = result => result.rows[0];
         
@@ -334,11 +355,13 @@ export default function queryDb(intention, params) {
         
       case 'randomRow':
         
+        // INJECTION SQL !!!! à FAIRE !
         sql = `SELECT * FROM aquest_schema.${params} ORDER BY RANDOM() LIMIT 1`;
+        
         callback = result => result.rows[0];
         break;
     }
     
-    return {sql, callback};
+    return {sql, callback, paramaterized};
   }
 }

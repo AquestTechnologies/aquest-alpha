@@ -247,6 +247,39 @@ CREATE TRIGGER update_timestamp
   ON aquest_schema.universe 
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
 
+-- automaticaly create topic and associated atoms 
+CREATE OR REPLACE FUNCTION aquest_schema.create_atoms_topic(topic_id TEXT, user_id TEXT, universe_id TEXT, title TEXT, description TEXT, content TEXT) 
+  RETURNS JSON AS $$
+  var topic = plv8.subtransaction(function(){
+    
+    var insert_topic = plv8.execute( 
+      'INSERT INTO aquest_schema.topic ' +
+          '(id, user_id, universe_id, title, description) ' +
+        'VALUES ' +
+          '($1, $2, $3, $4, $5) ' + 
+        'RETURNING topic.chat_id AS "chatId", topic.picture, topic.updated_at as "timestamp"',
+        [topic_id, user_id, universe_id, title, description]
+    );
+    
+    content = JSON.parse(content);
+    
+    for(var i = 0, content_length = content.length ; i < content_length ; i++){
+      var insert_atom_topic = plv8.execute( 
+        'INSERT INTO aquest_schema.atom_topic ' +
+          '(atom_id, topic_id, type, content, position) ' +
+        'VALUES ' + 
+          '($1, $2, $3, $4, $5)',
+        [1, topic_id, content[i]['type'], content[i], i] 
+      );
+      plv8.elog(NOTICE, "resultat requête = ", insert_atom_topic);
+      i++;
+    }
+    
+    return {id: topic_id, author: user_id, universeId: universe_id, title: title, description: description, picture: insert_topic[0].picture, timestamp: insert_topic[0].timestamp, chatId: insert_topic[0].chatId, content: content};
+  });
+  return topic;
+$$ LANGUAGE plv8;
+
 -- concat an array of JSON object into JSON properties  
 CREATE OR REPLACE FUNCTION aquest_schema.concat_json_array(json_array JSON)
 RETURNS JSON AS $$
