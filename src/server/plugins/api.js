@@ -57,38 +57,33 @@ function apiPlugin(server, options, next) {
   };
   
   const validationSchema = {
-    post: {
-      createUser: {
-        payload: {
-          pseudo:           Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/),
-          email:            Joi.string().email(),
-          password:         Joi.string().min(5).regex(/^(?=.*){6,}$/), //temporaire pour accepter admin
-          confirmPassword:  Joi.string().valid(Joi.ref('password'))
-        }
-      },
-      createUniverse: {
-        payload: {
-          name:         Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,15}$/),
-          description:  Joi.string().max(200),
-          related:      Joi.string(),
-          userId:       Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/)
-        }
-      },
-      createTopic: {
-        payload: {
-          title:    Joi.string().trim().required().min(1).regex(/^$/),
-          content:  [{type: Joi.string().trim().required(),content:Joi.object().required()}],
-          userId:   Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/),
-          picture:  Joi.string() 
-        }
+    createUser: {
+      payload: {
+        pseudo:           Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/),
+        email:            Joi.string().email(),
+        password:         Joi.string().min(5).regex(/^(?=.*){6,}$/)
       }
     },
-    get: {
-      login: {
-        params: {
-          email:   Joi.string().trim().required().regex(/^$/),
-          password:  Joi.string().trim().required().min(5).regex(/^$/) //temporaire pour accepter admin
-        }
+    createUniverse: {
+      payload: {
+        name:         Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,15}$/),
+        description:  Joi.string().max(200),
+        related:      Joi.string(),
+        userId:       Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/)
+      }
+    },
+    createTopic: {
+      payload: {
+        title:    Joi.string().trim().required().min(1).regex(/^$/),
+        content:  [{type: Joi.string().trim().required(),content:Joi.object().required()}],
+        userId:   Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/),
+        picture:  Joi.string() 
+      }
+    },
+    login: {
+      params: {
+        email:   Joi.string().trim().required().regex(/^$/),
+        password:  Joi.string().trim().required().min(5).regex(/^(?=.*){6,}$/)
       }
     }
   };
@@ -101,7 +96,7 @@ function apiPlugin(server, options, next) {
       const before = beforeQuery[intention] || (() => Promise.resolve());
       const after  = afterQuery[intention]  || (() => Promise.resolve());
       
-      const validate = validationSchema[method][intention];
+      const validate = validationSchema[intention];
       
       server.route({
         method,
