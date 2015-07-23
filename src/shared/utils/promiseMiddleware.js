@@ -12,16 +12,10 @@ export default function promiseMiddleware({ dispatch, getState }) {
     
     const [REQUEST, SUCCESS, FAILURE] = types;
     next({params, type: REQUEST});
-
+    
     promise.then(
-    payload => {
-      next({params, payload, type: SUCCESS});
-      return payload; // Pour phidippides
-    },
-    payload => {
-      next({params, payload, type: FAILURE}); 
-      return payload;
-    });
+      payload => next({params, payload, type: SUCCESS}),
+      payload => next({params, payload, type: FAILURE}));
   };
 }
 

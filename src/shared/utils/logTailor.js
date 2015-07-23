@@ -1,71 +1,81 @@
 import isClient from './isClient';
-import chalk from 'chalk';
 import fs from 'fs';
+import chalk from 'chalk';
 
-export default function log(type, ...messages) {
+const isServer = !isClient();
+const colorMatching = {
+  '!!!': {
+    text: 'red'
+  },
+  '...': {
+    text: 'gray'
+  },
+  '.M.': {
+    text: 'gray'
+  },
+  '***': {
+    text: 'white',
+    bg: 'yellow'
+  },
+  '.A.': {
+    text: 'white',
+    bg: 'green',
+    bgClient : 'YellowGreen'
+  },
+  '.R.': {
+    text: 'white',
+    bg: 'cyan',
+    bgClient: 'SkyBlue'
+  },
+  '+++': {
+    text: 'white',
+    bg: 'magenta',
+    bgClient: 'LightPink'
+  },
+  '_w_': {
+    text: 'white',
+    bg: 'black'
+  },
+};
+
+export default function log(...messages) {
   
-  if (messages[0]) messages.forEach(msg => logOneEntry(type, msg));
-  else logOneEntry('info', type);
+  const firstMessage = messages[0];
   
-  function logOneEntry(type, message) {
-  
-    if (isClient()) {
-      switch (type) {
-        case 'error':
-          console.error(message);
-          break;
-        case 'warn':
-          console.warn(message);
-          break;
-        default:
-          console.log(message);
+  if (typeof firstMessage === 'string') {
+    const prefix = firstMessage.slice(0, 3);
+    const match  = colorMatching[prefix];
+    
+    if (match) {
+      const {text, bg, bgClient} = match;
+      messages.shift();
+      
+      if (isServer) console.log(chalk[bg ? 'bg' + bg.slice(0, 1).toUpperCase() + bg.slice(1) : text](prefix), firstMessage.slice(3), ...messages);
+      else {
+        let css = `color:${text};`;
+        css += bg ? bgClient ? `background:${bgClient};` : `background:${bg};` : '';
+        console.log(`%c${prefix}`, css, firstMessage.slice(3), ...messages);
       }
     }
-    else {
-      switch (type) {
-        case 'error':
-          console.log(message instanceof Error ? message.stack : chalk.bgRed(message));
-          break;
-        case 'warn':
-          console.log(chalk.bgYellow(message));
-          break;
-        default:
-          if (typeof message === 'string') {
-            let colorMatching = {
-              '...': 'grey',
-              '.M.': 'grey',
-              '***': 'bgYellow',
-              '.A.': 'bgGreen',
-              '.R.': 'bgCyan',
-              '+++': 'bgMagenta',
-              '_w_': 'gbBlack'
-            };
-            const prefix = message.slice(0,3);
-            const match  = colorMatching[prefix];
-            console.log(match ? chalk[match](prefix) + message.slice(3) : message);
-          }
-          else {
-            console.log(message);
-          }
-      }
-      const d = new Date();
-      const whatToLog = {
-        type:  type,
-        data:  message,
-        date:  d.toLocaleString('fr'), // :'( pas très local...
-        year:  d.getFullYear(),
-        month: d.getMonth(),
-        day:   d.getDate(),
-        h:     d.getHours(),
-        m:     d.getMinutes(),
-        s:     d.getSeconds()
-      };
-      fs.appendFile('log/server.log', JSON.stringify(whatToLog) +'\n', err => {
-        if (err) console.log(err);
-      });
-    }
+    else console.log(...messages);
+  } 
+  else console.log(...messages);
+    
+  if (isServer) {
+    const d = new Date();
+    fs.appendFile('log/server.log', JSON.stringify({
+      data:  messages.join(' '),
+      date:  d.toLocaleString('fr'), // :'( pas très local...
+      year:  d.getFullYear(),
+      month: d.getMonth(),
+      day:   d.getDate(),
+      h:     d.getHours(),
+      m:     d.getMinutes(),
+      s:     d.getSeconds()
+    }) +'\n', err => {
+      if (err) console.log(err);
+    });
   }
-  
 }
 
 let c = 0;

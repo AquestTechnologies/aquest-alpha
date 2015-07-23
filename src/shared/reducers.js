@@ -1,26 +1,6 @@
 import log from './utils/logTailor';
 import Immutable from 'immutable';
 
-import * as actionCreators from './actionCreators';
-
-const { 
-  SUCCESS_readUniverse,
-  SUCCESS_readUniverses,
-  SUCCESS_readInventory,
-  SUCCESS_readChat,
-  SUCCESS_readTopic,
-  SUCCESS_readTopicContent,
-  SUCCESS_createUser,
-  SUCCESS_createTopic,
-} = (() => {
-  const at = {};
-  Object.keys(actionCreators)
-    .map(key => actionCreators[key].getTypes())
-    .reduce((a, b) => a.concat(b), [])
-    .map(type => at[type] = type);
-  return at;
-})();
-
 // Doit être exporté en premier pour logger avant les autres
 export function records(state = [], action) {
   log('.R. ' + action.type);
@@ -34,17 +14,17 @@ export function universes(state = Immutable.Map(), action) {
   let newState;
   switch (action.type) {
     
-  case SUCCESS_readUniverse:
+  case 'SUCCESS_READ_UNIVERSE':
     return state.set(action.payload.id, fromJSGreedy(action.payload));
 
-  case SUCCESS_readUniverses:
+  case 'SUCCESS_READ_UNIVERSES':
     newState = state;
     action.payload.forEach(universe => {
       if (!newState.get(universe.id)) newState = newState.set(universe.id, fromJSGreedy(universe));
     });
     return newState;
     
-  case SUCCESS_readInventory:
+  case 'SUCCESS_READ_INVENTORY':
     const d = new Date();
     return state.setIn([action.params, 'lastInventoryUpdate'], d.getTime());
   
@@ -56,11 +36,7 @@ export function universes(state = Immutable.Map(), action) {
 export function chats(state = Immutable.Map(), action) {
   switch (action.type) {
     
-  case SUCCESS_readChat:
-    log('action.params');
-    log(action.params);
-    log('action.payload');
-    log(action.payload);
+  case 'SUCCESS_READ_CHAT':
     return state.set(action.payload.id, fromJSGreedy(action.payload));
     
   default:
@@ -72,20 +48,19 @@ export function topics(state = Immutable.Map(), action) {
   let newState;
   switch (action.type) {
     
-  case SUCCESS_readInventory:
+  case 'SUCCESS_READ_INVENTORY':
     newState = state;
     action.payload.forEach(topic => newState = newState.set(topic.id, fromJSGreedy(topic)));
     return newState;
     
-  case SUCCESS_readTopic:
+  case 'SUCCESS_READ_TOPIC':
     return state.set(action.payload.id, fromJSGreedy(action.payload));
     
-  
-  case SUCCESS_readTopicContent:
+  case 'SUCCESS_READ_TOPIC_CONTENT':
     return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
     
-  case SUCCESS_createTopic:
-    return state.set(action.params.id, fromJSGreedy(action.payload));
+  case 'SUCCESS_CREATE_TOPIC':
+    return state.set(action.params.id, fromJSGreedy(action.params));
     
   default:
     return state;
@@ -93,12 +68,13 @@ export function topics(state = Immutable.Map(), action) {
 }
 
 export function users(state = Immutable.Map(), action) {
-  let newState;
   switch (action.type) {
     
-  case SUCCESS_createUser:
-    action.params.redirect();
+  case 'SUCCESS_CREATE_USER':
     return state.set(action.payload.id, fromJSGreedy(action.payload));
+    
+  case 'SUCCESS_LOGIN':
+    return state.set(action.payload.id, fromJSGreedy(action.payload)); // le token est dedans !
     
   default:
     return state;

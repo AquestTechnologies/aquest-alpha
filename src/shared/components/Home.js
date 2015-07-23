@@ -6,11 +6,13 @@ import Login from './home/Login';
 export default class Home extends React.Component {
   
   render() {
+    const {login, createUser} = this.props;
+    
     return (
       <div style={{
         fontSize: '2rem',
         width: '60%',
-        margin: '50 auto 0 auto'
+        margin: '0 auto 0 auto'
       }}>    
       
         <h1>Aquest</h1>
@@ -21,9 +23,11 @@ export default class Home extends React.Component {
           display : 'flex',
           alignContent: 'space-between',
         }}>
-          <Login />
+          <Login 
+            login={login}
+          />
           <Signup 
-            createUser={this.props.createUser}
+            createUser={createUser}
           />
         </div>
         

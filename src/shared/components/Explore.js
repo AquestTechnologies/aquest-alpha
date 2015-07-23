@@ -52,6 +52,8 @@ export default class Explore extends React.Component {
     return (
       <div style={exploreStyle}>
         <div style={divStyle}>
+          <Link to='home'>Home</Link>
+          <br/>
           {this.renderGraph(universes)}
           <br/>
           <Link to='newUniverse'>Create a new universe</Link>

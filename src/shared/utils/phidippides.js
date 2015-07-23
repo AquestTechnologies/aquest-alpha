@@ -34,15 +34,15 @@ export default function phidippides(routerState, dispatch) {
   // ___Fonctions___
   
   // Log
-  function logMeOrNot(type, ...messages) {
-    if (VERBOSE === true) log(type, ...messages);
+  function logMeOrNot(...messages) {
+    if (VERBOSE) log(...messages);
   }
   
   
   // Parcours completedTask pour déterminer si une dependance est terminée
   function checkDependency(dependency) {
     logMeOrNot('*** _ checkDependency named ' + dependency);
-    if (dependency === undefined) return true;
+    if (!dependency) return true;
     for (let t of completedTasks) {
       if (t.task.id === dependency) return true;
     }
@@ -66,22 +66,19 @@ export default function phidippides(routerState, dispatch) {
           logMeOrNot('\n');
           
           // Si aucune tache n'a échoué c'est terminé
-          if (failedTasks.length === 0) {
-            resolve();
+          if (!failedTasks.length) resolve();
             
           // Sinon on rappel les tâches échouées (possible boucle infinie ici)
-          } else { 
+          else { 
             if (preventInfinite > 10) throw('!!! Infinite loop detected');
             
             // Inception des promises 8)
             clearTasks(failedTasks).then(
               () => resolve(),
-              error => reject(error)
-            );
+              error => reject(error));
           }
         },
-        error => reject(error)
-      );
+        error => reject(error));
     });
   }
   
@@ -119,7 +116,7 @@ export default function phidippides(routerState, dispatch) {
     const creator = actionCreators[task.creator];
     let realArgs = [], realArg;
     
-    if (creator === undefined || typeof creator !== 'function') return Promise.reject('callActionCreator creator ' + task.creator + ' does not exist.');
+    if (!creator || typeof creator !== 'function') return Promise.reject('callActionCreator creator ' + task.creator + ' does not exist.');
 
     // Traitement des arguments
     task.args.forEach(arg => {
@@ -151,15 +148,14 @@ export default function phidippides(routerState, dispatch) {
       const action = creator.apply(null, realArgs);
       dispatch(action);
       
-      if (action.promise === undefined) resolve(action.payload);
+      if (!action.promise) resolve(action.payload);
       else action.promise.then(
         data => {
           logMeOrNot('***  _ Dispatch for ' + task.id + ' resolved');
-          logMeOrNot(JSON.stringify(data).substr(0,100));
+          logMeOrNot(JSON.stringify(data).substr(0,150));
           resolve(data);
         },
-        error => reject(error)
-      );
+        error => reject(error));
     });
   }
   
@@ -171,26 +167,23 @@ export default function phidippides(routerState, dispatch) {
       
       if (task.hasOwnProperty('id')) {
         if (typeof task.id !== 'string') whatIsWrong += '\'id\' property should be a string\n';
-      } else {
-        whatIsWrong += 'task is missing \'id\' property\n';
-      }
+      } 
+      else whatIsWrong += 'task is missing \'id\' property\n';
       
       if (task.hasOwnProperty('creator')) {
         if (typeof task.creator !== 'string') whatIsWrong += '\'creator\' property should be a string\n';
-      } else {
-        whatIsWrong += 'task is missing \'creator\' property\n';
-      }
+      } 
+      else whatIsWrong += 'task is missing \'creator\' property\n';
       
       if (task.hasOwnProperty('args')) {
         if (!(task.args instanceof Array)) whatIsWrong += '\'args\' property should be an array\n';
-      } else {
-        whatIsWrong += 'task is missing \'args\' property\n';
-      }
+      } 
+      else whatIsWrong += 'task is missing \'args\' property\n';
       
       if (task.hasOwnProperty('dependency') && typeof task.dependency !== 'string') whatIsWrong += '\'dependency\' property should be a string\n';
       
       if (whatIsWrong.length) {
-        log('error', '*** ERROR ! Please check task format for task : ' + JSON.stringify(task), whatIsWrong);
+        log('!!! Please check task format for task : ' + JSON.stringify(task), whatIsWrong);
         return false;
       }
     }

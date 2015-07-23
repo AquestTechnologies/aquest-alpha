@@ -16,7 +16,6 @@ class NewTopic extends React.Component {
       this.state.id = topicId;
       this.state.universeId = universeId;
       this.state.description = content.substr(0, 600);
-      
       /**
        * TODO :
        * create a function that modify the content to match atom like version 

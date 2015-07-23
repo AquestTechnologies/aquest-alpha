@@ -1,50 +1,22 @@
 /* global d3 */
 
 import React from 'react';
-import {generateGraphForD3} from '../../utils/graphGenerator';
+import {generateWorkingGraph} from '../../utils/graphGenerator';
+import {loadScripts} from '../../../client/lib/loadScript';
 
-// http://arxiv.org/pdf/1201.3011v1.pdf
-// http://www.cs.arizona.edu/~kobourov/fdl.pdf
-// http://arxiv.org/pdf/1209.0748v1.pdf
 export default class Graph extends React.Component {
   
-  constructor() {
-    super();
-    this.graphSize = 20;
-  }
-  
   componentDidMount() {
-    const urls = [
-      'http://marvl.infotech.monash.edu/webcola/cola.v3.min.js',
+    loadScripts.call(this, [
+      // 'http://marvl.infotech.monash.edu/webcola/cola.v3.min.js',
       'https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.js'
-    ];
-    Promise.all(urls.map(url => this.loadScript(url))).then(() => this.renderGraph());
-  }
-  
-  loadScript(source) {
-    return new Promise((resolve, reject) => {
-      console.log('.C. Graph.loadScript');
-      const scripts = document.getElementsByTagName('script');
-      // Vérifie si le script à déjà été loadé
-      if ([].slice.call(scripts).every(script => script.src !== source)) {
-        // Code copié depuis stackoverflow
-        let newElement    = document.createElement('script');
-        let scriptElement = scripts[0];
-        newElement.src    = source;
-        newElement.onload = newElement.onreadystatechange = () => {
-          if (!this.readyState || this.readyState === 'complete') resolve();
-        };
-        scriptElement.parentNode.insertBefore(newElement, scriptElement);
-      } else {
-        resolve();
-      }
-    });
+    ]).then(() => this.renderGraph());
   }
   
   renderGraph() {
-    let {vertices, edges} = generateGraphForD3(400);
+    let {vertices, edges} = generateWorkingGraph(600);
     let width = 1920,
-    height = 750;
+    height = 800;
     
     let color = d3.scale.category20();
     
@@ -77,8 +49,8 @@ export default class Graph extends React.Component {
       .enter().append("circle")
       .attr("class", "node")
       .attr("r", 5)
-      .style("fill", d => color(d.group));
-      // .call(force.drag);
+      .style("fill", d => color(d.group))
+      .call(force.drag);
     
     node.append("title")
       .text(d => d.name);
@@ -132,21 +104,11 @@ export default class Graph extends React.Component {
   }
   
   render() {
-    const nodeStyle = {
-      fill: '#ccc',
-      stroke: '#fff',
-      strokeWidth: 2,
-    };
-    const edgeStyle = {
-      stroke: '#777',
-      strokeWidth: 2,
-    };
+    const graphStyle = '.node { stroke: #fff; stroke-width: 1.5px;}.link {  stroke: #999;  stroke-opacity: .6;';
     
     return(
       <div>
-        <style>
-          {'.node { stroke: #fff; stroke-width: 1.5px;}.link {  stroke: #999;  stroke-opacity: .6;'}
-        </style>
+        <style>{graphStyle}</style>
         <button type="button" onClick={this.again.bind(this)}>render</button>
         <div id='graphArea'/>
       </div>

@@ -30,7 +30,7 @@ export default class Activist {
 				console.log(data.id);
 				if (this.isStarted) setTimeout(loopActivities, pace);
 			},
-			error => log('error', error)
+			error => log(error)
 		);
 		loopActivities();
 	}
