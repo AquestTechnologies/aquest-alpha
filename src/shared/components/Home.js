@@ -12,7 +12,7 @@ export default class Home extends React.Component {
       <div style={{
         fontSize: '2rem',
         width: '60%',
-        margin: '50 auto 0 auto'
+        margin: '0 auto 0 auto'
       }}>    
       
         <h1>Aquest</h1>

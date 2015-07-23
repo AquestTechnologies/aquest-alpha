@@ -2,8 +2,6 @@ import log, {logRequest} from '../../shared/utils/logTailor.js';
 import queryDb from '../queryDb.js';
 import bcrypt from 'bcrypt';
 import * as actionCreators from '../../shared/actionCreators';
-import aguid from 'aguid';
-import cache from '../lib/cache';
 import JWT from 'jsonwebtoken';
 import devConfig from '../../../config/development.js';
 
@@ -79,27 +77,26 @@ function apiPlugin(server, options, next) {
               queryDb(intention, params).then(
                 result => after(params, result).then(
                   () => {
-                    console.log(result.token);
                     response.source = result;
                     response.send();
                   },
                   error => {
                     response.statusCode  = 500;
                     response.send();
-                    log('error', error);
+                    log(error);
                   }
                 ),
                 error => {
                   response.statusCode  = 500;
                   response.send();
-                  log('error', error);
+                  log(error);
                 }
               );
             },
             error => {
               response.statusCode  = 500;
               response.send();
-              log('error', error);
+              log(error);
             }
           );
         },

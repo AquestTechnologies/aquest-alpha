@@ -62,7 +62,7 @@ export const createUser = createActionCreator({
   intention:  'createUser',
   method:     'post',
   pathx:      '/api/user/',
-  auth:       'jwt',
+  auth:       false,
 });
 
 export const login = createActionCreator({
@@ -72,14 +72,16 @@ export const login = createActionCreator({
   auth:       false,
 });
 
-// (string)   intention       the queryDb hook, used also to create actionTypes
-// (string)   method          HTTP method
-// (string)   pathx           API path. If (method && path) an corresponding API route gets created
-// (function) overrideParams  allows to mutate the params before the fetching cycle
+// (string)   intention   The queryDb hook, also used to create actionTypes
+// (string)   method      HTTP method
+// (string)   pathx       API path. If (method && path) an corresponding API route gets created
 function createActionCreator(shape) {
   
-  const {intention, method, pathx, auth} = shape;
-  const types = ['REQUEST', 'SUCCESS', 'FAILURE'].map(type => `${type}_${intention}`);
+  
+  
+  const {intention, method, pathx} = shape;
+  const types = ['REQUEST', 'SUCCESS', 'FAILURE']
+    .map(type => `${type}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
   
   const actionCreator = params => {
     log(`.A. ${intention} ${JSON.stringify(params)}`);
@@ -96,7 +98,7 @@ function createActionCreator(shape) {
         const isPost = method === 'post';
         const req = new XMLHttpRequest();
         
-        console.log(`+++ --> ${method} ${path}`, params);
+        log(`+++ --> ${method} ${path}`, params);
         
         req.onerror = err => reject(err);
         req.open(method, isPost ? path : params ? path + params : path);
@@ -112,8 +114,14 @@ function createActionCreator(shape) {
     });
     
     promise.then(
-      result => {if (!isServer) console.log(`+++ <-- ${intention}`, result)}, 
-      error => log('error', 'Action error', 'shape:', shape, 'params:', JSON.stringify(params), error));
+      result => {
+        if (!isServer) log(`+++ <-- ${intention}`, result);
+      }, 
+      error => {
+        log('!!! Action error', error);
+        log('!!! shape', shape);
+        log('!!! params', params);
+      });
     
     return {types, params, promise};
   };

@@ -34,8 +34,8 @@ export default function phidippides(routerState, dispatch) {
   // ___Fonctions___
   
   // Log
-  function logMeOrNot(type, ...messages) {
-    if (VERBOSE) log(type, ...messages);
+  function logMeOrNot(...messages) {
+    if (VERBOSE) log(...messages);
   }
   
   
@@ -183,7 +183,7 @@ export default function phidippides(routerState, dispatch) {
       if (task.hasOwnProperty('dependency') && typeof task.dependency !== 'string') whatIsWrong += '\'dependency\' property should be a string\n';
       
       if (whatIsWrong.length) {
-        log('error', '*** ERROR ! Please check task format for task : ' + JSON.stringify(task), whatIsWrong);
+        log('!!! Please check task format for task : ' + JSON.stringify(task), whatIsWrong);
         return false;
       }
     }

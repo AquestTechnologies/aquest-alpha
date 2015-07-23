@@ -69,7 +69,7 @@ io.on('message', function (message) {
       );
     } 
     catch(err) {
-      log('error', '!!! Error while React.renderToString', err);
+      log('!!! Error while React.renderToString', err);
     }
   });
 

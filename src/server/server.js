@@ -15,7 +15,7 @@ import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
 import {createStore, combineReducers, applyMiddleware} from 'redux';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-log('node', `Starting server in ${process.env.NODE_ENV} mode...`);
+log(`Starting server in ${process.env.NODE_ENV} mode...`);
 
 //lance webpack-dev-server si on est pas en production
 if (process.env.NODE_ENV === 'development') require('./dev_server.js')();
@@ -107,7 +107,8 @@ function prerender(request, reply) {
     phidippides(routerState, store.dispatch).then(
       () => {
       
-        log('info', `... Exiting phidippides (${new Date() - dd}ms)` , '... Entering React.renderToString');
+        log(`... Exiting phidippides (${new Date() - dd}ms)`);
+        log('... Entering React.renderToString');
         
         try {
           var mountMeImFamous = React.renderToString(
@@ -117,7 +118,7 @@ function prerender(request, reply) {
           );
         } 
         catch(err) {
-          log('error', '!!! Error while React.renderToString', err);
+          log('!!! Error while React.renderToString', err);
         }
         log('... Exiting React.renderToString');
         
@@ -154,10 +155,10 @@ function prerender(request, reply) {
             response.send();
             log(`Served ${url} in ${new Date() - d}ms.\n`);
           },
-          error => log('error', '!!! Error while reading HTML', error)
+          error => log('!!! Error while reading HTML', error)
         );
       },
-      error => log('error', '!!! Error while Phidippides', error)
+      error => log('!!! Error while Phidippides', error)
     );
   });
 }

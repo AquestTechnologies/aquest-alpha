@@ -1,29 +1,35 @@
-import { observableFromStore } from 'redux-rx';
+import log from '../../shared/utils/logTailor';
+import * as actionCreators from '../../shared/actionCreators';
+import { Observable } from 'rx';
 
 export default function registerSideEffects(store, router) {
   
-  observableFromStore(store)
-    .distinctUntilChanged(state => state.effects)
-    .filter(state => state.effects)
-    .subscribe(state => {
+  const authFailureTypes = Object.keys(actionCreators)
+    .map(key => actionCreators[key])
+    .filter(ac => ac.getShape().auth)
+    .map(ac => ac.getTypes()[2]);
+  
+  // https://github.com/acdlite/redux-rx/blob/master/src/observableFromStore.js
+  Observable.create(observer => store.subscribe(() => observer.onNext(store.getState().records)))
+    .subscribe(records => {
+      const {type, payload} = records[records.length - 1].action;
+      console.log('... registerSideEffects', type);
       
-      const {did, jwt} = state.effects;
-      if (did) switch (did) {
-        case 'login': 
-          console.log('setting jwt', jwt);
-          localStorage.setItem('jwt', jwt);
+      if (authFailureTypes.indexOf(type) !== -1 && payload.message === 'Unauthorized') router.transitionTo('home');
+      
+      switch (type) {
+        
+        case 'SUCCESS_LOGIN': 
+          log('... setting jwt', payload.token);
+          localStorage.setItem('jwt', payload.token);
           router.transitionTo('explore');
           break;
           
-        case 'createUser': 
+        case 'SUCCESS_CREATE_USER':
           router.transitionTo('explore');
           break;
           
-        case 'createTopic':
-          console.log(state.effects);
-          break;
       }
-      
     });
     
 }
