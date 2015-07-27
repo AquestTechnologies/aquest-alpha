@@ -27,6 +27,15 @@ const colorMatching = {
     bg: 'cyan',
     bgClient: 'SkyBlue'
   },
+  'jwt': {
+    text: 'black',
+    bg: 'white',
+  },
+  '.E.': {
+    text: 'white',
+    bg: 'cyan',
+    bgClient: 'Gold'
+  },
   '+++': {
     text: 'white',
     bg: 'magenta',
@@ -93,7 +102,7 @@ export function logRequest(request) {
   const h = preprendZero(d.getHours());
   const m = preprendZero(d.getMinutes());
   const s = preprendZero(d.getSeconds());
-  log(`\n[${c}] ${D}-${M}-${Y} ${h}:${m}:${s} ${request.info.remoteAddress}:${request.info.remotePort} ${request.method} ${request.url.path}`);
+  log(`\n[${c}]`, ` ${D}-${M}-${Y} ${h}:${m}:${s} ${request.info.remoteAddress}:${request.info.remotePort} ${request.method} ${request.url.path}`);
 }
 
 export function logWelcome(x) {

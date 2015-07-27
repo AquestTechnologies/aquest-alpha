@@ -42,12 +42,24 @@ function apiPlugin(server, options, next) {
               id: result.id, 
               exp: Math.floor((new Date().getTime() + ttl) / 1000)
             }, key); // synchronous
-            log('... signed JWT ' + result.token);
+            log('... signed JWT after login' + result.token);
             resolve();
           }
           else reject('password mismatch');
         });
         else reject('user not found');
+      });
+    },
+    
+    createUser: (params, result) => {
+      return new Promise((resolve, reject) => {
+        result.token = JWT.sign({
+          valid: true, 
+          id: result.id, 
+          exp: Math.floor((new Date().getTime() + ttl) / 1000)
+        }, key); // synchronous
+        log('... signed JWT after user creation' + result.token);
+        resolve();
       });
     },
   };
@@ -67,7 +79,6 @@ function apiPlugin(server, options, next) {
         handler: (request, reply) => {
           const params = method === 'post' ? request.payload : request.params.p;
           const response = reply.response().hold();
-          
           before(request, params)
           .then(
             () => {

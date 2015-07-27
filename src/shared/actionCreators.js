@@ -1,5 +1,6 @@
 import log        from './utils/logTailor';
 import isClient from './utils/isClient';
+import docCookies from '../client/vendor/cookie';
 const isServer = !isClient();
 
 export const readUniverse = createActionCreator({
@@ -79,7 +80,7 @@ function createActionCreator(shape) {
   
   
   
-  const {intention, method, pathx} = shape;
+  const {intention, method, pathx, auth} = shape;
   const types = ['REQUEST', 'SUCCESS', 'FAILURE']
     .map(type => `${type}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
   
@@ -97,16 +98,14 @@ function createActionCreator(shape) {
         const path = pathx.replace(/\{\S*\}/, '');
         const isPost = method === 'post';
         const req = new XMLHttpRequest();
-        
+        const jwt = docCookies.getItem('jwt');
         log(`+++ --> ${method} ${path}`, params);
+        if (auth) log('+++ with JWT:', jwt);
         
         req.onerror = err => reject(err);
         req.open(method, isPost ? path : params ? path + params : path);
-        req.setRequestHeader('Authorization', localStorage.getItem('jwt'));
-        req.onload = () => {
-          if (req.status === 200) resolve(JSON.parse(req.response));
-          else reject(Error(req.statusText));
-        };
+        req.setRequestHeader('Authorization', jwt);
+        req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
         
         if (isPost) { 
           //stringify objects before POST XMLHttpRequest

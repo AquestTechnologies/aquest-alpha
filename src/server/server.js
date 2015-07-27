@@ -8,6 +8,7 @@ import validateJWT        from './lib/validateJWT';
 import * as reducers      from '../shared/reducers';
 import routes             from '../shared/routes.jsx';
 import {createActivists}  from './lib/activityGenerator';
+import Location           from 'react-router/lib/Location';
 import devConfig          from '../../config/development.js';
 import log, {logRequest}  from '../shared/utils/logTailor.js';
 import phidippides        from '../shared/utils/phidippides.js';
@@ -88,78 +89,78 @@ function prerender(request, reply) {
   const requestUrl = request.url.path;
   const url = requestUrl.slice(-1) === '/' && requestUrl !== '/' ? requestUrl.slice(0, -1) : requestUrl;
   
-  // Initialise le router
-  const router = Router.create({
-    routes: routes,
-    location: url
-  });
+  // Initialise une nouvelle instance redux  
+  const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), {});
   
-  // Match la location et les routes, et renvoie le bon layout (Handler) et le state
-  router.run((Handler, routerState) => {
-    log('_____________ router.run _____________');
-
-    // Initialise une nouvelle instance redux  
-    const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), {});
-    
+  var location = new Location(url, request.query);
+  Router.run(routes, location, (err, routerState) => {
     // Initialise les stores
     log('... Entering phidippides');
+    console.log('location', location);
+    console.log('routerState', routerState);
     const dd = new Date();
-    phidippides(routerState, store.dispatch).then(
-      () => {
+    phidippides(routerState, store.dispatch).then(() => {
       
-        log(`... Exiting phidippides (${new Date() - dd}ms)`);
-        log('... Entering React.renderToString');
+      log(`... Exiting phidippides (${new Date() - dd}ms)`);
+      log('... Entering React.renderToString');
+      
+      const createElement = (Component, props) => {
+        // console.log('yolo', Component);
+        return <Provider store={store}>
+              {() => routes}
+            </Provider>;
+      };
         
-        try {
-          var mountMeImFamous = React.renderToString(
-            <Provider store={store}>
-              {() => <Handler {...routerState} />}
-            </Provider>
+      try {
+        console.log(routes);
+        var mountMeImFamous = React.renderToString(
+          <Provider store={store}>
+          {() => <Router children={routes} {...routerState} />}
+        </Provider>
+          
           );
-        } 
-        catch(err) {
-          log('!!! Error while React.renderToString', err);
-        }
-        log('... Exiting React.renderToString');
+      } 
+      catch(err) {
+        log('!!! Error while React.renderToString');
+        console.log(err.stack);
+      }
+      log('... Exiting React.renderToString');
+      
+      // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
+      new Promise((resolve, reject) => {
+        fs.readFile('index.html', 'utf8', (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        });
+      })
+      .then(html => {
+        // On extrait le contenu du mountNode 
+        // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
+        let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0]; //à mod.
         
-        // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
-        new Promise((resolve, reject) => {
-          fs.readFile('index.html', 'utf8', (err, res) => {
-            if (err) reject(err);
-            else resolve(res);
-          });
-        }).then(
-          html => {
-            
-            // On extrait le contenu du mountNode 
-            // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
-            let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0]; //à mod.
-            
-            // Passage du state dans window
-            const serverState = store.getState();
-            delete serverState.records;
-            delete serverState.effects;
-            serverState.immutableKeys = [];
-            for (let key in serverState) {
-              if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !
-            }
-            
-            response.source = html
-              .replace(placeholder, mountMeImFamous)
-              .replace('</body>',
-                `\t<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>\n` +
-                `\t<script src="${wds.hotFile }"></script>\n` +
-                `\t<script src="${wds.publicPath + wds.filename}"></script>\n` +
-                '</body>'
-              );
-            response.send();
-            log(`Served ${url} in ${new Date() - d}ms.\n`);
-          },
-          error => log('!!! Error while reading HTML', error)
-        );
+        // Passage du state dans window
+        const serverState = store.getState();
+        delete serverState.records;
+        delete serverState.effects;
+        serverState.immutableKeys = [];
+        for (let key in serverState) {
+          if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !
+        }
+        
+        response.source = html
+          .replace(placeholder, mountMeImFamous)
+          .replace('</body>',
+            `\t<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>\n` +
+            `\t<script src="${wds.hotFile }"></script>\n` +
+            `\t<script src="${wds.publicPath + wds.filename}"></script>\n` +
+            '</body>'
+          );
+        response.send();
+        log(`Served ${url} in ${new Date() - d}ms.\n`);
       },
-      error => log('!!! Error while Phidippides', error)
-    );
+      error => log('!!! Error while reading HTML', error));
+    },
+    error => log('!!! Error while Phidippides', error));
   });
 }
 
