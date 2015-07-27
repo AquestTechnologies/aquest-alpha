@@ -2,54 +2,36 @@ import pg        from 'pg';
 import devConfig from '../../config/development.js';
 import log       from '../shared/utils/logTailor.js';
 
-let client;
+// let client;
 
 export default function queryDb(intention, params) {
   
   const d = new Date();
+  const {user, password, host, port, database} = devConfig().pg;
+  const connectionString = `postgres://${user}:${password}@${host}:${port}/${database}`;
   
   return new Promise((resolve, reject) => {
     
-    // Connection attempt
-    connect().then( 
-      () => {
-        const {sql, paramaterized, callback} = buildQuery(intention, params); // Query construction
-        
-        // log(`+++ REQUETE --> ${sql}`); 
-        if (sql) new Promise((resolve, reject) => {
-          client.query(sql, paramaterized, (err, result) => {
-            if (err) return reject(err);
-            log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
-            resolve(typeof callback === 'function' ? callback(result) : result);
-          });
-        }).then(
-          result => resolve(result),
-          error => reject(error)
-        );
-        else reject('queryDb.buildQuery did not produce any SQL, check your intention');
-      },
-      error => reject(error)
-    );
-  });
-  
-  
-  // Connects the current host to the remote database
-  function connect() {
-    if (client instanceof pg.Client) return Promise.resolve();
-    
-    const {user, password, host, port, database} = devConfig().pg;
-    
-    log(`... queryDb connecting to ${database}`);
-
-    client = new pg.Client(`postgres://${user}:${password}@${host}:${port}/${database}`);
-    
-    return new Promise((resolve, reject) => {
-      client.connect(err => {
-        if (err) return reject(err);
-        resolve();
-      });
+    /**
+     * Description : Update queryDb to fit node-postgres "best practise" - Execution handle reconnexion and use polling - https://github.com/brianc/node-postgres/wiki/pg
+     * ToDo : use the pg object to create pooled clients, build our own client pool implementation or use https://github.com/grncdr/node-any-db
+     * */
+    pg.connect(connectionString, (err, client, done) => { 
+      const {sql, paramaterized, callback} = buildQuery(intention, params); // Query construction
+      // log(`+++ REQUETE --> ${sql}`); 
+      // log(paramaterized);
+      if (sql){
+        client.query(sql, paramaterized, (err, result) => {
+          done();
+          if (err) return reject(err);
+          log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
+          resolve(typeof callback === 'function' ? callback(result) : result);
+        });
+      } else {
+        reject('queryDb.buildQuery did not produce any SQL, check your intention');
+      }
     });
-  }
+  });
   
   
   // Builds the SQL query and optionnal callback
@@ -291,18 +273,20 @@ export default function queryDb(intention, params) {
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
         sql = 
-        'with addMessage as ( ' +
+        'with createMessage as ( ' +
           'INSERT INTO aquest_schema.message ' +
             '(user_id, chat_id, created_at) ' +
           'VALUES ' +
             '($1,$2, CURRENT_TIMESTAMP) ' +
           'RETURNING message.id' +
-        ')' +
-        'INSERT INTO aquest_schema.atom_message (message_id, content) ' +
-        `SELECT id, '{"text": "$3"}' FROM addMessage ` +
-        'RETURNING id';
+        ') ' +
+        'INSERT INTO aquest_schema.atom_message (message_id, atom_id, type, content) ' +
+        `SELECT id, $3, $4, $5 FROM createMessage ` +
+        `RETURNING json_build_object('id', (SELECT createMessage.id FROM createMessage), 'author', $1, 'chatId', $2, 'createdAt', CURRENT_TIMESTAMP, 'content', $5) AS "createdMessage"`;
         
-        paramaterized = [userId, chatId, messageContent];
+        paramaterized = [userId, chatId, 1, messageContent.type, JSON.stringify(messageContent)];
+        
+        callback = result => result.rows[0].createdMessage;
         
         break;
         
@@ -332,7 +316,7 @@ export default function queryDb(intention, params) {
             '$1 ::TEXT, $2 ::TEXT, $3 ::TEXT, $4 ::TEXT, $5 ::TEXT, $6 ::TEXT' +
           ') AS create_topic';
         
-        paramaterized = [id, userId, universeId, title, description, content];
+        paramaterized = [id, userId, universeId, title, description, JSON.stringify(content)];
         
         callback = result => result.rows[0].create_topic;
         

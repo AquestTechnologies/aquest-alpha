@@ -175,8 +175,8 @@ server.start(() => {
               '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
               '          | |\n' +
               '          |_|');
-  if (0) {
-    const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
+  if (1) {
+    const {startActivists, stopActivists} = createActivists(1000, 1000, 10000);
     startActivists();
   }
 });
