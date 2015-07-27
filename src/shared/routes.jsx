@@ -1,5 +1,6 @@
 import React        from 'react';
-import {Router, Route, Redirect } from 'react-router';
+import {Route, DefaultRoute, NotFoundRoute } from 'react-router';
+
 import App         from './components/App';
 import Home        from './components/Home';
 import Universe    from './components/Universe';
@@ -11,22 +12,27 @@ import Explore     from './components/Explore';
 import User        from './components/User';
 import NotFound    from './components/NotFound';
 
-const routes = <Route component={App}>
+let routes = (
+  <Route handler={App}> 
+  
+    <Route name='home' path='/' handler={Home} />
     
-    <Route path='_:universeId' component={Universe}>
-      <Route path='new' component={NewTopic} />
-      <Route path=':topicId' component={Topic} />
+    <Route name='universe' path='/_:universeId' handler={Universe}>
+      <DefaultRoute handler={Inventory} />
+      <Route name='newTopic' path='new' handler={NewTopic} />
+      <Route name='topic' path=':topicId' handler={Topic} />
     </Route>
     
-    <Route path='@:pseudo' component={User}>
+    <Route name='user' path='/@:pseudo' handler={User}>
     </Route>
     
-    <Route path='Explore' component={Explore} />
+    <Route name='explore' path='/Explore' handler={Explore} />
     
-    <Route path='Create_universe' component={NewUniverse} />
+    <Route name='newUniverse' path='/CreateUniverse' handler={NewUniverse} />
     
-    <Redirect from="/login" to="/" />
-  </Route>;
+    <NotFoundRoute handler={NotFound}/>
     
+  </Route>
+);
 
 export default routes;
