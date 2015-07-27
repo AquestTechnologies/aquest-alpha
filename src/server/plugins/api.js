@@ -27,7 +27,7 @@ function apiPlugin(server, options, next) {
           });
         });
       });
-    },
+    }
   };
   
   // ...
@@ -51,17 +51,42 @@ function apiPlugin(server, options, next) {
         else reject('user not found');
       });
     },
-    createUser: (result) => {
-      
+    
+    createUser: ({}, result) => {
+      return new Promise((resolve, reject) => {
+        if (result) {
+          log('... result', result);
+          result.token = JWT.sign({
+            valid: true, 
+            id: result.id, 
+            exp: Math.floor((new Date().getTime() + ttl) / 1000)
+          }, key);
+          resolve();
+        }
+      });
     }
   };
   
+  /**
+   * Hapijs Joi validation schema
+   * Description : This const defines a Joi validation schema that can be use against headers, query, params, payload, and auth.
+   * Like data constraints might change over development time, they arn't "final" ( especially regex(/^.*$/) )
+   * 
+   * Structure : 
+   * {
+       intention: {
+          headers || query || params || payload || auth :{
+             <object_key>: <Joi constraint https://github.com/hapijs/joi>
+          }
+       }
+   * }
+   * */
   const validationSchema = {
     createUser: {
       payload: {
         pseudo:           Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/),
         email:            Joi.string().email(),
-        password:         Joi.string().min(5).regex(/^(?=.*){6,}$/)
+        password:         Joi.string().trim().required().min(6)
       }
     },
     createUniverse: {
@@ -74,16 +99,23 @@ function apiPlugin(server, options, next) {
     },
     createTopic: {
       payload: {
-        title:    Joi.string().trim().required().min(1).regex(/^$/),
-        content:  [{type: Joi.string().trim().required(),content:Joi.object().required()}],
-        userId:   Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/),
-        picture:  Joi.string() 
+        id:           Joi.string().trim().required().min(1).regex(/^.*$/),
+        universeId:   Joi.string().trim().required().min(1).regex(/^.*$/),
+        title:        Joi.string().trim().required().min(1).regex(/^.*$/),
+        description:  Joi.string().trim().required().min(1).regex(/^.*$/),
+        content:      Joi.array().items(
+                        Joi.object({
+                          type: Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,}$/)
+                        }).unknown(true).required()
+                      ), 
+        userId:       Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/),
+        picture:      Joi.string().allow('')
       }
     },
     login: {
-      params: {
-        email:   Joi.string().trim().required().regex(/^$/),
-        password:  Joi.string().trim().required().min(5).regex(/^(?=.*){6,}$/)
+      payload: {
+        email:    Joi.string().trim().required().min(1),
+        password: Joi.string().trim().required().min(6)
       }
     }
   };

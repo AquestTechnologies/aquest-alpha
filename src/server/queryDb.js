@@ -345,11 +345,11 @@ export default function queryDb(intention, params) {
           '(id, email, password_salt, password_hash, creation_ip) ' +
         'VALUES ' +
           '($1, $2, $3, $4, $5)' +
-        'RETURNING id';
+        `RETURNING json_build_object('id', id, 'email', email, 'password_salt', password_salt, 'password_hash', password_hash, 'creation_ip', creation_ip) AS user`;
         
         paramaterized = [pseudo, email, passwordSalt, passwordHash, ip];
         
-        callback = result => result.rows[0];
+        callback = result => result.rows[0].user;
         
         break;
         

@@ -39,6 +39,7 @@ class Universe extends React.Component {
     const universe   = this.props.universes[universeId];
     const topics     = this.filterTopics(this.props.topics, universeId);
     const chatId     = topicId ? topics[topicId].chatId : universe.chatId;
+    const users      = this.props.users;
     // console.log('topics :',this.props.topics);
     // console.log('universe :', universe);
     // console.log('universes :', this.props.universes);
@@ -61,6 +62,7 @@ class Universe extends React.Component {
                 readInventory    = {this.props.readInventory} //passer les actions par le context, a faire
                 readTopicContent = {this.props.readTopicContent} //passer les actions par le context, a faire
                 createTopic      = {this.props.createTopic}
+                users            = {users}
               />
             </div>
           </div>
@@ -70,6 +72,7 @@ class Universe extends React.Component {
           chatId   = {chatId}
           chat     = {this.props.chats[chatId]} 
           readChat = {this.props.readChat} //passer les actions par le context, a faire
+          users    = {users}
         />
       </div>
     );

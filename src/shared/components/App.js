@@ -38,6 +38,7 @@ export default class App extends React.Component {
               universes = {universes}
               topics = {topics}
               chats = {chats}
+              users = {users}
               {...bindActionCreators(actionCreators, dispatch)} 
             />
           </div>

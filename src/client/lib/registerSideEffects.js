@@ -13,7 +13,6 @@ export default function registerSideEffects(store, router) {
   Observable.create(observer => store.subscribe(() => observer.onNext(store.getState().records)))
     .subscribe(records => {
       const {type, payload} = records[records.length - 1].action;
-      console.log('... registerSideEffects', type);
       
       if (authFailureTypes.indexOf(type) !== -1 && payload.message === 'Unauthorized') router.transitionTo('home');
       
@@ -22,13 +21,21 @@ export default function registerSideEffects(store, router) {
         case 'SUCCESS_LOGIN': 
           log('... setting jwt', payload.token);
           localStorage.setItem('jwt', payload.token);
+          localStorage.setItem('userId', payload.id);
           router.transitionTo('explore');
           break;
           
         case 'SUCCESS_CREATE_USER':
           log('... setting jwt', payload.token);
           localStorage.setItem('jwt', payload.token);
+          localStorage.setItem('userId', payload.id);
           router.transitionTo('explore');
+          break;
+          
+        case 'SUCCESS_CREATE_TOPIC':
+          log('... setting jwt', payload.token);
+          localStorage.setItem('jwt', payload.token); 
+          router.transitionTo('_' + payload.universeId + '/' + payload.id);
           break;
           
       }

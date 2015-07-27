@@ -60,7 +60,7 @@ export function topics(state = Immutable.Map(), action) {
     return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
     
   case 'SUCCESS_CREATE_TOPIC':
-    return state.set(action.params.id, fromJSGreedy(action.params));
+    return state.set(action.payload.id, fromJSGreedy(action.payload));
     
   default:
     return state;
