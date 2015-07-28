@@ -15,8 +15,10 @@ export default function phidippides(routerState, dispatch) {
   let preventInfinite = 0;  // Compte le nombre de cycles pour empecher les boucles infinies (-_-)
   
   // Récupère les tâches
-  const TASKS = routerState.routes
-  .map    (route    => route.handler[METHOD_NAME]  )  // Recherche de runPhidippides dans chaque handler
+  // console.log('routerState', routerState);
+  console.log('branch', routerState.branch);
+  const TASKS = routerState.branch
+  .map    (route    => route.component[METHOD_NAME])  // Recherche de runPhidippides dans chaque handler
   .filter (method   => typeof method === 'function')  // Filtre si c'est une fonction
   .map    (method   => method(routerState)         )  // Appel de runPhidippides
   .filter (returned => returned instanceof Array   )  // Filtre si runPhidippides retourne un array (de tâches)

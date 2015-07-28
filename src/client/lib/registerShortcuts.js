@@ -1,6 +1,7 @@
 import key from '../vendor/keymaster';
 
-export default function registerShortcuts(getState, getCurrentParams) {
+export default function registerShortcuts(getState) {
+  const getCurrentParams = () => getState().router.params;
   key('ctrl+shift+1', () => console.log('state :', getState()));
   
   key('ctrl+shift+2', () => console.log('universes :', getState().universes.toJS()));

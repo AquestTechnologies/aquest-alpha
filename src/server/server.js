@@ -1,9 +1,10 @@
 import fs                 from 'fs';
 import Hapi               from 'hapi';
 import React              from 'react';
+import ReactDOM from 'react-dom/server';
 import Immutable          from 'immutable';
 import {Provider}         from 'react-redux';
-import Router             from 'react-router';
+import Router, { Route } from 'react-router';
 import validateJWT        from './lib/validateJWT';
 import * as reducers      from '../shared/reducers';
 import routes             from '../shared/routes.jsx';
@@ -12,7 +13,20 @@ import devConfig          from '../../config/development.js';
 import log, {logRequest}  from '../shared/utils/logTailor.js';
 import phidippides        from '../shared/utils/phidippides.js';
 import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
+import { reduxRouteComponent } from 'redux-react-router';
 import {createStore, combineReducers, applyMiddleware} from 'redux';
+import Location from 'react-router/lib/Location';
+
+import App         from '../shared/components/App';
+// import Home        from '../shared/components/Home';
+import Universe    from '../shared/components/Universe';
+import Inventory   from '../shared/components/Inventory';
+import Topic       from '../shared/components/Topic';
+import NewTopic    from '../shared/components/NewTopic';
+import NewUniverse from '../shared/components/NewUniverse';
+import Explore     from '../shared/components/Explore';
+import User        from '../shared/components/User';
+// import NotFound    from '../shared/components/NotFound';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log(`Starting server in ${process.env.NODE_ENV} mode...`);
@@ -89,77 +103,85 @@ function prerender(request, reply) {
   const url = requestUrl.slice(-1) === '/' && requestUrl !== '/' ? requestUrl.slice(0, -1) : requestUrl;
   
   // Initialise le router
-  const router = Router.create({
-    routes: routes,
-    location: url
-  });
-  
+  // const router = Router.create({
+  //   routes: routes,
+  //   location: url
+  // });
+  var location = new Location(url);
   // Match la location et les routes, et renvoie le bon layout (Handler) et le state
-  router.run((Handler, routerState) => {
+  Router.run(routes, location, (err, initialState) => {
     log('_____________ router.run _____________');
 
+    
     // Initialise une nouvelle instance redux  
     const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), {});
     
     // Initialise les stores
     log('... Entering phidippides');
     const dd = new Date();
-    phidippides(routerState, store.dispatch).then(
-      () => {
-      
-        log(`... Exiting phidippides (${new Date() - dd}ms)`);
-        log('... Entering React.renderToString');
-        
-        try {
-          var mountMeImFamous = React.renderToString(
-            <Provider store={store}>
-              {() => <Handler {...routerState} />}
-            </Provider>
-          );
-        } 
-        catch(err) {
-          log('!!! Error while React.renderToString', err);
-        }
-        log('... Exiting React.renderToString');
-        
-        // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
-        new Promise((resolve, reject) => {
-          fs.readFile('index.html', 'utf8', (err, res) => {
-            if (err) reject(err);
-            else resolve(res);
-          });
-        }).then(
-          html => {
-            
-            // On extrait le contenu du mountNode 
-            // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
-            let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0]; //à mod.
-            
-            // Passage du state dans window
-            const serverState = store.getState();
-            delete serverState.records;
-            delete serverState.effects;
-            serverState.immutableKeys = [];
-            for (let key in serverState) {
-              if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !
-            }
-            
-            response.source = html
-              .replace(placeholder, mountMeImFamous)
-              .replace('</body>',
-                `\t<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>\n` +
-                `\t<script src="${wds.hotFile }"></script>\n` +
-                `\t<script src="${wds.publicPath + wds.filename}"></script>\n` +
-                '</body>'
-              );
-            response.send();
-            log(`Served ${url} in ${new Date() - d}ms.\n`);
-          },
-          error => log('!!! Error while reading HTML', error)
+    phidippides(initialState, store.dispatch).then(() => {
+    
+      log(`... Exiting phidippides (${new Date() - dd}ms)`);
+      log('... Entering React.renderToString');
+      try {
+        var mountMeImFamous = ReactDOM.renderToString(
+          <Router {...initialState}>
+            <Route component={reduxRouteComponent(store)}>
+              <Route path='/' component={App}> 
+                {/*<Route path='/' component={Home} />*/}
+                
+                <Route path='/_:universeId' components={Universe, Inventory}>
+                  <Route path='/:topicId' component={Topic} />
+                  <Route path='/Create_topic' component={NewTopic} />
+                </Route>
+                
+                <Route path='/@:userId' component={User} />
+                
+                <Route path='/Explore' component={Explore} />
+                
+                <Route path='/Create_universe' component={NewUniverse} />
+                
+                {/*<NotFoundRoute component={NotFound}/>*/}
+                
+              </Route>
+            </Route>
+          </Router>
         );
-      },
-      error => log('!!! Error while Phidippides', error)
-    );
+      } 
+      catch(err) { log('!!! Error while React.renderToString', err, err.stack); }
+      log('... Exiting React.renderToString');
+      
+      // Le fichier html est partagé, penser a prendre une version minifée en cache en prod
+      new Promise((re, rt) => fs.readFile('index.html', 'utf8', (err, res) => err ? rt(err) : re(res)))
+      .then(html => {
+          
+        // On extrait le contenu du mountNode 
+        // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
+        let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0]; //à mod.
+        
+        // Passage du state dans window
+        const serverState = store.getState();
+        delete serverState.records;
+        delete serverState.effects;
+        serverState.immutableKeys = [];
+        for (let key in serverState) {
+          if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !
+        }
+        
+        response.source = html
+          .replace(placeholder, mountMeImFamous)
+          .replace('</body>',
+            `\t<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>\n` +
+            `\t<script src="${wds.hotFile }"></script>\n` +
+            `\t<script src="${wds.publicPath + wds.filename}"></script>\n` +
+            '</body>'
+          );
+          
+        response.send();
+        log(`Served ${url} in ${new Date() - d}ms.\n`);
+        
+        }, err => log('!!! Error while reading HTML', err));
+    }, err => log('!!! Error while Phidippides', err));
   });
 }
 

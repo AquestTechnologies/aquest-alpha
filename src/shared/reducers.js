@@ -1,5 +1,11 @@
 import log from './utils/logTailor';
 import Immutable from 'immutable';
+import {routerStateReducer} from 'redux-react-router';
+
+
+export function router(state = {}, action) {
+  return routerStateReducer(state, action);
+}
 
 // Doit être exporté en premier pour logger avant les autres
 export function records(state = [], action) {

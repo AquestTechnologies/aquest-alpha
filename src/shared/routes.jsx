@@ -1,8 +1,8 @@
 import React        from 'react';
-import {Route, DefaultRoute, NotFoundRoute } from 'react-router';
+import { Route } from 'react-router';
 
 import App         from './components/App';
-import Home        from './components/Home';
+// import Home        from './components/Home';
 import Universe    from './components/Universe';
 import Inventory   from './components/Inventory';
 import Topic       from './components/Topic';
@@ -10,27 +10,25 @@ import NewTopic    from './components/NewTopic';
 import NewUniverse from './components/NewUniverse';
 import Explore     from './components/Explore';
 import User        from './components/User';
-import NotFound    from './components/NotFound';
+// import NotFound    from './components/NotFound';
 
 let routes = (
-  <Route handler={App}> 
+  <Route path='/' component={App}> 
   
-    <Route name='home' path='/' handler={Home} />
+    {/*<Route path='/' component={Home} />*/}
     
-    <Route name='universe' path='/_:universeId' handler={Universe}>
-      <DefaultRoute handler={Inventory} />
-      <Route name='newTopic' path='new' handler={NewTopic} />
-      <Route name='topic' path=':topicId' handler={Topic} />
+    <Route path='/_:universeId' component={Universe}>
+      <Route path='/:topicId' component={Topic} />
+      <Route path='/Create_topic' component={NewTopic} />
     </Route>
     
-    <Route name='user' path='/@:pseudo' handler={User}>
-    </Route>
+    <Route path='/@:userId' component={User} />
     
-    <Route name='explore' path='/Explore' handler={Explore} />
+    <Route path='/Explore' component={Explore} />
     
-    <Route name='newUniverse' path='/CreateUniverse' handler={NewUniverse} />
+    <Route path='/Create_universe' component={NewUniverse} />
     
-    <NotFoundRoute handler={NotFound}/>
+    {/*<NotFoundRoute component={NotFound}/>*/}
     
   </Route>
 );

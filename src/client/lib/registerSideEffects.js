@@ -3,7 +3,7 @@ import docCookies from '../vendor/cookie';
 import log from '../../shared/utils/logTailor';
 import * as actionCreators from '../../shared/actionCreators';
 
-export default function registerSideEffects(store, router) {
+export default function registerSideEffects(store, transitionTo) {
   
   const authFailureTypes = Object.keys(actionCreators)
     .map(key => actionCreators[key])
@@ -17,7 +17,7 @@ export default function registerSideEffects(store, router) {
       
       if (authFailureTypes.indexOf(type) !== -1 && payload.message === 'Unauthorized') {
         log('.E. Unauthorized access');
-        router.transitionTo('home');
+        transitionTo('home');
       }
       
       switch (type) {
@@ -25,13 +25,13 @@ export default function registerSideEffects(store, router) {
         case 'SUCCESS_LOGIN': 
           log('.E. setting cookie', payload.token);
           docCookies.setItem('jwt', payload.token, 60);
-          router.transitionTo('explore');
+          transitionTo('explore');
           break;
         
         case 'SUCCESS_CREATE_USER':
           log('.E. setting cookie', payload.token);
           docCookies.setItem('jwt', payload.token, 60);
-          router.transitionTo('explore');
+          transitionTo('explore');
           break;
         
       }

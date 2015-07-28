@@ -1,6 +1,6 @@
 import React                from 'react';
 import {RouteHandler}       from 'react-router';
-
+import Home from './Home';
 import {bindActionCreators} from 'redux';
 import {Connector}          from 'react-redux';
 
@@ -15,34 +15,41 @@ function select(state) {
     chats:      state.chats.toJS(),
     users:      state.users.toJS(),
     records:    state.records,
+    router:     state.router,
   };
 }
 
 export default class App extends React.Component {
 
   render() {
+    console.log('props', this.props.children);
+    const {children} = this.props;
     return (
-      <Connector select={select}>
-        {
-          ({ 
+      <Connector select={select}> {({ 
             universes,
             topics,
             chats,
             users,
             records,
+            router,
             dispatch,
-          }) => 
-          <div>
-            <LoadingBar records = {records} />
+          }) => (
+          <div> 
+            {console.log('router', router)}
+            {children ? children : <Home />}
+          </div>
+        )} </Connector>
+    );
+  }
+}
+/*
+<LoadingBar records = {records} />
             <RouteHandler 
+              router = {router}
               universes = {universes}
               topics = {topics}
               chats = {chats}
               {...bindActionCreators(actionCreators, dispatch)} 
-            />
-          </div>
-        }
-      </Connector>
-    );
-  }
-}
+            />*/
+            
+            
