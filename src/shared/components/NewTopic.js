@@ -6,13 +6,12 @@ class NewTopic extends React.Component {
   constructor() {
     super();
     
-    this.userId = localStorage.getItem('userId');
     this.handleInputTitle = e => this.setState({title: e.target.value});
     this.handleInputContent = e => this.setState({content: e.target.value});
     this.handleSubmit = e => {
       e.preventDefault();
       const universeId = this.props.universe.id;
-      const {title, content} = this.state;
+      const {title, content, userId} = this.state;
       /**
        * MDN : /s => cela comprend les espace, tabulation, saut de ligne ou saut de page, 
        * MDN : \g => Recherche globale (ne s'arrête pas après la première instance)
@@ -20,7 +19,7 @@ class NewTopic extends React.Component {
       this.state.id = title.substr(0, 12).replace(/\s/g,'_');
       this.state.universeId = universeId;
       this.state.description = content.substr(0, 600);
-      this.state.userId = this.userId;
+      this.state.userId = this.props.users[userId].id;
       /**
        * TODO :
        * create a function that modify the content to match atom like version 
@@ -36,9 +35,12 @@ class NewTopic extends React.Component {
     };
   }
   
+  componentDidMount(){
+    this.setState({userId: localStorage.getItem('userId')})
+  }
+  
   render() {
-    const {title, content} = this.state;
-    const userId = this.userId;
+    const {title, content, userId} = this.state;
     const rules = "Rules: please don't hate";
     const s1 = {width: '100%'};
     const s2 = {width: '100%', minHeight: '33%'};

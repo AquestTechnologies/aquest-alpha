@@ -14,7 +14,7 @@ function select(state) {
     topics:     state.topics.toJS(),
     chats:      state.chats.toJS(),
     users:      state.users.toJS(),
-    records:    state.records,
+    records:    state.records
   };
 }
 

@@ -58,6 +58,12 @@ export const createTopic = createActionCreator({
   auth:       'jwt',
 });
 
+export const createMessage = createActionCreator({
+  intention:  'createMessage',
+  method:     'socket',
+  auth:       'jwt',
+});
+
 export const createUser = createActionCreator({
   intention:  'createUser',
   method:     'post',
@@ -76,9 +82,6 @@ export const login = createActionCreator({
 // (string)   method      HTTP method
 // (string)   pathx       API path. If (method && path) an corresponding API route gets created
 function createActionCreator(shape) {
-  
-  
-  
   const {intention, method, pathx} = shape;
   const types = ['REQUEST', 'SUCCESS', 'FAILURE']
     .map(type => `${type}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
@@ -94,26 +97,39 @@ function createActionCreator(shape) {
       
       // Client : API call through XMLHttpRequest
       else {
-        const path = pathx.replace(/\{\S*\}/, '');
-        const isPost = method === 'post';
-        const req = new XMLHttpRequest();
-        
-        log(`+++ --> ${method} ${path}`, params);
-        
-        req.onerror = err => reject(err);
-        req.open(method, isPost ? path : params ? path + params : path);
-        req.setRequestHeader('Authorization', localStorage.getItem('jwt'));
-        req.onload = () => {
-          if (req.status === 200) resolve(JSON.parse(req.response));
-          else reject(Error(req.statusText));
-        };
-        
-        if (isPost) { 
-          //stringify objects before POST XMLHttpRequest
+        if(method === 'socket'){
+          // socketio included in index.html <script src="http://<ip>:9090/socket.io/socket.io.js"></script>
+          let socket = io.connect('http://130.211.59.69:9090/');
+          
           Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
-          req.send(createForm(params));
+          
+          socket.emit(intention,{intention, params});
+          socket.on(intention, (result) => {result ? resolve(result) : reject(`result's empty`)});
+          
+          socket.on('error', (error) => reject(error));
+        } 
+        else {
+          const path = pathx.replace(/\{\S*\}/, '');
+          const isPost = method === 'post';
+          const req = new XMLHttpRequest();
+          
+          log(`+++ --> ${method} ${path}`, params);
+          
+          req.onerror = err => reject(err);
+          req.open(method, isPost ? path : params ? path + params : path);
+          req.setRequestHeader('Authorization', localStorage.getItem('jwt'));
+          req.onload = () => {
+            if (req.status === 200) resolve(JSON.parse(req.response));
+            else reject(Error(req.statusText));
+          };
+          
+          if (isPost) { 
+            //stringify objects before POST XMLHttpRequest
+            Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
+            req.send(createForm(params));
+          }
+          else req.send();
         }
-        else req.send();
       }
     });
     

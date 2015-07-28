@@ -50,27 +50,32 @@ server.register(
     log('API and WS plugins registered');
     if (err) throw err;
     
-    // Routes
-    server.route({
-      method: 'GET',
-      path: '/',
-      config: { auth: false },
-      handler: (request, reply) => prerender(request, reply)
-    });
-    
-    server.route({
-      method: 'GET',
-      path: '/{p*}',
-      config: { auth: false },
-      handler: (request, reply) => prerender(request, reply)
-    });
-    
-    server.route({
-      method: 'GET',
-      path: '/img/{filename}',
-      config: { auth: false },
-      handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
-    });
+    server.route([
+      {
+        method: 'GET',
+        path: '/',
+        config: { auth: false },
+        handler: (request, reply) => prerender(request, reply)
+      },
+      {
+        method: 'GET',
+        path: '/_{universeId}/{topicId}',
+        config: { auth: false },
+        handler: (request, reply) => prerender(request, reply)
+      },
+      {
+        method: 'GET',
+        path: '/{p*}',
+        config: { auth: false },
+        handler: (request, reply) => prerender(request, reply)
+      },
+      {
+        method: 'GET',
+        path: '/img/{filename}',
+        config: { auth: false },
+        handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
+      }
+    ]);
   }
 );
 
@@ -175,8 +180,8 @@ server.start(() => {
               '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
               '          | |\n' +
               '          |_|');
-  if (1) {
-    const {startActivists, stopActivists} = createActivists(1000, 1000, 10000);
+  if (0) {
+    const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
     startActivists();
   }
 });

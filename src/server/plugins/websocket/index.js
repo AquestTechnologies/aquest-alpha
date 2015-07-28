@@ -7,15 +7,15 @@ exports.register = function (server, options, next) {
     // On cree un nouveau server websocket derriere le port attribué
     const io = new SocketIo(server.select('ws').listener);
     let c = 0;
-    io.on('connection', function (socket) {
+    io.on('connection', (socket) => {
         c++;
         console.log('___ [' + c + '] New client connected');
         
-        socket.emit('message', 'hi');
+        // socket.emit('message', 'hi');
         
-        socket.on('hello', Handlers.hello);
-        socket.on('newMessage', Handlers.newMessage);
-        socket.on('goodbye', Handlers.goodbye);
+        // socket.on('hello', Handlers.hello);
+        socket.on('createMessage', Handlers.createMessage);
+        // socket.on('goodbye', Handlers.goodbye);
     });
 
     next();
