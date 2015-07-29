@@ -19,11 +19,13 @@ export default class Explore extends React.Component {
   }
   
   renderGraph(universes) {
+    const {transitionTo} = this.props;
     return Object.keys(universes).map(key => {
       return(
         <Node 
           key={key} 
           universe={universes[key]} 
+          transitionTo={transitionTo}
         />
       );
     });

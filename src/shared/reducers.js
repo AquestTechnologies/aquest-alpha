@@ -4,16 +4,22 @@ import {routerStateReducer} from 'redux-react-router';
 
 
 export function router(state = {}, action) {
+  log('.R. ' + action.type); // Cette ligne dans le premier reducer
   return routerStateReducer(state, action);
 }
 
-// Doit être exporté en premier pour logger avant les autres
-export function records(state = [], action) {
-  log('.R. ' + action.type);
-  return [
-    ...state,
-    {action: action, date: new Date()}
-  ];
+export function users(state = Immutable.Map(), action) {
+  switch (action.type) {
+    
+  case 'SUCCESS_CREATE_USER':
+    return state.set(action.payload.id, fromJSGreedy(action.payload));
+    
+  case 'SUCCESS_LOGIN':
+    return state.set(action.payload.id, fromJSGreedy(action.payload)); // le token est dedans !
+    
+  default:
+    return state;
+  }
 }
 
 export function universes(state = Immutable.Map(), action) {
@@ -73,18 +79,12 @@ export function topics(state = Immutable.Map(), action) {
   }
 }
 
-export function users(state = Immutable.Map(), action) {
-  switch (action.type) {
-    
-  case 'SUCCESS_CREATE_USER':
-    return state.set(action.payload.id, fromJSGreedy(action.payload));
-    
-  case 'SUCCESS_LOGIN':
-    return state.set(action.payload.id, fromJSGreedy(action.payload)); // le token est dedans !
-    
-  default:
-    return state;
-  }
+// Doit être exporté en dernier pour activer les side effects après la reduction des précédants
+export function records(state = [], action) {
+  return [
+    ...state,
+    {action: action, date: new Date()}
+  ];
 }
 
 // From the Immutable.js Github wiki

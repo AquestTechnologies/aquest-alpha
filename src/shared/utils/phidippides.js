@@ -4,6 +4,8 @@ import * as actionCreators from '../actionCreators';
 
 export default function phidippides(routerState, dispatch) {
   
+  if (!routerState) return Promise.resolve();
+  
   // Configuration
   const VERBOSE       = false;            // Affiche les log
   const PLACEHOLDER   = '__dependency.';  // Le placeholder pour les arguments des actions
@@ -16,12 +18,13 @@ export default function phidippides(routerState, dispatch) {
   
   // Récupère les tâches
   const TASKS = routerState.branch
-  .map    (route    => route.component[METHOD_NAME])  // Recherche de runPhidippides dans chaque handler
-  .filter (method   => typeof method === 'function')  // Filtre si c'est une fonction
-  .map    (method   => method(routerState)         )  // Appel de runPhidippides
-  .filter (returned => returned instanceof Array   )  // Filtre si runPhidippides retourne un array (de tâches)
-  .reduce ((a, b)   => a.concat(b), []             )  // Réduction de l'array d'array de tâches en array de tâches
-  .filter (task     => checkFormat(task)           ); // Évince les tâches hors format
+  // .filter(route    => route.component)
+  .map   (route    => route.component[METHOD_NAME])  // Recherche de runPhidippides dans chaque handler
+  .filter(method   => typeof method === 'function')  // Filtre si c'est une fonction
+  .map   (method   => method(routerState)         )  // Appel de runPhidippides
+  .filter(returned => returned instanceof Array   )  // Filtre si runPhidippides retourne un array(de tâches)
+  .reduce((a, b)   => a.concat(b), []             )  // Réduction de l'array d'array de tâches en array de tâches
+  .filter(task     => checkFormat(task)           ); // Évince les tâches hors format
   
   let nbTasks    = TASKS.length;
   let spkEnglish = nbTasks > 1 ? ' tasks : ' : ' task : ';
@@ -31,8 +34,7 @@ export default function phidippides(routerState, dispatch) {
   // Exécute les tâches
   return clearTasks(TASKS);
   
-  // ___Fonctions___
-  
+
   // Log
   function logMeOrNot(...messages) {
     if (VERBOSE) log(...messages);

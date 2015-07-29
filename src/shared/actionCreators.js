@@ -3,6 +3,13 @@ import isClient from './utils/isClient';
 import docCookies from '../client/vendor/cookie';
 const isServer = !isClient();
 
+export function transitionTo(pathname, query, state) {
+  return {
+    type: 'TRANSITION_TO',
+    payload: {pathname, query, state}
+  };
+}
+
 export const readUniverse = createActionCreator({
   intention:  'readUniverse',
   method:     'get',

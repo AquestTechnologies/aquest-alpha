@@ -1,7 +1,7 @@
 import React from 'react';
 import {randomInteger, randomText} from '../utils/randomGenerators';
 
-class NewTopic extends React.Component {
+export default class NewTopic extends React.Component {
   
   constructor() {
     super();
@@ -10,19 +10,18 @@ class NewTopic extends React.Component {
     this.handleInputContent = e => this.setState({content: e.target.value});
     this.handleSubmit = e => {
       e.preventDefault();
-      const universeId = this.props.universe.id;
+      const {universe, createTopic} = this.props;
       const {title, content} = this.state;
-      const topicId = title.substr(0, 12).replace(' ','_');
+      const topicId = title.trim().substr(0, 30).replace(' ','_');
       this.state.id = topicId;
-      this.state.universeId = universeId;
+      this.state.universeId = universe.id;
       this.state.description = content.substr(0, 600);
       /**
        * TODO :
        * create a function that modify the content to match atom like version 
        * --> [{'atom_type':'sub_content'}] */
       this.state.content = [{type: 'text', text: content}];
-      this.state.redirect = this.context.router.transitionTo.bind(null, 'universe', {universeId});
-      this.props.createTopic(this.state);
+      createTopic(this.state);
     };
     
     this.state = {
@@ -66,9 +65,3 @@ class NewTopic extends React.Component {
     );
   }
 }
-
-NewTopic.contextTypes = {
-  router: React.PropTypes.func.isRequired
-};
-
-export default NewTopic;

@@ -4,7 +4,7 @@ export default class Node extends React.Component {
   
   handleSelectedUniverse(universeId) {
     console.log('-C- Node.handleSelectedUniverse ' + universeId);
-    // this.context.router.transitionTo('universe', {universeId});
+    this.props.transitionTo('_' + universeId);
   };  
   
   render() {

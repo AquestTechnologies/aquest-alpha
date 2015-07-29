@@ -1,8 +1,8 @@
 import React                from 'react';
-import {RouteHandler}       from 'react-router';
+import { RouteHandler }       from 'react-router';
 import Home from './Home';
-import {bindActionCreators} from 'redux';
-import {Connector}          from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { Connector }          from 'react-redux';
 
 import * as actionCreators from '../actionCreators';
 
@@ -51,13 +51,7 @@ export default class App extends React.Component {
                     users,
                     router,
                   }, bindActionCreators(actionCreators, dispatch))) 
-                : React.createElement(Home, simpleMerge({
-                  universes,
-                    topics,
-                    chats,
-                    users,
-                    router,
-                  }, bindActionCreators(actionCreators, dispatch))) 
+                : <Home {...bindActionCreators(actionCreators, dispatch)} />
             }
           </div>
       } </Connector>

@@ -154,8 +154,12 @@ function prerender(request, reply) {
             `\t<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>\n` +
             `\t<script src="${wds.hotFile }"></script>\n` +
             `\t<script src="${wds.publicPath + wds.filename}"></script>\n` +
-            '</body>'
-          );
+            '</body>' );
+        
+        const token = request.state.jwt;
+        if (token) response.state('jwt', token, {
+          ttl: jwt.ttl
+        });
           
         response.send();
         log(`Served ${url} in ${new Date() - d}ms.\n`);

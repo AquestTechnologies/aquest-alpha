@@ -1,6 +1,6 @@
 import React from 'react';
 
-class Topic extends React.Component {
+export default class Topic extends React.Component {
   
   // Load les données initiales
   static runPhidippides(routerState) {
@@ -12,14 +12,13 @@ class Topic extends React.Component {
   }
   
   componentWillMount() {
-    const {id, content} = this.props.topics[this.props.params.topicId];
-    if (!content) this.props.readTopicContent(id);
+    const {topic, readTopicContent} = this.props;
+    if (!topic.content) readTopicContent(topic.id);
   }
   
   render() {
-    const topic = this.props.topics[this.props.params.topicId];
+    const {topic} = this.props;
     const {title, author, timestamp} = topic;
-    console.log(typeof(topic.content));
     const content = topic.content ? typeof(topic.content) === 'object' ? topic.content : JSON.parse(topic.content) : ['Loading...'];
     
     return (
@@ -40,10 +39,3 @@ class Topic extends React.Component {
     );
   }
 }
-
-// Permet d'acceder a this.context.router
-Topic.contextTypes = {
-  router: React.PropTypes.func.isRequired
-};
-
-export default Topic;

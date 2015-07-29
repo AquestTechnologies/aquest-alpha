@@ -31,7 +31,7 @@ export default function() {
     },
     jwt: {
       key: 'ohPleaseHackMe',
-      ttl: 1 * 60 * 1000
+      ttl: 15 * 60 * 1000
     }
   };
 }

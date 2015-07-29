@@ -66,7 +66,9 @@ function apiPlugin(server, options, next) {
   
   // Dynamic construction of the API routes from actionCreator with API calls
   for (let key in actionCreators) {
-    const {intention, method, pathx, auth} = actionCreators[key].getShape();
+    
+    const getShape = actionCreators[key].getShape || undefined;
+    const {intention, method, pathx, auth} = getShape ? getShape() : {};
     
     if (method && pathx) {
       const before = beforeQuery[intention] || (() => Promise.resolve());
@@ -79,8 +81,7 @@ function apiPlugin(server, options, next) {
         handler: (request, reply) => {
           const params = method === 'post' ? request.payload : request.params.p;
           const response = reply.response().hold();
-          before(request, params)
-          .then(
+          before(request, params).then(
             () => {
               logRequest(request);
               if (request.method === 'post') log(`+++ params : ${JSON.stringify(params)}`);
@@ -91,20 +92,22 @@ function apiPlugin(server, options, next) {
                     response.source = result;
                     response.send();
                   },
-                  error => {
+                  
+                  
+                  error => { // after failed
                     response.statusCode  = 500;
                     response.send();
                     log(error);
                   }
                 ),
-                error => {
+                error => { // query failed
                   response.statusCode  = 500;
                   response.send();
                   log(error);
                 }
               );
             },
-            error => {
+            error => { // before failed
               response.statusCode  = 500;
               response.send();
               log(error);
@@ -120,7 +123,7 @@ function apiPlugin(server, options, next) {
 
 apiPlugin.attributes = {
   name:         'apiPlugin',
-  description:  'REST API for client queries',
+  description:  'REST API',
   main:         'api.js'
 };
 

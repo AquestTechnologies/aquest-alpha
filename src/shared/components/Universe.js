@@ -1,14 +1,17 @@
 import React          from 'react';
+import Inventory      from './Inventory';
 import {RouteHandler} from 'react-router';
-
 import Menu           from './universe/Menu';
 import Chat           from './universe/Chat';
+import simpleMerge    from '../utils/simpleMerge';
+import menuScroll     from '../../client/lib/menuScroll';
+import config         from '../../../config/client';
 
-class Universe extends React.Component {
+export default class Universe extends React.Component {
   
-  // Load les données initiales
+  // Loads initial data
   static runPhidippides(routerState) {
-    return [{
+    const tasks = [{
       id:         'universe',
       creator:    'readUniverse',
       args:       [routerState.params.universeId]
@@ -18,6 +21,13 @@ class Universe extends React.Component {
       creator:    'readChat',
       args:       ['__dependency.chatId']
     }];
+    const inventory = {
+      id:         'inventory',
+      dependency: 'universe',
+      creator:    'readInventory',
+      args:       ['__dependency.id']
+    };
+    return routerState.params.topicId ? tasks : tasks.concat(inventory);
   }
   
   filterTopics(topics, universeId) {
@@ -29,78 +39,57 @@ class Universe extends React.Component {
   }
   
   componentDidMount() {
-    require('../../client/lib/menuScroll')('main_scrollable');
+    menuScroll('main_scrollable');
   }
   
   render() {
     // console.log('.C. Universe.render');
-    const universeId = this.props.params.universeId;
-    const topicId    = this.props.params.topicId;
-    const universe   = this.props.universes[universeId];
-    const topics     = this.filterTopics(this.props.topics, universeId);
-    const chatId     = topicId ? topics[topicId].chatId : universe.chatId;
-    // console.log('topics :',this.props.topics);
-    // console.log('universe :', universe);
-    // console.log('universes :', this.props.universes);
+    const {router, universes, params, children, readInventory, readTopicContent, createTopic, transitionTo} = this.props;
+    const {universeId, topicId} = params;
+    const universe = universes[universeId];
+    const topics   = this.filterTopics(this.props.topics, universeId);
+    const topic    = topicId ? topics[topicId] : undefined;
+    const chatId   = topicId ? topic.chatId : universe.chatId;
     
     return (
       <div> 
         <Menu 
-          universeId={universeId} 
+          topicId     ={topicId}
+          universeId  ={universeId} 
           universeName={universe.name} 
-          topicId={topicId}
+          pathName    ={router.pathname}
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(http://104.155.1.36:8080/${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
-            <div className='universe_main_scrolled'>
-              <RouteHandler
-                topics           = {topics}
-                universe         = {universe}
-                setTopic         = {this.props.setTopic}
-                readInventory    = {this.props.readInventory} //passer les actions par le context, a faire
-                readTopicContent = {this.props.readTopicContent} //passer les actions par le context, a faire
-                createTopic      = {this.props.createTopic}
-              />
-            </div>
+            <div className='universe_main_scrolled'> { 
+              
+              children && !(children instanceof Array) ? 
+              
+                React.cloneElement(children, {
+                    topic,
+                    universe,
+                    createTopic,
+                    readTopicContent,
+                  }) 
+                :
+                <Inventory 
+                  topics       ={topics}
+                  universe     ={universe}
+                  transitionTo ={transitionTo}
+                  readInventory={readInventory}
+                />
+                
+            } </div>
           </div>
         </div>  
         
         <Chat 
-          chatId   = {chatId}
-          chat     = {this.props.chats[chatId]} 
-          readChat = {this.props.readChat} //passer les actions par le context, a faire
+          chatId  ={chatId}
+          chat    ={this.props.chats[chatId]} 
+          readChat={this.props.readChat} //passer les actions par le context, a faire
         />
       </div>
     );
   }
 }
-
-// à supprimer ?
-// Universe.defaultProps = { 
-//   universe: {
-//     id: 0,
-//     name: 'defaultProps name',
-//     description: 'defaultProps description',
-//     imgPath: '/static/img/pillars_compressed.png',
-//     chatId: 0
-//   },
-//   inventory: {
-//     universeId: 0,
-//     topics: []
-//   },
-//   chat: {
-//     id: 0,
-//     name: 'defaultProps name',
-//     messages: []
-//   },
-//   topic: {
-//     id: 0,
-//     author: 'defaultProps author',
-//     title: 'defaultProps title',
-//     content: 'defaultProps content',
-//     timestamp: 'defaultProps timestamp'
-//   }
-// };
-
-export default Universe;
