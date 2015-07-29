@@ -1,22 +1,21 @@
 import { Observable } from 'rx';
 import docCookies from '../vendor/cookie';
 import log from '../../shared/utils/logTailor';
-import * as actionCreators from '../../shared/actionCreators';
+import { isUnauthorized } from '../../shared/actionCreators';
 
 export default function registerSideEffects(store, transitionTo) {
-  
-  const authFailureTypes = Object.keys(actionCreators)
-    .map(key => actionCreators[key])
-    .filter(ac => typeof ac.getShape === 'function' && ac.getShape().auth)
-    .map(ac => ac.getTypes()[2]);
+
+  let redirection = '';
     
   // https://github.com/acdlite/redux-rx/blob/master/src/observableFromStore.js
   Observable.create(observer => store.subscribe(() => observer.onNext(store.getState().records)))
     .subscribe(records => {
-      const {type, payload} = records[records.length - 1].action;
+      const action = records[records.length - 1].action;
+      const {type, payload} = action;
       
-      if (authFailureTypes.indexOf(type) !== -1 && payload.message === 'Unauthorized') {
-        log('.E. Unauthorized access');
+      if (isUnauthorized(action)) {
+        redirection = store.getState().router.pathname;
+        log('.E. Unauthorized access, will redirect to', redirection);
         transitionTo('/');
       }
       
@@ -31,13 +30,15 @@ export default function registerSideEffects(store, transitionTo) {
         case 'SUCCESS_LOGIN': 
           log('.E. setting cookie', payload.token);
           docCookies.setItem('jwt', payload.token, 60);
-          transitionTo('/Explore');
+          transitionTo(redirection ? redirection : '/Explore');
+          redirection = '';
           break;
         
         case 'SUCCESS_CREATE_USER':
           log('.E. setting cookie', payload.token);
           docCookies.setItem('jwt', payload.token, 60);
-          transitionTo('/Explore');
+          transitionTo(redirection ? redirection : '/Explore');
+          redirection = '';
           break;
         
       }

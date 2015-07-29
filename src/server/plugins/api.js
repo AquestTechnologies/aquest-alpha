@@ -1,7 +1,7 @@
 import log, {logRequest} from '../../shared/utils/logTailor.js';
 import queryDb from '../queryDb.js';
 import bcrypt from 'bcrypt';
-import * as actionCreators from '../../shared/actionCreators';
+import actionCreators from '../../shared/actionCreators';
 import JWT from 'jsonwebtoken';
 import devConfig from '../../../config/development.js';
 

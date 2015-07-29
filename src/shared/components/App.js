@@ -4,7 +4,7 @@ import Home from './Home';
 import { bindActionCreators } from 'redux';
 import { Connector }          from 'react-redux';
 
-import * as actionCreators from '../actionCreators';
+import actionCreators from '../actionCreators';
 
 import LoadingBar           from './common/LoadingBar';
 
@@ -38,6 +38,7 @@ export default class App extends React.Component {
           users,
           records,
           router,
+          session,
           dispatch,
         }) => 
           <div> 
@@ -48,6 +49,7 @@ export default class App extends React.Component {
                     universes,
                     topics,
                     chats,
+                    session,
                     users,
                     router,
                   }, bindActionCreators(actionCreators, dispatch))) 

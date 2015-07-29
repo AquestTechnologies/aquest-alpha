@@ -1,5 +1,5 @@
 import React        from 'react';
-import { Route }    from 'react-router';
+import { Route, Redirect }    from 'react-router';
 import App          from './components/App';
 import User         from './components/User';
 import Topic        from './components/Topic';
@@ -7,31 +7,57 @@ import Explore      from './components/Explore';
 import Universe     from './components/Universe';
 import NewTopic     from './components/NewTopic';
 import NewUniverse  from './components/NewUniverse';
-import docCookies   from '../client/vendor/cookie';
 import log          from './utils/logTailor';
-import isClient     from './utils/isClient';
+import { protectedComponents } from './actionCreators';
 
-const isServer = !isClient();
-function checkAuth(nextState, transition) {
-  log('... checking Auth for ', nextState.location.pathname);
+const routes = <Route path='/' component={App}> 
+  
+  <Route path='_:universeId' component={Universe}>
+    <Route path='Create_topic' component={NewTopic} />
+    <Route path=':topicId' component={Topic} />
+  </Route>
+  
+  <Route path='@:userId' component={User} />
+  
+  <Route path='Explore' component={Explore} />
+  
+  <Route path='Create_universe' component={NewUniverse} />
+  
+  <Redirect from='login' to='/' />
+  <Redirect from='signup' to='/' />
+  <Redirect from='register' to='/' />
+  
+</Route>;
+
+function simpleAdd(a, b) {
+  const c = {};
+  Object.keys(a).forEach(key => a.hasOwnProperty(key) ? c[key] = a[key] : {});
+  Object.keys(b).forEach(key => b.hasOwnProperty(key) ? c[key] = b[key] : {});
+  return c;
 }
 
-let routes = (
-  <Route path='/' component={App}> 
-        
-    <Route path='_:universeId' component={Universe} onEnter={checkAuth}>
-      <Route path='Create_topic' component={NewTopic} onEnter={checkAuth} />
-      <Route path=':topicId' component={Topic} />
-    </Route>
+export default function makeJourney(safe) {
+  
+  function checkRoute(route) {
+    const {component, children, path} = route.props;
+    const newChildren = children && (children instanceof Array) ? children.map(child => checkRoute(child)) : undefined;
     
-    <Route path='@:userId' component={User} onEnter={checkAuth} />
-    
-    <Route path='Explore' component={Explore} onEnter={checkAuth} />
-    
-    <Route path='Create_universe' component={NewUniverse} onEnter={checkAuth} />
-    
-    
-  </Route>
-);
+    return component && protectedComponents.indexOf(component.name) !== -1 ?
+      React.createElement(Route, {
+        path,
+        component,
+        children: newChildren,
+        onEnter: safe,
+      }) :
+      newChildren ? React.cloneElement(route, simpleAdd(route.props, {children: newChildren})) : route;
+  }
+  
+  return checkRoute(routes);
+}
 
-export default routes;
+export function routeGuard(store) {
+  return (nextState, transition) => {
+    const {userId, exp} = store.getState().session;
+    log('... checking Auth for ', nextState.location.pathname, 'user is', userId ? userId : 'visitor', 'Expiration', exp ? (exp - (new Date()).getTime()) / (1000 * 60) : '0', 'minutes');
+  };
+}

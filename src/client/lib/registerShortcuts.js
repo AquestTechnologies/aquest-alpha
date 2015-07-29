@@ -25,4 +25,6 @@ export default function registerShortcuts(getState) {
   key('ctrl+shift+8', () => console.log('users :', getState().users.toJS()));
   
   key('ctrl+shift+9', () => console.log('records :', getState().records));
+  
+  key('ctrl+shift+0', () => console.log('session :', getState().session));
 }

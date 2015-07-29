@@ -3,86 +3,92 @@ import isClient from './utils/isClient';
 import docCookies from '../client/vendor/cookie';
 const isServer = !isClient();
 
-export function transitionTo(pathname, query, state) {
-  return {
-    type: 'TRANSITION_TO',
-    payload: {pathname, query, state}
-  };
-}
+const actionCreators = {
+  
+  transitionTo: (pathname, query, state) => ({ type: 'TRANSITION_TO', payload: {pathname, query, state} }),
 
-export const readUniverse = createActionCreator({
-  intention:  'readUniverse',
-  method:     'get',
-  pathx:      '/api/universe/{p}',
-  auth:       false,
-});
+  readUniverse: createActionCreator({
+    intention:  'readUniverse',
+    method:     'get',
+    pathx:      '/api/universe/{p}',
+    auth:       false,
+  }),
+  
+  readUniverses: createActionCreator({
+    intention:  'readUniverses',
+    method:     'get',
+    pathx:      '/api/universes/',
+    auth:       'jwt',
+    component:  'Explore',
+  }),
+  
+  readInventory: createActionCreator({
+    intention:  'readInventory',
+    method:     'get',
+    pathx:      '/api/inventory/{p}',
+    auth:       'jwt',
+    component:  'Universe',
+  }),
+  
+  readTopic: createActionCreator({
+    intention:  'readTopic',
+    method:     'get',
+    pathx:      '/api/topic/{p}',
+    auth:       false,
+  }),
+  
+  readTopicContent: createActionCreator({
+    intention:  'readTopicContent',
+    method:     'get',
+    pathx:      '/api/topic/content/{p}',
+    auth:       false,
+  }),
+  
+  readChat: createActionCreator({
+    intention:  'readChat',
+    method:     'get',
+    pathx:      '/api/chat/{p}',
+    auth:       false,
+  }),
+  
+  createUniverse: createActionCreator({
+    intention:  'createUniverse',
+    method:     'post',
+    pathx:      '/api/universe/',
+    auth:       'jwt',
+    component:  'NewUniverse',
+  }),
+  
+  createTopic: createActionCreator({
+    intention:  'createTopic',
+    method:     'post',
+    pathx:      '/api/topic/',
+    auth:       'jwt',
+    component:  'NewTopic',
+  }),
+  
+  createUser: createActionCreator({
+    intention:  'createUser',
+    method:     'post',
+    pathx:      '/api/user/',
+    auth:       false,
+  }),
+  
+  login: createActionCreator({
+    intention:  'login',
+    method:     'post',
+    pathx:      '/login',
+    auth:       false,
+  }),
+};
 
-export const readUniverses = createActionCreator({
-  intention:  'readUniverses',
-  method:     'get',
-  pathx:      '/api/universes/',
-  auth:       'jwt',
-});
+export default actionCreators;
 
-export const readInventory = createActionCreator({
-  intention:  'readInventory',
-  method:     'get',
-  pathx:      '/api/inventory/{p}',
-  auth:       'jwt',
-});
-
-export const readTopic = createActionCreator({
-  intention:  'readTopic',
-  method:     'get',
-  pathx:      '/api/topic/{p}',
-  auth:       false,
-});
-
-export const readTopicContent = createActionCreator({
-  intention:  'readTopicContent',
-  method:     'get',
-  pathx:      '/api/topic/content/{p}',
-  auth:       false,
-});
-
-export const readChat = createActionCreator({
-  intention:  'readChat',
-  method:     'get',
-  pathx:      '/api/chat/{p}',
-  auth:       false,
-});
-
-export const createUniverse = createActionCreator({
-  intention:  'createUniverse',
-  method:     'post',
-  pathx:      '/api/universe/',
-  auth:       'jwt',
-});
-
-export const createTopic = createActionCreator({
-  intention:  'createTopic',
-  method:     'post',
-  pathx:      '/api/topic/',
-  auth:       'jwt',
-});
-
-export const createUser = createActionCreator({
-  intention:  'createUser',
-  method:     'post',
-  pathx:      '/api/user/',
-  auth:       false,
-});
-
-export const login = createActionCreator({
-  intention:  'login',
-  method:     'post',
-  pathx:      '/login',
-  auth:       false,
-});
-
-// (string)   intention   The queryDb hook, also used to create actionTypes
-// (string)   method      HTTP method
-// (string)   pathx       API path. If (method && path) an corresponding API route gets created
+// (string)            intention   The queryDb hook, also used to create actionTypes
+// (string)            method      HTTP method
+// (string)            pathx       API path. If (method && path) an corresponding API route gets created
+// (string or false)   auth        Authentication strategy
+// (string)            component   Adds the authentication strategy to given component in routes
 function createActionCreator(shape) {
   
   
@@ -148,4 +154,19 @@ function createForm(o) {
   for(let k in o) {
     f.append(k, o[k]);
   } return f;
+}
+
+const ac = Object.keys(actionCreators).map(key => actionCreators[key]);
+
+const authFailureTypes = ac
+  .filter(ac => typeof ac.getShape === 'function' && ac.getShape().auth)
+  .map(ac => ac.getTypes()[2]);
+
+export const protectedComponents = ac
+  .filter(ac => typeof ac.getShape === 'function')
+  .map(ac => ac.getShape().component)
+  .filter(component => component);
+  
+export function isUnauthorized(action) {
+  return authFailureTypes.indexOf(action.type) !== -1 && action.payload && action.payload.message === 'Unauthorized';
 }

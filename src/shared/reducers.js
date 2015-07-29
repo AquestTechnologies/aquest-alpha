@@ -1,96 +1,132 @@
 import log from './utils/logTailor';
 import Immutable from 'immutable';
-import {routerStateReducer} from 'redux-react-router';
+import { routerStateReducer } from 'redux-react-router';
+import { isUnauthorized } from './actionCreators';
+import config from '../../config/client';
 
-
-export function router(state = {}, action) {
-  log('.R. ' + action.type); // Cette ligne dans le premier reducer
-  return routerStateReducer(state, action);
-}
-
-export function users(state = Immutable.Map(), action) {
-  switch (action.type) {
-    
-  case 'SUCCESS_CREATE_USER':
-    return state.set(action.payload.id, fromJSGreedy(action.payload));
-    
-  case 'SUCCESS_LOGIN':
-    return state.set(action.payload.id, fromJSGreedy(action.payload)); // le token est dedans !
-    
-  default:
-    return state;
-  }
-}
-
-export function universes(state = Immutable.Map(), action) {
-  let newState;
-  switch (action.type) {
-    
-  case 'SUCCESS_READ_UNIVERSE':
-    return state.set(action.payload.id, fromJSGreedy(action.payload));
-
-  case 'SUCCESS_READ_UNIVERSES':
-    newState = state;
-    action.payload.forEach(universe => {
-      if (!newState.get(universe.id)) newState = newState.set(universe.id, fromJSGreedy(universe));
-    });
-    return newState;
-    
-  case 'SUCCESS_READ_INVENTORY':
-    const d = new Date();
-    return state.setIn([action.params, 'lastInventoryUpdate'], d.getTime());
-  
-  default:
-    return state;
-  }
-}
-
-export function chats(state = Immutable.Map(), action) {
-  switch (action.type) {
-    
-  case 'SUCCESS_READ_CHAT':
-    return state.set(action.payload.id, fromJSGreedy(action.payload));
-    
-  default:
-    return state;
-  }
-}
-
-export function topics(state = Immutable.Map(), action) {
-  let newState;
-  switch (action.type) {
-    
-  case 'SUCCESS_READ_INVENTORY':
-    newState = state;
-    action.payload.forEach(topic => newState = newState.set(topic.id, fromJSGreedy(topic)));
-    return newState;
-    
-  case 'SUCCESS_READ_TOPIC':
-    return state.set(action.payload.id, fromJSGreedy(action.payload));
-    
-  case 'SUCCESS_READ_TOPIC_CONTENT':
-    return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
-    
-  case 'SUCCESS_CREATE_TOPIC':
-    return state.set(action.params.id, fromJSGreedy(action.params));
-    
-  default:
-    return state;
-  }
-}
-
-// Doit être exporté en dernier pour activer les side effects après la reduction des précédants
-export function records(state = [], action) {
-  return [
-    ...state,
-    {action: action, date: new Date()}
-  ];
-}
+const _map = Immutable.Map();
+const _session = {
+  userId: '',
+  exp: '',
+};
 
 // From the Immutable.js Github wiki
-function fromJSGreedy(js) {
-  return typeof js !== 'object' || js === null ? js :
-    Array.isArray(js) ? 
-      Immutable.Seq(js).map(fromJSGreedy).toList() :
-      Immutable.Seq(js).map(fromJSGreedy).toMap();
-}
+const fromJSGreedy = js => typeof js !== 'object' || js === null ? js : Array.isArray(js) ? 
+  Immutable.Seq(js).map(fromJSGreedy).toList() :
+  Immutable.Seq(js).map(fromJSGreedy).toMap();
+
+
+const reducers = {
+  
+  router: (state = {}, action) => {
+    log('.R. ' + action.type); // This line in first reducer
+    return routerStateReducer(state, action);
+  },
+  
+  session: (state=_session, action) => {
+    if (isUnauthorized(action)) {
+       return _session;
+    } else switch (action.type) {
+        
+      case 'SUCCESS_CREATE_USER':
+        return {
+          userId: action.payload.id,
+          exp: (new Date()).getTime() + config.sessionDuration,
+        };
+      
+      case 'SUCCESS_LOGIN':
+        return {
+          userId: action.payload.id,
+          exp: (new Date()).getTime() + config.sessionDuration,
+        };
+      
+      case 'SUCESS_LOGOUT':
+        return _session;
+        
+      default:
+        return state;
+    }
+  },
+  
+  users: (state=_map, action) => {
+    switch (action.type) {
+      
+    case 'SUCCESS_CREATE_USER':
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      
+    case 'SUCCESS_LOGIN':
+      return state.set(action.payload.id, fromJSGreedy(action.payload)); // le token est dedans !
+      
+    default:
+      return state;
+    }
+  },
+  
+  universes: (state=_map, action) => {
+    let newState;
+    switch (action.type) {
+      
+    case 'SUCCESS_READ_UNIVERSE':
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
+  
+    case 'SUCCESS_READ_UNIVERSES':
+      newState = state;
+      action.payload.forEach(universe => {
+        if (!newState.get(universe.id)) newState = newState.set(universe.id, fromJSGreedy(universe));
+      });
+      return newState;
+      
+    case 'SUCCESS_READ_INVENTORY':
+      const d = new Date();
+      return state.setIn([action.params, 'lastInventoryUpdate'], d.getTime());
+    
+    default:
+      return state;
+    }
+  },
+  
+  chats: (state=_map, action) => {
+    switch (action.type) {
+      
+    case 'SUCCESS_READ_CHAT':
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      
+    default:
+      return state;
+    }
+  },
+  
+  topics: (state=_map, action) => {
+    let newState;
+    switch (action.type) {
+      
+    case 'SUCCESS_READ_INVENTORY':
+      newState = state;
+      action.payload.forEach(topic => newState = newState.set(topic.id, fromJSGreedy(topic)));
+      return newState;
+      
+    case 'SUCCESS_READ_TOPIC':
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      
+    case 'SUCCESS_READ_TOPIC_CONTENT':
+      return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
+      
+    case 'SUCCESS_CREATE_TOPIC':
+      return state.set(action.params.id, fromJSGreedy(action.params));
+      
+    default:
+      return state;
+    }
+  },
+  
+  // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
+  records: (state = [], action) => {
+    return [
+      ...state,
+      {action: action, date: new Date()}
+    ];
+  },
+
+};
+
+export default reducers;
