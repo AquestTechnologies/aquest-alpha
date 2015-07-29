@@ -14,21 +14,18 @@ import User        from './components/User';
 
 let routes = (
   <Route path='/' component={App}> 
-  
-    {/*<Route path='/' component={Home} />*/}
-    
-    <Route path='/_:universeId' component={Universe}>
-      <Route path='/:topicId' component={Topic} />
-      <Route path='/Create_topic' component={NewTopic} />
+        
+    <Route path='_:universeId' components={Universe, Inventory}>
+      <Route path=':topicId' component={Topic} />
+      <Route path='Create_topic' component={NewTopic} />
     </Route>
     
-    <Route path='/@:userId' component={User} />
+    <Route path='@:userId' component={User} />
     
-    <Route path='/Explore' component={Explore} />
+    <Route path='Explore' component={Explore} />
     
-    <Route path='/Create_universe' component={NewUniverse} />
+    <Route path='Create_universe' component={NewUniverse} />
     
-    {/*<NotFoundRoute component={NotFound}/>*/}
     
   </Route>
 );

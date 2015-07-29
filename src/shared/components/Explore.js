@@ -1,9 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router';
-
-import Node from './explore/Node';
-// import Pseudos from './explore/Pseudos';
+import Node  from './explore/Node';
 import Graph from './explore/Graph';
+import { Link } from 'react-router';
 
 
 export default class Explore extends React.Component {
@@ -52,11 +50,11 @@ export default class Explore extends React.Component {
     return (
       <div style={exploreStyle}>
         <div style={divStyle}>
-          <Link to='home'>Home</Link>
+          <Link to='/'>Home</Link>
           <br/>
-          {this.renderGraph(universes)}
+          { this.renderGraph(universes) }
           <br/>
-          <Link to='newUniverse'>Create a new universe</Link>
+          <Link to='/Create_universe'>Create a new universe</Link>
         </div>
         <Graph />
         {/*<br />

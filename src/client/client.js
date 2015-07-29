@@ -14,13 +14,6 @@ import promiseMiddleware    from '../shared/utils/promiseMiddleware.js';
 import BrowserHistory from 'react-router/lib/BrowserHistory';
 import {createStore, combineReducers, applyMiddleware}   from 'redux';
 
-/*import Websocket from 'socket.io-client';
-const io = Websocket('http://130.211.68.244:8081'); //Prendre le bon port
-
-io.on('message', function (message) {
-  log('_w_ Server says ' + message);
-});*/
-
 (() => {
   
   logWelcome(false);
@@ -38,35 +31,27 @@ io.on('message', function (message) {
   }
   
   const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
-  
-  registerSideEffects(store, Router.transitionTo);
   registerShortcuts(store.getState);
   
-  // Render app
   let c = 0;
-  // Router.run((Handler, routerState) => {
     
-    // Gère les trailing slash des url
-    // const url = routerState.pathname;
-    // if (url.slice(-1) === '/' && url !== '/') {
-    //   router.replaceWith(url.slice(0,-1), null, routerState.query);
-    //   return;
-    // }
-    
-    c++;
-    const d = new Date();
-    // log(`__________ ${c} router.run ${url} __________`);
-    const history = new BrowserHistory();
-    try { 
-      ReactDOM.render(
-        <Router history={history}>
-            <Route children={routes} component={reduxRouteComponent(store)} />
-        </Router>,
-        document.getElementById('mountNode'),
-        () => log(`... App rendered in ${new Date() - d}ms.`)
-      );
-    } 
-    catch(err) { log('!!! Error while React.renderToString', err); }
+  // Gère les trailing slash des url
+  // const url = routerState.pathname;
+  // if (url.slice(-1) === '/' && url !== '/') {
+  //   router.replaceWith(url.slice(0,-1), null, routerState.query);
+  //   return;
+  // }
+  
+  c++;
+  const d = new Date();
+  const history = new BrowserHistory();
+  const routex = <Route children={routes} component={reduxRouteComponent(store)} />;
+  const app = ReactDOM.render(
+    <Router history={history} children={routex} />,
+    document.getElementById('mountNode'),
+    () => log(`... App rendered in ${new Date() - d}ms.`)
+  );
+  registerSideEffects(store, app.transitionTo);
 
 })();
 

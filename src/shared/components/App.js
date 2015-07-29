@@ -19,29 +19,52 @@ function select(state) {
   };
 }
 
+function simpleMerge(a, b) {
+  Object.keys(b).forEach(key => b.hasOwnProperty(key) ? a[key] = b[key] : {});
+  return a;
+}
+
 export default class App extends React.Component {
 
   render() {
-    console.log('props', this.props.children);
     const {children} = this.props;
+
     return (
-      <Connector select={select}> {({ 
-            universes,
-            topics,
-            chats,
-            users,
-            records,
-            router,
-            dispatch,
-          }) => (
+      <Connector select={select}> {
+        ({ 
+          universes,
+          topics,
+          chats,
+          users,
+          records,
+          router,
+          dispatch,
+        }) => 
           <div> 
-            {console.log('router', router)}
-            {children ? children : <Home />}
+            <LoadingBar records={records} />
+            { 
+              children && !(children instanceof Array) ? 
+                React.cloneElement(children, simpleMerge({
+                    universes,
+                    topics,
+                    chats,
+                    users,
+                    router,
+                  }, bindActionCreators(actionCreators, dispatch))) 
+                : React.createElement(Home, simpleMerge({
+                  universes,
+                    topics,
+                    chats,
+                    users,
+                    router,
+                  }, bindActionCreators(actionCreators, dispatch))) 
+            }
           </div>
-        )} </Connector>
+      } </Connector>
     );
   }
 }
+
 /*
 <LoadingBar records = {records} />
             <RouteHandler 
@@ -49,7 +72,7 @@ export default class App extends React.Component {
               universes = {universes}
               topics = {topics}
               chats = {chats}
-              {...bindActionCreators(actionCreators, dispatch)} 
+              
             />*/
             
             

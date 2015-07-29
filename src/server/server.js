@@ -108,13 +108,13 @@ function prerender(request, reply) {
   //   location: url
   // });
   var location = new Location(url);
+  // Initialise une nouvelle instance redux  
+  const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), {});
+  
+  const routex = <Route component={reduxRouteComponent(store)} children={routes} />;
   // Match la location et les routes, et renvoie le bon layout (Handler) et le state
-  Router.run(routes, location, (err, initialState) => {
+  Router.run(routex, location, (err, initialState) => {
     log('_____________ router.run _____________');
-
-    
-    // Initialise une nouvelle instance redux  
-    const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), {});
     
     // Initialise les stores
     log('... Entering phidippides');
@@ -125,27 +125,7 @@ function prerender(request, reply) {
       log('... Entering React.renderToString');
       try {
         var mountMeImFamous = ReactDOM.renderToString(
-          <Router {...initialState}>
-            <Route component={reduxRouteComponent(store)}>
-              <Route path='/' component={App}> 
-                {/*<Route path='/' component={Home} />*/}
-                
-                <Route path='/_:universeId' components={Universe, Inventory}>
-                  <Route path='/:topicId' component={Topic} />
-                  <Route path='/Create_topic' component={NewTopic} />
-                </Route>
-                
-                <Route path='/@:userId' component={User} />
-                
-                <Route path='/Explore' component={Explore} />
-                
-                <Route path='/Create_universe' component={NewUniverse} />
-                
-                {/*<NotFoundRoute component={NotFound}/>*/}
-                
-              </Route>
-            </Route>
-          </Router>
+          <Router {...initialState} children={routex} />
         );
       } 
       catch(err) { log('!!! Error while React.renderToString', err, err.stack); }
