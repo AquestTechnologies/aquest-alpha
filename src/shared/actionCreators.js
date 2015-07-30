@@ -58,6 +58,18 @@ export const createTopic = createActionCreator({
   auth:       'jwt',
 });
 
+export const joinChat = createActionCreator({
+  intention:  'joinChat',
+  method:     'socket',
+  auth:       'jwt',
+});
+
+export const leaveChat = createActionCreator({
+  intention:  'leaveChat',
+  method:     'socket',
+  auth:       'jwt',
+});
+
 export const createMessage = createActionCreator({
   intention:  'createMessage',
   method:     'socket',
@@ -98,15 +110,28 @@ function createActionCreator(shape) {
       // Client : API call through XMLHttpRequest
       else {
         if(method === 'socket'){
-          // socketio included in index.html <script src="http://<ip>:9090/socket.io/socket.io.js"></script>
-          let socket = io.connect('http://130.211.59.69:9090/');
           
-          Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
+          if(params.socketAction){
+            if(params.socketAction === 'emit'){
+              log('is socket, emit');
+              const socket = io.connect(`http://130.211.59.69:9090/${params.namespace}`);
+              
+              let sendParams = {};
+              for(let key in params){ 
+                sendParams[key] = params[key];
+              }
+              
+              Object.keys(sendParams).map(value => sendParams[value] = typeof(sendParams[value]) === 'object' ? JSON.stringify(sendParams[value]) : sendParams[value]);
+              log('sendParams', sendParams);
+              log('params', params);
+              socket.emit(intention,sendParams);
+            } 
+            resolve(params);
+          } else {
+            reject('action param is empty');
+          }
           
-          socket.emit(intention,{intention, params});
-          socket.on(intention, (result) => {result ? resolve(result) : reject(`result's empty`)});
-          
-          socket.on('error', (error) => reject(error));
+          // socket.on('error', (error) => reject(error));
         } 
         else {
           const path = pathx.replace(/\{\S*\}/, '');

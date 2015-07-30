@@ -70,9 +70,11 @@ class Universe extends React.Component {
         
         <Chat 
           chatId        = {chatId}
+          users         = {users}
           chat          = {this.props.chats[chatId]} 
           readChat      = {this.props.readChat} //passer les actions par le context, a faire
-          users         = {users}
+          joinChat      = {this.props.joinChat}
+          leaveChat     = {this.props.leaveChat}
           createMessage = {this.props.createMessage}
         />
       </div>

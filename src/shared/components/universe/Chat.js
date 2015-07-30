@@ -86,6 +86,8 @@ class Chat extends React.Component {
         <ChatFooter
           chatId        = {this.props.chatId}
           users         = {users}
+          joinChat      = {this.props.joinChat}
+          leaveChat     = {this.props.leaveChat}
           createMessage = {this.props.createMessage}
         />
       </div>

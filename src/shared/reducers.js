@@ -39,6 +39,64 @@ export function chats(state = Immutable.Map(), action) {
   case 'SUCCESS_READ_CHAT':
     return state.set(action.payload.id, fromJSGreedy(action.payload));
     
+  case 'SUCCESS_CREATE_MESSAGE':
+    //should work as latence compensation !
+    if(state.action){
+      // here we use params
+      if(state.action === 'emit'){
+        return state.set(action.params.id, fromJSGreedy(action.params)); 
+      } else {
+        // Todo : check if the message in the redux state is equal to the payload
+        log('Roger that : ', action.paylaod)
+      }
+    }
+    
+  case 'SUCCESS_JOIN_CHAT':
+    log(state);
+    //should work as latence compensation !
+    if(state.socketAction){
+      // here we use params
+      if(state.socketAction === 'emit'){
+        // push user in the userList
+        const joinChatId = parseInt(action.params.id, 10);
+        return state.getIn([joinChatId, 'users']) ? state.getIn([joinChatId, 'users']).push(fromJSGreedy(action.params.userId)) : state.setIn([joinChatId, 'users'], Immutable.List.of(action.params.userId));
+      } else {
+        // Todo : check if the user is in the userList (it should be !)
+        // if there is an error, or the payload is empty, remove the user from the table
+        // else, everything is alright
+        log('Roger that : ', action.paylaod)
+        
+        // const joinChatId = parseInt(action.payload.id, 10);
+        // return state.getIn([joinChatId, 'users']) ? state.getIn([joinChatId, 'users']).push(fromJSGreedy(action.payload.userId)) : state.setIn([joinChatId, 'users'], Immutable.List.of(action.payload.userId));    
+      }
+    }
+    
+  case 'SUCCESS_LEAVE_CHAT':
+    
+    if(state.socketAction){
+      // here we use params
+      if(state.socketAction === 'emit'){
+        const leaveChatId = parseInt(action.params.id, 10);
+        return state.setIn([leaveChatId, 'users'],
+          state.getIn([leaveChatId, 'users']).filter(function(user) {
+            console.log(user !== action.params.userId ? 'not equal' : 'equal');
+            return user !== action.params.userId;
+          })
+        )
+      } else {
+        
+        log('Roger that : ', action.paylaod);
+        // const leaveChatId = parseInt(action.payload.id, 10);
+        // return state.setIn([leaveChatId, 'users'],
+        //   state.getIn([leaveChatId, 'users']).filter(function(user) {
+        //     console.log(user !== action.payload.userId ? 'not equal' : 'equal');
+        //     return user !== action.payload.userId;
+        //   })
+        // )
+      }
+    }
+    // return state.set(action.payload.id, fromJSGreedy(false));
+    
   default:
     return state;
   }
