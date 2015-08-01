@@ -39,8 +39,8 @@ function apiPlugin(server, options, next) {
           if (isValid) {
             result.token = JWT.sign({
               valid: true, 
-              id: result.id, 
-              exp: Math.floor((new Date().getTime() + ttl) / 1000)
+              userId: result.id, 
+              expiration: new Date().getTime() + ttl
             }, key); // synchronous
             log('... signed JWT after login', result.token.slice(0, 20));
             resolve();
@@ -55,8 +55,8 @@ function apiPlugin(server, options, next) {
       return new Promise((resolve, reject) => {
         result.token = JWT.sign({
           valid: true, 
-          id: result.id, 
-          exp: Math.floor((new Date().getTime() + ttl) / 1000)
+          userId: result.id, 
+          expiration: new Date().getTime() + ttl
         }, key); // synchronous
         log('... signed JWT after user creation' + result.token);
         resolve();

@@ -20,7 +20,7 @@ export default function makeJourney(safe) {
     const {component, children} = route.props;
     const newProps = {
       children: children && (children instanceof Array) ? children.map(child => checkRoute(child)) : undefined,
-      onEnter: component && protectedComponents.indexOf(component.name) !== -1 ? safe : undefined,
+      onEnter: component && protectedComponents.indexOf(component.name) !== -1 ? safe(component.name) : undefined,
     };
     
     return React.cloneElement(route, newProps);
@@ -48,13 +48,13 @@ export default function makeJourney(safe) {
 
 export function routeGuard(store) {
   
-  return (nextState, transition) => {
+  return componentName => (nextState, transition) => {
     const {pathname} = nextState.location;
-    const {userId, exp} = store.getState().session;
-    const expi = exp - new Date().getTime(); // en ms
-    log(`... Checking authentication for ${pathname}`, {userId, ttl: exp ? expi : '0'});
+    const {userId, expiration} = store.getState().session;
+    const timeLeft = expiration - new Date().getTime(); // en ms
+    log(`... Checking authentication in ${componentName} for ${pathname}`, {userId, ttl: expiration ? timeLeft : '0'});
     
-    if (!userId || expi <= 0) {
+    if (!userId || timeLeft <= 0) {
       log('!!! User unauthenticated: cancelling transition');
       store.dispatch({
         type: 'SET_REDIRECTION',

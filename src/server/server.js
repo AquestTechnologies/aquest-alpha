@@ -2,9 +2,10 @@ import fs        from 'fs';
 import Hapi      from 'hapi';
 import React     from 'react';
 import Immutable from 'immutable';
+import JWT       from 'jsonwebtoken';
 import ReactDOM  from 'react-dom/server';
 import Location  from 'react-router/lib/Location';
-import { Provider }      from 'react-redux';
+
 import Router, { Route } from 'react-router';
 import validateJWT       from './lib/validateJWT';
 import reducers          from '../shared/reducers';
@@ -86,71 +87,87 @@ function prerender(request, reply) {
   const d = new Date();
   
   logRequest(request);
-  const html   = HTML;
-  const store  = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), {});
-  const safe   = routeGuard(store);
-  const routes = <Route component={reduxRouteComponent(store)} children={makeJourney(safe)} />;
-
-  // transforme coco.com/truc/ en coco.com/truc
-  const requestUrl = request.url.path.split('?')[0];
-  const url = requestUrl.slice(-1) === '/' && requestUrl !== '/' ? requestUrl.slice(0, -1) : requestUrl;
   
-  Router.run(routes, new Location(url), (err, initialState, transition) => {
-    log('_____________ Router.run _____________');
-    if (err) log('!!! Error while Router.run', err);  
+  // If there is a JWT in the request cookie header, we verify it async
+  const token = request.state ? request.state.jwt : undefined;
+  const authPromise = token ? 
+    new Promise((resolve, reject) => JWT.verify(token, jwt.key, (err, decoded) => err ? reject(err) : resolve(decoded))) :
+    Promise.resolve();
+
+  authPromise.then(decoded => {
     
-    // log('initialState', initialState);
-    if (transition.isCancelled) {
-      log('... Transition cancelled: redirecting');
-      response.redirect(transition.redirectInfo.pathname + '?r=' + url).send();
-      return;
+    const state = {};
+    if (decoded) {
+      const {userId, expiration} = decoded;
+      log('... JWT found in cookie', userId);
+      state.session = {userId, expiration};
     }
+    const html   = HTML;
+    const store  = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), state);
+    const safe   = routeGuard(store);
+    const routes = <Route component={reduxRouteComponent(store)} children={makeJourney(safe)} />;
     
-    log('... Entering phidippides');
-    const dd = new Date();
-    phidippides(initialState, store.dispatch).then(() => {
+    // transforme coco.com/truc/ en coco.com/truc
+    const requestUrl = request.url.path.split('?')[0];
+    const url = requestUrl.slice(-1) === '/' && requestUrl !== '/' ? requestUrl.slice(0, -1) : requestUrl;
+    
+    Router.run(routes, new Location(url), (err, initialState, transition) => {
+      log('_____________ Router.run _____________');
+      if (err) log('!!! Error while Router.run', err);  
       
-      log(`... Exiting phidippides (${new Date() - dd}ms)`);
-      log('... Entering React.renderToString');
-      try {
-        var mountMeImFamous = ReactDOM.renderToString(
-          <Router {...initialState} children={routes} />
-        );
-      } 
-      catch(err) { log('!!! Error while React.renderToString', err, err.stack); }
-      log('... Exiting React.renderToString');
-      
-      // On extrait le contenu du mountNode 
-      // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
-      let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0]; //à mod.
-      
-      // Passage du state dans window
-      const serverState = store.getState();
-      delete serverState.records;
-      delete serverState.effects;
-      serverState.immutableKeys = [];
-      for (let key in serverState) {
-        if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !
+      // log('initialState', initialState);
+      if (transition.isCancelled) {
+        log('... Transition cancelled: redirecting');
+        response.redirect(transition.redirectInfo.pathname + '?r=' + url).send();
+        return;
       }
       
-      response.source = html
-        .replace(placeholder, mountMeImFamous)
-        .replace('</body>',
-          `\t<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>\n` +
-          `\t<script src="${wds.hotFile }"></script>\n` +
-          `\t<script src="${wds.publicPath + wds.filename}"></script>\n` +
-          '</body>' );
-      
-      const token = request.state.jwt;
-      if (token) response.state('jwt', token, {
-        ttl: jwt.ttl
-      });
+      log('... Entering phidippides');
+      const dd = new Date();
+      phidippides(initialState, store.dispatch).then(() => {
         
-      response.send();
-      log(`Served ${url} in ${new Date() - d}ms.\n`);
+        log(`... Exiting phidippides (${new Date() - dd}ms)`);
+        log('... Entering React.renderToString');
+        try {
+          var mountMeImFamous = ReactDOM.renderToString(
+            <Router {...initialState} children={routes} />
+          );
+        } 
+        catch(err) { log('!!! Error while React.renderToString', err, err.stack); }
+        log('... Exiting React.renderToString');
         
-    }, err => log('!!! Error while Phidippides', err));
-  });
+        // On extrait le contenu du mountNode 
+        // Il est ici imperatif que le mountNode contienne du texte unique et pas de </div>
+        let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0]; //à mod.
+        
+        // Passage du state dans window
+        const serverState = store.getState();
+        delete serverState.records;
+        delete serverState.effects;
+        serverState.immutableKeys = [];
+        for (let key in serverState) {
+          if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !
+        }
+        
+        response.source = html
+          .replace(placeholder, mountMeImFamous)
+          .replace('</body>',
+            `\t<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>\n` +
+            `\t<script src="${wds.hotFile }"></script>\n` +
+            `\t<script src="${wds.publicPath + wds.filename}"></script>\n` +
+            '</body>' );
+        
+        const token = request.state.jwt;
+        if (token) response.state('jwt', token, {
+          ttl: jwt.ttl
+        });
+          
+        response.send();
+        log(`Served ${url} in ${new Date() - d}ms.\n`);
+          
+      }, err => log('!!! Error while Phidippides', err));
+    });
+  }, err => log('!!! Error while JWT.verify', err));
 }
 
 // Démarrage du server

@@ -12,16 +12,17 @@ export default class Topic extends React.Component {
   }
   
   componentWillMount() {
-    const {topic, readTopicContent} = this.props;
-    if (!topic.content) readTopicContent(topic.id);
+    const {topic, params, readTopicContent, readTopic} = this.props;
+    if (!topic) readTopic(params.topicId);
+    else if (!topic.content) readTopicContent(topic.id);
   }
   
   render() {
     const {topic} = this.props;
-    const {title, author, timestamp} = topic;
-    const content = topic.content ? typeof(topic.content) === 'object' ? topic.content : JSON.parse(topic.content) : ['Loading...'];
+    const {title, author, timestamp} = topic ? topic : {};
+    const content = topic ? topic.content ? typeof(topic.content) === 'object' ? topic.content : JSON.parse(topic.content) : ['Loading...'] : undefined;
     
-    return (
+    return !topic ? <div>Loading...</div> : (
       <div>
         <div className="topic">
           <div className="topic_title">

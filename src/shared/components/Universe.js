@@ -36,20 +36,26 @@ export default class Universe extends React.Component {
     return result;
   }
   
+  componentWillMount() {
+    const {universes, params, readUniverse} = this.props;
+    const {universeId} = params;
+    if (!universes[universeId]) readUniverse(universeId);
+  }
+  
   componentDidMount() {
     menuScroll('main_scrollable');
   }
   
   render() {
     // console.log('.C. Universe.render');
-    const {location, universes, chats, params, children, readInventory, readTopicContent, createTopic, readChat, transitionTo} = this.props;
+    const {universes, topics, chats, params, location, children, readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo} = this.props;
     const {universeId, topicId} = params;
     const universe = universes[universeId];
-    const topics   = this.filterTopics(this.props.topics, universeId);
-    const topic    = topicId ? topics[topicId] : undefined;
-    const chatId   = topic ? topic.chatId : universe.chatId;
+    const topic = topicId ? topics[topicId] : undefined;
+    const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
+    const filteredTopics = !children ? this.filterTopics(topics, universeId) : undefined;
     
-    return (
+    return !universe ? <div>Loading...</div> : (
       <div> 
         <Menu 
           topicId     ={topicId}
@@ -67,12 +73,13 @@ export default class Universe extends React.Component {
                 React.cloneElement(children, {
                   topic,
                   universe,
+                  readTopic,
                   createTopic,
                   readTopicContent,
                 }) 
                 :
                 <Inventory 
-                  topics       ={topics}
+                  topics       ={filteredTopics}
                   universe     ={universe}
                   transitionTo ={transitionTo}
                   readInventory={readInventory}
