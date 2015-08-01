@@ -42,7 +42,7 @@ function apiPlugin(server, options, next) {
               id: result.id, 
               exp: Math.floor((new Date().getTime() + ttl) / 1000)
             }, key); // synchronous
-            log('... signed JWT after login' + result.token);
+            log('... signed JWT after login', result.token.slice(0, 20));
             resolve();
           }
           else reject('password mismatch');

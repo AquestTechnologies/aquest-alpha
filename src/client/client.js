@@ -1,11 +1,10 @@
 import React                   from 'react';
 import ReactDOM                from 'react-dom';
 import Immutable               from 'immutable';
-import {Provider}              from 'react-redux';
 import Router, { Route }       from 'react-router';  
 import { reduxRouteComponent } from 'redux-react-router';
 import BrowserHistory          from 'react-router/lib/BrowserHistory';
-import {createStore, combineReducers, applyMiddleware} from 'redux';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
 import makeJourney, { routeGuard } from '../shared/routes.jsx';
 import reducers       from '../shared/reducers';
 import registerShortcuts   from './lib/registerShortcuts';
@@ -34,8 +33,6 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware.js';
   const safe  = routeGuard(store);
   registerShortcuts(store.getState);
   
-  let c = 0;
-    
   // Gère les trailing slash des url
   // const url = routerState.pathname;
   // if (url.slice(-1) === '/' && url !== '/') {
@@ -43,7 +40,6 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware.js';
   //   return;
   // }
 
-  c++;
   const d = new Date();
   const history = new BrowserHistory();
   const app = ReactDOM.render(
@@ -53,6 +49,7 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware.js';
     document.getElementById('mountNode'),
     () => log(`... App rendered in ${new Date() - d}ms.`)
   );
+  
   registerSideEffects(store, app.transitionTo);
 
 })();

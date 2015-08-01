@@ -7,7 +7,7 @@ import Location  from 'react-router/lib/Location';
 import { Provider }      from 'react-redux';
 import Router, { Route } from 'react-router';
 import validateJWT       from './lib/validateJWT';
-import reducers     from '../shared/reducers';
+import reducers          from '../shared/reducers';
 import devConfig         from '../../config/development.js';
 import phidippides       from '../shared/utils/phidippides.js';
 import promiseMiddleware from '../shared/utils/promiseMiddleware.js';
@@ -92,13 +92,20 @@ function prerender(request, reply) {
   const routes = <Route component={reduxRouteComponent(store)} children={makeJourney(safe)} />;
 
   // transforme coco.com/truc/ en coco.com/truc
-  const requestUrl = request.url.path;
+  const requestUrl = request.url.path.split('?')[0];
   const url = requestUrl.slice(-1) === '/' && requestUrl !== '/' ? requestUrl.slice(0, -1) : requestUrl;
   
-  Router.run(routes, new Location(url), (err, initialState) => {
-    log('_____________ router.run _____________');
+  Router.run(routes, new Location(url), (err, initialState, transition) => {
+    log('_____________ Router.run _____________');
+    if (err) log('!!! Error while Router.run', err);  
     
-    // Initialise les stores
+    // log('initialState', initialState);
+    if (transition.isCancelled) {
+      log('... Transition cancelled: redirecting');
+      response.redirect(transition.redirectInfo.pathname + '?r=' + url).send();
+      return;
+    }
+    
     log('... Entering phidippides');
     const dd = new Date();
     phidippides(initialState, store.dispatch).then(() => {

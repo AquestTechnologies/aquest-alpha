@@ -10,54 +10,57 @@ import NewUniverse  from './components/NewUniverse';
 import log          from './utils/logTailor';
 import { protectedComponents } from './actionCreators';
 
-const routes = <Route path='/' component={App}> 
-  
-  <Route path='_:universeId' component={Universe}>
-    <Route path='Create_topic' component={NewTopic} />
-    <Route path=':topicId' component={Topic} />
-  </Route>
-  
-  <Route path='@:userId' component={User} />
-  
-  <Route path='Explore' component={Explore} />
-  
-  <Route path='Create_universe' component={NewUniverse} />
-  
-  <Redirect from='login' to='/' />
-  <Redirect from='signup' to='/' />
-  <Redirect from='register' to='/' />
-  
-</Route>;
-
-function simpleAdd(a, b) {
-  const c = {};
-  Object.keys(a).forEach(key => a.hasOwnProperty(key) ? c[key] = a[key] : {});
-  Object.keys(b).forEach(key => b.hasOwnProperty(key) ? c[key] = b[key] : {});
-  return c;
-}
-
+// Adds 'safe' onEnter prop to Route whose component is protected by an actionCreator
 export default function makeJourney(safe) {
   
+  log('... Adding authentication check on routes');
+  
+  // Recursively checks for protected component
   function checkRoute(route) {
-    const {component, children, path} = route.props;
-    const newChildren = children && (children instanceof Array) ? children.map(child => checkRoute(child)) : undefined;
+    const {component, children} = route.props;
+    const newProps = {
+      children: children && (children instanceof Array) ? children.map(child => checkRoute(child)) : undefined,
+      onEnter: component && protectedComponents.indexOf(component.name) !== -1 ? safe : undefined,
+    };
     
-    return component && protectedComponents.indexOf(component.name) !== -1 ?
-      React.createElement(Route, {
-        path,
-        component,
-        children: newChildren,
-        onEnter: safe,
-      }) :
-      newChildren ? React.cloneElement(route, simpleAdd(route.props, {children: newChildren})) : route;
+    return React.cloneElement(route, newProps);
   }
   
-  return checkRoute(routes);
+  return checkRoute(
+    <Route path='/' component={App}> 
+      
+      <Route path='_:universeId' component={Universe}>
+        <Route path='Create_topic' component={NewTopic} />
+        <Route path=':topicId' component={Topic} />
+      </Route>
+      
+      <Route path='@:userId' component={User} />
+      <Route path='Explore' component={Explore} />
+      <Route path='Create_universe' component={NewUniverse} />
+      
+      <Redirect from='login' to='/' />
+      <Redirect from='signup' to='/' />
+      <Redirect from='register' to='/' />
+      
+    </Route>
+  );
 }
 
 export function routeGuard(store) {
+  
   return (nextState, transition) => {
+    const {pathname} = nextState.location;
     const {userId, exp} = store.getState().session;
-    log('... checking Auth for ', nextState.location.pathname, 'user is', userId ? userId : 'visitor', 'Expiration', exp ? (exp - (new Date()).getTime()) / (1000 * 60) : '0', 'minutes');
+    const expi = exp - new Date().getTime(); // en ms
+    log(`... Checking authentication for ${pathname}`, {userId, ttl: exp ? expi : '0'});
+    
+    if (!userId || expi <= 0) {
+      log('!!! User unauthenticated: cancelling transition');
+      store.dispatch({
+        type: 'SET_REDIRECTION',
+        payload: pathname,
+      });
+      transition.to('/');
+    }
   };
 }

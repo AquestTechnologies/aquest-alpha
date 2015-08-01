@@ -164,8 +164,9 @@ const authFailureTypes = ac
 
 export const protectedComponents = ac
   .filter(ac => typeof ac.getShape === 'function')
-  .map(ac => ac.getShape().component)
-  .filter(component => component);
+  .map(ac => ac.getShape())
+  .filter(s => s.auth && s.component)
+  .map(s => s.component);
   
 export function isUnauthorized(action) {
   return authFailureTypes.indexOf(action.type) !== -1 && action.payload && action.payload.message === 'Unauthorized';

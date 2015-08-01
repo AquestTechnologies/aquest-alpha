@@ -1,23 +1,40 @@
 import { Observable } from 'rx';
 import docCookies from '../vendor/cookie';
 import log from '../../shared/utils/logTailor';
+import config from '../../../config/client';
 import { isUnauthorized } from '../../shared/actionCreators';
 
 export default function registerSideEffects(store, transitionTo) {
-
-  let redirection = '';
-    
+  
+  const setRedirection = path => store.dispatch({
+    type: 'SET_REDIRECTION',
+    payload: path,
+  });
+  
   // https://github.com/acdlite/redux-rx/blob/master/src/observableFromStore.js
-  Observable.create(observer => store.subscribe(() => observer.onNext(store.getState().records)))
-    .subscribe(records => {
-      const action = records[records.length - 1].action;
+  Observable.create(observer => store.subscribe(() => observer.onNext(store.getState())))
+    .subscribe(state => {
+      const action = state.records[state.records.length - 1].action;
       const {type, payload} = action;
       
       if (isUnauthorized(action)) {
-        redirection = store.getState().router.pathname;
-        log('.E. Unauthorized access, will redirect to', redirection);
+        const currentPath = store.getState().router.pathname;
+        log('.E. Unauthorized access, will redirect to', currentPath);
+        setRedirection(currentPath);
         transitionTo('/');
+        return;
       }
+      
+      if (type === 'SUCCESS_LOGIN' || type === 'SUCCESS_CREATE_USER') {
+        log('.E. Setting cookie', payload.token);
+        docCookies.setItem('jwt', payload.token, config.sessionDuration);
+        const {redirection} = state.session;
+        const {query} = state.router;
+        const r = query ? query.r : undefined;
+        transitionTo(r ? r : redirection ? redirection : '/Explore');
+        setRedirection('');
+        return;
+      } 
       
       switch (type) {
         
@@ -26,22 +43,6 @@ export default function registerSideEffects(store, transitionTo) {
           log('.E. transitionTo ', pathname, query, state);
           transitionTo(pathname, query, state);
           break;
-        
-        case 'SUCCESS_LOGIN': 
-          log('.E. setting cookie', payload.token);
-          docCookies.setItem('jwt', payload.token, 60);
-          transitionTo(redirection ? redirection : '/Explore');
-          redirection = '';
-          break;
-        
-        case 'SUCCESS_CREATE_USER':
-          log('.E. setting cookie', payload.token);
-          docCookies.setItem('jwt', payload.token, 60);
-          transitionTo(redirection ? redirection : '/Explore');
-          redirection = '';
-          break;
-        
       }
     });
-    
 }

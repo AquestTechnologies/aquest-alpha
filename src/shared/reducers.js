@@ -5,10 +5,6 @@ import { isUnauthorized } from './actionCreators';
 import config from '../../config/client';
 
 const _map = Immutable.Map();
-const _session = {
-  userId: '',
-  exp: '',
-};
 
 // From the Immutable.js Github wiki
 const fromJSGreedy = js => typeof js !== 'object' || js === null ? js : Array.isArray(js) ? 
@@ -18,33 +14,43 @@ const fromJSGreedy = js => typeof js !== 'object' || js === null ? js : Array.is
 
 const reducers = {
   
-  router: (state = {}, action) => {
+  router: (state={}, action) => {
     log('.R. ' + action.type); // This line in first reducer
     return routerStateReducer(state, action);
   },
   
-  session: (state=_session, action) => {
-    if (isUnauthorized(action)) {
-       return _session;
-    } else switch (action.type) {
-        
-      case 'SUCCESS_CREATE_USER':
-        return {
-          userId: action.payload.id,
-          exp: (new Date()).getTime() + config.sessionDuration,
-        };
+  session: (state={}, action) => {
+    
+    if (isUnauthorized(action)) return {};
+    switch (action.type) {
       
-      case 'SUCCESS_LOGIN':
-        return {
-          userId: action.payload.id,
-          exp: (new Date()).getTime() + config.sessionDuration,
-        };
+    case 'SET_REDIRECTION':
+      const {userId, exp} = state;
+      return {
+        userId,
+        exp,
+        redirection: action.payload,
+      };
       
-      case 'SUCESS_LOGOUT':
-        return _session;
-        
-      default:
-        return state;
+    case 'SUCCESS_CREATE_USER':
+      return {
+        userId: action.payload.id,
+        exp: (new Date()).getTime() + config.sessionDuration,
+        redirection: state.redirection,
+      };
+    
+    case 'SUCCESS_LOGIN':
+      return {
+        userId: action.payload.id,
+        exp: (new Date()).getTime() + config.sessionDuration,
+        redirection: state.redirection,
+      };
+    
+    case 'SUCESS_LOGOUT':
+      return {};
+    
+    default:
+      return state;
     }
   },
   
