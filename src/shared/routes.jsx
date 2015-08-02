@@ -7,7 +7,7 @@ import Explore      from './components/Explore';
 import Universe     from './components/Universe';
 import NewTopic     from './components/NewTopic';
 import NewUniverse  from './components/NewUniverse';
-import log          from './utils/logTailor';
+import log, { logAuthentication } from './utils/logTailor';
 import { protectedComponents } from './actionCreators';
 
 // Adds 'safe' onEnter prop to Route whose component is protected by an actionCreator
@@ -20,7 +20,7 @@ export default function makeJourney(safe) {
     const {component, children} = route.props;
     const newProps = {
       children: children && (children instanceof Array) ? children.map(child => checkRoute(child)) : undefined,
-      onEnter: component && protectedComponents.indexOf(component.name) !== -1 ? safe(component.name) : undefined,
+      onEnter: component && protectedComponents.indexOf(component.name) !== -1 ? safe : undefined,
     };
     
     return React.cloneElement(route, newProps);
@@ -48,13 +48,12 @@ export default function makeJourney(safe) {
 
 export function routeGuard(store) {
   
-  return componentName => (nextState, transition) => {
+  return (nextState, transition) => {
     const {pathname} = nextState.location;
     const {userId, expiration} = store.getState().session;
-    const timeLeft = expiration - new Date().getTime(); // en ms
-    log(`... Checking authentication in ${componentName} for ${pathname}`, {userId, ttl: expiration ? timeLeft : '0'});
+    logAuthentication(`... routeGuard ${pathname}`, userId, expiration);
     
-    if (!userId || timeLeft <= 0) {
+    if (!userId || expiration < new Date().getTime()) {
       log('!!! User unauthenticated: cancelling transition');
       store.dispatch({
         type: 'SET_REDIRECTION',

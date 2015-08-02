@@ -26,10 +26,9 @@ export default function registerSideEffects(store, transitionTo) {
       }
       
       if (type === 'SUCCESS_LOGIN' || type === 'SUCCESS_CREATE_USER') {
-        log('.E. Setting cookie', payload.token);
-        docCookies.setItem('jwt', payload.token, config.sessionDuration);
+        log('.E. Redirecting after', type);
         const {redirection} = state.session;
-        const {query} = state.router;
+        const {query} = state.router; 
         const r = query ? query.r : undefined;
         transitionTo(r ? r : redirection ? redirection : '/Explore');
         setRedirection('');

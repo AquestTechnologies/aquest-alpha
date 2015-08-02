@@ -127,3 +127,7 @@ export function logWelcome(x) {
     log('\n... Rock\'n\'roll\n ');
   }
 }
+
+export function logAuthentication(source, userId, expiration) {
+  log(source + ':', userId ? userId : 'Visitor', expiration ? `(${Math.round((expiration - new Date().getTime()) / (60 * 1000))}min left)` : '');
+}

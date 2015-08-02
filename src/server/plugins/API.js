@@ -11,63 +11,63 @@ function apiPlugin(server, options, next) {
   // Allows validation and params mutation before querying db
   const beforeQuery = {
     
-    createUser: (request, params) => {
-      
-      return new Promise((resolve, reject) => {
-        bcrypt.genSalt(10, (err, salt) => {
+    createUser: (request, params) => new Promise((resolve, reject) => {
+      bcrypt.genSalt(10, (err, salt) => {
+        if (err) reject(err);
+        bcrypt.hash(params.password, salt, (err, hash) => {
           if (err) reject(err);
-          bcrypt.hash(params.password, salt, (err, hash) => {
-            if (err) reject(err);
-            params.passwordHash = hash;
-            params.passwordSalt = salt;
-            params.ip = request.info.remoteAddress;
-            delete params.password;
-            resolve();
-          });
+          params.passwordHash = hash;
+          params.passwordSalt = salt;
+          params.ip = request.info.remoteAddress;
+          delete params.password;
+          resolve();
         });
       });
-    },
+    }),
   };
   
   // ...
   const afterQuery = {
     
-    login: ({email, password}, result) => {
-      return new Promise((resolve, reject) => {
-        if (result) bcrypt.compare(password, result.password_hash, (err, isValid) => {
-          if (err) return reject(err);
-          if (isValid) {
-            result.token = JWT.sign({
-              valid: true, 
-              userId: result.id, 
-              expiration: new Date().getTime() + ttl
-            }, key); // synchronous
-            log('... signed JWT after login', result.token.slice(0, 20));
-            resolve();
-          }
-          else reject('password mismatch');
-        });
-        else reject('user not found');
+    login: ({email, password}, result, response) => new Promise((resolve, reject) => {
+      if (result) bcrypt.compare(password, result.password_hash, (err, isValid) => {
+        if (err) return reject(err);
+        if (isValid) {
+          const userId = result.id;
+          const expiration = new Date().getTime() + ttl;
+          response.state('jwt', JWT.sign({userId, expiration}, key), {ttl});
+          resolve(true);
+        }
+        else reject('password mismatch');
       });
-    },
+      else reject('user not found');
+    }),
     
-    createUser: (params, result) => {
-      return new Promise((resolve, reject) => {
-        result.token = JWT.sign({
-          valid: true, 
-          userId: result.id, 
-          expiration: new Date().getTime() + ttl
-        }, key); // synchronous
-        log('... signed JWT after user creation' + result.token);
-        resolve();
-      });
-    },
+    createUser: (params, result, response) => new Promise((resolve, reject) => {
+      const userId = result.id;
+      const expiration = new Date().getTime() + ttl;
+      response.state('jwt', JWT.sign({userId, expiration}, key), {ttl});
+      resolve(true);
+    }),
   };
   
+  // Adds a renewed JWT in the response cookie
+  function renewToken({state: {jwt}}, response) {
+    if (jwt) JWT.verify(jwt, key, (err, {userId, expiration}) => {
+      const t = new Date().getTime();
+      if (err) log(err);
+      else if (expiration > t) {
+        response.state('jwt', JWT.sign({userId, expiration: t + ttl}, key), {ttl}).send();
+        log('... Token renewed');
+      }
+    });
+    else response.send();
+  }
+  
   // Dynamic construction of the API routes from actionCreator with API calls
-  for (let key in actionCreators) {
+  for (let acKey in actionCreators) {
     
-    const getShape = actionCreators[key].getShape || undefined;
+    const getShape = actionCreators[acKey].getShape || undefined;
     const {intention, method, pathx, auth} = getShape ? getShape() : {};
     
     if (method && pathx) {
@@ -81,18 +81,17 @@ function apiPlugin(server, options, next) {
         handler: (request, reply) => {
           const params = method === 'post' ? request.payload : request.params.p;
           const response = reply.response().hold();
+          
           before(request, params).then(
             () => {
-              logRequest(request);
               if (request.method === 'post') log(`+++ params : ${JSON.stringify(params)}`);
               
               queryDb(intention, params).then(
-                result => after(params, result).then(
+                result => after(params, result, response).then(
                   () => {
                     response.source = result;
                     response.send();
                   },
-                  
                   
                   error => { // after failed
                     response.statusCode  = 500;

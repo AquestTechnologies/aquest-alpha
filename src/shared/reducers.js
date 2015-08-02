@@ -14,12 +14,8 @@ const fromJSGreedy = js => typeof js !== 'object' || js === null ? js : Array.is
 
 const reducers = {
   
-  router: (state={}, action) => {
-    log('.R. ' + action.type); // This line in first reducer
-    return routerStateReducer(state, action);
-  },
-  
   session: (state={}, action) => {
+    log('.R. ' + action.type); // This line in first reducer
     
     if (isUnauthorized(action)) return {};
     switch (action.type) {
@@ -35,14 +31,14 @@ const reducers = {
     case 'SUCCESS_CREATE_USER':
       return {
         userId: action.payload.id,
-        exp: (new Date()).getTime() + config.sessionDuration,
+        exp: new Date().getTime() + config.sessionDuration,
         redirection: state.redirection,
       };
     
     case 'SUCCESS_LOGIN':
       return {
         userId: action.payload.id,
-        exp: (new Date()).getTime() + config.sessionDuration,
+        exp: new Date().getTime() + config.sessionDuration,
         redirection: state.redirection,
       };
     
@@ -53,6 +49,8 @@ const reducers = {
       return state;
     }
   },
+  
+  router: (state={}, action) => routerStateReducer(state, action),
   
   users: (state=_map, action) => {
     switch (action.type) {
