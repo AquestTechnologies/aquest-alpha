@@ -28,6 +28,7 @@ server.register(require('hapi-auth-jwt2'), err => {
   
   server.auth.strategy('jwt', 'jwt', true, {
     key,      
+    cookieKey: 'jwt',
     validateFunc: validateJWT,         
     verifyOptions: { algorithms: ['HS256'] }
   });

@@ -19,7 +19,7 @@
     "bcrypt": "^0.8.3",
     "chalk": "^1.0.0",
     "hapi": "^8.8.0",
-    "hapi-auth-jwt2": "^4.8.1",
+    "hapi-auth-jwt2": "git://github.com/dwyl/hapi-auth-jwt2.git",
     "immutable": "^3.7.4",
     "jsonwebtoken": "^5.0.4",
     "node-babel": "^0.1.2",
