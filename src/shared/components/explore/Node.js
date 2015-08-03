@@ -1,10 +1,10 @@
 import React from 'react';
 
-class Node extends React.Component {
+export default class Node extends React.Component {
   
   handleSelectedUniverse(universeId) {
     console.log('-C- Node.handleSelectedUniverse ' + universeId);
-    this.context.router.transitionTo('universe', {universeId});
+    this.props.transitionTo('_' + universeId);
   };  
   
   render() {
@@ -22,13 +22,3 @@ class Node extends React.Component {
     );
   }
 }
-
-// Node.defaultProps = {
-// };
-
-// Permet d'acceder a this.context.router
-Node.contextTypes = {
-  router: React.PropTypes.func.isRequired
-};
-
-export default Node;

@@ -2,6 +2,7 @@ export default function menuScroll(elementId) {
 	
 	const scrollableElement = document.getElementById(elementId);
 	const menuElement = document.getElementsByClassName('menu')[0];
+	if (!menuElement) return;
 	menuElement.style.top = 0;
 	
 	let wasScrollingUp = false;

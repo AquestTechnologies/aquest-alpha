@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router';
 
-class NewUniverse extends React.Component {
+export default class NewUniverse extends React.Component {
   
   constructor() {
     super();
@@ -32,7 +32,7 @@ class NewUniverse extends React.Component {
   }
   
   render() {
-    let divStyle = {
+    const divStyle = {
       width: '60%',
       margin: '20 auto 0 auto',
       fontSize: '2rem',
@@ -66,5 +66,3 @@ class NewUniverse extends React.Component {
     );
   }
 }
-
-export default NewUniverse;

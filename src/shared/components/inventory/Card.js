@@ -1,13 +1,10 @@
 import React from 'react';
 
-class Card extends React.Component {
+export default class Card extends React.Component {
   
   handleClick(topic) { 
     console.log(`-C- Card.handleClick ${topic.id}`);
-    this.context.router.transitionTo('topic', {
-      universeId: this.context.router.getCurrentParams().universeId, 
-      topicId: topic.id
-    });
+    this.props.transitionTo(`/_${topic.universeId}/${topic.id}`);
   }
   
   renderPreview(hasPicture) {
@@ -41,11 +38,3 @@ class Card extends React.Component {
     );
   }
 }
-
-// Permet d'acceder a this.context.router
-Card.contextTypes = {
-  router: React.PropTypes.func.isRequired
-};
-
-
-export default Card;

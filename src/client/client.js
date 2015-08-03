@@ -1,33 +1,22 @@
-require('./css/app.css');
-import React                from 'react';
-import Immutable            from 'immutable';
-import {Provider}           from 'react-redux';
-import Router               from 'react-router';  
-import * as reducers        from '../shared/reducers';
-import routes               from '../shared/routes.jsx';
-import registerShortcuts    from './lib/registerShortcuts';
-import registerSideEffects  from './lib/registerSideEffects';
-import log, {logWelcome}    from '../shared/utils/logTailor.js';
-import promiseMiddleware    from '../shared/utils/promiseMiddleware.js';
-import {createStore, combineReducers, applyMiddleware}   from 'redux';
-
-/*import Websocket from 'socket.io-client';
-const io = Websocket('http://130.211.68.244:8081'); //Prendre le bon port
-
-io.on('message', function (message) {
-  log('_w_ Server says ' + message);
-});*/
+import React                   from 'react';
+import ReactDOM                from 'react-dom';
+import Immutable               from 'immutable';
+import Router, { Route }       from 'react-router';  
+import { reduxRouteComponent } from 'redux-react-router';
+import BrowserHistory          from 'react-router/lib/BrowserHistory';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
+import makeJourney, { routeGuard } from '../shared/routes';
+import reducers       from '../shared/reducers';
+import registerShortcuts   from './lib/registerShortcuts';
+import registerSideEffects from './lib/registerSideEffects';
+import log, { logWelcome } from '../shared/utils/logTailor';
+import promiseMiddleware   from '../shared/utils/promiseMiddleware';
 
 (() => {
-  
-  logWelcome(false);
+  logWelcome(0);
   log('... Initializing Redux and React Router');
   
-  const router = Router.create({ 
-    routes: routes,
-    location: Router.HistoryLocation
-  });
-  
+  // State from server --> Immutable maps
   const stateFromServer = window.STATE_FROM_SERVER || {};
   const immutableKeys = stateFromServer.immutableKeys;
   delete stateFromServer.immutableKeys;
@@ -39,38 +28,30 @@ io.on('message', function (message) {
     stateFromServer[key] = immutable ? Immutable.fromJS(stateFromServer[key]) : stateFromServer[key];
   }
   
+  // Store creation
   const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
+  const safe  = routeGuard(store);
+  registerShortcuts(store.getState);
   
-  registerSideEffects(store, router);
-  registerShortcuts(store.getState, router.getCurrentParams);
+  // Gère les trailing slash des url
+  // const url = routerState.pathname;
+  // if (url.slice(-1) === '/' && url !== '/') {
+  //   router.replaceWith(url.slice(0,-1), null, routerState.query);
+  //   return;
+  // }
+
+  const d = new Date();
+  const history = new BrowserHistory();
+  const app = ReactDOM.render(
+    <Router history={history}>
+      <Route children={makeJourney(safe)} component={reduxRouteComponent(store)} />
+    </Router>,
+    document.getElementById('mountNode'),
+    () => log(`... App rendered in ${new Date() - d}ms.`)
+  );
   
-  // Render app
-  let c = 0;
-  router.run((Handler, routerState) => {
-    
-    // Gère les trailing slash des url
-    const url = routerState.pathname;
-    if (url.slice(-1) === '/' && url !== '/') {
-      router.replaceWith(url.slice(0,-1), null, routerState.query);
-      return;
-    }
-    
-    c++;
-    const d = new Date();
-    log(`__________ ${c} router.run ${url} __________`);
-    
-    try { 
-      React.render(
-        <Provider store={store}>
-          {() => <Handler {...routerState} />}
-        </Provider>,
-        document.getElementById('mountNode'),
-        () => log(`... App rendered in ${new Date() - d}ms.`)
-      );
-    } 
-    catch(err) {
-      log('!!! Error while React.renderToString', err);
-    }
-  });
+  registerSideEffects(store, app.transitionTo);
 
 })();
+
+require('./css/app.css');

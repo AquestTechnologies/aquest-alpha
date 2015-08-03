@@ -3,17 +3,14 @@ import fs from 'fs';
 import chalk from 'chalk';
 
 const isServer = !isClient();
-const colorMatching = {
+const colorMatching = { // Color schemes definition, text isn't optionnal
   '!!!': {
     text: 'red'
   },
   '...': {
     text: 'gray'
   },
-  '.M.': {
-    text: 'gray'
-  },
-  '***': {
+  '.P.': {
     text: 'white',
     bg: 'yellow'
   },
@@ -26,6 +23,16 @@ const colorMatching = {
     text: 'white',
     bg: 'cyan',
     bgClient: 'SkyBlue'
+  },
+  '.X.': {
+    text: 'white',
+    bg: 'black',
+    bgClient: 'SlateGray'
+  },
+  '.E.': {
+    text: 'white',
+    bg: 'cyan',
+    bgClient: 'Gold'
   },
   '+++': {
     text: 'white',
@@ -42,14 +49,15 @@ export default function log(...messages) {
   
   const firstMessage = messages[0];
   
-  if (typeof firstMessage === 'string') {
+  if (typeof firstMessage === 'string') { // Should we colorize the first message ?
     const prefix = firstMessage.slice(0, 3);
     const match  = colorMatching[prefix];
     
-    if (match) {
+    if (match) { // If a colored prefix is found
       const {text, bg, bgClient} = match;
-      messages.shift();
+      messages.shift(); // The first message is removed from the message list
       
+      // Then displayed with colors (server : chalk, client: CSS)
       if (isServer) console.log(chalk[bg ? 'bg' + bg.slice(0, 1).toUpperCase() + bg.slice(1) : text](prefix), firstMessage.slice(3), ...messages);
       else {
         let css = `color:${text};`;
@@ -61,31 +69,32 @@ export default function log(...messages) {
   } 
   else console.log(...messages);
     
-  if (isServer) {
+  if (isServer) { // On server we save the message on a log file.
     const d = new Date();
-    fs.appendFile('log/server.log', JSON.stringify({
+    const line = {
       data:  messages.join(' '),
-      date:  d.toLocaleString('fr'), // :'( pas très local...
+      date:  d.toLocaleString('fr'), // :'( not very local...
       year:  d.getFullYear(),
       month: d.getMonth(),
       day:   d.getDate(),
       h:     d.getHours(),
       m:     d.getMinutes(),
       s:     d.getSeconds()
-    }) +'\n', err => {
+    };
+    fs.appendFile('log/server.log', JSON.stringify(line) +'\n', err => {
       if (err) console.log(err);
     });
   }
 }
 
+// Logs a request informations
 let c = 0;
-export function logRequest(request) {
+function preprendZero(i) {
+  const ii = i.toString();
+  return ii.length > 1 ? ii : '0' + ii;
+}
+export function logRequest({info: {remoteAddress, remotePort}, method, url: {path}}) {
   c++;
-  function preprendZero(i) {
-    const ii = i.toString();
-    return ii.length > 1 ? ii : '0' + ii;
-  }
-  
   const d = new Date();
   const Y = d.getFullYear();
   const D = preprendZero(d.getDate());
@@ -93,9 +102,15 @@ export function logRequest(request) {
   const h = preprendZero(d.getHours());
   const m = preprendZero(d.getMinutes());
   const s = preprendZero(d.getSeconds());
-  log(`\n[${c}] ${D}-${M}-${Y} ${h}:${m}:${s} ${request.info.remoteAddress}:${request.info.remotePort} ${request.method} ${request.url.path}`);
+  log(`\n[${c}]`, `${D}-${M}-${Y} ${h}:${m}:${s} ${remoteAddress}:${remotePort} ${method} ${path}`);
 }
 
+// Logs Autntication info : user id and time remaining.
+export function logAuthentication(source, userId, expiration) {
+  log(`.X. ${source}:`, userId ? userId : 'Visitor', expiration ? `(${Math.round((expiration - new Date().getTime()) / (60 * 1000))}min left)` : '');
+}
+
+// :)
 export function logWelcome(x) {
   if (x) {
     log('\n_-\' Welcome to Aquest v0.0.2 \'-_\n' +

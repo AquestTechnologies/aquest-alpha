@@ -14,7 +14,7 @@ export default class Graph extends React.Component {
   }
   
   renderGraph() {
-    let {vertices, edges} = generateWorkingGraph(600);
+    let {vertices, edges} = generateWorkingGraph(50);
     let width = 1920,
     height = 800;
     
