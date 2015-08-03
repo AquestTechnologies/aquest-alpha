@@ -14,7 +14,7 @@ const server = new Hapi.Server();
 const {api, ws, jwt: {key}} = devConfig();
 
 function validateJWT({userId, expiration}, request, callback) {
-  logAuthentication('... validateJWT', userId, expiration);
+  logAuthentication('validateJWT', userId, expiration);
   callback(null, expiration > new Date().getTime()); // returns 'false' if expired
 }
 

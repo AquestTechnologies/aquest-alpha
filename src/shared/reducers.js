@@ -1,56 +1,47 @@
-import log from './utils/logTailor';
 import Immutable from 'immutable';
-import { routerStateReducer } from 'redux-react-router';
-import { isUnauthorized } from './actionCreators';
+import log from './utils/logTailor';
 import config from '../../config/client';
+import { routerStateReducer } from 'redux-react-router';
+import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
 
-const _map = Immutable.Map();
 
 // From the Immutable.js Github wiki
 const fromJSGreedy = js => typeof js !== 'object' || js === null ? js : Array.isArray(js) ? 
   Immutable.Seq(js).map(fromJSGreedy).toList() :
   Immutable.Seq(js).map(fromJSGreedy).toMap();
+const _map = Immutable.Map();
 
-
-const reducers = {
+export default {
   
   session: (state={}, action) => {
-    log('.R. ' + action.type); // This line in first reducer
+    const {type, payload} = action;
+    const {userId, exp, redirection} = state;
+    log('.R. ' + type); // This line in first reducer
     
-    if (isUnauthorized(action)) return {};
-    switch (action.type) {
-      
-    case 'SET_REDIRECTION':
-      const {userId, exp} = state;
-      return {
-        userId,
-        exp,
-        redirection: action.payload,
-      };
-      
-    case 'SUCCESS_CREATE_USER':
-      return {
-        userId: action.payload.id,
-        exp: new Date().getTime() + config.sessionDuration,
-        redirection: state.redirection,
-      };
+    if (type === 'SUCCESS_LOGIN' || type === 'SUCCESS_CREATE_USER') return {
+      redirection,
+      userId: payload.id,
+      exp: new Date().getTime() + config.sessionDuration,
+    };
     
-    case 'SUCCESS_LOGIN':
-      return {
-        userId: action.payload.id,
-        exp: new Date().getTime() + config.sessionDuration,
-        redirection: state.redirection,
-      };
+    // If the API answers 200 then we renew the session expiration
+    if (isAPISuccess(action)) return {
+      userId,
+      redirection,
+      exp: new Date().getTime() + config.sessionDuration,
+    };
     
-    case 'SUCESS_LOGOUT':
-      return {};
+    // If the API answers 401 or user logs out then we kill the session
+    if (isAPIUnauthorized(action) || type === 'LOGOUT') return {};
     
-    default:
-      return state;
-    }
+    if (type === 'SET_REDIRECTION') return {
+      exp,
+      userId,
+      redirection: payload,
+    };
+    
+    return state;
   },
-  
-  router: (state={}, action) => routerStateReducer(state, action),
   
   users: (state=_map, action) => {
     switch (action.type) {
@@ -59,7 +50,7 @@ const reducers = {
       return state.set(action.payload.id, fromJSGreedy(action.payload));
       
     case 'SUCCESS_LOGIN':
-      return state.set(action.payload.id, fromJSGreedy(action.payload)); // le token est dedans !
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
       
     default:
       return state;
@@ -123,6 +114,8 @@ const reducers = {
     }
   },
   
+  router: (state={}, action) => routerStateReducer(state, action),
+  
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
   records: (state = [], action) => {
     return [
@@ -132,5 +125,3 @@ const reducers = {
   },
 
 };
-
-export default reducers;

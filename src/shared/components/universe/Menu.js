@@ -29,7 +29,6 @@ export default class Menu extends React.Component {
                 <span className='menu_item_label'>{'admin'}</span>
             </Link>
           </div>
-          
           <div className='menu_item'>
             <Link to='/Explore'>
               <Icon name='globe' cssclass='menu_item_icon' />
@@ -43,10 +42,12 @@ export default class Menu extends React.Component {
         
         <div className='menu_right'>
           
-          <div className='menu_item' onClick={(() => document.querySelector('.menu').classList.toggle('menu-scrolled')).bind()}>
-            <Icon name='disk' cssclass='menu_item_icon' />
-            <span className='menu_item_label'>{'About Aquest'}</span>
-          </div>
+          <div className='menu_item'>
+            <Link to='/about'>
+              <Icon name='disk' cssclass='menu_item_icon' />
+              <span className='menu_item_label'>{'About Aquest'}</span>
+            </Link>
+          </div> 
           
           <div className='menu_item'>
             <Icon name='magnifier' cssclass='menu_item_icon' />

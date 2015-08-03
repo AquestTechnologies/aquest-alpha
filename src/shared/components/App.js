@@ -1,21 +1,19 @@
-import React                from 'react';
-import { RouteHandler }       from 'react-router';
-import Home from './Home';
+import React from 'react';
+import Home from './app/Home';
+import { Connector } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { Connector }          from 'react-redux';
-
+import LoadingBar from './common/LoadingBar';
 import actionCreators from '../actionCreators';
-
-import LoadingBar           from './common/LoadingBar';
 
 function select(state) {
   return { 
-    universes:  state.universes.toJS(),
-    topics:     state.topics.toJS(),
-    chats:      state.chats.toJS(),
-    users:      state.users.toJS(),
-    records:    state.records,
-    router:     state.router,
+    universes: state.universes.toJS(),
+    topics:    state.topics.toJS(),
+    chats:     state.chats.toJS(),
+    users:     state.users.toJS(),
+    records:   state.records,
+    session:   state.session,
+    router:    state.router,
   };
 }
 
@@ -28,9 +26,9 @@ export default class App extends React.Component {
 
   render() {
     const {children} = this.props;
-
+    
     return (
-      <Connector select={select}> {
+      <Connector select={select}> { // Connector's API will change soon
         ({ 
           universes,
           topics,
@@ -45,30 +43,18 @@ export default class App extends React.Component {
             <LoadingBar records={records} />
             { 
               children && !(children instanceof Array) ? 
-                React.cloneElement(children, simpleMerge({
+                React.cloneElement(children, simpleMerge({ // This burns my eyes, when RR1.0 will be out a better solution might appear
                     universes,
                     topics,
                     chats,
                     session,
                     users,
                     router,
-                  }, bindActionCreators(actionCreators, dispatch))) 
-                : <Home {...bindActionCreators(actionCreators, dispatch)} />
+                  }, bindActionCreators(actionCreators, dispatch))) :
+                <Home session={session} {...bindActionCreators(actionCreators, dispatch)} />
             }
           </div>
       } </Connector>
     );
   }
 }
-
-/*
-<LoadingBar records = {records} />
-            <RouteHandler 
-              router = {router}
-              universes = {universes}
-              topics = {topics}
-              chats = {chats}
-              
-            />*/
-            
-            

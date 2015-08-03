@@ -6,6 +6,8 @@ const isServer = !isClient();
 const actionCreators = {
   
   transitionTo: (pathname, query, state) => ({ type: 'TRANSITION_TO', payload: {pathname, query, state} }),
+  
+  logout: () => ({ type: 'LOGOUT' }),
 
   readUniverse: createActionCreator({
     intention:  'readUniverse',
@@ -149,23 +151,33 @@ function createActionCreator(shape) {
 
 function createForm(o) {
   let f  = new FormData();
-  for(let k in o) {
-    f.append(k, o[k]);
-  } return f;
+  for(let k in o) { f.append(k, o[k]); } 
+  return f;
 }
 
 const ac = Object.keys(actionCreators).map(key => actionCreators[key]);
+const acAPI = ac.filter(ac => typeof ac.getShape === 'function');
 
+const APISuccessTypes = acAPI
+  .map(ac => ac.getTypes()[1]);
+  
 const authFailureTypes = ac
   .filter(ac => typeof ac.getShape === 'function' && ac.getShape().auth)
   .map(ac => ac.getTypes()[2]);
-
-export const protectedComponents = ac
-  .filter(ac => typeof ac.getShape === 'function')
+  
+const protectedComponents = acAPI
   .map(ac => ac.getShape())
   .filter(s => s.auth && s.component)
   .map(s => s.component);
-  
-export function isUnauthorized(action) {
+
+export function isAPIUnauthorized(action) {
   return authFailureTypes.indexOf(action.type) !== -1 && action.payload && action.payload.message === 'Unauthorized';
+}
+
+export function isAPISuccess(action) {
+  return APISuccessTypes.indexOf(action.type) !== -1;
+}
+
+export function isProtected(component) {
+  return protectedComponents.indexOf(component.name) !== -1;
 }

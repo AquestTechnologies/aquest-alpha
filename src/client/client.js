@@ -5,12 +5,12 @@ import Router, { Route }       from 'react-router';
 import { reduxRouteComponent } from 'redux-react-router';
 import BrowserHistory          from 'react-router/lib/BrowserHistory';
 import { createStore, combineReducers, applyMiddleware } from 'redux';
-import makeJourney, { routeGuard } from '../shared/routes.jsx';
+import makeJourney, { routeGuard } from '../shared/routes';
 import reducers       from '../shared/reducers';
 import registerShortcuts   from './lib/registerShortcuts';
 import registerSideEffects from './lib/registerSideEffects';
-import log, { logWelcome } from '../shared/utils/logTailor.js';
-import promiseMiddleware   from '../shared/utils/promiseMiddleware.js';
+import log, { logWelcome } from '../shared/utils/logTailor';
+import promiseMiddleware   from '../shared/utils/promiseMiddleware';
 
 (() => {
   logWelcome(0);

@@ -2,7 +2,7 @@ import { Observable } from 'rx';
 import docCookies from '../vendor/cookie';
 import log from '../../shared/utils/logTailor';
 import config from '../../../config/client';
-import { isUnauthorized } from '../../shared/actionCreators';
+import { isAPIUnauthorized } from '../../shared/actionCreators';
 
 export default function registerSideEffects(store, transitionTo) {
   
@@ -17,11 +17,12 @@ export default function registerSideEffects(store, transitionTo) {
       const action = state.records[state.records.length - 1].action;
       const {type, payload} = action;
       
-      if (isUnauthorized(action)) {
+      if (isAPIUnauthorized(action)) {
         const currentPath = store.getState().router.pathname;
         log('.E. Unauthorized access, will redirect to', currentPath);
+        docCookies.removeItem('jwt');
         setRedirection(currentPath);
-        transitionTo('/');
+        transitionTo('/login');
         return;
       }
       
@@ -41,7 +42,13 @@ export default function registerSideEffects(store, transitionTo) {
           const {pathname, query, state} = payload;
           log('.E. transitionTo ', pathname, query, state);
           transitionTo(pathname, query, state);
-          break;
+          return;
+          
+        case 'LOGOUT':
+          log('.E. Redirecting after logout');
+          docCookies.removeItem('jwt');
+          transitionTo('/');
+          return;
       }
     });
 }

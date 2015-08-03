@@ -29,7 +29,7 @@ export default function phidippides(routerState, dispatch) {
   let nbTasks    = TASKS.length;
   let spkEnglish = nbTasks > 1 ? ' tasks : ' : ' task : ';
   if (nbTasks === 0) return Promise.resolve();
-  log('*** Resolving ' + nbTasks + spkEnglish + TASKS.map(task => task.id));
+  log('.P. Resolving ' + nbTasks + spkEnglish + TASKS.map(task => task.id));
   
   // Exécute les tâches
   return clearTasks(TASKS);
@@ -43,7 +43,7 @@ export default function phidippides(routerState, dispatch) {
   
   // Parcours completedTask pour déterminer si une dependance est terminée
   function checkDependency(dependency) {
-    logMeOrNot('*** _ checkDependency named ' + dependency);
+    logMeOrNot('.P. _ checkDependency named ' + dependency);
     if (!dependency) return true;
     for (let t of completedTasks) {
       if (t.task.id === dependency) return true;
@@ -62,9 +62,9 @@ export default function phidippides(routerState, dispatch) {
       Promise.all(tasks.map(task => clearOneTask(task))).then(
         () => {
           logMeOrNot('\n');
-          logMeOrNot('*** * clearTasks ended * ');
-          logMeOrNot('*** completed tasks : ' + completedTasks.map(task => task.task.id));
-          logMeOrNot('*** failed tasks : ' + failedTasks.map(task => task.id));
+          logMeOrNot('.P. * clearTasks ended * ');
+          logMeOrNot('.P. completed tasks : ' + completedTasks.map(task => task.task.id));
+          logMeOrNot('.P. failed tasks : ' + failedTasks.map(task => task.id));
           logMeOrNot('\n');
           
           // Si aucune tache n'a échoué c'est terminé
@@ -87,7 +87,7 @@ export default function phidippides(routerState, dispatch) {
   
   // Complete une tâche
   function clearOneTask(task) {
-    logMeOrNot('*** clearOneTask ' + task.id);
+    logMeOrNot('.P. clearOneTask ' + task.id);
     return new Promise((resolve, reject) => {
       if(checkDependency(task.dependency)) {
         callActionCreator(task).then(
@@ -96,14 +96,14 @@ export default function phidippides(routerState, dispatch) {
               task: task,
               result: data
             });
-            logMeOrNot('*** clearOneTask OK ' + task.id + ' [dependency ok -> fetch ok]');
+            logMeOrNot('.P. clearOneTask OK ' + task.id + ' [dependency ok -> fetch ok]');
             resolve();
           },
           error => reject(error)
         );
       } else {
         failedTasks.push(task);
-        logMeOrNot('*** clearOneTask FAILED ' + task.id + ' [dependency failed]');
+        logMeOrNot('.P. clearOneTask FAILED ' + task.id + ' [dependency failed]');
         resolve();
       }
     });
@@ -113,7 +113,7 @@ export default function phidippides(routerState, dispatch) {
   // Appel l'action associée à une task
   function callActionCreator(task) {
     
-    logMeOrNot('*** _ callActionCreator ' + task.creator);
+    logMeOrNot('.P. _ callActionCreator ' + task.creator);
     
     const creator = actionCreators[task.creator];
     let realArgs = [], realArg;
@@ -122,22 +122,22 @@ export default function phidippides(routerState, dispatch) {
 
     // Traitement des arguments
     task.args.forEach(arg => {
-      logMeOrNot('*** ___ processing arg ' + arg);
+      logMeOrNot('.P. ___ processing arg ' + arg);
       realArg = arg;
       // Si un argument string possède PLACEHOLDER alors il faut le traiter
       if (typeof arg === 'string' && arg.search(PLACEHOLDER) !== -1) {
-        logMeOrNot('*** ___ dependency found');
+        logMeOrNot('.P. ___ dependency found');
         // à commenter
         let dataTree = arg.replace(PLACEHOLDER, '').split('.'); // '__dependency.truc.machin.id' --> ['truc', 'machin', 'id']
         completedTasks.forEach(t => {
           if (t.task.id === task.dependency) {
-            logMeOrNot('*** ___ dependency resolved');
+            logMeOrNot('.P. ___ dependency resolved');
             // Quand on l'a trouvée on recupère le résultat de la tache pour le passer en argument à l'action
             realArg = t.result;
             for (let i = 0, l = dataTree.length; i < l; i++) {
               realArg = realArg[dataTree[i]]; // ['truc', 'machin', 'id'] --> t.result[truc][machin][id]
             }
-            logMeOrNot('*** ___ realArg is ' + realArg.toString().substring(0,9));
+            logMeOrNot('.P. ___ realArg is ' + realArg.toString().substring(0,9));
           }
         });
       }
@@ -146,14 +146,14 @@ export default function phidippides(routerState, dispatch) {
     
     return new Promise((resolve, reject) => {
       // Appel de l'action creator et dispatch de l'action
-      logMeOrNot('*** ___ calling with args ' + realArgs);
+      logMeOrNot('.P. ___ calling with args ' + realArgs);
       const action = creator.apply(null, realArgs);
       dispatch(action);
       
       if (!action.promise) resolve(action.payload);
       else action.promise.then(
         data => {
-          logMeOrNot('***  _ Dispatch for ' + task.id + ' resolved');
+          logMeOrNot('.P.  _ Dispatch for ' + task.id + ' resolved');
           logMeOrNot(JSON.stringify(data).substr(0,150));
           resolve(data);
         },

@@ -35,8 +35,8 @@ function apiPlugin(server, options, next) {
         if (isValid) {
           const userId = result.id;
           const expiration = new Date().getTime() + ttl;
-          response.state('jwt', JWT.sign({userId, expiration}, key), {ttl});
-          resolve(true);
+          response.state('jwt', JWT.sign({userId, expiration}, key), {ttl, path: '/'}); // Note: somehow, path: '/' is important
+          resolve(true); // Skips token renewal
         }
         else reject('password mismatch');
       });
@@ -46,8 +46,8 @@ function apiPlugin(server, options, next) {
     createUser: (params, result, response) => new Promise((resolve, reject) => {
       const userId = result.id;
       const expiration = new Date().getTime() + ttl;
-      response.state('jwt', JWT.sign({userId, expiration}, key), {ttl});
-      resolve(true);
+      response.state('jwt', JWT.sign({userId, expiration}, key), {ttl, path: '/'});
+      resolve(true); // Skips token renewal
     }),
   };
   
@@ -57,7 +57,7 @@ function apiPlugin(server, options, next) {
       const t = new Date().getTime();
       if (err) log(err);
       else if (expiration > t) {
-        response.state('jwt', JWT.sign({userId, expiration: t + ttl}, key), {ttl}).send();
+        response.state('jwt', JWT.sign({userId, expiration: t + ttl}, key), {ttl, path: '/'}).send();
         log('... Token renewed');
       }
     });
@@ -88,9 +88,9 @@ function apiPlugin(server, options, next) {
               
               queryDb(intention, params).then(
                 result => after(params, result, response).then(
-                  () => {
+                  skipRenewToken => {
                     response.source = result;
-                    response.send();
+                    skipRenewToken ? response.send() : renewToken(request, response);
                   },
                   
                   error => { // after failed
