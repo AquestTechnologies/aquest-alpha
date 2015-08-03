@@ -1,45 +1,44 @@
-import React from 'react';
-import Message from './Message';
+import React      from 'react';
+import Message    from './Message';
 import ChatHeader from './ChatHeader';
 import ChatFooter from './ChatFooter';
+import io         from 'socket.io-client';
 
 class Chat extends React.Component {
   
   constructor() {
     super();
-    this.state = { 
-      chat:      {},
-      isLoading: false
+    this.state = {
+      isLoading:  false
     };
   }
   
   componentWillMount() {
-    // console.log('.C. Chat.componentWillMount');
-    let chat = this.props.chat;
+    console.log('.C. Chat.componentWillMount');
     let isLoading = false;
-    if (!this.props.chat) {
+    
+    if ( Object.getOwnPropertyNames(this.props.chats).length === 0 || (Object.getOwnPropertyNames(this.props.chats).length !== 0 && this.props.chats[this.props.chatId] && !this.props.chats[this.props.chatId].isUpToDate) ) {
+      console.log('componenet will mount I\'m gonna readChat');
       this.props.readChat(this.props.chatId);
-      chat      = {};
+      this.props.joinChat( {chatId: this.props.chatId, userId: this.props.currentUserId} );
       isLoading = true;
     }
-    this.setState({chat, isLoading});
+    this.setState({isLoading});
   }
   
   componentWillReceiveProps(nextProps) {
-    // console.log('.C. Chat.componentWillReceiveProps');
-    if (!nextProps.chat) {
-      if (!this.state.isLoading) {
+    console.log('.C. Chat.componentWillReceiveProps');
+    
+    if( nextProps.chatId && this.props.chatId !== nextProps.chatId ){
+      if( !nextProps.chats[nextProps.chatId] || ( nextProps.chats[nextProps.chatId] && !nextProps.chats[nextProps.chatId].isUpToDate) ){
+        
+        console.log('chat change :) !')
+        
         nextProps.readChat(nextProps.chatId);
-        this.setState({ 
-          chat:      {},
-          isLoading: true
-        });
+        
+        this.props.leaveChat( {chatId: this.props.chatId, userId: this.props.currentUserId} );
+        this.props.joinChat( {chatId: nextProps.chatId, userId: this.props.currentUserId} );
       }
-    } else {
-      this.setState({ 
-        chat:      nextProps.chat,
-        isLoading: false
-      });
     }
   }
   
@@ -50,6 +49,17 @@ class Chat extends React.Component {
       let scrollable = document.getElementById('scrollMeDown');
       scrollable.scrollTop = scrollable.scrollHeight;
     }, 100);
+    
+    const socket = io.connect('http://130.211.59.69:9090/chat-universe-topic');
+    socket.on('createMessage', result => this.props.createMessage(result) );
+    socket.on('joinChat', result => {
+      console.log('recieving joinChat from server');
+      this.props.joinChat(result) 
+    });
+    socket.on('leaveChat', result => {
+      console.log('recieving leaveChat from server');
+      this.props.leaveChat(result) 
+    });
   }
   
   componentDidUpdate() {
@@ -59,16 +69,23 @@ class Chat extends React.Component {
     scrollable.scrollTop = scrollable.scrollHeight;
   }
   
+  componentWillUnmount(){
+    console.log('will unmount');
+    this.props.leaveChat(this.props.chatId);
+  }
+  
   render() {
-    const chat     = this.state.chat || {};
-    const users    = this.props.users;
-    const messages = (chat.messages && chat.messages[0].id) ? chat.messages : []; // l'idéale est d'avoir une requête qui renvoi tableau vide s'il n'y a pas de message.
-    const samuel   = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
-    const messagesList = messages.length ? 'chat_list-visible' : 'chat_list-hidden';
+    const chat          = this.props.chats && this.props.chats[this.props.chatId] ? this.props.chats[this.props.chatId] : {} || {};
+    const chatName      = chat ? chat.name : 'loadingChat' || 'loadingChat'; 
+    const messages      = (chat && chat.messages && chat.messages[0]) ? chat.messages : []; // l'idéale est d'avoir une requête qui renvoi tableau vide s'il n'y a pas de message.
+    // const samuel        = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
+    // <Message author='Jackie Chan' content='I live in the USA' />
+    // <Message author={chat.name + ' L. Jackson'} content={samuel}/>
+    const messagesList  = messages.length ? 'chat_list-visible' : 'chat_list-hidden';
     
     return (
       <div className='chat'>
-        <ChatHeader chatTitle={chat.name} />
+        <ChatHeader chatTitle={chatName} />
         
         <div id='scrollMeDown' className='chat_scrollable'>
           <div className={messagesList}>
@@ -77,18 +94,15 @@ class Chat extends React.Component {
             {messages.map(message => { 
               return <Message key={message.id} author={message.author} content={message.content.text} />;
             })}
-            <Message author='Jackie Chan' content='I live in the USA' />
-            <Message author={chat.name + ' L. Jackson'} content={samuel}/>
             
           </div>
         </div>
           
         <ChatFooter
-          chatId        = {this.props.chatId}
-          users         = {users}
-          joinChat      = {this.props.joinChat}
-          leaveChat     = {this.props.leaveChat}
-          createMessage = {this.props.createMessage}
+          chatId              = {this.props.chatId}
+          users               = {this.props.users}
+          currentUserId       = {this.props.currentUserId}
+          createMessage       = {this.props.createMessage}
         />
       </div>
     );

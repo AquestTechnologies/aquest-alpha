@@ -1,5 +1,6 @@
 import log        from './utils/logTailor';
-import isClient from './utils/isClient';
+import isClient   from './utils/isClient';
+import io         from 'socket.io-client';
 const isServer = !isClient();
 
 export const readUniverse = createActionCreator({
@@ -60,18 +61,24 @@ export const createTopic = createActionCreator({
 
 export const joinChat = createActionCreator({
   intention:  'joinChat',
+  ip:         'http://130.211.59.69:9090',
+  namespace:  'chat-universe-topic',
   method:     'socket',
   auth:       'jwt',
 });
 
 export const leaveChat = createActionCreator({
   intention:  'leaveChat',
+  ip:         'http://130.211.59.69:9090',
+  namespace:  'chat-universe-topic',
   method:     'socket',
   auth:       'jwt',
 });
 
 export const createMessage = createActionCreator({
   intention:  'createMessage',
+  ip:         'http://130.211.59.69:9090',
+  namespace:  'chat-universe-topic',
   method:     'socket',
   auth:       'jwt',
 });
@@ -94,14 +101,14 @@ export const login = createActionCreator({
 // (string)   method      HTTP method
 // (string)   pathx       API path. If (method && path) an corresponding API route gets created
 function createActionCreator(shape) {
-  const {intention, method, pathx} = shape;
+  const {intention, method, pathx, ip, namespace} = shape;
   const types = ['REQUEST', 'SUCCESS', 'FAILURE']
     .map(type => `${type}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
   
   const actionCreator = params => {
     log(`.A. ${intention} ${JSON.stringify(params)}`);
     const promise = new Promise((resolve, reject) => {
-      
+      // console.log('method', method);
       // Server : direct db middleware call
       if (isServer) require('../server/queryDb')(intention, params).then(
           result => resolve(result),
@@ -109,31 +116,22 @@ function createActionCreator(shape) {
       
       // Client : API call through XMLHttpRequest
       else {
-        if(method === 'socket'){
+        if(method === 'socket' && params){
+          /**
+           * ToDo
+           * Vérification des params !
+           * */
+          resolve(params);
           
-          if(params.socketAction){
-            if(params.socketAction === 'emit'){
-              log('is socket, emit');
-              const socket = io.connect(`http://130.211.59.69:9090/${params.namespace}`);
-              
-              let sendParams = {};
-              for(let key in params){ 
-                sendParams[key] = params[key];
-              }
-              
-              Object.keys(sendParams).map(value => sendParams[value] = typeof(sendParams[value]) === 'object' ? JSON.stringify(sendParams[value]) : sendParams[value]);
-              log('sendParams', sendParams);
-              log('params', params);
-              socket.emit(intention,sendParams);
-            } 
-            resolve(params);
-          } else {
-            reject('action param is empty');
+          if(!params.from && params.from !== 'server'){
+            Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
+            
+            const socket = io.connect(ip + '/' + namespace);
+            socket.emit(intention, params);
           }
           
-          // socket.on('error', (error) => reject(error));
-        } 
-        else {
+        } else {
+          
           const path = pathx.replace(/\{\S*\}/, '');
           const isPost = method === 'post';
           const req = new XMLHttpRequest();
@@ -144,7 +142,10 @@ function createActionCreator(shape) {
           req.open(method, isPost ? path : params ? path + params : path);
           req.setRequestHeader('Authorization', localStorage.getItem('jwt'));
           req.onload = () => {
-            if (req.status === 200) resolve(JSON.parse(req.response));
+            if (req.status === 200){ 
+              console.log('request response', req.response);
+              resolve(JSON.parse(req.response));
+            }
             else reject(Error(req.statusText));
           };
           

@@ -2,7 +2,9 @@ import React          from 'react';
 import {RouteHandler} from 'react-router';
 
 import Menu           from './universe/Menu';
+// import ChatIo         from './universe/ChatIo';
 import Chat           from './universe/Chat';
+import docCookies     from '../../client/vendor/cookie';
 
 class Universe extends React.Component {
   
@@ -20,6 +22,13 @@ class Universe extends React.Component {
     }];
   }
   
+  constructor() {
+    super();
+    this.state = { 
+      currentUserId: 'abeseven'
+    };
+  }
+  
   filterTopics(topics, universeId) {
     let result = {};
     for (let id in topics) {
@@ -34,12 +43,14 @@ class Universe extends React.Component {
   
   render() {
     // console.log('.C. Universe.render');
-    const universeId = this.props.params.universeId;
-    const topicId    = this.props.params.topicId;
-    const universe   = this.props.universes[universeId];
-    const topics     = this.filterTopics(this.props.topics, universeId);
-    const chatId     = topicId ? topics[topicId].chatId : universe.chatId;
-    const users      = this.props.users;
+    const universeId  = this.props.params.universeId;
+    const topicId     = this.props.params.topicId;
+    
+    const universe    = this.props.universes[universeId];
+    const topics      = this.filterTopics(this.props.topics, universeId);
+    const chatId      = topicId ? topics[topicId].chatId : universe.chatId;
+    const users       = this.props.users;
+    
     // console.log('topics :',this.props.topics);
     // console.log('universe :', universe);
     // console.log('universes :', this.props.universes);
@@ -71,7 +82,8 @@ class Universe extends React.Component {
         <Chat 
           chatId        = {chatId}
           users         = {users}
-          chat          = {this.props.chats[chatId]} 
+          currentUserId = {this.state.currentUserId}
+          chats         = {this.props.chats} 
           readChat      = {this.props.readChat} //passer les actions par le context, a faire
           joinChat      = {this.props.joinChat}
           leaveChat     = {this.props.leaveChat}

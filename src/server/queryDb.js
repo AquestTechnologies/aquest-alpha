@@ -21,6 +21,7 @@ export default function queryDb(intention, params) {
       // log(`+++ REQUETE --> ${sql}`); 
       // log(paramaterized);
       if (sql){
+        console.log('sql',sql);
         client.query(sql, paramaterized, (err, result) => {
           done();
           if (err) return reject(err);
@@ -126,7 +127,8 @@ export default function queryDb(intention, params) {
               'json_build_object(' + 
                 `'id',message.id,` + 
                 `'author',aquest_user.id,` + 
-                `'content',atom_message.content` + 
+                `'content',atom_message.content,` +
+                `'timestamp', atom_message.updated_at` +
               ')' + 
             ')' + 
           ') as chat ' +

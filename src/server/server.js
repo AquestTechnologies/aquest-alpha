@@ -13,6 +13,7 @@ import log, {logRequest}  from '../shared/utils/logTailor.js';
 import phidippides        from '../shared/utils/phidippides.js';
 import promiseMiddleware  from '../shared/utils/promiseMiddleware.js';
 import {createStore, combineReducers, applyMiddleware} from 'redux';
+import {randomInteger} from '../shared/utils/randomGenerators';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log(`Starting server in ${process.env.NODE_ENV} mode...`);
@@ -61,7 +62,8 @@ server.register(
         method: 'GET',
         path: '/_{universeId}/{topicId}',
         config: { auth: false },
-        handler: (request, reply) => prerender(request, reply)
+        handler: (request, reply) => { 
+          prerender(request, reply);}
       },
       {
         method: 'GET',
@@ -114,7 +116,6 @@ function prerender(request, reply) {
       
         log(`... Exiting phidippides (${new Date() - dd}ms)`);
         log('... Entering React.renderToString');
-        
         try {
           var mountMeImFamous = React.renderToString(
             <Provider store={store}>
@@ -148,7 +149,6 @@ function prerender(request, reply) {
             for (let key in serverState) {
               if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !
             }
-            
             response.source = html
               .replace(placeholder, mountMeImFamous)
               .replace('</body>',

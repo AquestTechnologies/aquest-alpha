@@ -1,6 +1,8 @@
-import log from '../../shared/utils/logTailor';
-import * as actionCreators from '../../shared/actionCreators';
-import { Observable } from 'rx';
+import log                  from '../../shared/utils/logTailor';
+import * as actionCreators  from '../../shared/actionCreators';
+import { Observable }       from 'rx';
+import io                   from 'socket.io-client';
+import docCookies           from '../vendor/cookie';
 
 export default function registerSideEffects(store, router) {
   
@@ -37,7 +39,6 @@ export default function registerSideEffects(store, router) {
           localStorage.setItem('jwt', payload.token); 
           router.transitionTo('_' + payload.universeId + '/' + payload.id);
           break;
-          
       }
     });
     
