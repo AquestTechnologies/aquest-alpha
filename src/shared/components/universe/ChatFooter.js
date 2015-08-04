@@ -1,4 +1,5 @@
 import React from 'react';
+import {randomInteger} from '../../utils/randomGenerators';
 
 class ChatFooter extends React.Component {
   
@@ -11,9 +12,10 @@ class ChatFooter extends React.Component {
       e.preventDefault();
       
       const messageParams = {
-        chatId:           this.props.chatId,
-        userId:           this.props.currentUserId,
-        messageContent:   {type: 'text', text: this.state.messageContent}
+        id:       randomInteger(0, 1000000),
+        chatId:   this.props.chatId,
+        userId:   this.props.currentUserId,
+        content:  {type: 'text', text: this.state.messageContent}
       };
       
       this.props.createMessage(messageParams);

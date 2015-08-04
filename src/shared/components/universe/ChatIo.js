@@ -8,7 +8,7 @@ class ChatIo extends React.Component {
   constructor() {
     super();
     this.state = { 
-      socket: io.connect('http://130.211.59.69:9090/chat-universe-topic'),
+      socket: io.connect('http://23.251.143.127:9090/chat-universe-topic'),
       joinedChat: false
     };
   }

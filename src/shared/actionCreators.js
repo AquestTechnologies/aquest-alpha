@@ -61,7 +61,7 @@ export const createTopic = createActionCreator({
 
 export const joinChat = createActionCreator({
   intention:  'joinChat',
-  ip:         'http://130.211.59.69:9090',
+  ip:         'http://23.251.143.127:9090',
   namespace:  'chat-universe-topic',
   method:     'socket',
   auth:       'jwt',
@@ -69,7 +69,7 @@ export const joinChat = createActionCreator({
 
 export const leaveChat = createActionCreator({
   intention:  'leaveChat',
-  ip:         'http://130.211.59.69:9090',
+  ip:         'http://23.251.143.127:9090',
   namespace:  'chat-universe-topic',
   method:     'socket',
   auth:       'jwt',
@@ -77,7 +77,7 @@ export const leaveChat = createActionCreator({
 
 export const createMessage = createActionCreator({
   intention:  'createMessage',
-  ip:         'http://130.211.59.69:9090',
+  ip:         'http://23.251.143.127:9090',
   namespace:  'chat-universe-topic',
   method:     'socket',
   auth:       'jwt',

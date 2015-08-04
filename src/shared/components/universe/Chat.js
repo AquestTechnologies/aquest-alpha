@@ -17,7 +17,7 @@ class Chat extends React.Component {
     console.log('.C. Chat.componentWillMount');
     let isLoading = false;
     
-    if ( Object.getOwnPropertyNames(this.props.chats).length === 0 || (Object.getOwnPropertyNames(this.props.chats).length !== 0 && this.props.chats[this.props.chatId] && !this.props.chats[this.props.chatId].isUpToDate) ) {
+    if ( Object.getOwnPropertyNames(this.props.chats).length === 0 || (Object.getOwnPropertyNames(this.props.chats).length !== 0 && (!this.props.chats[this.props.chatId] || !this.props.chats[this.props.chatId].isUpToDate)) ) {
       console.log('componenet will mount I\'m gonna readChat');
       this.props.readChat(this.props.chatId);
       this.props.joinChat( {chatId: this.props.chatId, userId: this.props.currentUserId} );
@@ -30,6 +30,7 @@ class Chat extends React.Component {
     console.log('.C. Chat.componentWillReceiveProps');
     
     if( nextProps.chatId && this.props.chatId !== nextProps.chatId ){
+      console.log('not the same chat');
       if( !nextProps.chats[nextProps.chatId] || ( nextProps.chats[nextProps.chatId] && !nextProps.chats[nextProps.chatId].isUpToDate) ){
         
         console.log('chat change :) !')
@@ -50,7 +51,10 @@ class Chat extends React.Component {
       scrollable.scrollTop = scrollable.scrollHeight;
     }, 100);
     
-    const socket = io.connect('http://130.211.59.69:9090/chat-universe-topic');
+    const socket = io.connect('http://23.251.143.127:9090/chat-universe-topic');
+    this.setState({socket}); 
+    
+    
     socket.on('createMessage', result => this.props.createMessage(result) );
     socket.on('joinChat', result => {
       console.log('recieving joinChat from server');
@@ -71,7 +75,12 @@ class Chat extends React.Component {
   
   componentWillUnmount(){
     console.log('will unmount');
-    this.props.leaveChat(this.props.chatId);
+    const socket = this.state.socket;
+    
+    this.props.leaveChat({chatId: this.props.chatId, userId: this.props.currentUserId});
+    socket.removeListener('createMessage');
+    socket.removeListener('joinChat');
+    socket.removeListener('leaveChat');
   }
   
   render() {
@@ -92,7 +101,7 @@ class Chat extends React.Component {
           
             <Message author='Extreme firster' content='First!' />
             {messages.map(message => { 
-              return <Message key={message.id} author={message.author} content={message.content.text} />;
+              return <Message key={message.id} author={message.userId} content={message.content.text} />;
             })}
             
           </div>

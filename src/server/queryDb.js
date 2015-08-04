@@ -121,12 +121,12 @@ export default function queryDb(intention, params) {
         sql =
         'SELECT ' +
           'json_build_object(' + 
-            `'id', chat.id,` + 
+            `'chatId', chat.id,` + 
             `'name', chat.name,` + 
             `'messages', array_agg(` + 
               'json_build_object(' + 
                 `'id',message.id,` + 
-                `'author',aquest_user.id,` + 
+                `'userId',aquest_user.id,` + 
                 `'content',atom_message.content,` +
                 `'timestamp', atom_message.updated_at` +
               ')' + 

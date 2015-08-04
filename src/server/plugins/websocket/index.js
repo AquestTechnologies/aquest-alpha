@@ -9,7 +9,9 @@ exports.register = function (server, options, next) {
   
   //before RabbitMQ implementation
   // let userList = new WeakMap();
-  let userList = [];
+  let chatList = {};
+  
+  const from = 'server';
   
   //namespace for the chat of a universe or a topic
   const chat = io.of('/chat-universe-topic');
@@ -19,41 +21,48 @@ exports.register = function (server, options, next) {
     console.log('___ [' + chatUsers + '] New client connected in a chat universe | topic');
     
     socket.on('joinChat', function(request) {
+      const {chatId} = request;
+      
       console.log(request);
-      console.log(`___ ${request.userId} joining chat ${request.chatId}`);
-      this.join(request.chatId);
+      console.log(`___ ${request.userId} joining chat ${chatId}`);
+      this.join(chatId);
       // userList.set({userId: request.userId}, request);
+      let userList = Array.isArray(chatList[chatId]) ? chatList[chatId] : chatList[chatId] = [];
       userList.push(request.userId);
       
       console.log('userList', userList);
       
+      
       // send the current list of people in the chat to the user joining the chat
-      this.emit('joinChat', { from: 'server', chatId: request.chatId, userList });
+      this.emit('joinChat', { from, chatId, userList });
       
       //send the user info to current people in the chat
-      // io.to(request.chatId).emit('joinChat', request);
+      socket.broadcast.to(chatId).emit('joinChat', { from, chatId, userList });
     });
 
     socket.on('leaveChat', function(request) {
-      console.log(`___ ${request.userId} leaving chat ${request.chatId}`);
-      this.leave(request.chatId);
+      const {chatId} = request;
+      
+      console.log(`___ ${request.userId} leaving chat ${chatId}`);
+      this.leave(chatId);
       // userList.delete(socket);
+      let userList = Array.isArray(chatList[chatId]) ? chatList[chatId] : chatList[chatId] = [];
       userList.splice(userList.indexOf(request.userId), 1);
-      //send delete the current user list of people in the chat
-      this.emit('leaveChat', { from: 'server', userList });
       
       //send request to remove the user who left the chat from their list
-      // io.to(request.chatId).emit('leaveChat', request);
+      socket.broadcast.to(chatId).emit('leaveChat', { from, chatId, userList });
     });
     
     socket.on('createMessage', function(request) { 
+      const {chatId, id, userId} = request;
+      
       console.log('___ Got message', request);
-      request.messageContent ? request.messageContent = JSON.parse(request.messageContent) : false;
+      const content = request.content ? JSON.parse(request.content) : false;
       
       const d = new Date();
-      this.emit('createMessage', { from: 'server', chatId: request.chatId, message: {id: request.chatId, author: request.userId, content: request.messageContent, timestamp: d.getTime()}});
+      this.emit('createMessage', { from, chatId, message: { id, userId, content, timestamp: d.getTime()} });
       
-      // io.to(request.chatId).emit('createMessage', request);
+      socket.broadcast.to(chatId).emit('createMessage', { from, chatId, message: { id, userId, content, timestamp: d.getTime()} });
     });
     
     socket.on('disconnect', (socket) => {
