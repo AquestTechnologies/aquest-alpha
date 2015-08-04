@@ -18,17 +18,14 @@ export default class Explore extends React.Component {
     if (Object.keys(this.props.universes).length < 2) this.props.readUniverses();
   }
   
-  renderGraph(universes) {
-    const {transitionTo} = this.props;
-    return Object.keys(universes).map(key => {
-      return(
-        <Node 
-          key={key} 
-          universe={universes[key]} 
-          transitionTo={transitionTo}
-        />
-      );
-    });
+  renderList(universes) {
+    return Object.keys(universes).map(key =>
+      <Node 
+        key={key} 
+        universe={universes[key]} 
+        transitionTo={this.props.transitionTo}
+      />
+    );
   }
   
   render() {
@@ -39,31 +36,18 @@ export default class Explore extends React.Component {
       fontSize: '2rem',
     };
     
-    const exploreStyle = {
-      position: 'fixed', 
-      width: '100%',
-      height: '100%',
-      // backgroundColor: '#222',
-      // color: '#fff',
-    };
-    
     const {universes} = this.props;
     
     return (
-      <div style={exploreStyle}>
+      <div>
         <div style={divStyle}>
           <Link to='/'>Home</Link>
           <br/>
-          { this.renderGraph(universes) }
+          { this.renderList(universes) }
           <br/>
           <Link to='/Create_universe'>Create a new universe</Link>
         </div>
         <Graph />
-        {/*<br />
-        <br />
-        <div style={divStyle}>
-          <Pseudos />
-        </div>*/}
       </div>
     );
   }

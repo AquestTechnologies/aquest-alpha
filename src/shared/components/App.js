@@ -2,7 +2,7 @@ import React from 'react';
 import Home from './app/Home';
 import { Connector } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import LoadingBar from './common/LoadingBar';
+import LoadingBar from './app/LoadingBar';
 import actionCreators from '../actionCreators';
 
 function select(state) {

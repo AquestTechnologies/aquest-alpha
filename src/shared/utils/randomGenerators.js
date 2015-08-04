@@ -50,9 +50,8 @@ export function randomText(n) {
       wordsInSentence = randomInteger(3, 12);
       wordPositionInSentence = 0;
       text += '. ';
-    } else {
-      text += ' ';
-    }
+    } 
+    else text += ' ';
   }
   
   return text.slice(-2) === '. ' ? text.slice(0, -1) : text.slice(0, -1) + '.';

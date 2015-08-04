@@ -1,11 +1,11 @@
 import { Observable } from 'rx';
 import docCookies from '../vendor/cookie';
 import log from '../../shared/utils/logTailor';
-import config from '../../../config/client';
 import { isAPIUnauthorized } from '../../shared/actionCreators';
 
 export default function registerSideEffects(store, transitionTo) {
   
+  const logR = type => log('.E. redirecting after', type);
   const setRedirection = path => store.dispatch({
     type: 'SET_REDIRECTION',
     payload: path,
@@ -14,7 +14,7 @@ export default function registerSideEffects(store, transitionTo) {
   // https://github.com/acdlite/redux-rx/blob/master/src/observableFromStore.js
   Observable.create(observer => store.subscribe(() => observer.onNext(store.getState())))
     .subscribe(state => {
-      const action = state.records[state.records.length - 1].action;
+      const action = state.records[state.records.length - 1];
       const {type, payload} = action;
       
       if (isAPIUnauthorized(action)) {
@@ -27,7 +27,7 @@ export default function registerSideEffects(store, transitionTo) {
       }
       
       if (type === 'SUCCESS_LOGIN' || type === 'SUCCESS_CREATE_USER') {
-        log('.E. Redirecting after', type);
+        logR(type);
         const {redirection} = state.session;
         const {query} = state.router; 
         const r = query ? query.r : undefined;
@@ -45,9 +45,14 @@ export default function registerSideEffects(store, transitionTo) {
           return;
           
         case 'LOGOUT':
-          log('.E. Redirecting after logout');
+          logR(type);
           docCookies.removeItem('jwt');
           transitionTo('/');
+          return;
+          
+        case 'SUCCESS_CREATE_UNIVERSE':
+          logR(type);
+          // transitionTo('_' + payload.)
           return;
       }
     });

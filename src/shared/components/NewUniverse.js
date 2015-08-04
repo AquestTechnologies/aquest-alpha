@@ -1,33 +1,35 @@
 import React from 'react';
 import {Link} from 'react-router';
+import { randomText, randomInteger } from '../utils/randomGenerators';
 
 export default class NewUniverse extends React.Component {
   
   constructor() {
     super();
     
-    this.handleInputName = event => this.setState({name: event.target.value});
-    this.handleInputDescription = event => this.setState({description: event.target.value});
-    this.handleInputRelated = event => this.setState({related: event.target.value});
-    this.handleSubmit = () => this.props.createUniverse(this.state);
+    this.handleInputName = event => this.setState({name: event.currentTarget.value});
+    // this.handleInputName = event => console.log(event.currentTarget)
+    this.handleInputDescription = event => this.setState({description: event.currentTarget.value});
+    this.handleInputRelated = event => this.setState({related: event.currentTarget.value});
+    this.handleSubmit = event => {
+      event.preventDefault();
+      this.state.userId = this.props.session.userId;
+      this.props.createUniverse(this.state);
+    };
     
     this.state = {
       name: '',
-      description: 'Awesomeness',
+      description: '',
       related: '',
-      userId: 'johnDoe'
+      userId: '',
+      picture: 'img/pillars_compressed.png',
     };
   }
   
   componentDidMount() {
     this.setState({
-      name: (Math.random() + 1).toString(36).substring(2, 14)
-      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
-      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
-      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
-      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
-      .replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
-      .trim()
+      name: randomText(randomInteger(1, 5)).slice(0, -1),
+      description: randomText(randomInteger(1, 100))
     });
   }
   
