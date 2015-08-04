@@ -76,7 +76,7 @@ export default {
       return state.setIn([action.params, 'lastInventoryUpdate'], d.getTime());
     
     case 'SUCCESS_CREATE_UNIVERSE':
-      
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
     
     default:
       return state;

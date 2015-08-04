@@ -1,6 +1,5 @@
 import React from 'react';
 import Node  from './explore/Node';
-import Graph from './explore/Graph';
 import { Link } from 'react-router';
 
 
@@ -19,7 +18,8 @@ export default class Explore extends React.Component {
   }
   
   renderList(universes) {
-    return Object.keys(universes).map(key =>
+    return Object.keys(universes).sort()
+    .map(key =>
       <Node 
         key={key} 
         universe={universes[key]} 
@@ -42,12 +42,12 @@ export default class Explore extends React.Component {
       <div>
         <div style={divStyle}>
           <Link to='/'>Home</Link>
+          {' - '}
+          <Link to='/Create_universe'>Create a new universe</Link>
+          <br/>
           <br/>
           { this.renderList(universes) }
-          <br/>
-          <Link to='/Create_universe'>Create a new universe</Link>
         </div>
-        <Graph />
       </div>
     );
   }

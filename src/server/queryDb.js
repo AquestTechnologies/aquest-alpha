@@ -313,12 +313,11 @@ export default function queryDb(intention, params) {
         sql = 
         'INSERT INTO aquest_schema.universe ' +
           '(id, name, user_id, description, picture) ' +
-        'VALUES ' +
-          // `('${name}', '${name}', 'johnDoe', '${description}')`;
-        '($1, $2, $3, $4, $5)';
+        'VALUES ($1, $2, $3, $4, $5) ' +
+        `RETURNING json_build_object('id', id, 'chatId', chat_id, 'name', name, 'description', description, 'picture', picture) AS "createdUniverse"`;
         
         paramaterized = [name, name, userId, description, picture];
-        callback = result => result.rows[0];
+        callback = result => result.rows[0].createdUniverse;
         
         break;
         

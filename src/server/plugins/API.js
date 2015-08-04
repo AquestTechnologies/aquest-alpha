@@ -13,15 +13,24 @@ function apiPlugin(server, options, next) {
     
     createUser: (request, params) => new Promise((resolve, reject) => {
       bcrypt.genSalt(10, (err, salt) => {
-        if (err) reject(err);
+        if (err) return reject(err);
         bcrypt.hash(params.password, salt, (err, hash) => {
-          if (err) reject(err);
+          if (err) return reject(err);
           params.passwordHash = hash;
           params.passwordSalt = salt;
           params.ip = request.info.remoteAddress;
           delete params.password;
           resolve();
         });
+      });
+    }),
+    
+    createUniverse: (request, params) => new Promise((resolve, reject) => {
+      JWT.verify(request.state.jwt, key, (err, decoded) => { // JWT.decode() should be enough since the token has already been verified by Hapi-Auth-JWT2
+        if (err) return reject(err);
+        params.userId = decoded.userId; // The real user id
+        params.ip = request.info.remoteAddress; // We should add this in the universe schema
+        resolve();
       });
     }),
   };

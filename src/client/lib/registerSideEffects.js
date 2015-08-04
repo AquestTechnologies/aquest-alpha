@@ -52,7 +52,7 @@ export default function registerSideEffects(store, transitionTo) {
           
         case 'SUCCESS_CREATE_UNIVERSE':
           logR(type);
-          // transitionTo('_' + payload.)
+          transitionTo('/_' + payload.id);
           return;
       }
     });

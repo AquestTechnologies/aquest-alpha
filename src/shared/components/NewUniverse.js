@@ -8,12 +8,10 @@ export default class NewUniverse extends React.Component {
     super();
     
     this.handleInputName = event => this.setState({name: event.currentTarget.value});
-    // this.handleInputName = event => console.log(event.currentTarget)
     this.handleInputDescription = event => this.setState({description: event.currentTarget.value});
     this.handleInputRelated = event => this.setState({related: event.currentTarget.value});
     this.handleSubmit = event => {
       event.preventDefault();
-      this.state.userId = this.props.session.userId;
       this.props.createUniverse(this.state);
     };
     
@@ -21,15 +19,14 @@ export default class NewUniverse extends React.Component {
       name: '',
       description: '',
       related: '',
-      userId: '',
       picture: 'img/pillars_compressed.png',
     };
   }
   
   componentDidMount() {
     this.setState({
-      name: randomText(randomInteger(1, 5)).slice(0, -1),
-      description: randomText(randomInteger(1, 100))
+      name: randomText(randomInteger(1, 3)).slice(0, -1),
+      description: randomText(randomInteger(1, 70))
     });
   }
   
@@ -44,7 +41,7 @@ export default class NewUniverse extends React.Component {
     
     return (
       <div style={divStyle} >
-        <Link to='explore'>Back</Link>
+        <Link to='Explore'>Back</Link>
         <h1>Create New Universe</h1>
         <form className='universeFrom' onSubmit={this.handleSubmit}>
           <div>
