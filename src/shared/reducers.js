@@ -75,6 +75,9 @@ export default {
       const d = new Date();
       return state.setIn([action.params, 'lastInventoryUpdate'], d.getTime());
     
+    case 'SUCCESS_CREATE_UNIVERSE':
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
+    
     default:
       return state;
     }
@@ -118,10 +121,11 @@ export default {
   
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
   records: (state = [], action) => {
-    return [
-      ...state,
-      {action: action, date: new Date()}
-    ];
+    const record = { date: new Date().getTime() };
+    Object.keys(action).forEach(key => {
+      if (action.hasOwnProperty(key)) record[key] = action[key];
+    });
+    return [...state, record];
   },
 
 };

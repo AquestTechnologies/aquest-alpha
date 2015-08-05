@@ -69,7 +69,8 @@ export default function log(...messages) {
   } 
   else console.log(...messages);
     
-  if (isServer) { // On server we save the message on a log file.
+  // if (isServer) { // On server we save the message on a log file.
+  if (0) { // !
     const d = new Date();
     const line = {
       data:  messages.join(' '),
@@ -82,7 +83,7 @@ export default function log(...messages) {
       s:     d.getSeconds()
     };
     fs.appendFile('log/server.log', JSON.stringify(line) +'\n', err => {
-      if (err) console.log(err);
+      if (err) console.log(err, err.stack);
     });
   }
 }

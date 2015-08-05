@@ -55,7 +55,7 @@ export default function queryDb(intention, params) {
   // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
-    const {id, userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip, content} = 
+    const {id, userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip, content, picture} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback, paramaterized;
@@ -312,12 +312,12 @@ export default function queryDb(intention, params) {
         
         sql = 
         'INSERT INTO aquest_schema.universe ' +
-          '(id, name, user_id, description) ' +
-        'VALUES ' +
-          // `('${name}', '${name}', 'johnDoe', '${description}')`;
-        '($1, $2, $3, $4)';
+          '(id, name, user_id, description, picture) ' +
+        'VALUES ($1, $2, $3, $4, $5) ' +
+        `RETURNING json_build_object('id', id, 'chatId', chat_id, 'name', name, 'description', description, 'picture', picture) AS "createdUniverse"`;
         
-        paramaterized = [name, name, userId, description];
+        paramaterized = [name, name, userId, description, picture];
+        callback = result => result.rows[0].createdUniverse;
         
         break;
         

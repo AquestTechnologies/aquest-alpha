@@ -5,6 +5,8 @@ const isServer = !isClient();
 
 const actionCreators = {
   
+  // Si une transition peut avoir lieu dans les sides effects alors preferer cette methode
+  // Cet AC est provisoire et devra être remplacé par <Link/> partout (SEO friendly)
   transitionTo: (pathname, query, state) => ({ type: 'TRANSITION_TO', payload: {pathname, query, state} }),
   
   logout: () => ({ type: 'LOGOUT' }),

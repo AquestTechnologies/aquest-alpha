@@ -1,8 +1,6 @@
 import React from 'react';
 import Node  from './explore/Node';
-import Graph from './explore/Graph';
 import { Link } from 'react-router';
-
 
 export default class Explore extends React.Component {
   
@@ -18,54 +16,21 @@ export default class Explore extends React.Component {
     if (Object.keys(this.props.universes).length < 2) this.props.readUniverses();
   }
   
-  renderGraph(universes) {
-    const {transitionTo} = this.props;
-    return Object.keys(universes).map(key => {
-      return(
-        <Node 
-          key={key} 
-          universe={universes[key]} 
-          transitionTo={transitionTo}
-        />
-      );
-    });
-  }
-  
   render() {
-    // CSS temporaire
+    const {universes} = this.props;
     const divStyle = {
       width: '60%',
       margin: '0 auto 0 auto',
       fontSize: '2rem',
     };
     
-    const exploreStyle = {
-      position: 'fixed', 
-      width: '100%',
-      height: '100%',
-      // backgroundColor: '#222',
-      // color: '#fff',
-    };
-    
-    const {universes} = this.props;
-    
-    return (
-      <div style={exploreStyle}>
-        <div style={divStyle}>
-          <Link to='/'>Home</Link>
-          <br/>
-          { this.renderGraph(universes) }
-          <br/>
-          <Link to='/Create_universe'>Create a new universe</Link>
-        </div>
-        <Graph />
-        {/*<br />
-        <br />
-        <div style={divStyle}>
-          <Pseudos />
-        </div>*/}
-      </div>
-    );
+    return <div style={divStyle}>
+      <Link to='/'>Home</Link>
+      {' - '}
+      <Link to='/Create_universe'>Create a new universe</Link>
+      <br/>
+      <br/>
+      { Object.keys(universes).sort().map(key => <Node key={key} universe={universes[key]} />) }
+    </div>;
   }
-  
 }

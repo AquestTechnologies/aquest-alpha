@@ -4,16 +4,15 @@ import Immutable from 'immutable';
 import JWT       from 'jsonwebtoken';
 import ReactDOM  from 'react-dom/server';
 import Location  from 'react-router/lib/Location';
-import Router, { Route } from 'react-router';
 import { reduxRouteComponent } from 'redux-react-router';
 import {createStore, combineReducers, applyMiddleware} from 'redux';
+import Router, { Route } from 'react-router';
 import reducers          from '../shared/reducers';
 import devConfig         from '../../config/development';
 import phidippides       from '../shared/utils/phidippides';
 import promiseMiddleware from '../shared/utils/promiseMiddleware';
 import log, { logAuthentication }  from '../shared/utils/logTailor';
 import makeJourney, { routeGuard } from '../shared/routes';
-
 
 const {wds: {hotFile, publicPath, filename}, jwt: {key, ttl}} = devConfig();
 const HTML = fs.readFileSync('index.html', 'utf8');
