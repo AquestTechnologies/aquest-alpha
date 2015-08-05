@@ -123,7 +123,8 @@ function createActionCreator(shape) {
            * */
           resolve(params);
           
-          if(!params.from && params.from !== 'server'){
+          // if the action isn't a response from the server
+          if(!params.fromServer){
             Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
             
             const socket = io.connect(ip + '/' + namespace);

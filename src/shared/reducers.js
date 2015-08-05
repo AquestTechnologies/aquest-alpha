@@ -12,6 +12,7 @@ export function records(state = [], action) {
 
 export function universes(state = Immutable.Map(), action) {
   let newState;
+  
   switch (action.type) {
     
   case 'SUCCESS_READ_UNIVERSE':
@@ -34,89 +35,95 @@ export function universes(state = Immutable.Map(), action) {
 }
 
 export function chats(state = Immutable.Map(), action) {
-  let newState;
-  const chatId = action.params && action.params.chatId ? parseInt(action.params.chatId, 10) : action.payload && action.payload.chatId ? parseInt(action.payload.chatId, 10) : false;
   
-  switch (action.type) {
-    
-  case 'SUCCESS_READ_CHAT':
-    console.log(chatId);
-    
-    action.payload.isUpToDate = true;
-    if(!action.payload.messages[0].id){ 
-      console.log('no messages');
-      action.payload.messages = [];
-    }
-    return state.mergeIn([chatId], fromJSGreedy(action.payload));
-    // console.log('messages list ?', Immutable.List.isList(newState.getIn([chatId, 'messages'])) );
-    // console.log('newState', newState );
-    // return newState;
-    
-  case 'SUCCESS_CREATE_MESSAGE':
-    
-    //should work as latence compensation !
-    if(!action.params.from && action.params.from !== 'server'){
-      action.params.content = JSON.parse(action.params.content);
-      delete action.params.chatId;
-      return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(action.params))); 
-    } else {
-      const id = parseInt(action.payload.message.id,10);
-      const {userId, content} = action.payload.message;
-      const messageIndex = state.getIn([chatId, 'messages']).indexOf(fromJSGreedy({id, userId, content}));
-      if (messageIndex !== -1){
-        console.log('latency compensation');
-        return state.setIn([chatId, 'messages', messageIndex], fromJSGreedy(action.payload.message));
-      } else {
-        console.log('Message from another user');
-        return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(action.payload.message)));
+  // the chat reducer always recieve a chatId -- action.params && action.params.chatId not checked here because there is no 'REQUEST' case
+  const chatId  = action.payload && action.payload.chatId ? parseInt(action.payload.chatId, 10) : action.params ? parseInt(action.params, 10) : false;
+  
+  const userId = action.payload && action.payload.userId ? action.payload.userId : false;
+  
+  //property 'from' send by the server using websocket 
+  const local = action.payload && action.payload.fromServer ? false : true;
+  const owner   = action.payload && action.payload.owner ? true : false;
+  
+  if(chatId){
+    switch (action.type) {
+      
+    case 'SUCCESS_READ_CHAT':
+      
+      action.payload.isUpToDate = true;
+      if(!action.payload.messages[0].id){ 
+        console.log('no messages');
+        action.payload.messages = [];
       }
-    }
-    
-  case 'SUCCESS_JOIN_CHAT':
-    console.log(chatId);
-    
-    if(!action.params.from && action.params.from !== 'server'){
-      // push user in the userList
-      if( state.getIn([chatId, 'users']) ) {
-        console.log('userList exist');
-        return state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(action.params.userId)) );
+      return state.mergeIn([chatId], fromJSGreedy(action.payload));
+      
+    case 'SUCCESS_CREATE_MESSAGE':
+      
+      //should work as latence compensation !
+      if(local) {
+        action.params.content = JSON.parse(action.params.content);
+        delete action.params.chatId;
+        return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(action.params))); 
       } else {
-        console.log('createUser list');
-        if(!state.get(chatId)){
-          console.log('setting the chat and the user', action.params.userId);
-          return state.set(chatId, Immutable.Map({users: fromJSGreedy([action.params.userId])}));  
+        if(owner){
+          const messageId = parseInt(action.payload.message.id,10);
+          const {content} = action.payload.message;
+          const messageUserId = action.payload.message.userId;
+          const messageIndex = state.getIn([chatId, 'messages']).indexOf(fromJSGreedy({messageId, messageUserId, content}));
+          if (messageIndex !== -1){
+            console.log('latency compensation');
+            return state.setIn([chatId, 'messages', messageIndex], fromJSGreedy(action.payload.message));
+          } 
         } else {
-          console.log('setting users in chat');
-          return state.setIn([chatId, 'users'], fromJSGreedy([action.params.userId]));          
+          console.log('Message from another user');
+          return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(action.payload.message)));
         }
       }
-    } else {
-      if(action.params.userList){
-        return state.mergeIn([chatId, 'users'], fromJSGreedy([action.params.userList]));
+      
+      return state;
+      
+    case 'SUCCESS_JOIN_CHAT':
+      
+      if (local){
+        if ( state.getIn([chatId, 'users']) ) {
+          return state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
+        } else {
+          if ( state.get(chatId) ){
+            return state.setIn([chatId, 'users'], fromJSGreedy([userId]));  
+          } else {
+            return state.set(chatId, Immutable.Map({users: fromJSGreedy([userId])}));          
+          }
+        }
       } else {
-        console.log('delet user');
-        return state.deleteIn([chatId, 'users']);
+        if (owner){
+          return state.mergeIn([chatId, 'users'], fromJSGreedy(action.params.userList));
+        } else {
+          return state.setIn( [chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
+        }
       }
-    }
-    
-  case 'SUCCESS_LEAVE_CHAT':
-    
-    if(!action.params.from && action.params.from !== 'server'){
-      newState = state.updateIn([chatId, 'isUpToDate'], value => false);
-      return newState = newState.setIn([chatId, 'users'],
-        newState.getIn([chatId, 'users']).filter((user) => {
-          console.log('user', user, 'userId', action.params.userId);
-          console.log(!(user === action.params.userId) ? 'not equal' : 'equal');
-          return !(user === action.params.userId);
+      
+    case 'SUCCESS_LEAVE_CHAT':
+      
+      if(local){
+        // the chat won't be up to date anymore !
+        state = state.updateIn([chatId, 'isUpToDate'], value => false);
+      }
+      
+      // remove the user from the user list
+      return state = state.setIn([chatId, 'users'],
+        state.getIn([chatId, 'users']).filter((user) => {
+          console.log('user', user, 'userId', userId);
+          console.log(!(user === userId) ? 'not equal' : 'equal');
+          return !(user === userId);
         })
-      )
-    } else {
-      return state.setIn([chatId, 'users'], fromJSGreedy(action.params.userList) );
+      );
+      
+    default:
+      return state;
     }
-    
-  default:
-    return state;
   }
+  
+  return state;
 }
 
 export function topics(state = Immutable.Map(), action) {
@@ -143,6 +150,7 @@ export function topics(state = Immutable.Map(), action) {
 }
 
 export function users(state = Immutable.Map(), action) {
+  
   switch (action.type) {
     
   case 'SUCCESS_CREATE_USER':
