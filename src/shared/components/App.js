@@ -1,49 +1,47 @@
-import React                from 'react';
-import {RouteHandler}       from 'react-router';
+import React from 'react';
+import Home from './app/Home';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import LoadingBar from './app/LoadingBar';
+import actionCreators from '../actionCreators';
 
-import {bindActionCreators} from 'redux';
-import {Connector}          from 'react-redux';
-
-import * as actionCreators from '../actionCreators';
-
-import LoadingBar           from './common/LoadingBar';
-
-function select(state) {
-  return { 
-    universes:  state.universes.toJS(),
-    topics:     state.topics.toJS(),
-    chats:      state.chats.toJS(),
-    users:      state.users.toJS(),
-    records:    state.records
-  };
+function simpleMerge(a, b) {
+  Object.keys(b).forEach(key => b.hasOwnProperty(key) ? a[key] = b[key] : {});
+  return a;
 }
 
-export default class App extends React.Component {
-
+class App extends React.Component {
+  
   render() {
-    return (
-      <Connector select={select}>
-        {
-          ({ 
-            universes,
-            topics,
-            chats,
-            users,
-            records,
-            dispatch,
-          }) => 
-          <div>
-            <LoadingBar records = {records} />
-            <RouteHandler 
-              universes = {universes}
-              topics = {topics}
-              chats = {chats}
-              users = {users}
-              {...bindActionCreators(actionCreators, dispatch)} 
-            />
-          </div>
-        }
-      </Connector>
-    );
+    const {children, universes, topics, chats, session, users, userId, router, records, dispatch} = this.props;
+    
+    return <div> 
+      <LoadingBar records={records} />
+      { 
+        children && !(children instanceof Array) ? 
+          React.cloneElement(children, simpleMerge({ // This burns my eyes, when RR1.0 will be out a better solution might appear
+              universes,
+              topics,
+              chats,
+              session,
+              users,
+              userId,
+              router,
+            }, bindActionCreators(actionCreators, dispatch))) :
+          <Home session={session} {...bindActionCreators(actionCreators, dispatch)} />
+      }
+    </div>;
   }
 }
+
+const select = state => ({ 
+  universes: state.universes.toJS(),
+  topics:    state.topics.toJS(),
+  chats:     state.chats.toJS(),
+  users:     state.users.toJS(),
+  records:   state.records,
+  session:   state.session,
+  router:    state.router,
+});
+
+export default connect(select)(App);

@@ -14,7 +14,7 @@ class ChatFooter extends React.Component {
       const messageParams = {
         id:       randomInteger(0, 1000000),
         chatId:   this.props.chatId,
-        userId:   this.props.currentUserId,
+        userId:   this.props.session.userId,
         content:  {type: 'text', text: this.state.messageContent}
       };
       

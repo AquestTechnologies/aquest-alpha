@@ -1,32 +1,32 @@
 import React          from 'react';
-import {RouteHandler} from 'react-router';
-
+import Inventory      from './Inventory';
 import Menu           from './universe/Menu';
-// import ChatIo         from './universe/ChatIo';
 import Chat           from './universe/Chat';
 import docCookies     from '../../client/vendor/cookie';
+import config         from '../../../config/client';
+import menuScroll     from '../../client/lib/menuScroll';
 
-class Universe extends React.Component {
+export default class Universe extends React.Component {
   
-  // Load les données initiales
   static runPhidippides(routerState) {
-    return [{
+    const {universeId, topicId} = routerState.params;
+    const tasks = [{
       id:         'universe',
       creator:    'readUniverse',
-      args:       [routerState.params.universeId]
+      args:       [universeId]
     },{
       id:         'chat',
-      dependency: routerState.params.topicId ? 'topic' : 'universe',
+      dependency: topicId ? 'topic' : 'universe',
       creator:    'readChat',
       args:       ['__dependency.chatId']
     }];
-  }
-  
-  constructor() {
-    super();
-    this.state = { 
-      currentUserId: 'abeseven'
+    const inventory = {
+      id:         'inventory',
+      dependency: 'universe',
+      creator:    'readInventory',
+      args:       ['__dependency.id']
     };
+    return topicId ? tasks : tasks.concat(inventory);
   }
   
   filterTopics(topics, universeId) {
@@ -37,88 +37,71 @@ class Universe extends React.Component {
     return result;
   }
   
+  componentWillMount() {
+    const {universes, params, readUniverse} = this.props;
+    const {universeId} = params;
+    if (!universes[universeId]) readUniverse(universeId);
+  }
+  
   componentDidMount() {
-    require('../../client/lib/menuScroll')('main_scrollable');
+    menuScroll('main_scrollable');
   }
   
   render() {
     // console.log('.C. Universe.render');
-    const universeId  = this.props.params.universeId;
-    const topicId     = this.props.params.topicId;
+    const {session, universes, topics, chats, params, location, children, readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo, users, joinChat, leaveChat, createMessage} = this.props;
+    const {universeId, topicId} = params;
+    const universe = universes[universeId];
+    const topic = topicId ? topics[topicId] : undefined;
+    const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
+    const filteredTopics = !children ? this.filterTopics(topics, universeId) : undefined;
     
-    const universe    = this.props.universes[universeId];
-    const topics      = this.filterTopics(this.props.topics, universeId);
-    const chatId      = topicId ? topics[topicId].chatId : universe.chatId;
-    const users       = this.props.users;
-    
-    // console.log('topics :',this.props.topics);
-    // console.log('universe :', universe);
-    // console.log('universes :', this.props.universes);
-    
-    return (
+    return !universe ? <div>Loading...</div> : (
       <div> 
         <Menu 
-          universeId={universeId} 
+          topicId     ={topicId}
+          universeId  ={universeId} 
           universeName={universe.name} 
-          topicId={topicId}
+          pathName    ={location.pathname}
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(http://23.251.143.127:8080/${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
-            <div className='universe_main_scrolled'>
-              <RouteHandler
-                topics           = {topics}
-                universe         = {universe}
-                setTopic         = {this.props.setTopic}
-                readInventory    = {this.props.readInventory} //passer les actions par le context, a faire
-                readTopicContent = {this.props.readTopicContent} //passer les actions par le context, a faire
-                createTopic      = {this.props.createTopic}
-                users            = {users}
-              />
-            </div>
+            <div className='universe_main_scrolled'> { 
+              
+              children && !(children instanceof Array) ? 
+                
+                React.cloneElement(children, {
+                  topic,
+                  universe,
+                  readTopic,
+                  createTopic,
+                  readTopicContent,
+                }) 
+                :
+                <Inventory 
+                  topics        = {filteredTopics}
+                  universe      = {universe}
+                  transitionTo  = {transitionTo}
+                  readInventory = {readInventory}
+                  session       = {session}
+                />
+                
+            } </div>
           </div>
         </div>  
         
         <Chat 
           chatId        = {chatId}
           users         = {users}
-          currentUserId = {this.state.currentUserId}
-          chats         = {this.props.chats} 
-          readChat      = {this.props.readChat} //passer les actions par le context, a faire
-          joinChat      = {this.props.joinChat}
-          leaveChat     = {this.props.leaveChat}
-          createMessage = {this.props.createMessage}
+          chats         = {chats} 
+          readChat      = {readChat} //passer les actions par le context, a faire
+          joinChat      = {joinChat}
+          leaveChat     = {leaveChat}
+          createMessage = {createMessage}
+          session       = {session}
         />
       </div>
     );
   }
 }
-
-// à supprimer ?
-// Universe.defaultProps = { 
-//   universe: {
-//     id: 0,
-//     name: 'defaultProps name',
-//     description: 'defaultProps description',
-//     imgPath: '/static/img/pillars_compressed.png',
-//     chatId: 0
-//   },
-//   inventory: {
-//     universeId: 0,
-//     topics: []
-//   },
-//   chat: {
-//     id: 0,
-//     name: 'defaultProps name',
-//     messages: []
-//   },
-//   topic: {
-//     id: 0,
-//     author: 'defaultProps author',
-//     title: 'defaultProps title',
-//     content: 'defaultProps content',
-//     timestamp: 'defaultProps timestamp'
-//   }
-// };
-
-export default Universe;

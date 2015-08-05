@@ -53,8 +53,4 @@ class Signup extends React.Component {
   }
 }
 
-Signup.contextTypes = {
-  router: React.PropTypes.func.isRequired
-};
-
 export default Signup;

@@ -32,6 +32,7 @@ exports.register = function (server, options, next) {
           
         const {chatId, userId} = request;
         
+        socket.userId = userId;
         this.join(chatId);
         // userList.set({userId: request.userId}, request);
         let userList = Array.isArray(chatList[chatId]) ? chatList[chatId] : chatList[chatId] = [];
@@ -50,6 +51,7 @@ exports.register = function (server, options, next) {
 
     socket.on('leaveChat', function(request) {
       console.log(`___ ${request.userId} leaving chat ${request.chatId}`);
+      console.log('socket', socket.id);
       
       Joi.validate(request, validationSchema['leaveChat'], (err, value) => {
         
@@ -69,6 +71,7 @@ exports.register = function (server, options, next) {
     
     socket.on('createMessage', function(request) {
       console.log('___ Got message', request);
+      console.log('socket', socket.id);
       
       Joi.validate(request, validationSchema['createMessage'], (err, value) => {
         
@@ -85,10 +88,21 @@ exports.register = function (server, options, next) {
       });
     });
     
-    socket.on('disconnect', (socket) => {
+    socket.on('disconnect', (request) => {
       chatUsers--;
-      console.log('___ [' + chatUsers + '] A client disconnected from a chat universe | topic');
-    })
+      
+      //dirty wait for RabbitMQ
+      const {userId} = socket;
+      for(let chatId in chatList) {
+        chatList[chatId] = chatList[chatId].filter((user) => {
+          if(user === userId){
+            socket.broadcast.to(chatId).emit('leaveChat', { fromServer, chatId, userId });
+            return true;
+          }
+        });
+      }
+      console.log('___ [' + chatUsers + '] ' + socket.id + ' disconnected from a chat universe | topic');
+    });
   });
   
   /**

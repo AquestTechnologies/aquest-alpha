@@ -1,4 +1,5 @@
 import ip from './ip';
+import client from './client';
 
 export default function() {
   const main = ip.localServer;
@@ -31,7 +32,7 @@ export default function() {
     },
     jwt: {
       key: 'ohPleaseHackMe',
-      ttl: 1 * 60 * 1000
+      ttl: client.sessionDuration
     }
   };
 }

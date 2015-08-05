@@ -1,38 +1,37 @@
 import React from 'react';
 import {Link} from 'react-router';
+import { randomText, randomInteger } from '../utils/randomGenerators';
 
-class NewUniverse extends React.Component {
+export default class NewUniverse extends React.Component {
   
   constructor() {
     super();
     
-    this.handleInputName = event => this.setState({name: event.target.value});
-    this.handleInputDescription = event => this.setState({description: event.target.value});
-    this.handleInputRelated = event => this.setState({related: event.target.value});
-    this.handleSubmit = () => this.props.createUniverse(this.state);
+    this.handleInputName = event => this.setState({name: event.currentTarget.value});
+    this.handleInputDescription = event => this.setState({description: event.currentTarget.value});
+    this.handleInputRelated = event => this.setState({related: event.currentTarget.value});
+    this.handleSubmit = event => {
+      event.preventDefault();
+      this.props.createUniverse(this.state);
+    };
     
     this.state = {
       name: '',
-      description: 'Awesomeness',
+      description: '',
       related: '',
-      userId: 'johnDoe'
+      picture: 'img/pillars_compressed.png',
     };
   }
   
   componentDidMount() {
     this.setState({
-      name: (Math.random() + 1).toString(36).substring(2, 14)
-      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
-      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
-      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
-      .replace((Math.random() + 1).toString(36).substring(2, 3), ' ')
-      .replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
-      .trim()
+      name: randomText(randomInteger(1, 3)).slice(0, -1),
+      description: randomText(randomInteger(1, 70))
     });
   }
   
   render() {
-    let divStyle = {
+    const divStyle = {
       width: '60%',
       margin: '20 auto 0 auto',
       fontSize: '2rem',
@@ -42,7 +41,7 @@ class NewUniverse extends React.Component {
     
     return (
       <div style={divStyle} >
-        <Link to='explore'>Back</Link>
+        <Link to='Explore'>Back</Link>
         <h1>Create New Universe</h1>
         <form className='universeFrom' onSubmit={this.handleSubmit}>
           <div>
@@ -66,5 +65,3 @@ class NewUniverse extends React.Component {
     );
   }
 }
-
-export default NewUniverse;

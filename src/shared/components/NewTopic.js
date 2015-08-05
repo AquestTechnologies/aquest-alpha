@@ -1,7 +1,7 @@
 import React from 'react';
 import {randomInteger, randomText} from '../utils/randomGenerators';
 
-class NewTopic extends React.Component {
+export default class NewTopic extends React.Component {
   
   constructor() {
     super();
@@ -10,22 +10,19 @@ class NewTopic extends React.Component {
     this.handleInputContent = e => this.setState({content: e.target.value});
     this.handleSubmit = e => {
       e.preventDefault();
-      const universeId = this.props.universe.id;
-      const {title, content, userId} = this.state;
-      /**
-       * MDN : /s => cela comprend les espace, tabulation, saut de ligne ou saut de page, 
-       * MDN : \g => Recherche globale (ne s'arrête pas après la première instance)
-       * */
-      this.state.id = title.substr(0, 12).replace(/\s/g,'_');
-      this.state.universeId = universeId;
+      const {universe, createTopic} = this.props;
+      const {title, content} = this.state;
+      const topicId = title.trim().substr(0, 30).replace(' ','_');
+      this.state.id = topicId;
+      this.state.universeId = universe.id;
       this.state.description = content.substr(0, 600);
-      this.state.userId = this.props.users[userId].id;
+      this.state.userId = this.props.session.userId;
       /**
        * TODO :
        * create a function that modify the content to match atom like version 
        * --> [{'atom_type':'sub_content'}] */
       this.state.content = [{type: 'text', text: content}];
-      this.props.createTopic(this.state);
+      createTopic(this.state);
     };
     
     this.state = {
@@ -35,12 +32,9 @@ class NewTopic extends React.Component {
     };
   }
   
-  componentDidMount(){
-    this.setState({userId: localStorage.getItem('userId')})
-  }
-  
   render() {
-    const {title, content, userId} = this.state;
+    const {title, content} = this.state;
+    const userId = this.props.session.userId;
     const rules = "Rules: please don't hate";
     const s1 = {width: '100%'};
     const s2 = {width: '100%', minHeight: '33%'};
@@ -72,9 +66,3 @@ class NewTopic extends React.Component {
     );
   }
 }
-
-NewTopic.contextTypes = {
-  router: React.PropTypes.func.isRequired
-};
-
-export default NewTopic;

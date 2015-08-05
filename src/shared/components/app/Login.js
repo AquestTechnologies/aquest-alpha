@@ -8,7 +8,6 @@ class Login extends React.Component {
     this.handleInputEmail = event => this.setState({email: event.target.value});
     this.handleInputPassword = event => this.setState({password: event.target.value});
     this.handleSubmit = () => this.props.login(this.state);
-    
     this.state = {
       email: 'admin',
       password: 'admin',
@@ -19,6 +18,7 @@ class Login extends React.Component {
     let divStyle = {
       width: '50%',
       fontSize: '2rem',
+      margin: '0 auto 0 auto',
     };
     
     const {email, password} = this.state;

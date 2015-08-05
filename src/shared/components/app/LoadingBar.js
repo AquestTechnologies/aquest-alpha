@@ -12,7 +12,7 @@ export default class LoadingBar extends React.Component {
     const nextRecords = nextProps.records;
     
     nextRecords.forEach(record => {
-      const type = record.action.type;
+      const {type} = record;
       const intention = type.substr(8); //pratique :)
       if (type.match(/REQUEST/)) needsResolving.push(intention);
       else if (type.match(/SUCCESS|FAILURE/)) needsResolving.forEach((awaiting, i) => {
