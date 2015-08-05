@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import actionCreators from '../../shared/actionCreators';
 import JWT from 'jsonwebtoken';
 import devConfig from '../../../config/development.js';
+import {API_VALIDATION_SCHEMA as validationSchema} from '../validationSchema.js';
 
 function apiPlugin(server, options, next) {
   const {key, ttl} = devConfig().jwt;
@@ -83,10 +84,12 @@ function apiPlugin(server, options, next) {
       const before = beforeQuery[intention] || (() => Promise.resolve());
       const after  = afterQuery[intention]  || (() => Promise.resolve());
       
+      const validate = validationSchema[intention];
+      
       server.route({
         method,
         path: pathx,
-        config : {auth},
+        config : {auth, validate},
         handler: (request, reply) => {
           const params = method === 'post' ? request.payload : request.params.p;
           const response = reply.response().hold();

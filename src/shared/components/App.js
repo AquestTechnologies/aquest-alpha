@@ -13,7 +13,7 @@ function simpleMerge(a, b) {
 class App extends React.Component {
   
   render() {
-    const {children, universes, topics, chats, session, users, router, records, dispatch} = this.props;
+    const {children, universes, topics, chats, session, users, userId, router, records, dispatch} = this.props;
     
     return <div> 
       <LoadingBar records={records} />
@@ -25,6 +25,7 @@ class App extends React.Component {
               chats,
               session,
               users,
+              userId,
               router,
             }, bindActionCreators(actionCreators, dispatch))) :
           <Home session={session} {...bindActionCreators(actionCreators, dispatch)} />

@@ -1,4 +1,5 @@
 import log        from './utils/logTailor';
+import io         from 'socket.io-client';
 import isClient from './utils/isClient';
 import docCookies from '../client/vendor/cookie';
 const isServer = !isClient();
@@ -71,6 +72,30 @@ const actionCreators = {
     component:  'NewTopic',
   }),
   
+  joinChat: createActionCreator({
+    intention:  'joinChat',
+    ip:         'http://23.251.143.127:9090',
+    namespace:  'chat-universe-topic',
+    method:     'socket',
+    auth:       'jwt',
+  }),
+  
+  leaveChat: createActionCreator({
+    intention:  'leaveChat',
+    ip:         'http://23.251.143.127:9090',
+    namespace:  'chat-universe-topic',
+    method:     'socket',
+    auth:       'jwt',
+  }),
+  
+  createMessage: createActionCreator({
+    intention:  'createMessage',
+    ip:         'http://23.251.143.127:9090',
+    namespace:  'chat-universe-topic',
+    method:     'socket',
+    auth:       'jwt',
+  }),
+  
   createUser: createActionCreator({
     intention:  'createUser',
     method:     'post',
@@ -88,21 +113,22 @@ const actionCreators = {
 
 export default actionCreators;
 
-// (string)            intention   The queryDb hook, also used to create actionTypes
-// (string)            method      HTTP method
-// (string)            pathx       API path. If (method && path) an corresponding API route gets created
-// (string or false)   auth        Authentication strategy
-// (string)            component   Adds the authentication strategy to given component in routes
+/**
+ * (string)            intention   The queryDb hook, also used to create actionTypes
+ * (string)            method      HTTP method
+ * (string)            pathx       API path. If (method && path) an corresponding API route gets created
+ * (string or false)   auth        Authentication strategy
+ * (string)            component   Adds the authentication strategy to given component in routes
+ * */
 function createActionCreator(shape) {
-  
-  const {intention, method, pathx, auth} = shape;
+  const {intention, method, pathx, ip, namespace} = shape;
   const types = ['REQUEST', 'SUCCESS', 'FAILURE']
     .map(type => `${type}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
   
   const actionCreator = params => {
     log('.A.', intention, params ? JSON.stringify(params) : '');
     const promise = new Promise((resolve, reject) => {
-      
+      // console.log('method', method);
       // Server : direct db middleware call
       if (isServer) require('../server/queryDb')(intention, params).then(
           result => resolve(result),
@@ -110,24 +136,40 @@ function createActionCreator(shape) {
       
       // Client : API call through XMLHttpRequest
       else {
-        const path = pathx.replace(/\{\S*\}/, '');
-        const isPost = method === 'post';
-        const req = new XMLHttpRequest();
-        // const jwt = docCookies.getItem('jwt');
-        log(`+++ --> ${method} ${path}`, params);
-        // if (auth) log('+++ with JWT:', jwt);
-        
-        req.onerror = err => reject(err);
-        req.open(method, isPost ? path : params ? path + params : path);
-        // req.setRequestHeader('Authorization', jwt);
-        req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
-        
-        if (isPost) { 
-          //stringify objects before POST XMLHttpRequest
-          Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
-          req.send(createForm(params));
+        if(method === 'socket' && params){
+          /**
+           * ToDo : Vérification des params !(?)
+           * */
+          resolve(params);
+          
+          // if the action isn't a response from the server
+          if(!params.fromServer){
+            Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
+            
+            const socket = io.connect(ip + '/' + namespace);
+            socket.emit(intention, params);
+          }
+          
+        } else {
+          const path = pathx.replace(/\{\S*\}/, '');
+          const isPost = method === 'post';
+          const req = new XMLHttpRequest();
+          // const jwt = docCookies.getItem('jwt');
+          log(`+++ --> ${method} ${path}`, params);
+          // if (auth) log('+++ with JWT:', jwt);
+          
+          req.onerror = err => reject(err);
+          req.open(method, isPost ? path : params ? path + params : path);
+          // req.setRequestHeader('Authorization', jwt);
+          req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
+          
+          if (isPost) { 
+            //stringify objects before POST XMLHttpRequest
+            Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
+            req.send(createForm(params));
+          }
+          else req.send();
         }
-        else req.send();
       }
     });
     

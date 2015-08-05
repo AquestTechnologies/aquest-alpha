@@ -16,6 +16,7 @@ export default class NewTopic extends React.Component {
       this.state.id = topicId;
       this.state.universeId = universe.id;
       this.state.description = content.substr(0, 600);
+      this.state.userId = this.props.session.userId;
       /**
        * TODO :
        * create a function that modify the content to match atom like version 
@@ -27,20 +28,20 @@ export default class NewTopic extends React.Component {
     this.state = {
       title:   randomText(randomInteger(1, 10)),
       content: randomText(randomInteger(5, 500)),
-      userId:  'johnDoe',
       picture: ''
     };
   }
   
   render() {
-    const {title, content, userId} = this.state;
+    const {title, content} = this.state;
+    const userId = this.props.session.userId;
     const rules = "Rules: please don't hate";
     const s1 = {width: '100%'};
     const s2 = {width: '100%', minHeight: '33%'};
     
     return (
       <div className='topic'>
-        <form className='topicFrom' onSubmit={this.handleSubmit}>
+        <form className='topicForm' onSubmit={this.handleSubmit}>
           <div className="newTopic_rules">
             {rules}
           </div>

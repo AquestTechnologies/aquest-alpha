@@ -13,11 +13,51 @@ export default class Activist {
 		this.counter = 0; // Counts the number of actions taken
 		this.actionProbabilities = {}; // Will be constructed from this.probabilities
 		this.probabilities = { // Reflects the chances to perform a given action
-			'createMessage': 0.53,
-			'createVote': 0.3,
-			'createTopic': 0.09,
-			'createUser': 0.05,
-			'createUniverse': 0.03
+			'createMessage': {
+				prob: 0.3,
+				params: {
+					userId: 'abeseven',
+					chatId: '1', 
+					messageContent: {type: 'text', text: randomText(30)}
+				}
+			},
+			'readUniverses': {
+				prob: 0.2
+			},
+			'readUniverse': {
+				prob: 0.4,
+				params: 'Startups'
+			},
+			'createTopic': {
+				// prob: 0.09,
+				prob: 0.1,
+				params: {
+					id: 'required',
+					userId: 'abeseven', 
+					universeId: 'Startups',
+					title: randomText(5),
+					description: randomText(10),
+					content: [{type:'text', text: randomText(20)}]
+				}
+			}
+			// 'createVote': {
+			// 	prob: 0.3,
+			// 	data: {
+					
+			// 	}
+			// },
+			// 'createUser':  {
+			// 	prob: 0.05,
+			// 	data: {
+					
+			// 	}
+			// },
+			// 'createUniverse': {
+			// 	prob: 0.03,
+			// 	data: {
+					
+			// 	}
+			// }
 		};
 	}
 	
@@ -27,7 +67,7 @@ export default class Activist {
 		this.isStarted = true;
 		const loopActivities = () => this._generateActivity().then(
 			data => {
-				console.log(data.id);
+				log(data.id ? data.id : data);
 				if (this.isStarted) setTimeout(loopActivities, pace);
 			},
 			error => log(error)
@@ -47,9 +87,13 @@ export default class Activist {
 		
 		// actionProbabilities construction
 		Object.keys(probabilities).forEach(key => {
-			sum += probabilities[key];
-			actionProbabilities[key] = [lastValue, lastValue + probabilities[key]];
-			lastValue += probabilities[key];
+			sum += probabilities[key].prob;
+			actionProbabilities[key] = {
+				name: key,
+				prob: [lastValue, lastValue + probabilities[key].prob], 
+				params: probabilities[key].params ? probabilities[key].params : false
+			};
+			lastValue += probabilities[key].prob;
 		});
 		
 		// Checks if sum of probabilities === 1
@@ -64,8 +108,9 @@ export default class Activist {
 		const {id, _selectAction, _fetchRandomRow, actionProbabilities, counter} = this;
 		
 		return new Promise((resolve, reject) => {
-			console.log(`generateActivity ${id} ${counter} ${_selectAction(actionProbabilities)}`);
-			_fetchRandomRow('universe').then(
+			const action = _selectAction(actionProbabilities);
+			console.log(`generateActivity ${id} ${counter} ${action.name}`);
+			_fetchRandomRow(action).then(
 				data => resolve(data),
 				error => reject(error)
 			);
@@ -77,20 +122,27 @@ export default class Activist {
 		const x = Math.random();
 		let action;
 		Object.keys(actionProbabilities).forEach(key => {
-			const array = actionProbabilities[key];
-			if (x >= array[0] && x < array[1]) action = key;
+			const array = actionProbabilities[key].prob;
+			if (x >= array[0] && x < array[1]) action = actionProbabilities[key];
 		});
 		return action;
 	}
 	
-	_fetchRandomRow(table) {
-		const query = {
-			source: 'randomRow',
-			params: table
+	_fetchRandomRow(action) {
+		
+		let newAction = {
+			name: action.name,
+			params: {}
 		};
+		
+		//deep copy of params and unique Id creation for insert that needs it
+		Object.keys(action.params).forEach(param => {
+			param === 'id' ? newAction.params.id = randomString(12) : newAction.params[param] = action.params[param];
+		});
+		
 		return new Promise((resolve, reject) => {
-			queryDb(query).then(
-				data => resolve(data),
+			queryDb(newAction.name, newAction.params).then(
+				data => {resolve(data)},
 				error => reject(error)
 			);
 		});

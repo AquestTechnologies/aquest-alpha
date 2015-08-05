@@ -2,6 +2,7 @@ import React          from 'react';
 import Inventory      from './Inventory';
 import Menu           from './universe/Menu';
 import Chat           from './universe/Chat';
+import docCookies     from '../../client/vendor/cookie';
 import config         from '../../../config/client';
 import menuScroll     from '../../client/lib/menuScroll';
 
@@ -48,7 +49,7 @@ export default class Universe extends React.Component {
   
   render() {
     // console.log('.C. Universe.render');
-    const {universes, topics, chats, params, location, children, readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo} = this.props;
+    const {session, universes, topics, chats, params, location, children, readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo, users, joinChat, leaveChat, createMessage} = this.props;
     const {universeId, topicId} = params;
     const universe = universes[universeId];
     const topic = topicId ? topics[topicId] : undefined;
@@ -79,10 +80,11 @@ export default class Universe extends React.Component {
                 }) 
                 :
                 <Inventory 
-                  topics       ={filteredTopics}
-                  universe     ={universe}
-                  transitionTo ={transitionTo}
-                  readInventory={readInventory}
+                  topics        = {filteredTopics}
+                  universe      = {universe}
+                  transitionTo  = {transitionTo}
+                  readInventory = {readInventory}
+                  session       = {session}
                 />
                 
             } </div>
@@ -90,9 +92,14 @@ export default class Universe extends React.Component {
         </div>  
         
         <Chat 
-          chatId  ={chatId}
-          readChat={readChat} //passer les actions par le context, a faire
-          chat    ={chats[chatId]} 
+          chatId        = {chatId}
+          users         = {users}
+          chats         = {chats} 
+          readChat      = {readChat} //passer les actions par le context, a faire
+          joinChat      = {joinChat}
+          leaveChat     = {leaveChat}
+          createMessage = {createMessage}
+          session       = {session}
         />
       </div>
     );

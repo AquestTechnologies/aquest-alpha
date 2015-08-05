@@ -42,26 +42,33 @@ server.register([{register: require('./plugins/API')}, {register: require('./plu
   log('API and WS plugins registered');
   
   // Routes
-  server.route({
-    method: 'GET',
-    path: '/',
-    config: { auth: false },
-    handler: (request, reply) => prerender(request, reply)
-  });
-  
-  server.route({
-    method: 'GET',
-    path: '/{p*}',
-    config: { auth: false },
-    handler: (request, reply) => prerender(request, reply)
-  });
-  
-  server.route({
-    method: 'GET',
-    path: '/img/{filename}',
-    config: { auth: false },
-    handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
-  });
+  server.route([
+    {
+      method: 'GET',
+      path: '/',
+      config: { auth: false },
+      handler: (request, reply) => prerender(request, reply)
+    },
+    {
+      method: 'GET',
+      path: '/_{universeId}/{topicId}',
+      config: { auth: false },
+      handler: (request, reply) => { 
+        prerender(request, reply);}
+    },
+    {
+      method: 'GET',
+      path: '/{p*}',
+      config: { auth: false },
+      handler: (request, reply) => prerender(request, reply)
+    },
+    {
+      method: 'GET',
+      path: '/img/{filename}',
+      config: { auth: false },
+      handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
+    }
+  ]);
 });
 
 server.ext('onRequest', (request, reply) => {
