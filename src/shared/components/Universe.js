@@ -52,8 +52,6 @@ export default class Universe extends React.Component {
     const topic = topicId ? topics[topicId] : undefined;
     const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
     const filteredTopics = !children ? this.filterTopics(topics, universeId) : undefined;
-    console.log('chatid', chatId);
-    console.log('chats', chats);
     
     return !universe ? <div>Loading...</div> : (
       <div> 

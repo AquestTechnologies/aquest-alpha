@@ -1,7 +1,7 @@
 ------------
 -- SCHEMA --
 ------------
-DROP SCHEMA if exists aquest_schema CASCADE;
+DROP SCHEMA IF EXISTS aquest_schema CASCADE;
 CREATE SCHEMA aquest_schema;
 ALTER SCHEMA aquest_schema OWNER TO admin;
 ALTER DATABASE aquestdb SET search_path='"$user", public, aquest_schema';
@@ -187,81 +187,50 @@ CREATE TABLE aquest_schema.ATOMMESSAGE(
 -- );
 
 
-----------------------------------------------------
--- TRIGGER : ID GENERATION FOR UNIVERSE AND TOPIC --
-----------------------------------------------------
-CREATE FUNCTION aquest_schema.generate_id() 
-  RETURNS trigger AS $generate_id$
+-------------------------------------------------------------
+-- TRIGGER : ID AND CHAT GENERATION FOR UNIVERSE AND TOPIC --
+-------------------------------------------------------------
+CREATE FUNCTION aquest_schema.prepare_insert() 
+  RETURNS trigger AS $prepare_insert$
   DECLARE
     new_id TEXT;
-    existant TEXT;
+    same_id TEXT;
+    last_chat_id BIGINT;
+    chat_name TEXT;
+    
   BEGIN
+    -- Universe
     IF (TG_TABLE_NAME = 'universe') THEN
       new_id := replace(trim(both ' ' from NEW.name), ' ', '_');
-      existant := (SELECT id FROM aquest_schema.universe WHERE universe.id ~ concat('^', new_id) ORDER BY id DESC);
-      IF (FOUND IS FALSE) THEN
-        NEW.id := new_id;
-      ELSE
-      END IF;
+      same_id := (SELECT id FROM aquest_schema.universe WHERE universe.id = new_id);
+      INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING id INTO last_chat_id;
+      
+    -- Topic
     ELSIF (TG_TABLE_NAME = 'topic') THEN
       new_id := replace(trim(both ' ' from NEW.title), ' ', '_');
-      existant := (SELECT id FROM aquest_schema.topic WHERE topic.id ~ concat('^', new_id) ORDER BY id DESC);
-      IF (FOUND IS FALSE) THEN
-        NEW.id := new_id;
-      ELSE
-      END IF;
+      same_id := (SELECT id FROM aquest_schema.topic WHERE topic.id = new_id ORDER BY id DESC);
+      INSERT INTO aquest_schema.chat (name) VALUES (NEW.title) RETURNING id INTO last_chat_id;
     END IF;
+    
+    IF (same_id <> '') THEN
+      new_id := concat(new_id, '_', left(md5(random()::text), 7));
+    END IF;
+    
+    NEW.chat_id := last_chat_id;
+    NEW.id := new_id;
     RETURN NEW;
   END;
-$generate_id$ LANGUAGE plpgsql;
+$prepare_insert$ LANGUAGE plpgsql;
 
 -- Universe
-CREATE TRIGGER generate_id
+CREATE TRIGGER prepare_insert
   BEFORE INSERT ON aquest_schema.universe
-  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.generate_id();
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.prepare_insert();
 -- Topic
-CREATE TRIGGER generate_id
+CREATE TRIGGER prepare_insert
   BEFORE INSERT ON aquest_schema.topic
-  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.generate_id();
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.prepare_insert();
 
-
----------------------------------------------------
--- TRIGGER : CHAT CREATION FOR UNIVERSE AND TOPIC--
----------------------------------------------------
--- automaticaly create a chat and assign it's ID before creating a topic
-CREATE FUNCTION aquest_schema.create_chat_topic() 
-  RETURNS trigger AS $create_chat_topic$
-  DECLARE
-    last_chat_id BIGINT;
-    chat_name TEXT;
-  BEGIN
-    INSERT INTO aquest_schema.chat (name) VALUES (NEW.title) RETURNING id INTO last_chat_id;
-    NEW.chat_id := last_chat_id;
-    RETURN NEW;
-  END;
-$create_chat_topic$ LANGUAGE plpgsql;
-
--- automaticaly create a chat and assign it's ID before creating a universe
-CREATE FUNCTION aquest_schema.create_chat_universe() 
-  RETURNS trigger AS $create_chat_universe$
-  DECLARE
-    last_chat_id BIGINT;
-    chat_name TEXT;
-  BEGIN
-    INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING id INTO last_chat_id;
-    NEW.chat_id := last_chat_id;
-    RETURN NEW;
-  END;
-$create_chat_universe$ LANGUAGE plpgsql;
--- Universe
-CREATE TRIGGER create_chat
-  BEFORE INSERT ON aquest_schema.universe
-  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.create_chat_universe();
--- Topic  
-CREATE TRIGGER create_chat
-  BEFORE INSERT ON aquest_schema.topic
-  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.create_chat_topic();
-  
 
 --------------------------
 -- TRIGGER : UPDATED_AT -- 
@@ -375,15 +344,25 @@ INSERT INTO aquest_schema.user
   VALUES 
     ('admin@aquest.tech', 'admin', 'Aquest', 'Technologies', '$2a$10$m3jpaE2uelYFzoPTu/fG/eU5rTkmL0d8ph.eF3uQrdQE46UbhhpdW', '192.168.0.1');
 
+INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
+  VALUES ('Test', 'admin', 'Make some, fail some, love some.', 'img/pillars_compressed.png', '192.168.0.1');
+
+INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
+  VALUES ('Test', 'admin', 'Same name ? No problem.', 'img/pillars_compressed.png', '192.168.0.1');
+    
+INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
+  VALUES ('Test', 'admin', 'Same name ? No problem.', 'img/pillars_compressed.png', '192.168.0.1');
+    
+INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
+  VALUES ('X X', 'admin', 'Same name ? No problem.', 'img/pillars_compressed.png', '192.168.0.1');
+    
+INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
+  VALUES ('X_X', 'admin', 'Same name ? No problem.', 'img/pillars_compressed.png', '192.168.0.1');
+    
 -- INSERT INTO aquest_schema.user 
 --     (email, id, first_name, last_name, password_salt, password_hash, creation_ip) 
 --   VALUES 
 --     ('johndoe@gmail.com', 'johnDoe', 'John', 'Doe', 'fsfgfdgsdfgsdfokoksqlsd', 'dskjfsdkfjks', '192.168.0.1');
-
--- INSERT INTO aquest_schema.universe 
---     (id, name, user_id, description, picture) 
---   VALUES 
---     ('Startups', 'Startups', 'johnDoe', 'This is the description of the Startups universe', 'img/pillars_compressed.png');
     
 -- INSERT INTO aquest_schema.universe 
 --     (id, name, user_id, description, picture) 
