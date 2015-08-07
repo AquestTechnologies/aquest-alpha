@@ -9,7 +9,7 @@ export default class NewUniverse extends React.Component {
     
     this.handleInputName = event => this.setState({name: event.currentTarget.value});
     this.handleInputDescription = event => this.setState({description: event.currentTarget.value});
-    this.handleInputRelated = event => this.setState({related: event.currentTarget.value});
+    // this.handleInputRelated = event => this.setState({related: event.currentTarget.value});
     this.handleSubmit = event => {
       event.preventDefault();
       this.props.createUniverse(this.state);
@@ -18,7 +18,8 @@ export default class NewUniverse extends React.Component {
     this.state = {
       name: '',
       description: '',
-      related: '',
+      // related: [],
+      // relatedRaw: '',
       picture: 'img/pillars_compressed.png',
     };
   }
@@ -26,7 +27,7 @@ export default class NewUniverse extends React.Component {
   componentDidMount() {
     this.setState({
       name: randomText(randomInteger(1, 3)).slice(0, -1),
-      description: randomText(randomInteger(1, 70))
+      description: randomText(randomInteger(1, 30))
     });
   }
   
@@ -54,14 +55,18 @@ export default class NewUniverse extends React.Component {
             <input type="text" value={description} onChange={this.handleInputDescription} />
           </div>
           <br />
-          <div>
-            <div>Related universes</div>
-            <input type="text" value={related} onChange={this.handleInputRelated} />
-          </div>
-          <br />
           <input type="submit" value='Create universe' />
         </form>
       </div>
     );
   }
 }
+
+          /*
+          <br />
+          <div>
+            <div>Related universes</div>
+            <input type="text" value={related} onChange={this.handleInputRelated} />
+          </div>
+          */
+          

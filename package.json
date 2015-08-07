@@ -21,6 +21,7 @@
     "hapi": "^8.8.0",
     "hapi-auth-jwt2": "^4.9.0",
     "immutable": "^3.7.4",
+    "joi": "^6.6.1",
     "jsonwebtoken": "^5.0.4",
     "node-babel": "^0.1.2",
     "node-libs-browser": "^0.5.2",

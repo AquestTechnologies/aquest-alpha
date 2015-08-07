@@ -29,10 +29,11 @@ const API_VALIDATION_SCHEMA = {
   },
   createUniverse: {
     payload: {
-      name:         Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,15}$/),
-      description:  Joi.string().max(200),
-      related:      Joi.string(),
-      userId
+      // name:         Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,15}$/), // Le regex n'est pas bon, "ô-ïçé" doit etre valide
+      name:         Joi.string().trim().required().min(1).max(100),
+      description:  Joi.string().trim().max(200),
+      picture:      Joi.string().required(),
+      // related:      Joi.array().optional(),
     }
   },
   createTopic: {

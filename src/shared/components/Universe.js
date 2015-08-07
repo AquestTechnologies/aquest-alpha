@@ -2,7 +2,6 @@ import React          from 'react';
 import Inventory      from './Inventory';
 import Menu           from './universe/Menu';
 import Chat           from './universe/Chat';
-import docCookies     from '../../client/vendor/cookie';
 import config         from '../../../config/client';
 import menuScroll     from '../../client/lib/menuScroll';
 
@@ -38,8 +37,7 @@ export default class Universe extends React.Component {
   }
   
   componentWillMount() {
-    const {universes, params, readUniverse} = this.props;
-    const {universeId} = params;
+    const { universes, params: { universeId }, readUniverse } = this.props;
     if (!universes[universeId]) readUniverse(universeId);
   }
   
@@ -49,20 +47,21 @@ export default class Universe extends React.Component {
   
   render() {
     // console.log('.C. Universe.render');
-    const {session, universes, topics, chats, params, location, children, readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo, users, joinChat, leaveChat, createMessage} = this.props;
-    const {universeId, topicId} = params;
+    const { universes, topics, chats, location, children, readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo, params: { universeId, topicId } } = this.props;
     const universe = universes[universeId];
     const topic = topicId ? topics[topicId] : undefined;
     const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
     const filteredTopics = !children ? this.filterTopics(topics, universeId) : undefined;
+    console.log('chatid', chatId);
+    console.log('chats', chats);
     
     return !universe ? <div>Loading...</div> : (
       <div> 
         <Menu 
-          topicId     ={topicId}
-          universeId  ={universeId} 
+          topicId={topicId}
+          universeId={universeId} 
           universeName={universe.name} 
-          pathName    ={location.pathname}
+          pathName={location.pathname}
         />
         
         <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
@@ -80,11 +79,10 @@ export default class Universe extends React.Component {
                 }) 
                 :
                 <Inventory 
-                  topics        = {filteredTopics}
-                  universe      = {universe}
-                  transitionTo  = {transitionTo}
-                  readInventory = {readInventory}
-                  session       = {session}
+                  universe={universe}
+                  topics={filteredTopics}
+                  transitionTo={transitionTo}
+                  readInventory={readInventory}
                 />
                 
             } </div>
@@ -92,14 +90,9 @@ export default class Universe extends React.Component {
         </div>  
         
         <Chat 
-          chatId        = {chatId}
-          users         = {users}
-          chats         = {chats} 
-          readChat      = {readChat} //passer les actions par le context, a faire
-          joinChat      = {joinChat}
-          leaveChat     = {leaveChat}
-          createMessage = {createMessage}
-          session       = {session}
+          chatId={chatId}
+          readChat={readChat} //passer les actions par le context, a faire
+          chat={chats[chatId]} 
         />
       </div>
     );

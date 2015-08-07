@@ -1,9 +1,9 @@
-import log, {logRequest} from '../../shared/utils/logTailor.js';
-import queryDb from '../queryDb.js';
 import bcrypt from 'bcrypt';
-import actionCreators from '../../shared/actionCreators';
 import JWT from 'jsonwebtoken';
+import queryDb from '../queryDb.js';
+import log from '../../shared/utils/logTailor.js';
 import devConfig from '../../../config/development.js';
+import actionCreators from '../../shared/actionCreators';
 import {API_VALIDATION_SCHEMA as validationSchema} from '../validationSchema.js';
 
 function apiPlugin(server, options, next) {
@@ -18,8 +18,8 @@ function apiPlugin(server, options, next) {
         bcrypt.hash(params.password, salt, (err, hash) => {
           if (err) return reject(err);
           params.passwordHash = hash;
-          params.passwordSalt = salt;
           params.ip = request.info.remoteAddress;
+          params.picture = '';
           delete params.password;
           resolve();
         });
@@ -40,20 +40,22 @@ function apiPlugin(server, options, next) {
   const afterQuery = {
     
     login: ({email, password}, result, response) => new Promise((resolve, reject) => {
-      if (result) bcrypt.compare(password, result.password_hash, (err, isValid) => {
+      if (result) bcrypt.compare(password, result.passwordHash, (err, isValid) => {
         if (err) return reject(err);
         if (isValid) {
+          delete result.passwordHash;
           const userId = result.id;
           const expiration = new Date().getTime() + ttl;
           response.state('jwt', JWT.sign({userId, expiration}, key), {ttl, path: '/'}); // Note: somehow, path: '/' is important
           resolve(true); // Skips token renewal
         }
-        else reject('password mismatch');
+        else reject('password mismatch'); // Alerte : reject n'est pas le comportement attendu
       });
       else reject('user not found');
     }),
     
     createUser: (params, result, response) => new Promise((resolve, reject) => {
+      // Alerte!!! Il faut que la bdd reponde ok pour pouvoir creer un cookie/token !!!!
       const userId = result.id;
       const expiration = new Date().getTime() + ttl;
       response.state('jwt', JWT.sign({userId, expiration}, key), {ttl, path: '/'});
@@ -83,7 +85,6 @@ function apiPlugin(server, options, next) {
     if (method && pathx) {
       const before = beforeQuery[intention] || (() => Promise.resolve());
       const after  = afterQuery[intention]  || (() => Promise.resolve());
-      
       const validate = validationSchema[intention];
       
       server.route({
@@ -95,33 +96,29 @@ function apiPlugin(server, options, next) {
           const response = reply.response().hold();
           
           before(request, params).then(
-            () => {
-              if (request.method === 'post') log(`+++ params : ${JSON.stringify(params)}`);
-              
-              queryDb(intention, params).then(
-                result => after(params, result, response).then(
-                  skipRenewToken => {
-                    response.source = result;
-                    skipRenewToken ? response.send() : renewToken(request, response);
-                  },
-                  
-                  error => { // after failed
-                    response.statusCode  = 500;
-                    response.send();
-                    log(error);
-                  }
-                ),
-                error => { // query failed
+            () => queryDb(intention, params).then(
+              result => after(params, result, response).then(
+                skipRenewToken => {
+                  response.source = result;
+                  skipRenewToken ? response.send() : renewToken(request, response);
+                },
+                
+                error => {
+                  log('!!! Error while afterQuery:', error.message);
                   response.statusCode  = 500;
                   response.send();
-                  log(error);
                 }
-              );
-            },
-            error => { // before failed
+              ),
+              error => {
+                log('!!! Error while query:', error.message);
+                response.statusCode  = 500;
+                response.send();
+              }
+            ),
+            error => {
+              log('!!! Error while beforeQuery:', error.message);
               response.statusCode  = 500;
               response.send();
-              log(error);
             }
           );
         },
@@ -135,7 +132,7 @@ function apiPlugin(server, options, next) {
 apiPlugin.attributes = {
   name:         'apiPlugin',
   description:  'REST API',
-  main:         'api.js'
+  main:         'API.js'
 };
 
 export default apiPlugin;

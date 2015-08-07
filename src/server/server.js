@@ -51,13 +51,6 @@ server.register([{register: require('./plugins/API')}, {register: require('./plu
     },
     {
       method: 'GET',
-      path: '/_{universeId}/{topicId}',
-      config: { auth: false },
-      handler: (request, reply) => { 
-        prerender(request, reply);}
-    },
-    {
-      method: 'GET',
       path: '/{p*}',
       config: { auth: false },
       handler: (request, reply) => prerender(request, reply)
