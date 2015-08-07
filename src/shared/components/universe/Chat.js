@@ -3,7 +3,7 @@ import Message from './Message';
 import ChatHeader from './ChatHeader';
 import ChatFooter from './ChatFooter';
 
-class Chat extends React.Component {
+export default class Chat extends React.Component {
   
   constructor() {
     super();
@@ -15,7 +15,7 @@ class Chat extends React.Component {
   
   componentWillMount() {
     // console.log('.C. Chat.componentWillMount');
-    let {chat, readChat, chatId} = this.props;
+    let { chat, readChat, chatId } = this.props;
     let isLoading = false;
     if (!chat) {
       chat = {};
@@ -27,7 +27,7 @@ class Chat extends React.Component {
   
   componentWillReceiveProps(nextProps) {
     // console.log('.C. Chat.componentWillReceiveProps');
-    const {chat, readChat, chatId} = nextProps;
+    const { chat, readChat, chatId } = nextProps;
     const isLoading = false;
     if (!chat) {
       if (!this.state.isLoading) {
@@ -85,5 +85,3 @@ class Chat extends React.Component {
     );
   }
 }
-
-export default Chat;

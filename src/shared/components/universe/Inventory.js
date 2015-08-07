@@ -1,6 +1,6 @@
 import React    from 'react';
-import Card     from './inventory/Card';
-import NewTopicCard  from './inventory/NewTopicCard';
+import Card     from './Card';
+import NewTopicCard  from './NewTopicCard';
 
 class Inventory extends React.Component {
   

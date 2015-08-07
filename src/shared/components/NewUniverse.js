@@ -12,7 +12,7 @@ export default class NewUniverse extends React.Component {
     // this.handleInputRelated = event => this.setState({related: event.currentTarget.value});
     this.handleSubmit = event => {
       event.preventDefault();
-      this.props.createUniverse(this.state);
+      this.props.actions.createUniverse(this.state);
     };
     
     this.state = {
@@ -38,7 +38,7 @@ export default class NewUniverse extends React.Component {
       fontSize: '2rem',
     };
     
-    const {name, description, related} = this.state;
+    const { name, description, related } = this.state;
     
     return (
       <div style={divStyle} >
@@ -61,7 +61,6 @@ export default class NewUniverse extends React.Component {
     );
   }
 }
-
           /*
           <br />
           <div>

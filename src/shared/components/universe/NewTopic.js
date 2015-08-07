@@ -1,5 +1,5 @@
 import React from 'react';
-import {randomInteger, randomText} from '../utils/randomGenerators';
+import {randomInteger, randomText} from '../../utils/randomGenerators';
 
 export default class NewTopic extends React.Component {
   

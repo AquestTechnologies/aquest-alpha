@@ -191,7 +191,7 @@ CREATE TABLE aquest_schema.ATOMMESSAGE(
 -- TRIGGER : ID AND CHAT GENERATION FOR UNIVERSE AND TOPIC --
 -------------------------------------------------------------
 CREATE FUNCTION aquest_schema.prepare_insert() 
-  RETURNS trigger AS $prepare_insert$
+  RETURNS TRIGGER AS $prepare_insert$
   DECLARE
     new_id TEXT;
     same_id TEXT;
@@ -339,10 +339,8 @@ $$ LANGUAGE plv8 IMMUTABLE STRICT;
 -- MOCK DATA INSERTION --
 -------------------------
 
-INSERT INTO aquest_schema.user 
-    (email, id, first_name, last_name, password_hash, creation_ip) 
-  VALUES 
-    ('admin@aquest.tech', 'admin', 'Aquest', 'Technologies', '$2a$10$m3jpaE2uelYFzoPTu/fG/eU5rTkmL0d8ph.eF3uQrdQE46UbhhpdW', '192.168.0.1');
+INSERT INTO aquest_schema.user (email, id, first_name, last_name, password_hash, creation_ip) 
+  VALUES ('admin@aquest.tech', 'admin', 'Aquest', 'Technologies', '$2a$10$m3jpaE2uelYFzoPTu/fG/eU5rTkmL0d8ph.eF3uQrdQE46UbhhpdW', '192.168.0.1');
 
 INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
   VALUES ('Test', 'admin', 'Make some, fail some, love some.', 'img/pillars_compressed.png', '192.168.0.1');

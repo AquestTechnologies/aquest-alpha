@@ -1,5 +1,5 @@
 import React          from 'react';
-import Inventory      from './Inventory';
+import Inventory      from './universe/Inventory';
 import Menu           from './universe/Menu';
 import Chat           from './universe/Chat';
 import config         from '../../../config/client';
@@ -8,7 +8,7 @@ import menuScroll     from '../../client/lib/menuScroll';
 export default class Universe extends React.Component {
   
   static runPhidippides(routerState) {
-    const {universeId, topicId} = routerState.params;
+    const { universeId, topicId } = routerState.params;
     const tasks = [{
       id:         'universe',
       creator:    'readUniverse',
@@ -37,7 +37,7 @@ export default class Universe extends React.Component {
   }
   
   componentWillMount() {
-    const { universes, params: { universeId }, readUniverse } = this.props;
+    const { universes, params: { universeId }, actions: { readUniverse } } = this.props;
     if (!universes[universeId]) readUniverse(universeId);
   }
   
@@ -47,7 +47,7 @@ export default class Universe extends React.Component {
   
   render() {
     // console.log('.C. Universe.render');
-    const { universes, topics, chats, location, children, readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo, params: { universeId, topicId } } = this.props;
+    const { universes, topics, chats, location, children, actions: { readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo }, params: { universeId, topicId } } = this.props;
     const universe = universes[universeId];
     const topic = topicId ? topics[topicId] : undefined;
     const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
@@ -70,6 +70,7 @@ export default class Universe extends React.Component {
                 
                 React.cloneElement(children, {
                   topic,
+                  topicId,
                   universe,
                   readTopic,
                   createTopic,
