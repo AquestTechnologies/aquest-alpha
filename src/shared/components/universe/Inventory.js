@@ -1,29 +1,24 @@
-import React    from 'react';
-import Card     from './Card';
-import NewTopicCard  from './NewTopicCard';
+import React from 'react';
+import Card  from './Card';
+import NewTopicCard from './NewTopicCard';
 
-class Inventory extends React.Component {
+export default class Inventory extends React.Component {
   
   constructor() {
     super();
     
     this.state = { nameVisible: true };
     this.handleHeaderHover = () => this.setState({nameVisible: !this.state.nameVisible});
-    this.renderCards = (topics, transitionTo) => Object.keys(topics).map(key => <Card
-      key = {key} 
-      transitionTo={transitionTo}
-      topic = {topics[key]}
-    />);
   }
   
   componentWillMount() {
-    const {universe, readInventory} = this.props;
+    const { universe, readInventory } = this.props;
     if (!universe.lastInventoryUpdate) readInventory(universe.id);
   }
   
   render() {
-    const {nameVisible} = this.state;
-    const {universe, topics, transitionTo} = this.props;
+    const { nameVisible } = this.state;
+    const { universe: { name, description, id }, topics, transitionTo } = this.props;
     
     return (
       <div>
@@ -31,7 +26,7 @@ class Inventory extends React.Component {
         <div className='inventory_header'>
           <div className='inventory_header_content' onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
             <div className={nameVisible ? 'inventory_header_content_name' : 'inventory_header_content_desc'}>
-              { nameVisible ? universe.name : universe.description }
+              { nameVisible ? name : description }
             </div>
           </div>
         </div>  
@@ -39,11 +34,18 @@ class Inventory extends React.Component {
         <div className='inventory_list'>
           
           <NewTopicCard 
-            universeId={universe.id} 
+            universeId={id} 
             transitionTo={transitionTo}
           />
           
-          { this.renderCards(topics, transitionTo) }
+          { 
+            Object.keys(topics).map(key => 
+              <Card
+                key = {key} 
+                transitionTo={transitionTo}
+                topic = {topics[key]}
+              />)
+          }
           
         </div>
         
@@ -52,5 +54,3 @@ class Inventory extends React.Component {
   }
   
 }
-
-export default Inventory;

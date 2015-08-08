@@ -168,48 +168,27 @@ export default function queryDb(intention, params) {
       case 'readTopicContent':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
-        /*sql =
-        'SELECT ' + 
-          'aquest_schema.concat_json_object(' +
-            'to_json(topic), json_build_object(' +
-              `'content',array_to_json(` + 
-                'array_agg(' +
-                  '(SELECT atom_topic.content ORDER BY atom_topic.position)' +
-                ')' +
-              ')' +
-            ')' +
-          ') as "topicWithContent" ' +
-        'FROM ' +
-          '(SELECT ' + 
-            'topic.id, topic.title, topic.universe_id "universeId", topic.user_id author, topic.description, topic.picture, topic.updated_at "timestamp", topic.chat_id "chatId" ' +
-          'FROM ' +
-            `aquest_schema.topic WHERE topic.id = '${params}'`+
-          ') topic, ' +
-          'aquest_schema.atom_topic ' +
-        'WHERE ' +
-          'atom_topic.topic_id = topic.id ' +
-        'GROUP BY topic';*/
         sql = 
         'SELECT ' +
           'array_to_json(' +
             'array_agg(' +
               'aquest_schema.concat_json_object(' +
-                'atom_topics.content, json_build_object(' +
-                  `'type',atom_topics.type`+
+                'atomtopics.content, json_build_object(' +
+                  `'type',atomtopics.type` +
                 ')' +
               ')' +
             ')' +
           ') AS content ' +
         'FROM ' +
           '(SELECT ' +
-        		'atom_topic.content, atom_topic.type ' +
+        		'atomtopic.content, atomtopic.type ' +
         	'FROM ' +
-        		'aquest_schema.atom_topic ' +
+        		'aquest_schema.atomtopic ' +
         	'WHERE ' +
-        		'atom_topic.topic_id = $1 ' + 	
+        		'atomtopic.topic_id = $1 ' + 	
         	'ORDER BY ' + 
-        		'atom_topic.position' +
-        	') atom_topics';
+        		'atomtopic.position' +
+        	') atomtopics';
         
         paramaterized = [params];
         callback = result => result.rows[0].content;

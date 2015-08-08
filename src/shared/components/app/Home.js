@@ -6,7 +6,7 @@ import Login from './Login';
 export default class Home extends React.Component {
   
   renderLogin() {
-    const {session: {userId}, login, logout, createUser} = this.props;
+    const { session: { userId }, actions: { login, logout, createUser } } = this.props;
     const s2 = { 
       display : 'flex', 
       alignContent: 'space-between',

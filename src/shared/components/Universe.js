@@ -47,7 +47,12 @@ export default class Universe extends React.Component {
   
   render() {
     // console.log('.C. Universe.render');
-    const { universes, topics, chats, location, children, actions: { readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo }, params: { universeId, topicId } } = this.props;
+    const { 
+      universes, topics, chats, session: { userId },
+      children, location: { pathname }, params: { universeId, topicId },
+      actions: { readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo }
+    } = this.props;
+    
     const universe = universes[universeId];
     const topic = topicId ? topics[topicId] : undefined;
     const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
@@ -59,7 +64,7 @@ export default class Universe extends React.Component {
           topicId={topicId}
           universeId={universeId} 
           universeName={universe.name} 
-          pathName={location.pathname}
+          pathName={pathname}
         />
         
         <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
@@ -70,6 +75,7 @@ export default class Universe extends React.Component {
                 
                 React.cloneElement(children, {
                   topic,
+                  userId,
                   topicId,
                   universe,
                   readTopic,

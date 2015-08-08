@@ -85,12 +85,24 @@ function apiPlugin(server, options, next) {
     if (method && pathx) {
       const before = beforeQuery[intention] || (() => Promise.resolve());
       const after  = afterQuery[intention]  || (() => Promise.resolve());
-      const validate = validationSchema[intention];
       
       server.route({
         method,
         path: pathx,
-        config : {auth, validate},
+        config: {
+          auth, 
+          validate: { 
+            payload: validationSchema[intention],
+            failAction: (request, reply, source, error) => { 
+              // servira à renvoyer des messages d'erreur custom
+              const response = reply.response().hold();
+              log('... Joi failed:', error.data.details); // Pas pour la prod mais c'est relou d'aller dans console/network pour voir le message en devlopement
+              response.statusCode = 400;
+              response.source = error.data.details;
+              response.send();
+            }
+          }
+        },
         handler: (request, reply) => {
           const params = method === 'post' ? request.payload : request.params.p;
           const response = reply.response().hold();
@@ -104,19 +116,19 @@ function apiPlugin(server, options, next) {
                 },
                 
                 error => {
-                  log('!!! Error while afterQuery:', error.message);
+                  log('!!! Error while API afterQuery:', error.message);
                   response.statusCode  = 500;
                   response.send();
                 }
               ),
               error => {
-                log('!!! Error while query:', error.message);
+                log('!!! Error while API query:', error.message);
                 response.statusCode  = 500;
                 response.send();
               }
             ),
             error => {
-              log('!!! Error while beforeQuery:', error.message);
+              log('!!! Error while API beforeQuery:', error.message);
               response.statusCode  = 500;
               response.send();
             }

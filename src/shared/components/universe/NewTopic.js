@@ -6,35 +6,34 @@ export default class NewTopic extends React.Component {
   constructor() {
     super();
     
-    this.handleInputTitle = e => this.setState({title: e.target.value});
-    this.handleInputContent = e => this.setState({content: e.target.value});
+    this.handleInputTitle = e => this.setState({title: e.currentTarget.value});
+    this.handleInputContent = e => this.setState({content: e.currentTarget.value});
     this.handleSubmit = e => {
       e.preventDefault();
-      const {universe, createTopic} = this.props;
-      const {title, content} = this.state;
-      const topicId = title.trim().substr(0, 30).replace(' ','_');
-      this.state.id = topicId;
-      this.state.universeId = universe.id;
+      const { content } = this.state;
+      const { universe: { id }, createTopic } = this.props;
+      this.state.universeId = id;
       this.state.description = content.substr(0, 600);
-      this.state.userId = this.props.session.userId;
-      /**
-       * TODO :
-       * create a function that modify the content to match atom like version 
-       * --> [{'atom_type':'sub_content'}] */
-      this.state.content = [{type: 'text', text: content}];
+      this.state.atoms = [ // à gen dynamiquement
+        {
+          type: 'text', 
+          content: {text: content}, 
+          position: 1,
+        }
+      ];
       createTopic(this.state);
     };
     
     this.state = {
       title:   randomText(randomInteger(1, 10)),
       content: randomText(randomInteger(5, 500)),
-      picture: ''
     };
   }
   
   render() {
-    const {title, content} = this.state;
-    const userId = this.props.session.userId;
+    const { title, content } = this.state;
+    const { userId } = this.props;
+    
     const rules = "Rules: please don't hate";
     const s1 = {width: '100%'};
     const s2 = {width: '100%', minHeight: '33%'};
