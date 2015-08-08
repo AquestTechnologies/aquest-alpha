@@ -20,52 +20,45 @@ const password  = Joi.string().trim().required().min(6);
  * }
  * */
 const API_VALIDATION_SCHEMA = {
+  
   createUser: {
-    payload: {
-      pseudo:       userId,
-      email,
-      password
-    }
+    pseudo:       userId,
+    email,
+    password
   },
+  
   createUniverse: {
-    payload: {
-      name:         Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,15}$/),
-      description:  Joi.string().max(200),
-      related:      Joi.string(),
-      userId
-    }
+    // name:         Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,15}$/), // Le regex n'est pas bon, "ô-ïçé" doit etre valide
+    name:         Joi.string().trim().required().min(1).max(100),
+    description:  Joi.string().trim().max(200),
+    picture:      Joi.string().required(),
+    // related:      Joi.array().optional(),
   },
+  
   createTopic: {
-    payload: {
-      id:           Joi.string().trim().required().min(1).regex(/^.*$/),
-      universeId:   Joi.string().trim().required().min(1).regex(/^.*$/),
-      title:        Joi.string().trim().required().min(1).regex(/^.*$/),
-      description:  Joi.string().trim().required().min(1).regex(/^.*$/),
-      content:      Joi.array().items(
-                      Joi.object({
-                        type: Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,}$/)
-                      }).unknown(true).required()
-                    ), 
-      userId,
-      picture:      Joi.string().allow('')
-    }
+    title:        Joi.string().trim().required().min(1).regex(/^.*$/),
+    universeId:   Joi.string().trim().required().min(1).regex(/^.*$/),
+    atoms:        Joi.array().items(
+      Joi.object().keys({
+        type: Joi.string().trim().required().min(1).regex(/^text$/), // Regex à construire dynamiquement
+        content: Joi.object().required(),
+      }).unknown(false).required()), 
   },
+  
   login: {
-    payload: {
-      email:        Joi.alternatives().try(userId, email),
-      password
-    }
+    password,
+    email: Joi.alternatives().try(userId, email),
   }
 };
 
 const WEBSOCKET_VALIDATION_SCHEMA = {
   joinChat: {
     chatId,
-    userId
+    // userId // Ne pas faire confiance à l'utilisateur, userId provient du token décodé (je sais avec du WS ca pas etre simple)
   },
   leaveChat: {
     chatId,
-    userId
+    // userId
   },
   createMessage: {
     id:           Joi.number().positive().integer().required().min(1),
@@ -73,7 +66,7 @@ const WEBSOCKET_VALIDATION_SCHEMA = {
     content:      Joi.object({
                     type: Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,}$/)
                   }).unknown(true).required(), 
-    userId
+    // userId 
   }
 };  
 

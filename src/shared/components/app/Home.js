@@ -6,7 +6,7 @@ import Login from './Login';
 export default class Home extends React.Component {
   
   renderLogin() {
-    const {session: {userId}, login, logout, createUser} = this.props;
+    const { actions, session: { userId } } = this.props;
     const s2 = { 
       display : 'flex', 
       alignContent: 'space-between',
@@ -14,11 +14,11 @@ export default class Home extends React.Component {
     
     return userId ?
       <div style={{marginTop: '20'}}>
-        <button onClick={logout}>Logout</button>
+        <button onClick={actions.logout}>Logout</button>
       </div> :
       <div style={s2}>
-        <Login login={login} />
-        <Signup createUser={createUser} />
+        <Login actions={actions} />
+        <Signup createUser={actions.createUser} />
       </div>;
   }
   

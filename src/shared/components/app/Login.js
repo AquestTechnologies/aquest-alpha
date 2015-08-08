@@ -5,12 +5,12 @@ class Login extends React.Component {
   constructor() {
     super();
     
-    this.handleInputEmail = event => this.setState({email: event.target.value});
-    this.handleInputPassword = event => this.setState({password: event.target.value});
-    this.handleSubmit = () => this.props.login(this.state);
+    this.handleInputEmail = event => this.setState({email: event.currentTarget.value});
+    this.handleInputPassword = event => this.setState({password: event.currentTarget.value});
+    this.handleSubmit = () => this.props.actions.login(this.state);
     this.state = {
       email: 'admin',
-      password: 'admin',
+      password: 'password',
     };
   }
   

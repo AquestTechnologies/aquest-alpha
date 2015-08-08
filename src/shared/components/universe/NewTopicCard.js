@@ -7,21 +7,21 @@ class NewTopicCard extends React.Component {
   };
   
   render() {
-    const {title, title2, author, description, transitionTo, universeId} = this.props;
+    const { title, title2, author, description, transitionTo, universeId } = this.props;
     
     return (
       <div className="newTopicCard" onClick={this.handleClick.bind(this, transitionTo, universeId)}>
       
         <div className="card_content">
           <div className="newTopicCard_title">
-            <div>{title}</div>
-            <div>{title2}</div>
+            <div>{ title }</div>
+            <div>{ title2}</div>
           </div>
           <div className="newTopicCard_author">
-            {author}
+            { author }
           </div>
           <div className="newTopicCard_description">
-            {description}
+            { description }
           </div>
         </div>
         

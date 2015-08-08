@@ -14,14 +14,15 @@ import promiseMiddleware from '../shared/utils/promiseMiddleware';
 import log, { logAuthentication }  from '../shared/utils/logTailor';
 import makeJourney, { routeGuard } from '../shared/routes';
 
-const {wds: {hotFile, publicPath, filename}, jwt: {key, ttl}} = devConfig();
-const HTML = fs.readFileSync('index.html', 'utf8');
+const { wds: { hotFile, publicPath, filename }, jwt: { key, ttl } } = devConfig();
+const HTML = fs.readFileSync('src/server/index.html', 'utf8');
 
 // Replies a prerendered application
 export default function prerender(request, reply) {
   
   const d = new Date();
   const response = reply.response().hold();
+  
   const checkCookie = typeof request.state.jwt === 'string' ? // If there is a JWT in the cookie, we verify it
     new Promise((resolve, reject) => JWT.verify(request.state.jwt, key, (err, {userId, expiration}) => {
       if (err) reject(err);
@@ -53,13 +54,16 @@ export default function prerender(request, reply) {
     
     Router.run(routes, new Location(url), (err, initialState, transition) => {
       log('... Router.run');
-      if (err) log('!!! Error while Router.run', err);  
+      if (err) {
+        log('!!! Error while Router.run', err.message, err.stack); 
+        response.statusCode = 500;
+        return response.send();
+      }
       
       // If routeGuard canceled a route transition (for example) then we send back a 301 (redirect)
       if (transition.isCancelled) {
         log('... Transition cancelled: redirecting');
-        response.redirect(transition.redirectInfo.pathname + '?r=' + url).send();
-        return;
+        return response.redirect(transition.redirectInfo.pathname + '?r=' + url).send();
       }
       
       // Fetches initial data for components in router's branch
@@ -76,7 +80,7 @@ export default function prerender(request, reply) {
             <Router {...initialState} children={routes} />
           );
         } 
-        catch(err) { log('!!! Error while React.renderToString', err, err.stack); }
+        catch(err) { log('!!! Error while React.renderToString', err.message, err.stack); }
         log('... Exiting React.renderToString');
         
         // A recoder !
@@ -104,7 +108,7 @@ export default function prerender(request, reply) {
         response.send(); // Bon voyage
         log(`Served ${url} in ${new Date() - d}ms.\n`);
           
-      }, err => log('!!! Error while Phidippides', err, err.stack));
+      }, err => log('!!! Error while Phidippides', err.message, err.stack));
     });
-  }, err => log('!!! Error while checkCookie', err, err.stack));
+  }, err => log('!!! Error while checkCookie', err.message, err.stack));
 }

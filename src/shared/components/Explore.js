@@ -13,11 +13,12 @@ export default class Explore extends React.Component {
   }
   
   componentDidMount() {
-    if (Object.keys(this.props.universes).length < 2) this.props.readUniverses();
+    const { universes, actions: { readUniverses } } = this.props;
+    if (Object.keys(universes).length < 2) readUniverses();
   }
   
   render() {
-    const {universes} = this.props;
+    const { universes } = this.props;
     const divStyle = {
       width: '60%',
       margin: '0 auto 0 auto',

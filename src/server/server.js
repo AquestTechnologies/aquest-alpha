@@ -5,10 +5,10 @@ import log, { logRequest, logAuthentication } from '../shared/utils/logTailor.js
 import { createActivists } from './lib/activityGenerator';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-log(`Starting server in ${process.env.NODE_ENV} mode...`);
+log(`\nStarting server in ${process.env.NODE_ENV} mode...`);
 
 //lance webpack-dev-server si on est pas en production
-if (process.env.NODE_ENV === 'development') require('./dev_server.js')();
+if (process.env.NODE_ENV === 'development') require('./dev_server/dev_server')();
 
 const server = new Hapi.Server();
 const {api, ws, jwt: {key}} = devConfig();
@@ -48,13 +48,6 @@ server.register([{register: require('./plugins/API')}, {register: require('./plu
       path: '/',
       config: { auth: false },
       handler: (request, reply) => prerender(request, reply)
-    },
-    {
-      method: 'GET',
-      path: '/_{universeId}/{topicId}',
-      config: { auth: false },
-      handler: (request, reply) => { 
-        prerender(request, reply);}
     },
     {
       method: 'GET',

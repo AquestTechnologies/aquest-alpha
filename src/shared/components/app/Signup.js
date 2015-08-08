@@ -8,9 +8,9 @@ class Signup extends React.Component {
     super();
     
     this.state = {};
-    this.handleInputPseudo = event => this.setState({pseudo: event.target.value});
-    this.handleInputEmail = event => this.setState({email: event.target.value});
-    this.handleInputPassword = event => this.setState({password: event.target.value});
+    this.handleInputPseudo = event => this.setState({pseudo: event.currentTarget.value});
+    this.handleInputEmail = event => this.setState({email: event.currentTarget.value});
+    this.handleInputPassword = event => this.setState({password: event.currentTarget.value});
     this.handleSubmit = () => this.props.createUser(this.state);
   }
   

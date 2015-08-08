@@ -58,14 +58,13 @@ export default {
   },
   
   universes: (state=_map, action) => {
-    let newState;
     switch (action.type) {
       
     case 'SUCCESS_READ_UNIVERSE':
       return state.set(action.payload.id, fromJSGreedy(action.payload));
   
     case 'SUCCESS_READ_UNIVERSES':
-      newState = state;
+      let newState = state;
       action.payload.forEach(universe => {
         if (!newState.get(universe.id)) newState = newState.set(universe.id, fromJSGreedy(universe));
       });
@@ -84,85 +83,14 @@ export default {
   },
   
   chats: (state=_map, action) => {
-    // the chat reducer always recieve a chatId -- action.params && action.params.chatId not checked here because there is no 'REQUEST' case
-    const chatId  = action.payload && action.payload.chatId ? parseInt(action.payload.chatId, 10) : action.params ? parseInt(action.params, 10) : false;
-    
-    const userId = action.payload && action.payload.userId ? action.payload.userId : false;
-    
-    //property 'from' & 'owner' send by the server using websocket 
-    // from   --> does the SUCCESS action comes from the server
-    // owner  --> does the SUCCESS action comes from the confirmation of a user action, or does it comes from another user
-    const local = action.payload && action.payload.fromServer ? false : true;
-    const owner   = action.payload && action.payload.owner ? true : false;
-    
-    if (chatId){
-      switch (action.type) {
-        
-      case 'SUCCESS_READ_CHAT':
-        
-        action.payload.isUpToDate = true;
-        
-        if(!action.payload.messages[0].id) action.payload.messages = [];
-        
-        return state.get(chatId) ?  state.mergeIn([chatId], fromJSGreedy(action.payload)) : state.set(chatId, fromJSGreedy(action.payload));          
-          
-        
-      case 'SUCCESS_CREATE_MESSAGE':
-        
-        //should work as latence compensation !
-        if(local) {
-          action.params.content = JSON.parse(action.params.content);
-          delete action.params.chatId;
-          
-          return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(action.params))); 
-        } else {
-          if(owner){
-            const messageId = parseInt(action.payload.message.id,10);
-            const {content} = action.payload.message;
-            const messageUserId = action.payload.message.userId;
-            const messageIndex = state.getIn([chatId, 'messages']).indexOf(fromJSGreedy({messageId, messageUserId, content}));
-            
-            if (messageIndex !== -1) return state.setIn([chatId, 'messages', messageIndex], fromJSGreedy(action.payload.message));
-          } else {
-            return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(action.payload.message)));
-          }
-        }
-        
-        return state;
-        
-      case 'SUCCESS_JOIN_CHAT':
-        
-        if (local){
-          if ( state.getIn([chatId, 'users']) ) return state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
-          else {
-            if ( state.get(chatId) ) return state.setIn([chatId, 'users'], fromJSGreedy([userId]));  
-            else {
-              return state.set(chatId, fromJSGreedy({users: [userId]}));          
-            }
-          }
-        } else {
-          if (owner) return state.mergeIn([chatId, 'users'], fromJSGreedy(action.payload.userList));
-          else {
-            return state.setIn( [chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
-          }
-        }
-        
-      case 'SUCCESS_LEAVE_CHAT':
-        
-        // the chat won't be up to date anymore !
-        if (local) state = state.updateIn([chatId, 'isUpToDate'], value => false);
-          
-        // remove the user from the user list
-        return state.getIn([chatId, 'users']) && state.getIn([chatId, 'users']).size ? 
-          state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).filter( user => !(user === userId) )) :
-          state;
-        
-      default:
-        return state;
-      }
+    switch (action.type) {
+      
+    case 'SUCCESS_READ_CHAT':
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      
+    default:
+      return state;
     }
-    
-    return state;
   },
   
   topics: (state=_map, action) => {
@@ -177,11 +105,11 @@ export default {
     case 'SUCCESS_READ_TOPIC':
       return state.set(action.payload.id, fromJSGreedy(action.payload));
       
-    case 'SUCCESS_READ_TOPIC_CONTENT':
-      return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
+    case 'SUCCESS_READ_TOPIC_ATOMS':
+      return state.setIn([action.params, 'atoms'], fromJSGreedy(action.payload));
       
     case 'SUCCESS_CREATE_TOPIC':
-      return state.set(action.params.id, fromJSGreedy(action.params));
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
       
     default:
       return state;

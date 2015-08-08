@@ -1,11 +1,11 @@
 import React from 'react';
-import {Link} from 'react-router';
 import Icon from '../common/Icon';
+import { Link } from 'react-router';
 
 export default class Menu extends React.Component {
   
   renderBackTo() {
-    const {universeId, universeName, topicId, pathName} = this.props;
+    const { universeId, universeName, topicId, pathName } = this.props;
     if (topicId || (pathName ? pathName.split('/')[2] === 'Create_topic' : false)) return (
       <div className='menu_item menu_backTo'>
         <Link to={'/_'+universeId}>
@@ -38,7 +38,7 @@ export default class Menu extends React.Component {
           
         </div>
         
-        {this.renderBackTo()}
+        { this.renderBackTo() }
         
         <div className='menu_right'>
           

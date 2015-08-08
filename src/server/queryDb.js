@@ -1,8 +1,6 @@
-import pg        from 'pg';
+import pg from 'pg';
+import log from '../shared/utils/logTailor.js';
 import devConfig from '../../config/development.js';
-import log       from '../shared/utils/logTailor.js';
-
-// let client;
 
 export default function queryDb(intention, params) {
   
@@ -17,20 +15,17 @@ export default function queryDb(intention, params) {
      * ToDo : use the pg object to create pooled clients, build our own client pool implementation or use https://github.com/grncdr/node-any-db
      * */
     pg.connect(connectionString, (err, client, done) => { 
+      if (err) throw err;
+      
       const {sql, paramaterized, callback} = buildQuery(intention, params); // Query construction
-      // log(`+++ REQUETE --> ${sql}`); 
-      // log(paramaterized);
-      if (sql){
-        console.log('sql',sql);
-        client.query(sql, paramaterized, (err, result) => {
-          done();
-          if (err) return reject(err);
-          log(result.rowCount ? `+++ <-- ${intention} : ${result.rowCount} rows after ${new Date() - d}ms` : `+++ <-- ${intention} : nothing after ${new Date() - d}ms`);
-          resolve(typeof callback === 'function' ? callback(result) : result);
-        });
-      } else {
-        reject('queryDb.buildQuery did not produce any SQL, check your intention');
-      }
+      
+      if (sql) client.query(sql, paramaterized, (err, result) => {
+        done();
+        if (err) return reject(err);
+        log(`+++ <-- ${intention} : `, result.rowCount ? `${result.rowCount}rows` : 'nothing', ` after ${new Date() - d}ms`);
+        resolve(typeof callback === 'function' ? callback(result) : result);
+      });
+      else reject(`queryDb.buildQuery did not produce any SQL, check your intention: ${intention}`);
     });
   });
   
@@ -38,24 +33,26 @@ export default function queryDb(intention, params) {
   // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
-    const {id, userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip, content, picture} = 
+    const {id, userId, universeId, title, chatId, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback, paramaterized;
     
     switch (intention) {
       
+      
       case 'readUniverses':
         // sql = 'SELECT id, name, description, picture, chat_id FROM aquest_schema.universe';
         sql = 
         'SELECT ' + 
-          'id, name, description, picture, chat_id "chatId" ' +
+          'id, name, description, picture, chat_id "chatId", rules ' +
         'FROM ' + 
           'aquest_schema.universe';
         
         callback = result => result.rows;
         
         break;
+        
         
       case 'readUniverse':
         
@@ -68,10 +65,10 @@ export default function queryDb(intention, params) {
           'id = $1';
         
         paramaterized = [params];
-          
         callback = result => result.rows[0];
           
         break;
+        
         
       case 'readUniverseWithTopics':
         
@@ -101,256 +98,201 @@ export default function queryDb(intention, params) {
         ') topics GROUP BY universe';
         
         paramaterized = [params];
-        
         callback = result => result.rows[0].UniverseWithTopics;
         
         break;
         
-      case 'readChat':
         
-        /*sql = 
-        'SELECT \
-          message.id, aquest_user.id, atom_message.content, chat.name as chat_name \
-        FROM \
-          aquest_schema.message \
-            RIGHT OUTER JOIN aquest_schema.chat ON chat.id = message.chat_id \
-            LEFT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.id \
-            LEFT JOIN  aquest_schema.atom_message ON message.id = atom_message.message_id \
-        WHERE chat.id = \'' + params + `'';*/
+      case 'readChat':
         
         sql =
         'SELECT ' +
           'json_build_object(' + 
-            `'chatId', chat.id,` + 
+            `'id', chat.id,` + 
             `'name', chat.name,` + 
             `'messages', array_agg(` + 
               'json_build_object(' + 
-                `'id',message.id,` + 
-                `'userId',aquest_user.id,` + 
-                `'content',atom_message.content,` +
-                `'timestamp', atom_message.updated_at` +
+                `'userId', aquest_user.id,` + 
+                `'type', atommessage.type,` +
+                `'content', atommessage.content,` +
+                `'createdAt', atommessage.created_at` +
               ')' + 
             ')' + 
           ') as chat ' +
         'FROM ' +
           'aquest_schema.chat ' +
-            'LEFT JOIN aquest_schema.message ON chat.id = message.chat_id ' +
-            'LEFT JOIN aquest_schema.user aquest_user ON message.user_id = aquest_user.id ' +
-            'LEFT JOIN  aquest_schema.atom_message ON message.id = atom_message.message_id ' +
+        'LEFT JOIN aquest_schema.atommessage atommessage ON chat.id = atommessage.chat_id ' +
+        'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
         'WHERE chat.id = $1 GROUP BY chat.id';
         
         paramaterized = [params];
-        
         callback = result => result.rows[0].chat;
         
         break;
         
+        
       case 'readInventory':
           
-        /*sql = 
-        'SELECT ' +  
-          'array_agg(' +  
-            'json_build_object(' +  
-              `'id',topic.id,` +
-              `'title',topic.title,` +
-              `'universeId',topic.universe_id,` +
-              `'author',topic.user_id,` +
-              `'description',topic.description,` +
-              `'picture',topic.picture,` +
-              `'timestamp',topic.updated_at,` + 
-              `'chatId',topic.chat_id` + 
-            ')' + 
-          ') as topics ' +
-        'FROM ' +   
-          'aquest_schema.topic, aquest_schema.universe ' +
-        `WHERE universe.id = '${params}'`;*/
-        
         sql =
         'SELECT ' + 
-          'id, title, topic.universe_id "universeId", topic.user_id author, topic.description, topic.picture, topic.updated_at "timestamp", topic.chat_id "chatId" ' +
+          `id, title, universe_id "universeId", user_id "userId", preview_type "previewType", preview_content "previewContent", COALESCE(to_char(created_at, 'MM-DD-YYYY HH24:MI:SS'), '') "createdAt", chat_id "chatId" ` +
         'FROM ' +    
           'aquest_schema.topic ' +
         'WHERE ' + 
           'topic.universe_id = $1';
         
         paramaterized = [params];
-        
         callback = result => result.rows;
         
         break;  
         
-      /*case 'readTopicByHandle':
         
-        // id, title, author, desc, imgPath, timestamp, handle, content, chatId
-        sql = 
-        'SELECT \
-          topic.id, topic.title, aquest_user.id, topic.handle, atom_topic.content, topic.chat_id \
-        FROM \
-          aquest_schema.topic, aquest_schema.atom_topic, aquest_schema.user as aquest_user \
-        WHERE handle=\'' + params + `' AND topic.id = atom_topic.topic_id AND topic.user_id = aquest_user.id';
-        
-        // log('+++ ' + sql.replace('',`').substring(0,29));
-        callback = function(result){
-          let r=result.rows[0];
-          return ({
-            id:          r.id, 
-            title:       r.title,
-            id:      r.id,
-            handle:      r.handle,
-            content:     r.content,
-            chatId:      r.chat_id,
-          });
-        };
-        break;*/
-      
       case 'readTopic':
         
         sql =
-        'SELECT ' +
-          'id, title, universe_id "universeId", user_id author, description, picture, updated_at "timestamp", chat_id "chatId" ' +
-        'FROM '+
-          'aquest_schema.topic ' +
-        'WHERE ' + 
-          'topic.id = $1';
+        'SELECT json_build_object(' + 
+          `'id', topic.id,` + 
+          `'userId', topic.user_id,` + 
+          `'chatId', topic.chat_id,` + 
+          `'universeId', topic.universe_id,` + 
+          `'title', topic.title,` + 
+          `'previewContent', topic.preview_content,` + 
+          `'previewType', topic.preview_type,` + 
+          `'createdAt', COALESCE(to_char(created_at, 'MM-DD-YYYY HH24:MI:SS'), ''),` + 
+          `'atoms', array_agg(` + 
+            'json_build_object(' + 
+              `'type', atomtopic.type,` +
+              `'content', atomtopic.content,` +
+            ')' + 
+          ')' + 
+        ') as topic ' +
+        'FROM aquest_schema.topic ' +
+        'WHERE topic.id = $1 ' +
+        'LEFT JOIN aquest_schema.atomtopic atomtopic ON topic.id = atomtopic.topic_id ' +
+        'ORDER BY atomtopic.position';
         
         paramaterized = [params];
-        
-        callback = result => result.rows[0];
+        callback = result => result.rows[0].topic;
         
         break;
       
-      case 'readTopicContent':
-        // atomTopicId, content, ordered, deleted, topicId, atomId
+      
+      case 'readTopicAtoms':
         
-        /*sql =
-        'SELECT ' + 
-          'aquest_schema.concat_json_object(' +
-            'to_json(topic), json_build_object(' +
-              `'content',array_to_json(` + 
-                'array_agg(' +
-                  '(SELECT atom_topic.content ORDER BY atom_topic.position)' +
-                ')' +
-              ')' +
-            ')' +
-          ') as "topicWithContent" ' +
-        'FROM ' +
-          '(SELECT ' + 
-            'topic.id, topic.title, topic.universe_id "universeId", topic.user_id author, topic.description, topic.picture, topic.updated_at "timestamp", topic.chat_id "chatId" ' +
-          'FROM ' +
-            `aquest_schema.topic WHERE topic.id = '${params}'`+
-          ') topic, ' +
-          'aquest_schema.atom_topic ' +
-        'WHERE ' +
-          'atom_topic.topic_id = topic.id ' +
-        'GROUP BY topic';*/
-        sql = 
+        // sql = 
+        // 'SELECT ' +
+        //   'json_build_object(' +
+        //     'array_agg(' +
+        //       'json_build_object(' +
+        //         `'type', atomtopic.type,` +
+        //         `'content', atomtopic.content,` +
+        //       ')' +
+        //     ')' +
+        //   ') AS atoms ' +
+        // 'FROM ' +
+        //   '(SELECT ' +
+        // 		'atomtopic.content, atomtopic.type ' +
+        // 	'FROM ' +
+        // 		'aquest_schema.atomtopic ' +
+        // 	'WHERE ' +
+        // 		'atomtopic.topic_id = $1 ' + 	
+        // 	'ORDER BY ' + 
+        // 		'atomtopic.position' +
+        // 	') atomtopics';
+        
+        sql =
         'SELECT ' +
-          'array_to_json(' +
-            'array_agg(' +
-              'aquest_schema.concat_json_object(' +
-                'atom_topics.content, json_build_object(' +
-                  `'type',atom_topics.type`+
-                ')' +
-              ')' +
-            ')' +
-          ') AS content ' +
+          'type, content ' +
         'FROM ' +
-          '(SELECT ' +
-        		'atom_topic.content, atom_topic.type ' +
-        	'FROM ' +
-        		'aquest_schema.atom_topic ' +
-        	'WHERE ' +
-        		'atom_topic.topic_id = $1 ' + 	
-        	'ORDER BY ' + 
-        		'atom_topic.position' +
-        	') atom_topics';
-        
+          'aquest_schema.atomtopic ' +
+        'WHERE ' +
+          'atomtopic.topic_id = $1 ' + 
+        'ORDER BY ' + 
+      		'atomtopic.position';
         paramaterized = [params];
-        
-        callback = result => result.rows[0].content;
+        callback = result => result.rows;
         
         break;
+        
         
       case 'createMessage':
         // atomTopicId, content, ordered, deleted, topicId, atomId
         
         sql = 
-        'with createMessage as ( ' +
-          'INSERT INTO aquest_schema.message ' +
-            '(user_id, chat_id, created_at) ' +
-          'VALUES ' +
-            '($1,$2, CURRENT_TIMESTAMP) ' +
-          'RETURNING message.id' +
-        ') ' +
-        'INSERT INTO aquest_schema.atom_message (message_id, atom_id, type, content) ' +
-        `SELECT id, $3, $4, $5 FROM createMessage ` +
-        `RETURNING json_build_object('id', (SELECT createMessage.id FROM createMessage), 'author', $1, 'chatId', $2, 'createdAt', CURRENT_TIMESTAMP, 'content', $5) AS "createdMessage"`;
+        'INSERT INTO aquest_schema.atommessage ' +
+          '(chat_id, user_id, type, content) ' +
+        'VALUES' +
+          '($1, $2, $3, $4) ' +
+        "RETURNING json_build_object('id', id, 'chatId', chat_id, 'type', type, 'content', content) AS message";
         
-        paramaterized = [userId, chatId, 1, messageContent.type, JSON.stringify(messageContent)];
-        
-        callback = result => result.rows[0].createdMessage;
+        paramaterized = [chatId, userId, 'text', JSON.stringify(content)];
+        callback = result => result.rows[0].message;
         
         break;
         
         
       case 'createUniverse':
-        // id, universe1Id, universe2Id, force, createdAt, updatedAt, deleted
         
         sql = 
         'INSERT INTO aquest_schema.universe ' +
-          '(id, name, user_id, description, picture) ' +
-        'VALUES ($1, $2, $3, $4, $5) ' +
-        `RETURNING json_build_object('id', id, 'chatId', chat_id, 'name', name, 'description', description, 'picture', picture) AS "createdUniverse"`;
+          '(name, user_id, description, picture, creation_ip) ' +
+        'VALUES ' +
+          '($1, $2, $3, $4, $5) ' +
+        `RETURNING json_build_object('id', id, 'chatId', chat_id, 'name', name, 'description', description, 'picture', picture, 'rules', rules) AS universe`;
         
-        paramaterized = [name, name, userId, description, picture];
-        callback = result => result.rows[0].createdUniverse;
+        paramaterized = [name, userId, description, picture, ip];
+        callback = result => result.rows[0].universe;
         
         break;
         
+        
       case 'createTopic':
-        //topic : id, user_id, chat_id, universe_id, title, handle, created_at, updated_at, deleted
-        //atom_topic : id; atom_id, topic_id, content, order, created_at, updated_at, deleted
-        //atom : id, type, structure, created_at, updated_at, deleted
         
         sql = 
         'SELECT ' + 
-          'aquest_schema.create_atoms_topic(' + 
-            '$1 ::TEXT, $2 ::TEXT, $3 ::TEXT, $4 ::TEXT, $5 ::TEXT, $6 ::TEXT' +
-          ') AS create_topic';
+          'aquest_schema.create_topic($1, $2, $3, $4, $5, $6) ' +
+        'AS topic';
         
-        paramaterized = [id, userId, universeId, title, description, JSON.stringify(content)];
-        
-        callback = result => result.rows[0].create_topic;
+        paramaterized = [userId, universeId, title, previewType, JSON.stringify(previewContent), JSON.stringify(atoms)];
+        callback = result => result.rows[0].topic;
         
         break;
+        
         
       case 'createUser':
         
         sql = 
         'INSERT INTO aquest_schema."user" ' +
-          '(id, email, password_salt, password_hash, creation_ip) ' +
+          '(id, email, password_hash, creation_ip, picture) ' +
         'VALUES ' +
           '($1, $2, $3, $4, $5)' +
-        `RETURNING json_build_object('id', id, 'email', email, 'password_salt', password_salt, 'password_hash', password_hash, 'creation_ip', creation_ip) AS user`;
+        "RETURNING json_build_object('id', id, 'email', email, 'picture', picture) AS user";
         
-        paramaterized = [pseudo, email, passwordSalt, passwordHash, ip];
-        
+        paramaterized = [pseudo, email, passwordHash, ip, picture];
         callback = result => result.rows[0].user;
         
         break;
         
+        
       case 'login':
         
-        sql = `SELECT * FROM aquest_schema."user" WHERE "user".id = '${email}' OR "user".email = '${email}' LIMIT 1`;
+        sql = 
+        'SELECT ' +
+          'id, email, bio, first_name "firstName", last_name "lastName", picture, password_hash "passwordHash"' +
+        'FROM aquest_schema."user" ' +
+        `WHERE "user".id = '${email}' OR "user".email = '${email}' LIMIT 1`;
+        
         callback = result => result.rows[0];
+        
         break;
+        
         
       case 'randomRow':
         
-        // INJECTION SQL !!!! à FAIRE !
         sql = `SELECT * FROM aquest_schema.${params} ORDER BY RANDOM() LIMIT 1`;
         
         callback = result => result.rows[0];
+        
         break;
     }
     
