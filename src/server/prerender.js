@@ -14,8 +14,8 @@ import promiseMiddleware from '../shared/utils/promiseMiddleware';
 import log, { logAuthentication }  from '../shared/utils/logTailor';
 import makeJourney, { routeGuard } from '../shared/routes';
 
-const {wds: {hotFile, publicPath, filename}, jwt: {key, ttl}} = devConfig();
-const HTML = fs.readFileSync('index.html', 'utf8');
+const { wds: { hotFile, publicPath, filename }, jwt: { key, ttl } } = devConfig();
+const HTML = fs.readFileSync('src/server/index.html', 'utf8');
 
 // Replies a prerendered application
 export default function prerender(request, reply) {

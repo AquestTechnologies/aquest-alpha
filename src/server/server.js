@@ -8,7 +8,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log(`Starting server in ${process.env.NODE_ENV} mode...`);
 
 //lance webpack-dev-server si on est pas en production
-if (process.env.NODE_ENV === 'development') require('./dev_server.js')();
+if (process.env.NODE_ENV === 'development') require('./dev_server/dev_server')();
 
 const server = new Hapi.Server();
 const {api, ws, jwt: {key}} = devConfig();
