@@ -33,7 +33,7 @@ export default function queryDb(intention, params) {
   // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
-    const {id, userId, universeId, title, chatId, messageContent, name, description, pseudo, email, passwordHash, passwordSalt, ip, content, picture} = 
+    const {id, userId, universeId, title, chatId, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback, paramaterized;
@@ -112,8 +112,6 @@ export default function queryDb(intention, params) {
             `'name', chat.name,` + 
             `'messages', array_agg(` + 
               'json_build_object(' + 
-                `'id', atommessage.id,` + 
-                `'chatId', chat.id,` + 
                 `'userId', aquest_user.id,` + 
                 `'type', atommessage.type,` +
                 `'content', atommessage.content,` +
@@ -123,7 +121,7 @@ export default function queryDb(intention, params) {
           ') as chat ' +
         'FROM ' +
           'aquest_schema.chat ' +
-        'LEFT JOIN aquest_schema.atommessage ON chat.id = atommessage.chat_id ' +
+        'LEFT JOIN aquest_schema.atommessage atommessage ON chat.id = atommessage.chat_id ' +
         'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
         'WHERE chat.id = $1 GROUP BY chat.id';
         
@@ -137,7 +135,7 @@ export default function queryDb(intention, params) {
           
         sql =
         'SELECT ' + 
-          'id, title, universe_id "universeId", user_id "userId", description, created_at "createdAt", chat_id "chatId" ' +
+          `id, title, universe_id "universeId", user_id "userId", preview_type "previewType", preview_content "previewContent", COALESCE(to_char(created_at, 'MM-DD-YYYY HH24:MI:SS'), '') "createdAt", chat_id "chatId" ` +
         'FROM ' +    
           'aquest_schema.topic ' +
         'WHERE ' + 
@@ -152,46 +150,67 @@ export default function queryDb(intention, params) {
       case 'readTopic':
         
         sql =
-        'SELECT ' +
-          'id, title, universe_id "universeId", user_id "userId", description, created_at "createdAt", chat_id "chatId" ' +
-        'FROM '+
-          'aquest_schema.topic ' +
-        'WHERE ' + 
-          'topic.id = $1';
+        'SELECT json_build_object(' + 
+          `'id', topic.id,` + 
+          `'userId', topic.user_id,` + 
+          `'chatId', topic.chat_id,` + 
+          `'universeId', topic.universe_id,` + 
+          `'title', topic.title,` + 
+          `'previewContent', topic.preview_content,` + 
+          `'previewType', topic.preview_type,` + 
+          `'createdAt', COALESCE(to_char(created_at, 'MM-DD-YYYY HH24:MI:SS'), ''),` + 
+          `'atoms', array_agg(` + 
+            'json_build_object(' + 
+              `'type', atomtopic.type,` +
+              `'content', atomtopic.content,` +
+            ')' + 
+          ')' + 
+        ') as topic ' +
+        'FROM aquest_schema.topic ' +
+        'WHERE topic.id = $1 ' +
+        'LEFT JOIN aquest_schema.atomtopic atomtopic ON topic.id = atomtopic.topic_id ' +
+        'ORDER BY atomtopic.position';
         
         paramaterized = [params];
-        callback = result => result.rows[0];
+        callback = result => result.rows[0].topic;
         
         break;
       
       
-      case 'readTopicContent':
-        // atomTopicId, content, ordered, deleted, topicId, atomId
+      case 'readTopicAtoms':
         
-        sql = 
+        // sql = 
+        // 'SELECT ' +
+        //   'json_build_object(' +
+        //     'array_agg(' +
+        //       'json_build_object(' +
+        //         `'type', atomtopic.type,` +
+        //         `'content', atomtopic.content,` +
+        //       ')' +
+        //     ')' +
+        //   ') AS atoms ' +
+        // 'FROM ' +
+        //   '(SELECT ' +
+        // 		'atomtopic.content, atomtopic.type ' +
+        // 	'FROM ' +
+        // 		'aquest_schema.atomtopic ' +
+        // 	'WHERE ' +
+        // 		'atomtopic.topic_id = $1 ' + 	
+        // 	'ORDER BY ' + 
+        // 		'atomtopic.position' +
+        // 	') atomtopics';
+        
+        sql =
         'SELECT ' +
-          'array_to_json(' +
-            'array_agg(' +
-              'aquest_schema.concat_json_object(' +
-                'atomtopics.content, json_build_object(' +
-                  `'type',atomtopics.type` +
-                ')' +
-              ')' +
-            ')' +
-          ') AS content ' +
+          'type, content ' +
         'FROM ' +
-          '(SELECT ' +
-        		'atomtopic.content, atomtopic.type ' +
-        	'FROM ' +
-        		'aquest_schema.atomtopic ' +
-        	'WHERE ' +
-        		'atomtopic.topic_id = $1 ' + 	
-        	'ORDER BY ' + 
-        		'atomtopic.position' +
-        	') atomtopics';
-        
+          'aquest_schema.atomtopic ' +
+        'WHERE ' +
+          'atomtopic.topic_id = $1 ' + 
+        'ORDER BY ' + 
+      		'atomtopic.position';
         paramaterized = [params];
-        callback = result => result.rows[0].content;
+        callback = result => result.rows;
         
         break;
         
@@ -204,42 +223,38 @@ export default function queryDb(intention, params) {
           '(chat_id, user_id, type, content) ' +
         'VALUES' +
           '($1, $2, $3, $4) ' +
-        "RETURNING json_build_object('id', id, 'chatId', chat_id, 'type', type, 'content', content) AS createdMessage";
+        "RETURNING json_build_object('id', id, 'chatId', chat_id, 'type', type, 'content', content) AS message";
         
-        paramaterized = [chatId, userId, 'text', JSON.stringify(messageContent)];
-        callback = result => result.rows[0].createdMessage;
+        paramaterized = [chatId, userId, 'text', JSON.stringify(content)];
+        callback = result => result.rows[0].message;
         
         break;
         
         
       case 'createUniverse':
-        // id, universe1Id, universe2Id, force, createdAt, updatedAt, deleted
         
         sql = 
         'INSERT INTO aquest_schema.universe ' +
           '(name, user_id, description, picture, creation_ip) ' +
         'VALUES ' +
           '($1, $2, $3, $4, $5) ' +
-        `RETURNING json_build_object('id', id, 'chatId', chat_id, 'name', name, 'description', description, 'picture', picture, 'rules', rules) AS "createdUniverse"`;
+        `RETURNING json_build_object('id', id, 'chatId', chat_id, 'name', name, 'description', description, 'picture', picture, 'rules', rules) AS universe`;
         
         paramaterized = [name, userId, description, picture, ip];
-        callback = result => result.rows[0].createdUniverse;
+        callback = result => result.rows[0].universe;
         
         break;
         
         
       case 'createTopic':
-        //topic : id, user_id, chat_id, universe_id, title, handle, created_at, updated_at
-        //atomtopic : id; atom_id, topic_id, content, order, created_at, updated_at
         
         sql = 
         'SELECT ' + 
-          'aquest_schema.create_atoms_topic(' + 
-            '$1 ::TEXT, $2 ::TEXT, $3 ::TEXT, $4 ::TEXT, $5 ::TEXT, $6 ::TEXT' +
-          ') AS create_topic';
+          'aquest_schema.create_topic($1, $2, $3, $4, $5, $6) ' +
+        'AS topic';
         
-        paramaterized = [id, userId, universeId, title, description, JSON.stringify(content)];
-        callback = result => result.rows[0].create_topic;
+        paramaterized = [userId, universeId, title, previewType, JSON.stringify(previewContent), JSON.stringify(atoms)];
+        callback = result => result.rows[0].topic;
         
         break;
         
@@ -248,7 +263,7 @@ export default function queryDb(intention, params) {
         
         sql = 
         'INSERT INTO aquest_schema."user" ' +
-          '(id, email, password_hash, creation_ip) ' +
+          '(id, email, password_hash, creation_ip, picture) ' +
         'VALUES ' +
           '($1, $2, $3, $4, $5)' +
         "RETURNING json_build_object('id', id, 'email', email, 'picture', picture) AS user";

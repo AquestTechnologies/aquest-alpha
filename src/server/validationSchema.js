@@ -36,13 +36,11 @@ const API_VALIDATION_SCHEMA = {
   },
   
   createTopic: {
-    universeId:   Joi.string().trim().required().min(1).regex(/^.*$/),
     title:        Joi.string().trim().required().min(1).regex(/^.*$/),
-    description:  Joi.string().trim().required().min(1).regex(/^.*$/),
+    universeId:   Joi.string().trim().required().min(1).regex(/^.*$/),
     atoms:        Joi.array().items(
-      Joi.object({
+      Joi.object().keys({
         type: Joi.string().trim().required().min(1).regex(/^text$/), // Regex à construire dynamiquement
-        position: Joi.number().integer().min(1).required(),
         content: Joi.object().required(),
       }).unknown(false).required()), 
   },

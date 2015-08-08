@@ -7,18 +7,18 @@ export default class Card extends React.Component {
     this.props.transitionTo(`/_${universeId}/${id}`);
   }
   
-  renderPreview(picture, description) {
-    return picture ?
-      <img src={picture} className='card_image' /> :
-      <div className='card_description'>{this.props.topic.description}</div>;
+  renderPreview(previewType, previewContent) {
+    return previewType === 'image' ?
+      <img src={previewContent.path} className='card_image' /> :
+      <div className='card_description'>{previewContent.text}</div>;
   }
   
-  renderFooter(picture) {
-    if (picture.length) return <div className='card_footer'></div>;
+  renderFooter(previewType) {
+    if (previewType === 'image') return <div className='card_footer'></div>;
   }
     
   render() {
-    const { title, userId, createdAt, picture, description, universeId, id } = this.props.topic;
+    const { title, userId, createdAt, previewType, previewContent, universeId, id } = this.props.topic;
     
     return (
       <div className='card' onClick={this.handleClick.bind(this, universeId, id)}>
@@ -31,8 +31,8 @@ export default class Card extends React.Component {
           { `By ${userId}, ${createdAt} ago.` }
         </div>
         
-        { this.renderPreview(picture, description) }
-        { this.renderFooter(picture) }
+        { this.renderPreview(previewType, previewContent) }
+        { this.renderFooter(previewType) }
         
       </div>
     );

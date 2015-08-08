@@ -85,8 +85,8 @@ CREATE TABLE aquest_schema.TOPIC(
   chat_id             BIGINT NOT NULL UNIQUE,
   universe_id         TEXT NOT NULL,
   title               TEXT NOT NULL,
-  description         TEXT DEFAULT '',
-  picture             TEXT DEFAULT '',
+  preview_type        TEXT NOT NULL,
+  preview_content     JSON NOT NULL,
   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
@@ -195,28 +195,26 @@ CREATE FUNCTION aquest_schema.prepare_insert()
   DECLARE
     new_id TEXT;
     same_id TEXT;
-    last_chat_id BIGINT;
-    chat_name TEXT;
-    
+    new_chat_id BIGINT;
   BEGIN
     -- Universe
     IF (TG_TABLE_NAME = 'universe') THEN
       new_id := replace(trim(both ' ' from NEW.name), ' ', '_');
       same_id := (SELECT id FROM aquest_schema.universe WHERE universe.id = new_id);
-      INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING id INTO last_chat_id;
+      INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING id INTO new_chat_id;
       
     -- Topic
     ELSIF (TG_TABLE_NAME = 'topic') THEN
       new_id := replace(trim(both ' ' from NEW.title), ' ', '_');
       same_id := (SELECT id FROM aquest_schema.topic WHERE topic.id = new_id ORDER BY id DESC);
-      INSERT INTO aquest_schema.chat (name) VALUES (NEW.title) RETURNING id INTO last_chat_id;
+      INSERT INTO aquest_schema.chat (name) VALUES (NEW.title) RETURNING id INTO new_chat_id;
     END IF;
     
     IF (same_id <> '') THEN
       new_id := concat(new_id, '_', left(md5(random()::text), 7));
     END IF;
     
-    NEW.chat_id := last_chat_id;
+    NEW.chat_id := new_chat_id;
     NEW.id := new_id;
     RETURN NEW;
   END;
@@ -273,36 +271,46 @@ CREATE TRIGGER update_timestamp
 -- FUNCTION : TOPIC w/ ATOMS CREATION --
 ----------------------------------------
 -- automaticaly create topic and associated atoms 
-CREATE OR REPLACE FUNCTION aquest_schema.create_atoms_topic(topic_id TEXT, user_id TEXT, universe_id TEXT, title TEXT, description TEXT, content TEXT) 
+CREATE OR REPLACE FUNCTION aquest_schema.create_topic(user_id TEXT, universe_id TEXT, title TEXT, preview_type TEXT, preview_content TEXT, atoms TEXT) 
   RETURNS JSON AS $$
-  var topic = plv8.subtransaction(function() {
+  return plv8.subtransaction(function() {
+  
+    var parsedAtoms = JSON.parse(atoms);
+    var parsedPreviewContent = JSON.parse(preview_content);
     
-    var insert_topic = plv8.execute( 
+    var newTopic = plv8.execute( 
       'INSERT INTO aquest_schema.topic ' +
-        '(id, user_id, universe_id, title, description) ' +
+        '(user_id, universe_id, title, preview_type, preview_content) ' +
       'VALUES ' +
         '($1, $2, $3, $4, $5) ' + 
-      'RETURNING topic.chat_id AS "chatId", topic.picture, topic.updated_at as "timestamp"',
-      [topic_id, user_id, universe_id, title, description]
-    );
+      'RETURNING topic.id AS "id", topic.chat_id AS "chatId", topic.created_at as "createdAt"',
+      [user_id, universe_id, title, preview_type, parsedPreviewContent]
+    )[0];
     
-    content = JSON.parse(content);
+    var topicId = newTopic.id;
     
-    for(var i = 0, content_length = content.length ; i < content_length ; i++){
-      var insert_atom_topic = plv8.execute( 
+    parsedAtoms.forEach(function(atom, index) {
+      plv8.execute( 
         'INSERT INTO aquest_schema.atomtopic ' +
           '(topic_id, type, content, position) ' +
         'VALUES ' + 
           '($1, $2, $3, $4)',
-        [topic_id, content[i]['type'], content[i], i] 
-      );
-      -- plv8.elog(NOTICE, "resultat requête = ", insert_atom_topic);
-      i++;
-    }
+        [topicId, atom['type'], atom.content, index] 
+      );  
+    });
     
-    return {id: topic_id, author: user_id, universeId: universe_id, title: title, description: description, picture: insert_topic[0].picture, timestamp: insert_topic[0].timestamp, chatId: insert_topic[0].chatId, content: content};
+    return {
+      id: topicId, 
+      userId: user_id, 
+      universeId: universe_id, 
+      chatId: newTopic.chatId, 
+      title: title, 
+      atoms: parsedAtoms,
+      previewType: preview_type,
+      previewContent: parsedPreviewContent,
+      createdAt: newTopic.createdAt,
+    };
   });
-  return topic;
 $$ LANGUAGE plv8;
 
 
@@ -344,60 +352,4 @@ INSERT INTO aquest_schema.user (email, id, first_name, last_name, password_hash,
 
 INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
   VALUES ('Test', 'admin', 'Make some, fail some, love some.', 'img/pillars_compressed.png', '192.168.0.1');
-
-INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
-  VALUES ('Test', 'admin', 'Same name ? No problem.', 'img/pillars_compressed.png', '192.168.0.1');
-    
-INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
-  VALUES ('Test', 'admin', 'Same name ? No problem.', 'img/pillars_compressed.png', '192.168.0.1');
-    
-INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
-  VALUES ('X X', 'admin', 'Same name ? No problem.', 'img/pillars_compressed.png', '192.168.0.1');
-    
-INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
-  VALUES ('X_X', 'admin', 'Same name ? No problem.', 'img/pillars_compressed.png', '192.168.0.1');
-    
--- INSERT INTO aquest_schema.user 
---     (email, id, first_name, last_name, password_salt, password_hash, creation_ip) 
---   VALUES 
---     ('johndoe@gmail.com', 'johnDoe', 'John', 'Doe', 'fsfgfdgsdfgsdfokoksqlsd', 'dskjfsdkfjks', '192.168.0.1');
-    
--- INSERT INTO aquest_schema.universe 
---     (id, name, user_id, description, picture) 
---   VALUES 
---     ('Design', 'Design', 'johnDoe', 'This is the description of the Design Universe', 'img/designer_compressed.png');
-    
--- INSERT INTO aquest_schema.topic 
---     (id, user_id, universe_id, title) 
---   VALUES 
---     ('AquestTechnologies', 'johnDoe', 'Startups', 'Aquest Technologies');
-    
--- INSERT INTO aquest_schema.topic 
---     (id, user_id, universe_id, title) 
---   VALUES 
---     ('DavidEtAugustin', 'johnDoe', 'Startups', 'David et Augustin');
-    
--- INSERT INTO aquest_schema.atom 
---   (type,structure) 
--- VALUES 
---   ('text','{"text":"^[A-Za-z][0-9]+$"}');
-
--- INSERT INTO aquest_schema.message 
---   (user_id,chat_id) 
--- VALUES 
---   ('johnDoe','1');
-
--- INSERT INTO aquest_schema.atom_message 
---   (atom_id, message_id, type, content) 
--- VALUES 
---   (1, 1,'text','{"text":"hello"}');
   
--- INSERT INTO aquest_schema.atom_topic 
---   (atom_id, topic_id, type, content, position) 
--- VALUES 
---   (1,'AquestTechnologies','text','{"text":"Topic about nothing"}',0);
-
--- INSERT INTO aquest_schema.atom_topic 
---   (atom_id, topic_id, type, content, position) 
--- VALUES 
---   (1,'AquestTechnologies','text','{"text":"WITH NOTHING !!!"}',1);

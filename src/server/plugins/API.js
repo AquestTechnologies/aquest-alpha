@@ -12,7 +12,7 @@ function apiPlugin(server, options, next) {
   // Allows validation and params mutation before querying db
   const beforeQuery = {
     
-    createUser: (request, params) => new Promise((resolve, reject) => {
+    createUser: (request, params) => new Promise((resolve, reject) =>
       bcrypt.genSalt(10, (err, salt) => {
         if (err) return reject(err);
         bcrypt.hash(params.password, salt, (err, hash) => {
@@ -23,17 +23,31 @@ function apiPlugin(server, options, next) {
           delete params.password;
           resolve();
         });
-      });
-    }),
+      })
+    ),
     
-    createUniverse: (request, params) => new Promise((resolve, reject) => {
+    createUniverse: (request, params) => new Promise((resolve, reject) =>
       JWT.verify(request.state.jwt, key, (err, decoded) => { // JWT.decode() should be enough since the token has already been verified by Hapi-Auth-JWT2
         if (err) return reject(err);
+        params.name = params.name.trim(),
         params.userId = decoded.userId; // The real user id
-        params.ip = request.info.remoteAddress; // We should add this in the universe schema
+        params.ip = request.info.remoteAddress;
         resolve();
-      });
-    }),
+      })
+    ),
+    
+    createTopic: (request, params) => new Promise((resolve, reject) => 
+      JWT.verify(request.state.jwt, key, (err, decoded) => { // JWT.decode() should be enough since the token has already been verified by Hapi-Auth-JWT2
+        if (err) return reject(err);
+        params.title = params.title.trim(),
+        params.userId = decoded.userId; // The real user id
+        params.previewType = 'text',
+        params.previewContent = {
+          text: 'This needs to be generated dynamically.',
+        };
+        resolve();
+      })
+    ),
   };
   
   // ...
@@ -63,18 +77,6 @@ function apiPlugin(server, options, next) {
     }),
   };
   
-  // Adds a renewed JWT in the response cookie
-  function renewToken({state: {jwt}}, response) {
-    if (jwt) JWT.verify(jwt, key, (err, {userId, expiration}) => {
-      const t = new Date().getTime();
-      if (err) log(err);
-      else if (expiration > t) {
-        response.state('jwt', JWT.sign({userId, expiration: t + ttl}, key), {ttl, path: '/'}).send();
-        log('... Token renewed');
-      }
-    });
-    else response.send();
-  }
   
   // Dynamic construction of the API routes from actionCreator with API calls
   for (let acKey in actionCreators) {
@@ -111,24 +113,36 @@ function apiPlugin(server, options, next) {
             () => queryDb(intention, params).then(
               result => after(params, result, response).then(
                 skipRenewToken => {
+                  
+                  // Adds a renewed JWT in the response cookie
+                  const { jwt } = request.state;
+                  if (!skipRenewToken && jwt) JWT.verify(jwt, key, (err, {userId, expiration}) => {
+                    const t = new Date().getTime();
+                    if (err) log(err);
+                    else if (expiration > t) {
+                      response.state('jwt', JWT.sign({userId, expiration: t + ttl}, key), {ttl, path: '/'});
+                      log('... Token renewed');
+                    }
+                  });
+                  
                   response.source = result;
-                  skipRenewToken ? response.send() : renewToken(request, response);
+                  response.send();
                 },
                 
                 error => {
-                  log('!!! Error while API afterQuery:', error.message);
+                  log('!!! Error while API afterQuery:', error.stack);
                   response.statusCode  = 500;
                   response.send();
                 }
               ),
               error => {
-                log('!!! Error while API query:', error.message);
+                log('!!! Error while queryDb:', error.message, JSON.stringify(error));
                 response.statusCode  = 500;
                 response.send();
               }
             ),
             error => {
-              log('!!! Error while API beforeQuery:', error.message);
+              log('!!! Error while API beforeQuery:', error.stack);
               response.statusCode  = 500;
               response.send();
             }

@@ -105,11 +105,11 @@ export default {
     case 'SUCCESS_READ_TOPIC':
       return state.set(action.payload.id, fromJSGreedy(action.payload));
       
-    case 'SUCCESS_READ_TOPIC_CONTENT':
-      return state.setIn([action.params, 'content'], fromJSGreedy(action.payload));
+    case 'SUCCESS_READ_TOPIC_ATOMS':
+      return state.setIn([action.params, 'atoms'], fromJSGreedy(action.payload));
       
     case 'SUCCESS_CREATE_TOPIC':
-      return state.set(action.params.id, fromJSGreedy(action.params));
+      return state.set(action.payload.id, fromJSGreedy(action.payload));
       
     default:
       return state;

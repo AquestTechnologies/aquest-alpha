@@ -50,7 +50,7 @@ export default class Universe extends React.Component {
     const { 
       universes, topics, chats, session: { userId },
       children, location: { pathname }, params: { universeId, topicId },
-      actions: { readInventory, readTopic, readTopicContent, readChat, createTopic, transitionTo }
+      actions: { readInventory, readTopic, readTopicAtoms, readChat, createTopic, transitionTo }
     } = this.props;
     
     const universe = universes[universeId];
@@ -80,7 +80,7 @@ export default class Universe extends React.Component {
                   universe,
                   readTopic,
                   createTopic,
-                  readTopicContent,
+                  readTopicAtoms,
                 }) 
                 :
                 <Inventory 

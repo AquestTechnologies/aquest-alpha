@@ -12,15 +12,15 @@ export default class Topic extends React.Component {
   }
   
   componentWillMount() {
-    const { topic, topicId, readTopicContent, readTopic } = this.props;
+    const { topic, topicId, readTopicAtoms, readTopic } = this.props;
     if (!topic) readTopic(topicId);
-    else if (!topic.content) readTopicContent(topic.id);
+    else if (!topic.atoms) readTopicAtoms(topic.id);
   }
   
   render() {
     const { topic } = this.props;
-    const { title, userId, created_at } = topic ? topic : {};
-    const content = topic ? topic.content ? typeof(topic.content) === 'object' ? topic.content : JSON.parse(topic.content) : ['Loading...'] : undefined;
+    const { title, userId, createdAt } = topic ? topic : {};
+    const atoms = topic ? topic.atoms ? topic.atoms : ['Loading...'] : undefined;
     
     return !topic ? <div>Loading...</div> : (
       <div>
@@ -29,10 +29,10 @@ export default class Topic extends React.Component {
             {title}
           </div>
           <div className="topic_author">
-            {`By ${userId}, ${created_at} ago.`}
+            {`By ${userId}, ${createdAt} ago.`}
           </div>
           <div className="topic_content">
-            {content.map((atom, index) => <div key={index}>{JSON.stringify(atom.text)}</div>)}
+            {atoms.map((atom, index) => <div key={index}>{JSON.stringify(atom)}</div>)}
           </div>
         </div>
           

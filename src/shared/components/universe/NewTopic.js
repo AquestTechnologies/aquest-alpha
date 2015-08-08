@@ -10,18 +10,23 @@ export default class NewTopic extends React.Component {
     this.handleInputContent = e => this.setState({content: e.currentTarget.value});
     this.handleSubmit = e => {
       e.preventDefault();
-      const { content } = this.state;
+      const { content, title } = this.state;
       const { universe: { id }, createTopic } = this.props;
-      this.state.universeId = id;
-      this.state.description = content.substr(0, 600);
-      this.state.atoms = [ // à gen dynamiquement
-        {
-          type: 'text', 
-          content: {text: content}, 
-          position: 1,
-        }
-      ];
-      createTopic(this.state);
+      
+      createTopic({
+        title,
+        universeId: id,
+        atoms: [ // à gen dynamiquement
+          {
+            type: 'text', 
+            content: {text: content}, 
+          },
+          {
+            type: 'text',
+            content: {text: 'Second atom of text'},
+          }
+        ],
+      });
     };
     
     this.state = {

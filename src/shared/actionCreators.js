@@ -40,8 +40,8 @@ const actionCreators = {
     auth:       false,
   }),
   
-  readTopicContent: createActionCreator({
-    intention:  'readTopicContent',
+  readTopicAtoms: createActionCreator({
+    intention:  'readTopicAtoms',
     method:     'get',
     pathx:      '/api/topic/content/{p}',
     auth:       false,
