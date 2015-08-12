@@ -8,7 +8,7 @@ import actionCreators from '../actionCreators';
 class App extends React.Component {
   
   render() {
-    const {children, universes, topics, chats, session, users, router, records, actions, dispatch} = this.props;
+    const { children, universes, topics, chats, session, users, router, records, actions } = this.props;
     
     return <div> 
       <LoadingBar records={records} />
@@ -30,7 +30,7 @@ class App extends React.Component {
   }
 }
 
-const mapReducerd =(state, props) => ({ 
+const mapState = (state, props) => ({ 
   universes: state.universes.toJS(),
   topics:    state.topics.toJS(),
   chats:     state.chats.toJS(),
@@ -45,4 +45,4 @@ const mapActions = dispatch => ({
   dispatch,
 });
 
-export default connect(mapReducerd, mapActions)(App);
+export default connect(mapState, mapActions)(App);

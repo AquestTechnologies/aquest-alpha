@@ -5,7 +5,7 @@ import Chat           from './universe/Chat';
 import config         from '../../../config/client';
 import menuScroll     from '../../client/lib/menuScroll';
 
-export default class Universe extends React.Component {
+class Universe extends React.Component {
   
   static runPhidippides(routerState) {
     const { universeId, topicId } = routerState.params;
@@ -103,3 +103,13 @@ export default class Universe extends React.Component {
     );
   }
 }
+
+const mapState = (state, props) => ({ 
+  universes: state.universes.toJS(),
+  chats:     state.chats.toJS(),
+  users:     state.users.toJS(),
+  session:   state.session,
+  router:    state.router,
+});
+
+export default Universe;
