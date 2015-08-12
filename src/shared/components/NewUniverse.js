@@ -1,8 +1,11 @@
 import React from 'react';
-import {Link} from 'react-router';
+import { Link } from 'react-router';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createUniverse } from '../actionCreators';
 import { randomText, randomInteger } from '../utils/randomGenerators';
 
-export default class NewUniverse extends React.Component {
+class NewUniverse extends React.Component {
   
   constructor() {
     super();
@@ -12,7 +15,7 @@ export default class NewUniverse extends React.Component {
     // this.handleInputRelated = event => this.setState({related: event.currentTarget.value});
     this.handleSubmit = event => {
       event.preventDefault();
-      this.props.actions.createUniverse(this.state);
+      this.props.createUniverse(this.state);
     };
     
     this.state = {
@@ -44,19 +47,23 @@ export default class NewUniverse extends React.Component {
       <div style={divStyle} >
         <Link to='Explore'>Back</Link>
         <h1>Create New Universe</h1>
+        
         <form className='universeFrom' onSubmit={this.handleSubmit}>
           <div>
             <div>Name (unique)</div>
             <input type="text" value={name} onChange={this.handleInputName} />
           </div>
+          
           <br />
           <div>
             <div>Description</div>
             <input type="text" value={description} onChange={this.handleInputDescription} />
           </div>
+          
           <br />
           <input type="submit" value='Create universe' />
         </form>
+        
       </div>
     );
   }
@@ -69,3 +76,6 @@ export default class NewUniverse extends React.Component {
           </div>
           */
           
+const mapActions = dispatch => bindActionCreators({ createUniverse }, dispatch);
+
+export default connect(null, mapActions)(NewUniverse);

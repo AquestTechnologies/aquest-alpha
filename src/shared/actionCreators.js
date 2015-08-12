@@ -84,7 +84,7 @@ const actionCreators = {
     auth:       false,
   }),
 };
-export default actionCreators;
+
 
 // (string)            intention   The queryDb hook, also used to create actionTypes
 // (string)            method      HTTP method
@@ -93,7 +93,7 @@ export default actionCreators;
 // (string)            component   Adds the authentication strategy to given component in routes
 function createActionCreator(shape) {
   
-  const {intention, method, pathx, auth} = shape;
+  const { intention, method, pathx } = shape;
   const types = ['REQUEST', 'SUCCESS', 'FAILURE']
     .map(type => `${type}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
   
@@ -103,26 +103,29 @@ function createActionCreator(shape) {
       
       // Server : direct db middleware call
       if (isServer) require('../server/queryDb')(intention, params).then(
-          result => resolve(result),
-          error => reject(error));
+        result => resolve(result),
+        error => reject(error)
+      );
       
       // Client : API call through XMLHttpRequest
       else {
         const path = pathx.replace(/\{\S*\}/, '');
         const isPost = method === 'post';
         const req = new XMLHttpRequest();
-        // const jwt = docCookies.getItem('jwt');
         log(`+++ --> ${method} ${path}`, params);
-        // if (auth) log('+++ with JWT:', jwt);
         
         req.onerror = err => reject(err);
         req.open(method, isPost ? path : params ? path + params : path);
-        // req.setRequestHeader('Authorization', jwt);
         req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
         
         if (isPost) { 
-          //stringify objects before POST XMLHttpRequest
-          Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
+          //stringifies objects before POST XMLHttpRequest
+          for (let key in params) {
+            if (params.hasOwnProperty(key)) {
+              const value = params[key];
+              params[key] = typeof(value) === 'object' ? JSON.stringify(value) : value;
+            }
+          }
           req.send(createForm(params));
         }
         else req.send();
@@ -139,7 +142,7 @@ function createActionCreator(shape) {
         log('!!! params', params);
       });
     
-    return {types, params, promise};
+    return { types, params, promise };
   };
   
   // getters
@@ -150,8 +153,10 @@ function createActionCreator(shape) {
 }
 
 function createForm(o) {
-  let f  = new FormData();
-  for(let k in o) { f.append(k, o[k]); } 
+  let f = new FormData();
+  for (let k in o) { 
+    if (o.hasOwnProperty(k)) f.append(k, o[k]); 
+  } 
   return f;
 }
 
@@ -171,7 +176,8 @@ const protectedComponents = acAPI
   .map(s => s.component);
 
 export function isAPIUnauthorized(action) {
-  return authFailureTypes.indexOf(action.type) !== -1 && action.payload && action.payload.message === 'Unauthorized';
+  const { type, payload } = action;
+  return authFailureTypes.indexOf(type) !== -1 && payload && payload.message === 'Unauthorized';
 }
 
 export function isAPISuccess(action) {
@@ -181,3 +187,10 @@ export function isAPISuccess(action) {
 export function isProtected(component) {
   return protectedComponents.indexOf(component.name) !== -1;
 }
+
+export default actionCreators;
+export const login = actionCreators.login;
+export const logout = actionCreators.logout;
+export const readUniverses = actionCreators.readUniverses;
+export const createUniverse = actionCreators.createUniverse;
+export const createUser = actionCreators.createUser;

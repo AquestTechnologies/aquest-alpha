@@ -1,12 +1,15 @@
 import React from 'react';
-import { Link } from 'react-router';
-import Signup from './Signup';
 import Login from './Login';
+import Signup from './Signup';
+import { Link } from 'react-router';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { logout } from '../../actionCreators';
 
-export default class Home extends React.Component {
+class Home extends React.Component {
   
   renderLogin() {
-    const { actions, session: { userId } } = this.props;
+    const { userId, logout } = this.props;
     const s2 = { 
       display : 'flex', 
       alignContent: 'space-between',
@@ -14,11 +17,11 @@ export default class Home extends React.Component {
     
     return userId ?
       <div style={{marginTop: '20'}}>
-        <button onClick={actions.logout}>Logout</button>
+        <button onClick={logout}>Logout</button>
       </div> :
       <div style={s2}>
-        <Login actions={actions} />
-        <Signup createUser={actions.createUser} />
+        <Login />
+        <Signup />
       </div>;
   }
   
@@ -34,10 +37,18 @@ export default class Home extends React.Component {
       
         <h1>Aquest</h1>
         <Link to='/Explore'>Explore</Link>
+        
         { this.renderLogin() }
         
       </div>
     );
   }
-  
 }
+
+const mapState = state => ({
+  userId: state.session.userId
+});
+
+const mapActions = dispatch => bindActionCreators({ logout }, dispatch);
+
+export default connect(mapState, mapActions)(Home);

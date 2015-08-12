@@ -1,26 +1,25 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-export default class LoadingBar extends React.Component {
+class LoadingBar extends React.Component {
   
   constructor() {
     super();
-    this.state = {loadings: []};
+    this.state = { loadings: [] };
   }
   
   componentWillReceiveProps(nextProps) {
     let needsResolving = [];
-    const nextRecords = nextProps.records;
     
-    nextRecords.forEach(record => {
-      const {type} = record;
-      const intention = type.substr(8); //pratique :)
+    // Runs through each records (really not perf)
+    nextProps.records.forEach(record => {
+      const { type } = record;
+      const intention = type.substr(8); // --> REQUEST || SUCCESS || FAILURE || foo
       if (type.match(/REQUEST/)) needsResolving.push(intention);
-      else if (type.match(/SUCCESS|FAILURE/)) needsResolving.forEach((awaiting, i) => {
-        if (awaiting === intention) needsResolving.splice(i, 1);
-      });
+      else if (type.match(/SUCCESS|FAILURE/)) needsResolving.splice(needsResolving.indexOf(intention), 1); 
     });
     
-    this.setState({loadings: needsResolving});
+    this.setState({ loadings: needsResolving });
   }
   
   render() {
@@ -38,8 +37,14 @@ export default class LoadingBar extends React.Component {
     
     return (
       <div style={divStyle}>
-        {this.state.loadings.map(loading => <div key={loading}>{loading}</div>)}
+        { this.state.loadings.map(loading => <div key={loading}>{loading}</div>) }
       </div>
     );
   }
 }
+
+const mapState = state => ({
+  records: state.records
+});
+
+export default connect(mapState)(LoadingBar);

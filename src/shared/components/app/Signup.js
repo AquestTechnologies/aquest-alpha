@@ -1,6 +1,9 @@
 import React from 'react';
-import {generateOnePseudo} from '../../utils/pseudosGenerator';
-import {randomString, randomText} from '../../utils/randomGenerators';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createUser } from '../../actionCreators';
+import { generateOnePseudo } from '../../utils/pseudosGenerator';
+import { randomString, randomText } from '../../utils/randomGenerators';
 
 class Signup extends React.Component {
   
@@ -23,29 +26,33 @@ class Signup extends React.Component {
   }
   
   render() {
-    const {pseudo, password, email} = this.state;
+    const { pseudo, password, email } = this.state;
     const divStyle = {
       width: '50%',
       fontSize: '2rem',
     };
     
     return (
-      <div style={divStyle} >
+      <div style={divStyle}>
         <h2>Sign up</h2>
+        
         <div>
           <div>Pseudo (unique)</div>
           <input type="text" value={pseudo} onChange={this.handleInputPseudo} />
         </div>
+        
         <br />
         <div>
           <div>Email (unique)</div>
           <input type="text" value={email} onChange={this.handleInputEmail} />
         </div>
+        
         <br />
         <div>
           <div>Password</div>
           <input type="text" value={password} onChange={this.handleInputPassword} />
         </div>
+        
         <br />
         <button type="button" onClick={this.handleSubmit}>Start adventure!</button>
       </div>
@@ -53,4 +60,6 @@ class Signup extends React.Component {
   }
 }
 
-export default Signup;
+const mapActions = dispatch => bindActionCreators({ createUser }, dispatch);
+
+export default connect(null, mapActions)(Signup);

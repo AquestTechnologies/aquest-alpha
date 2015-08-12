@@ -1,8 +1,11 @@
 import React from 'react';
 import Node  from './explore/Node';
 import { Link } from 'react-router';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { readUniverses } from '../actionCreators';
 
-export default class Explore extends React.Component {
+class Explore extends React.Component {
   
   static runPhidippides(routerState) {
     return [{
@@ -13,12 +16,11 @@ export default class Explore extends React.Component {
   }
   
   componentDidMount() {
-    const { universes, actions: { readUniverses } } = this.props;
-    if (Object.keys(universes).length < 2) readUniverses();
+    const { universes, readUniverses } = this.props;
+    if (universes.size < 2) readUniverses();
   }
   
   render() {
-    const { universes } = this.props;
     const divStyle = {
       width: '60%',
       margin: '0 auto 0 auto',
@@ -31,7 +33,15 @@ export default class Explore extends React.Component {
       <Link to='/Create_universe'>Create a new universe</Link>
       <br/>
       <br/>
-      { Object.keys(universes).sort().map(key => <Node key={key} universe={universes[key]} />) }
+      { this.props.universes.sort().map(universe => <Node key={universe.get('id')} universe={universe} />) }
     </div>;
   }
 }
+
+const mapState = state => ({
+  universes: state.universes
+});
+
+const mapActions = dispatch => bindActionCreators({ readUniverses }, dispatch);
+
+export default connect(mapState, mapActions)(Explore);
