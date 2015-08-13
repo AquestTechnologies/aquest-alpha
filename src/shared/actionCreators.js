@@ -83,8 +83,47 @@ const actionCreators = {
     pathx:      '/login',
     auth:       false,
   }),
+  
+  /**
+   * WebSocket actions for the chat component
+   */
+  joinChat: createSocketCreator({
+    type:  'joinChat',
+    auth:       'jwt',
+  }),
+  
+  leaveChat: createSocketCreator({
+    type:       'leaveChat',
+    auth:       'jwt',
+  }),
+  
+  createMessage: createSocketCreator({
+    type:       'createMessage',
+    auth:       'jwt',
+  }),
+  
+  receiveJoinChat:  (params) => ({ type: 'RECEIVE_JOIN_CHAT', payload: params }),
+  
+  receiveLeaveChat: (params) => ({ type: 'RECEIVE_LEAVE_CHAT', payload: params }),
+  
+  receiveMessage:   (params) => ({ type: 'RECEIVE_MESSAGE', payload: params }),
 };
 export default actionCreators;
+
+function createSocketCreator(shape) {
+  const {type} = shape;
+  const lcType = type.replace(/[A-Z]/g, '_$&').toUpperCase() + '_LC';
+  
+  const socketCreator = params => {
+    const socket = params.socket;
+    delete params.socket;
+    socket.emit(type, stringifyObjectValues(params));
+    
+    return {type: lcType, payload: params};
+  }
+  
+  return socketCreator;
+}
 
 // (string)            intention   The queryDb hook, also used to create actionTypes
 // (string)            method      HTTP method
@@ -121,9 +160,7 @@ function createActionCreator(shape) {
         req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
         
         if (isPost) { 
-          //stringify objects before POST XMLHttpRequest
-          Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
-          req.send(createForm(params));
+          req.send(createForm(stringifyObjectValues(params)));
         }
         else req.send();
       }
@@ -147,6 +184,12 @@ function createActionCreator(shape) {
   actionCreator.getShape = () => shape;
   
   return actionCreator;
+}
+
+//stringify objects value before send params to the server
+function stringifyObjectValues(params){
+  Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value])
+  return params;
 }
 
 function createForm(o) {

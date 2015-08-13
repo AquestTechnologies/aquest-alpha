@@ -48,15 +48,17 @@ export default class Universe extends React.Component {
   render() {
     // console.log('.C. Universe.render');
     const { 
-      universes, topics, chats, session: { userId },
+      universes, topics, chats, session: { userId }, websocket,
       children, location: { pathname }, params: { universeId, topicId },
-      actions: { readInventory, readTopic, readTopicAtoms, readChat, createTopic, transitionTo }
+      actions: { readInventory, readTopic, readTopicAtoms, readChat, joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage, createTopic, transitionTo }
     } = this.props;
     
     const universe = universes[universeId];
     const topic = topicId ? topics[topicId] : undefined;
     const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
     const filteredTopics = !children ? this.filterTopics(topics, universeId) : undefined;
+    
+    const socket = websocket.connect('http://23.251.143.127:9090/chat-universe-topic');
     
     return !universe ? <div>Loading...</div> : (
       <div> 
@@ -96,8 +98,16 @@ export default class Universe extends React.Component {
         
         <Chat 
           chatId={chatId}
-          readChat={readChat} //passer les actions par le context, a faire
+          userId={userId}
           chat={chats[chatId]} 
+          readChat={readChat}
+          socket={socket}
+          joinChat={joinChat}
+          leaveChat={leaveChat}
+          createMessage={createMessage}
+          receiveJoinChat={receiveJoinChat}
+          receiveLeaveChat={receiveLeaveChat}
+          receiveMessage={receiveMessage}
         />
       </div>
     );

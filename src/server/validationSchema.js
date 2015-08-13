@@ -54,11 +54,11 @@ const API_VALIDATION_SCHEMA = {
 const WEBSOCKET_VALIDATION_SCHEMA = {
   joinChat: {
     chatId,
-    // userId // Ne pas faire confiance à l'utilisateur, userId provient du token décodé (je sais avec du WS ca pas etre simple)
+    userId // Ne pas faire confiance à l'utilisateur, userId provient du token décodé (je sais avec du WS ca pas etre simple)
   },
   leaveChat: {
     chatId,
-    // userId
+    userId
   },
   createMessage: {
     id:           Joi.number().positive().integer().required().min(1),
@@ -66,7 +66,7 @@ const WEBSOCKET_VALIDATION_SCHEMA = {
     content:      Joi.object({
                     type: Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,}$/)
                   }).unknown(true).required(), 
-    // userId 
+    userId 
   }
 };  
 

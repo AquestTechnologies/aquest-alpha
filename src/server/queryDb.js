@@ -150,26 +150,33 @@ export default function queryDb(intention, params) {
       case 'readTopic':
         
         sql =
-        'SELECT json_build_object(' + 
-          `'id', topic.id,` + 
-          `'userId', topic.user_id,` + 
-          `'chatId', topic.chat_id,` + 
-          `'universeId', topic.universe_id,` + 
-          `'title', topic.title,` + 
-          `'previewContent', topic.preview_content,` + 
-          `'previewType', topic.preview_type,` + 
-          `'createdAt', COALESCE(to_char(created_at, 'MM-DD-YYYY HH24:MI:SS'), ''),` + 
-          `'atoms', array_agg(` + 
-            'json_build_object(' + 
-              `'type', atomtopic.type,` +
-              `'content', atomtopic.content,` +
-            ')' + 
-          ')' + 
+        'SELECT json_build_object(' +
+          `'id', topic.id,` +
+          `'userId', topic.user_id,` +
+          `'chatId', topic.chat_id,` +
+          `'universeId', topic.universe_id,` +
+          `'title', topic.title,` +
+          `'previewContent', topic.preview_content,` +
+          `'previewType', topic.preview_type,` +
+          `'createdAt', COALESCE(to_char(topic.created_at, 'MM-DD-YYYY HH24:MI:SS'), ''),` +
+          `'atoms', atomtopic.atoms` +
         ') as topic ' +
         'FROM aquest_schema.topic ' +
-        'WHERE topic.id = $1 ' +
-        'LEFT JOIN aquest_schema.atomtopic atomtopic ON topic.id = atomtopic.topic_id ' +
-        'ORDER BY atomtopic.position';
+        'LEFT JOIN ' +
+          '(SELECT ' +
+            'atomtopic.topic_id, ' +
+            'array_agg(' +
+              'json_build_object(' +
+                `'type', atomtopic.type,` +
+                `'content', atomtopic.content` +
+              ') ' +
+              'ORDER BY atomtopic.position ' +
+            ') as atoms ' +
+          'FROM aquest_schema.atomtopic ' +
+          'GROUP BY atomtopic.topic_id' +
+          ') as atomtopic ' +
+        'ON topic.id = atomtopic.topic_id ' +
+        'WHERE topic.id = $1';
         
         paramaterized = [params];
         callback = result => result.rows[0].topic;

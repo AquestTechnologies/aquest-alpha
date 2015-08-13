@@ -4,11 +4,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import LoadingBar from './app/LoadingBar';
 import actionCreators from '../actionCreators';
+import websocket     from 'socket.io-client';
 
 class App extends React.Component {
   
   render() {
-    const {children, universes, topics, chats, session, users, router, records, actions, dispatch} = this.props;
+    const {children, universes, topics, chats, session, users, router, records, actions, dispatch, websocket} = this.props;
     
     return <div> 
       <LoadingBar records={records} />
@@ -22,6 +23,7 @@ class App extends React.Component {
             session,
             router,
             actions,
+            websocket
           }) 
           :
           <Home session={session} actions={actions} />
@@ -38,6 +40,7 @@ const mapReducerd =(state, props) => ({
   records:   state.records,
   session:   state.session,
   router:    state.router,
+  websocket
 });
 
 const mapActions = dispatch => ({
