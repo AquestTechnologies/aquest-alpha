@@ -17,8 +17,8 @@ export default class User extends React.Component {
       fontSize: '5rem'
     };
     
-    const { session, users } = this.props;
-    const { id, firstName, lastName, email, bio, picture } = users[session.userId];
+    const { session: {userId}, users } = this.props;
+    const { id, firstName, lastName, email, bio, picture } = users[userId];
     
     return (
       <div style={_user_}>

@@ -17,15 +17,13 @@ class Topic extends React.Component {
   componentWillMount() {
     const { topic, topicId, readTopic, readTopicAtoms } = this.props;
     if (!topic) readTopic(topicId);
-    else if (!topic.has('atoms')) readTopicAtoms(topicId);
+    else if (!topic.atoms) readTopicAtoms(topicId);
   }
   
   render() {
-    const { topic } = this.props || new Map();
-    const title = topic.get('title');
-    const userId = topic.get('userId');
-    const createdAt = topic.get('createdAt');
-    const atoms = topic.has('atoms') ? topic.get('atoms') : ['Loading...'];
+    const { topic } = this.props || {};
+    const { title, userId, createdAt } = topic;
+    const atoms = topic.atoms || ['Loading...'];
     
     return !topic ? <div>Loading...</div> : (
       <div>

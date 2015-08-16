@@ -33,11 +33,19 @@ class Universe extends React.Component {
   
   componentWillMount() {
     const { universes, readUniverse, params: { universeId } } = this.props;
-    if (!universes.has(universeId)) readUniverse(universeId);
+    if (!universes[universeId]) readUniverse(universeId);
   }
   
   componentDidMount() {
     menuScroll('main_scrollable');
+  }
+  
+  createTopicsList(topics, universeId) {
+    const list = [];
+    for (let key in topics) {
+      if (topics.hasOwnProperty(key) && topics[key].universeId === universeId) list.push(topics[key]); 
+    }
+    return list;
   }
   
   render() {
@@ -48,11 +56,11 @@ class Universe extends React.Component {
       children, location: { pathname }, params: { universeId, topicId },
     } = this.props;
     
-    const universe = universes.get(universeId);
-    const topic = topicId ? topics.get(topicId) : undefined;
-    const chatId = universe ? topic ? topic.get('chatId') : universe.get('chatId') : undefined;
-    const filteredTopics = !children ? topics.filter(t => t.get('universeId') === universeId) : undefined;
-    const chat = chats.get(chatId);
+    const universe = universes[universeId];
+    const topic = topicId ? topics[topicId] : undefined;
+    const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
+    const filteredTopics = !children ? this.createTopicsList(topics, universeId) : undefined;
+    const chat = chats[chatId];
     
     return !universe ? <div>Loading...</div> : (
       <div> 
@@ -60,10 +68,10 @@ class Universe extends React.Component {
           topicId={topicId}
           pathName={pathname}
           universeId={universeId} 
-          universeName={universe.get('name')} 
+          universeName={universe.name} 
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(${apiUrl}/${universe.get('picture')})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(${apiUrl}/${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'> { 
               
@@ -78,7 +86,7 @@ class Universe extends React.Component {
                 :
                 <Inventory 
                   universe={universe}
-                  topics={filteredTopics}
+                  topicsList={filteredTopics}
                   transitionTo={transitionTo}
                   readInventory={readInventory}
                 />

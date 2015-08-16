@@ -14,11 +14,11 @@ export default class CreateTopic extends React.Component {
     this.handleSubmit = e => {
       e.preventDefault();
       const { content, title } = this.state;
-      const { universe, createTopic } = this.props;
+      const { universe: { id }, createTopic } = this.props;
       
       createTopic({
         title,
-        universeId: universe.get('id'),
+        universeId: id,
         atoms: [ // à gen dynamiquement
           {
             type: 'text', 

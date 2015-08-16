@@ -1,6 +1,5 @@
 import fs        from 'fs';
 import React     from 'react';
-import Immutable from 'immutable';
 import JWT       from 'jsonwebtoken';
 import ReactDOM  from 'react-dom/server';
 import Location  from 'react-router/lib/Location';
@@ -87,12 +86,11 @@ export default function prerender(request, reply) {
         let placeholder = html.split('<div id="mountNode">')[1].split('</div>')[0]; //à mod.
         
         // Passage du state dans window
-        // Possible brandwidth optimization : delete empty keys (sending universes:{} is useless)
         const serverState = store.getState();
         delete serverState.records;
-        serverState.immutableKeys = [];
+        delete serverState.router;
         for (let key in serverState) {
-          if (Immutable.Map.isMap(serverState[key])) serverState.immutableKeys.push(key); //Mutation !
+          if (Object.keys(serverState[key]).length === 0) delete serverState[key];
         }
         
         response.source = html

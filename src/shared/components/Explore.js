@@ -17,10 +17,11 @@ class Explore extends React.Component {
   
   componentDidMount() {
     const { universes, readUniverses } = this.props;
-    if (universes.size < 2) readUniverses();
+    if (Object.keys(universes).length < 2) readUniverses();
   }
   
   render() {
+    const { universes } = this.props;
     const divStyle = {
       width: '60%',
       margin: '0 auto 0 auto',
@@ -33,7 +34,7 @@ class Explore extends React.Component {
       <Link to='/Create_universe'>Create a new universe</Link>
       <br/>
       <br/>
-      { this.props.universes.sort().map(universe => <Node key={universe.get('id')} universe={universe} />) }
+      { Object.keys(universes).sort().map(key => <Node key={key} universe={universes[key]} />) }
     </div>;
   }
 }

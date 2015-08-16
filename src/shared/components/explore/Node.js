@@ -4,14 +4,13 @@ import { Link } from 'react-router';
 export default class Node extends React.Component {
   
   render() {
-    const { universe } = this.props;
-    const description = universe.get('description');
+    const { universe: { id, name, description } } = this.props;
     const desc = description.length > 100 ? description.slice(0, 100) + '...' : description;
     
     return (
       <div style={{marginTop: 10}}>
-        <Link to={'/~' + universe.get('id')}>
-          {universe.get('name')}
+        <Link to={'/~' + id}>
+          {name}
         </Link>
         <span style={{marginLeft: 10, fontSize: '1.6rem'}}>
           {desc}

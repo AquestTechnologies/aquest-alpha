@@ -9,8 +9,8 @@ export default class Card extends React.Component {
   
   renderPreview(previewType, previewContent) {
     return previewType === 'image' ?
-      <img src={previewContent.get('path')} className='card_image' /> :
-      <div className='card_description'>{ previewContent.get('text') }</div>;
+      <img src={previewContent.path} className='card_image' /> :
+      <div className='card_description'>{ previewContent.text }</div>;
   }
   
   renderFooter(previewType) {
@@ -18,14 +18,7 @@ export default class Card extends React.Component {
   }
     
   render() {
-    const { topic } = this.props;
-    const id = topic.get('id');
-    const title = topic.get('title');
-    const userId = topic.get('userId');
-    const createdAt = topic.get('createdAt');
-    const universeId = topic.get('universeId');
-    const previewType = topic.get('previewType');
-    const previewContent = topic.get('previewContent');
+    const { topic: {id, title, userId, createdAt, universeId, previewType, previewContent} } = this.props;
     
     return (
       <div className='card' onClick={this.handleClick.bind(this, universeId, id)}>

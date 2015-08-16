@@ -1,6 +1,5 @@
 import React                   from 'react';
 import ReactDOM                from 'react-dom';
-import Immutable               from 'immutable';
 import Router, { Route }       from 'react-router';  
 import { reduxRouteComponent } from 'redux-react-router';
 import BrowserHistory          from 'react-router/lib/BrowserHistory';

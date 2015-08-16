@@ -12,13 +12,13 @@ export default class Inventory extends React.Component {
   }
   
   componentWillMount() {
-    const { universe, readInventory } = this.props;
-    if (!universe.has('lastInventoryUpdate')) readInventory(universe.get('id'));
+    const { universe: { id, lastInventoryUpdate }, readInventory } = this.props;
+    if (!lastInventoryUpdate) readInventory(id);
   }
   
   render() {
     const { nameVisible } = this.state;
-    const { universe, topics, transitionTo } = this.props;
+    const { universe: { id, name, description }, topicsList, transitionTo } = this.props;
     
     return (
       <div>
@@ -26,7 +26,7 @@ export default class Inventory extends React.Component {
         <div className='inventory_header'>
           <div className='inventory_header_content' onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
             <div className={nameVisible ? 'inventory_header_content_name' : 'inventory_header_content_desc'}>
-              { nameVisible ? universe.get('name') : universe.get('description') }
+              { nameVisible ? name : description }
             </div>
           </div>
         </div>  
@@ -34,15 +34,15 @@ export default class Inventory extends React.Component {
         <div className='inventory_list'>
           
           <CreateTopicCard 
-            universeId={universe.get('id')} 
+            universeId={id} 
             transitionTo={transitionTo}
           />
           
           { 
-            topics.map(topic => 
+            topicsList.map(topic => 
               <Card
                 topic = {topic}
-                key = {topic.get('id')} 
+                key = {topic.id} 
                 transitionTo={transitionTo}
               />)
           }
