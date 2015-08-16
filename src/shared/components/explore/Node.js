@@ -10,7 +10,7 @@ export default class Node extends React.Component {
     
     return (
       <div style={{marginTop: 10}}>
-        <Link to={'/_' + universe.get('id')}>
+        <Link to={'/~' + universe.get('id')}>
           {universe.get('name')}
         </Link>
         <span style={{marginLeft: 10, fontSize: '1.6rem'}}>

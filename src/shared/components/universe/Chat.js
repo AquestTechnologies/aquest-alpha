@@ -8,7 +8,7 @@ export default class Chat extends React.Component {
   constructor() {
     super();
     this.state = { 
-      chat:      {},
+      chat:      new Map(),
       isLoading: false
     };
   }
@@ -18,7 +18,7 @@ export default class Chat extends React.Component {
     let { chat, readChat, chatId } = this.props;
     let isLoading = false;
     if (!chat) {
-      chat = {};
+      chat = new Map();
       isLoading = true;
       readChat(chatId);
     }
@@ -33,7 +33,7 @@ export default class Chat extends React.Component {
       if (!this.state.isLoading) {
         readChat(chatId);
         this.setState({ 
-          chat: {},
+          chat: new Map(),
           isLoading: true
         });
       }
@@ -58,24 +58,22 @@ export default class Chat extends React.Component {
   }
   
   render() {
-    const chat     = this.state.chat || {};
-    const messages = (chat.messages && chat.messages[0].id) ? chat.messages : []; // l'idéale est d'avoir une requête qui renvoi tableau vide s'il n'y a pas de message.
-    const samuel   = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
+    const { chat } = this.state;
+    const messages = chat.has('messages') ? chat.get('messages').toJS() : []; // Bon courage !
+    const samuel = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
     const messagesList = messages.length ? 'chat_list-visible' : 'chat_list-hidden';
     
     return (
       <div className='chat'>
-        <ChatHeader chatTitle={chat.name} />
+        <ChatHeader chatTitle={chat.get('name')} />
         
         <div id='scrollMeDown' className='chat_scrollable'>
           <div className={messagesList}>
           
             <Message author='Extreme firster' content='First!' />
-            {messages.map(message => { 
-              return <Message key={message.id} author={message.author} content={message.content.text} />;
-            })}
+            { messages.map(msg => <Message key={msg.id} author={msg.userId} content={msg.content} />) }
             <Message author='Jackie Chan' content='I live in the USA' />
-            <Message author={chat.name + ' L. Jackson'} content={samuel}/>
+            <Message author={chat.get('name') + ' L. Jackson'} content={samuel}/>
             
           </div>
         </div>

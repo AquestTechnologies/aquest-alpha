@@ -7,12 +7,12 @@ import Location  from 'react-router/lib/Location';
 import { reduxRouteComponent } from 'redux-react-router';
 import {createStore, combineReducers, applyMiddleware} from 'redux';
 import Router, { Route } from 'react-router';
+import phidippides       from './phidippides';
 import reducers          from '../shared/reducers';
 import devConfig         from '../../config/development';
-import phidippides       from '../shared/utils/phidippides';
 import promiseMiddleware from '../shared/utils/promiseMiddleware';
 import log, { logAuthentication }  from '../shared/utils/logTailor';
-import makeJourney, { routeGuard } from '../shared/routes';
+import protectRoutes from '../shared/routes';
 
 const { wds: { hotFile, publicPath, filename }, jwt: { key, ttl } } = devConfig();
 const HTML = fs.readFileSync('src/server/index.html', 'utf8');
@@ -40,26 +40,24 @@ export default function prerender(request, reply) {
     Promise.resolve({}); // No cookie, no problem
 
   // First we scan the request for a cookie to renew
-  checkCookie.then(reduxInitialState => {
+  checkCookie.then(reduxState => {
     
     // Then we create a new Redux store and initialize the routes with it
     const html   = HTML;
-    const store  = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), reduxInitialState);
-    const safe   = routeGuard(store);
-    const routes = <Route component={reduxRouteComponent(store)} children={makeJourney(safe)} />;
+    const store  = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), reduxState);
+    const routes = <Route children={protectRoutes(store)} component={reduxRouteComponent(store)} />;
     
     // URL processing : /foo/ --> /foo || /foo?bar=baz --> /foo || / --> /
     const requestUrl = request.url.path.split('?')[0];
     const url = requestUrl.slice(-1) === '/' && requestUrl !== '/' ? requestUrl.slice(0, -1) : requestUrl;
     
-    Router.run(routes, new Location(url), (err, initialState, transition) => {
+    Router.run(routes, new Location(url), (err, routerState, transition) => {
       log('... Router.run');
       if (err) {
         log('!!! Error while Router.run', err.message, err.stack); 
         response.statusCode = 500;
         return response.send();
       }
-      
       // If routeGuard canceled a route transition (for example) then we send back a 301 (redirect)
       if (transition.isCancelled) {
         log('... Transition cancelled: redirecting');
@@ -69,7 +67,7 @@ export default function prerender(request, reply) {
       // Fetches initial data for components in router's branch
       log('... Entering phidippides');
       const dd = new Date();
-      phidippides(initialState, store.dispatch).then(() => {
+      phidippides(routerState, store.dispatch).then(() => {
         
         log(`... Exiting phidippides (${new Date() - dd}ms)`);
         log('... Entering React.renderToString');
@@ -77,7 +75,7 @@ export default function prerender(request, reply) {
         // Renders the app (try...catch to be removed in production)
         try {
           var mountMeImFamous = ReactDOM.renderToString(
-            <Router {...initialState} children={routes} />
+            <Router {...routerState} children={routes} />
           );
         } 
         catch(err) { log('!!! Error while React.renderToString', err.message, err.stack); }

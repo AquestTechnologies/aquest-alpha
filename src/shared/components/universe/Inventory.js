@@ -1,6 +1,6 @@
 import React from 'react';
 import Card  from './Card';
-import NewTopicCard from './NewTopicCard';
+import CreateTopicCard from './CreateTopicCard';
 
 export default class Inventory extends React.Component {
   
@@ -13,12 +13,12 @@ export default class Inventory extends React.Component {
   
   componentWillMount() {
     const { universe, readInventory } = this.props;
-    if (!universe.lastInventoryUpdate) readInventory(universe.id);
+    if (!universe.has('lastInventoryUpdate')) readInventory(universe.get('id'));
   }
   
   render() {
     const { nameVisible } = this.state;
-    const { universe: { name, description, id }, topics, transitionTo } = this.props;
+    const { universe, topics, transitionTo } = this.props;
     
     return (
       <div>
@@ -26,24 +26,24 @@ export default class Inventory extends React.Component {
         <div className='inventory_header'>
           <div className='inventory_header_content' onMouseOver={this.handleHeaderHover} onMouseOut={this.handleHeaderHover}>
             <div className={nameVisible ? 'inventory_header_content_name' : 'inventory_header_content_desc'}>
-              { nameVisible ? name : description }
+              { nameVisible ? universe.get('name') : universe.get('description') }
             </div>
           </div>
         </div>  
         
         <div className='inventory_list'>
           
-          <NewTopicCard 
-            universeId={id} 
+          <CreateTopicCard 
+            universeId={universe.get('id')} 
             transitionTo={transitionTo}
           />
           
           { 
-            Object.keys(topics).map(key => 
+            topics.map(topic => 
               <Card
-                key = {key} 
+                topic = {topic}
+                key = {topic.get('id')} 
                 transitionTo={transitionTo}
-                topic = {topics[key]}
               />)
           }
           

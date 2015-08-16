@@ -1,6 +1,9 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { readTopic, readTopicAtoms } from '../actionCreators';
 
-export default class Topic extends React.Component {
+class Topic extends React.Component {
   
   // Load les données initiales
   static runPhidippides(routerState) {
@@ -12,15 +15,17 @@ export default class Topic extends React.Component {
   }
   
   componentWillMount() {
-    const { topic, topicId, readTopicAtoms, readTopic } = this.props;
+    const { topic, topicId, readTopic, readTopicAtoms } = this.props;
     if (!topic) readTopic(topicId);
-    else if (!topic.atoms) readTopicAtoms(topic.id);
+    else if (!topic.has('atoms')) readTopicAtoms(topicId);
   }
   
   render() {
-    const { topic } = this.props;
-    const { title, userId, createdAt } = topic ? topic : {};
-    const atoms = topic ? topic.atoms ? topic.atoms : ['Loading...'] : undefined;
+    const { topic } = this.props || new Map();
+    const title = topic.get('title');
+    const userId = topic.get('userId');
+    const createdAt = topic.get('createdAt');
+    const atoms = topic.has('atoms') ? topic.get('atoms') : ['Loading...'];
     
     return !topic ? <div>Loading...</div> : (
       <div>
@@ -40,3 +45,7 @@ export default class Topic extends React.Component {
     );
   }
 }
+
+const mapActions = dispatch => bindActionCreators({ readTopic, readTopicAtoms }, dispatch);
+
+export default connect(null, mapActions)(Topic);

@@ -38,10 +38,7 @@ class Explore extends React.Component {
   }
 }
 
-const mapState = state => ({
-  universes: state.universes
-});
-
+const mapState = state => ({ universes: state.universes });
 const mapActions = dispatch => bindActionCreators({ readUniverses }, dispatch);
 
 export default connect(mapState, mapActions)(Explore);

@@ -4,13 +4,13 @@ export default class Card extends React.Component {
   
   handleClick(universeId, id) { 
     console.log(`-C- Card.handleClick ${id}`);
-    this.props.transitionTo(`/_${universeId}/${id}`);
+    this.props.transitionTo(`/~${universeId}/${id}`);
   }
   
   renderPreview(previewType, previewContent) {
     return previewType === 'image' ?
-      <img src={previewContent.path} className='card_image' /> :
-      <div className='card_description'>{previewContent.text}</div>;
+      <img src={previewContent.get('path')} className='card_image' /> :
+      <div className='card_description'>{ previewContent.get('text') }</div>;
   }
   
   renderFooter(previewType) {
@@ -18,7 +18,14 @@ export default class Card extends React.Component {
   }
     
   render() {
-    const { title, userId, createdAt, previewType, previewContent, universeId, id } = this.props.topic;
+    const { topic } = this.props;
+    const id = topic.get('id');
+    const title = topic.get('title');
+    const userId = topic.get('userId');
+    const createdAt = topic.get('createdAt');
+    const universeId = topic.get('universeId');
+    const previewType = topic.get('previewType');
+    const previewContent = topic.get('previewContent');
     
     return (
       <div className='card' onClick={this.handleClick.bind(this, universeId, id)}>

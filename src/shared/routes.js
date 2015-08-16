@@ -3,59 +3,23 @@ import App         from './components/App';
 import User        from './components/User';
 import Explore     from './components/Explore';
 import Universe    from './components/Universe';
-import Login       from './components/app/Login';
-import NewUniverse from './components/NewUniverse';
-import Topic       from './components/universe/Topic';
-import NewTopic    from './components/universe/NewTopic';
-import { isProtected } from './actionCreators';
+import Login       from './components/Login';
+import NewUniverse from './components/CreateUniverse';
+import Topic       from './components/Topic';
+import NewTopic    from './components/CreateTopic';
 import { Route, Redirect } from 'react-router';
 import log, { logAuthentication } from './utils/logTailor';
 
-// Adds 'safe' onEnter prop to Route whose component is protected by an actionCreator
-export default function makeJourney(safe) {
+export default function protectRoutes(store) {
   
   log('.X. Adding authentication check on routes');
   
-  // Recursively checks for protected component
-  function checkRoute(route) {
-    const {component, children} = route.props;
-    const newProps = {
-      children: children && (children instanceof Array) ? children.map(child => checkRoute(child)) : undefined,
-      onEnter: component && isProtected(component) ? safe : undefined,
-    };
+  const protectAccess = (nextState, transition) => { // RR 1.0 signature
     
-    return React.cloneElement(route, newProps);
-  }
-  
-  return checkRoute(
-    <Route path='/' component={App}> 
-      
-      <Route path='login' component={Login} />
-      
-      <Route path='_:universeId' component={Universe}>
-        <Route path='Create_topic' component={NewTopic} />
-        <Route path=':topicId' component={Topic} />
-      </Route>
-      
-      <Route path='@:userId' component={User} />
-      <Route path='Explore' component={Explore} />
-      <Route path='Create_universe' component={NewUniverse} />
-      
-      <Redirect from='signup' to='/' />
-      <Redirect from='register' to='/' />
-      <Redirect from='about' to='/' />
-      
-    </Route>
-  );
-}
-
-// Checks for Authentication in store.session
-export function routeGuard(store) {
-  
-  return (nextState, transition) => { // RR 1.0 signature
-    if (nextState.params.topicId) return; // Exception: _universe/topic gets checked because of _universe, this solves it.
+    const {location: {pathname}, params: {topicId}} = nextState;
     
-    const {pathname} = nextState.location;
+    if (topicId) return; // Exception: _universe/topic gets checked because of _universe, this solves it.
+    
     const {userId, expiration} = store.getState().session;
     logAuthentication(`routeGuard ${pathname}`, userId, expiration);
     
@@ -66,4 +30,25 @@ export function routeGuard(store) {
       transition.to('/login');
     }
   };
+  
+  return (
+    <Route path='/' component={App}> 
+      
+      <Route path='login' component={Login} />
+      
+      <Route path='~:universeId' component={Universe} onEnter={protectAccess}>
+        <Route path='Create_topic' component={NewTopic} onEnter={protectAccess} />
+        <Route path=':topicId' component={Topic} />
+      </Route>
+      
+      <Route path='@:userId' component={User} onEnter={protectAccess} />
+      <Route path='Explore' component={Explore} onEnter={protectAccess} />
+      <Route path='Create_universe' component={NewUniverse} onEnter={protectAccess} />
+      
+      <Redirect from='about'    to='/' />
+      <Redirect from='signup'   to='/' />
+      <Redirect from='register' to='/' />
+      
+    </Route>
+  );
 }

@@ -86,7 +86,7 @@ export default {
     switch (action.type) {
       
     case 'SUCCESS_READ_CHAT':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return state.set(action.payload.id.toString(), fromJSGreedy(action.payload)); // toString() important
       
     default:
       return state;
@@ -121,9 +121,9 @@ export default {
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
   records: (state = [], action) => {
     const record = { date: new Date().getTime() };
-    Object.keys(action).forEach(key => {
+    for (let key in action) {
       if (action.hasOwnProperty(key)) record[key] = action[key];
-    });
+    }
     return [...state, record];
   },
 

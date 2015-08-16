@@ -5,7 +5,7 @@ import { bindActionCreators } from 'redux';
 import { createUniverse } from '../actionCreators';
 import { randomText, randomInteger } from '../utils/randomGenerators';
 
-class NewUniverse extends React.Component {
+class CreateUniverse extends React.Component {
   
   constructor() {
     super();
@@ -30,7 +30,7 @@ class NewUniverse extends React.Component {
   componentDidMount() {
     this.setState({
       name: randomText(randomInteger(1, 3)).slice(0, -1),
-      description: randomText(randomInteger(1, 30))
+      description: randomText(randomInteger(1, 30)).substr(0, 200)
     });
   }
   
@@ -78,4 +78,4 @@ class NewUniverse extends React.Component {
           
 const mapActions = dispatch => bindActionCreators({ createUniverse }, dispatch);
 
-export default connect(null, mapActions)(NewUniverse);
+export default connect(null, mapActions)(CreateUniverse);

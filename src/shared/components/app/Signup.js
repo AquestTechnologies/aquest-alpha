@@ -1,11 +1,8 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { createUser } from '../../actionCreators';
 import { generateOnePseudo } from '../../utils/pseudosGenerator';
 import { randomString, randomText } from '../../utils/randomGenerators';
 
-class Signup extends React.Component {
+export default class Signup extends React.Component {
   
   constructor() {
     super();
@@ -59,7 +56,3 @@ class Signup extends React.Component {
     );
   }
 }
-
-const mapActions = dispatch => bindActionCreators({ createUser }, dispatch);
-
-export default connect(null, mapActions)(Signup);

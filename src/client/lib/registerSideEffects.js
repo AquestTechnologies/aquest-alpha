@@ -56,13 +56,13 @@ export default function registerSideEffects(store, transitionTo) {
         
       case 'SUCCESS_CREATE_UNIVERSE':
         logR(type);
-        transitionTo(`/_${payload.id}`);
+        transitionTo(`/~${payload.id}`);
         return;
         
       case 'SUCCESS_CREATE_TOPIC':
         const { id, universeId } = payload;
         logR(type);
-        transitionTo(`/_${universeId}/${id}`);
+        transitionTo(`/~${universeId}/${id}`);
         return;
     }
   });
