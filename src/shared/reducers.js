@@ -57,7 +57,7 @@ export default {
       return simpleFusion(state, {[payload.id]: payload});
   
     case 'SUCCESS_READ_UNIVERSES':
-      newState = simpleDeepCopy(state);
+      newState = simpleCopy(state);
       payload.forEach(universe => {
         if (!newState[universe.id]) newState[universe.id] = universe;
       });
@@ -92,7 +92,7 @@ export default {
     switch (type) {
       
     case 'SUCCESS_READ_INVENTORY':
-      newState = simpleDeepCopy(state);
+      newState = simpleCopy(state);
       payload.forEach(topic => newState[topic.id] = topic);
       return newState;
       
@@ -115,7 +115,7 @@ export default {
   router: (state={}, action) => routerStateReducer(state, action),
   
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
-  records: (state = [], action) => ([...state, simpleFusion(action, {date: new Date().getTime()})])
+  records: (state = [], action) => [...state, simpleMerge({date: new Date().getTime()}, action)]
 
 };
 
@@ -130,14 +130,33 @@ function simpleFusion(a, b) {
   return o;
 }
 
+function simpleCopy(a) {
+  const o = {};
+  for (let k in a) {
+    if (a.hasOwnProperty(k)) {
+      o[k] = a[k];
+    }
+  }
+  return o;
+}
+
 function simpleDeepCopy(a) {
   const o = {};
   for (let k in a) {
-    if(a.hasOwnProperty(k)) {
+    if (a.hasOwnProperty(k)) {
       const val = a[k];
       if (typeof val === 'object' && !(val instanceof Array) && !(val instanceof Date)) o[k] = simpleDeepCopy(val);
       else o[k] = val;
     }
   }
   return o;
+}
+
+function simpleMerge(t, s) {
+  for (let k in s) {
+    if (s.hasOwnProperty(k)) {
+      t[k] = s[k];
+    }
+  }
+  return t;
 }
