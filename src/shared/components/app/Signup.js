@@ -1,8 +1,8 @@
 import React from 'react';
-import {generateOnePseudo} from '../../utils/pseudosGenerator';
-import {randomString, randomText} from '../../utils/randomGenerators';
+import { generateOnePseudo } from '../../utils/pseudosGenerator';
+import { randomString, randomText } from '../../utils/randomGenerators';
 
-class Signup extends React.Component {
+export default class Signup extends React.Component {
   
   constructor() {
     super();
@@ -23,34 +23,36 @@ class Signup extends React.Component {
   }
   
   render() {
-    const {pseudo, password, email} = this.state;
+    const { pseudo, password, email } = this.state;
     const divStyle = {
       width: '50%',
       fontSize: '2rem',
     };
     
     return (
-      <div style={divStyle} >
+      <div style={divStyle}>
         <h2>Sign up</h2>
+        
         <div>
           <div>Pseudo (unique)</div>
           <input type="text" value={pseudo} onChange={this.handleInputPseudo} />
         </div>
+        
         <br />
         <div>
           <div>Email (unique)</div>
           <input type="text" value={email} onChange={this.handleInputEmail} />
         </div>
+        
         <br />
         <div>
           <div>Password</div>
           <input type="text" value={password} onChange={this.handleInputPassword} />
         </div>
+        
         <br />
         <button type="button" onClick={this.handleSubmit}>Start adventure!</button>
       </div>
     );
   }
 }
-
-export default Signup;

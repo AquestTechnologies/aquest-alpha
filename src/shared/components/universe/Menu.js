@@ -8,7 +8,7 @@ export default class Menu extends React.Component {
     const { universeId, universeName, topicId, pathName } = this.props;
     if (topicId || (pathName ? pathName.split('/')[2] === 'Create_topic' : false)) return (
       <div className='menu_item menu_backTo'>
-        <Link to={'/_'+universeId}>
+        <Link to={'/~' + universeId}>
             <div>Back to</div>
             <div className='menu_backTo_label'>{universeName}</div>
         </Link>

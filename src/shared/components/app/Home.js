@@ -1,24 +1,28 @@
 import React from 'react';
-import { Link } from 'react-router';
+import Login from '../Login';
 import Signup from './Signup';
-import Login from './Login';
+import { Link } from 'react-router';
 
 export default class Home extends React.Component {
   
   renderLogin() {
-    const { actions, session: { userId } } = this.props;
-    const s2 = { 
+    const { userId, logout, createUser } = this.props;
+    const s2 = {
+      marginTop: '20',
+    };
+    const s3 = { 
       display : 'flex', 
       alignContent: 'space-between',
     };
     
     return userId ?
-      <div style={{marginTop: '20'}}>
-        <button onClick={actions.logout}>Logout</button>
-      </div> :
       <div style={s2}>
-        <Login actions={actions} />
-        <Signup createUser={actions.createUser} />
+        <button onClick={logout}>Logout</button>
+      </div> 
+      :
+      <div style={s3}>
+        <Login />
+        <Signup createUser={createUser}/>
       </div>;
   }
   
@@ -34,10 +38,10 @@ export default class Home extends React.Component {
       
         <h1>Aquest</h1>
         <Link to='/Explore'>Explore</Link>
+        
         { this.renderLogin() }
         
       </div>
     );
   }
-  
 }

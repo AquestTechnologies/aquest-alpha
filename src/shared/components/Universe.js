@@ -1,11 +1,14 @@
-import React          from 'react';
-import Inventory      from './universe/Inventory';
-import Menu           from './universe/Menu';
-import Chat           from './universe/Chat';
-import config         from '../../../config/client';
-import menuScroll     from '../../client/lib/menuScroll';
+import React                  from 'react';
+import { bindActionCreators } from 'redux';
+import { connect }            from 'react-redux';
+import Menu                   from './universe/Menu';
+import Chat                   from './universe/Chat';
+import Inventory              from './universe/Inventory';
+import { apiUrl }             from '../../../config/client';
+import menuScroll             from '../../client/lib/menuScroll';
+import { readUniverse, readInventory, readChat, transitionTo } from '../actionCreators';
 
-export default class Universe extends React.Component {
+class Universe extends React.Component {
   
   static runPhidippides(routerState) {
     const { universeId, topicId } = routerState.params;
@@ -28,16 +31,8 @@ export default class Universe extends React.Component {
     return topicId ? tasks : tasks.concat(inventory);
   }
   
-  filterTopics(topics, universeId) {
-    let result = {};
-    for (let id in topics) {
-      if (topics.hasOwnProperty(id) && topics[id].universeId === universeId) result[id] = topics[id];
-    }
-    return result;
-  }
-  
   componentWillMount() {
-    const { universes, params: { universeId }, actions: { readUniverse } } = this.props;
+    const { universes, readUniverse, params: { universeId } } = this.props;
     if (!universes[universeId]) readUniverse(universeId);
   }
   
@@ -45,49 +40,53 @@ export default class Universe extends React.Component {
     menuScroll('main_scrollable');
   }
   
+  createTopicsList(topics, universeId) {
+    const list = [];
+    for (let key in topics) {
+      if (topics.hasOwnProperty(key) && topics[key].universeId === universeId) list.push(topics[key]); 
+    }
+    return list;
+  }
+  
   render() {
     // console.log('.C. Universe.render');
     const { 
-      universes, topics, chats, session: { userId }, websocket,
-      children, location: { pathname }, params: { universeId, topicId },
-      actions: { readInventory, readTopic, readTopicAtoms, readChat, joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage, createTopic, transitionTo }
+      universes, topics, chats, userId,
+      readInventory, readChat, transitionTo, 
+      children, location: { pathname }, params: { universeId, topicId }
     } = this.props;
     
     const universe = universes[universeId];
     const topic = topicId ? topics[topicId] : undefined;
     const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
-    const filteredTopics = !children ? this.filterTopics(topics, universeId) : undefined;
-    
-    const socket = websocket.connect('http://23.251.143.127:9090/chat-universe-topic');
+    const filteredTopics = !children ? this.createTopicsList(topics, universeId) : undefined;
+    const chat = chats[chatId];
     
     return !universe ? <div>Loading...</div> : (
       <div> 
         <Menu 
           topicId={topicId}
+          pathName={pathname}
           universeId={universeId} 
           universeName={universe.name} 
-          pathName={pathname}
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(${apiUrl}/${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'> { 
               
-              children && !(children instanceof Array) ? 
+              children ? 
                 
                 React.cloneElement(children, {
                   topic,
                   userId,
                   topicId,
                   universe,
-                  readTopic,
-                  createTopic,
-                  readTopicAtoms,
                 }) 
                 :
                 <Inventory 
                   universe={universe}
-                  topics={filteredTopics}
+                  topicsList={filteredTopics}
                   transitionTo={transitionTo}
                   readInventory={readInventory}
                 />
@@ -99,17 +98,26 @@ export default class Universe extends React.Component {
         <Chat 
           chatId={chatId}
           userId={userId}
-          chat={chats[chatId]} 
+          chat={chat} 
           readChat={readChat}
-          socket={socket}
-          joinChat={joinChat}
-          leaveChat={leaveChat}
-          createMessage={createMessage}
-          receiveJoinChat={receiveJoinChat}
-          receiveLeaveChat={receiveLeaveChat}
-          receiveMessage={receiveMessage}
         />
       </div>
     );
   }
 }
+
+const mapState = state => ({ 
+  chats:     state.chats,
+  topics:    state.topics,
+  universes: state.universes,
+  userId:    state.session.userId
+});
+
+const mapActions = dispatch => bindActionCreators({ 
+  transitionTo,
+  readUniverse, 
+  readInventory, 
+  readChat
+}, dispatch);
+
+export default connect(mapState, mapActions)(Universe);

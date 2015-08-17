@@ -2,115 +2,117 @@ import log from './utils/logTailor';
 import isClient from './utils/isClient';
 const isServer = !isClient();
 
-const actionCreators = {
-  
-  // Si une transition peut avoir lieu dans les sides effects alors preferer cette methode
-  // Cet AC est provisoire et devra être remplacé par <Link/> partout (SEO friendly)
-  transitionTo: (pathname, query, state) => ({ type: 'TRANSITION_TO', payload: {pathname, query, state} }),
-  
-  logout: () => ({ type: 'LOGOUT' }),
+// Si une transition peut avoir lieu dans les sides effects alors preferer cette methode
+// Cet AC est provisoire et devra être remplacé par <Link/> partout (SEO friendly)
+export const transitionTo = (pathname, query, state) => ({ type: 'TRANSITION_TO', payload: {pathname, query, state} });
 
-  readUniverse: createActionCreator({
-    intention:  'readUniverse',
-    method:     'get',
-    pathx:      '/api/universe/{p}',
-    auth:       false,
-  }),
+export const logout = () => ({ type: 'LOGOUT' });
+
+export const readUniverse = createActionCreator({
+  intention:  'readUniverse',
+  method:     'get',
+  pathx:      '/api/universe/{p}',
+  auth:       false,
+});
+
+export const readUniverses = createActionCreator({
+  intention:  'readUniverses',
+  method:     'get',
+  pathx:      '/api/universes/',
+  auth:       'jwt',
+});
+
+export const readInventory = createActionCreator({
+  intention:  'readInventory',
+  method:     'get',
+  pathx:      '/api/inventory/{p}',
+  auth:       'jwt',
+});
+
+export const readTopic = createActionCreator({
+  intention:  'readTopic',
+  method:     'get',
+  pathx:      '/api/topic/{p}',
+  auth:       false,
+});
+
+export const readTopicAtoms = createActionCreator({
+  intention:  'readTopicAtoms',
+  method:     'get',
+  pathx:      '/api/topicAtoms/{p}',
+  auth:       false,
+});
+
+export const readChat = createActionCreator({
+  intention:  'readChat',
+  method:     'get',
+  pathx:      '/api/chat/{p}',
+  auth:       false,
+});
+
+export const createUniverse = createActionCreator({
+  intention:  'createUniverse',
+  method:     'post',
+  pathx:      '/api/universe/',
+  auth:       'jwt',
+});
+
+export const createTopic = createActionCreator({
+  intention:  'createTopic',
+  method:     'post',
+  pathx:      '/api/topic/',
+  auth:       'jwt',
+});
+
+export const createUser = createActionCreator({
+  intention:  'createUser',
+  method:     'post',
+  pathx:      '/api/user/',
+  auth:       false,
+});
+
+export const login = createActionCreator({
+  intention:  'login',
+  method:     'post',
+  pathx:      '/login',
+  auth:       false,
+});
+
+export const joinChat = (params) => ({ type: 'JOIN_CHAT_LC', payload: params });
+
+/*export const joinChat = createSocketCreator({
+  type:  'joinChat',
+  auth:       'jwt',
+});*/
   
-  readUniverses: createActionCreator({
-    intention:  'readUniverses',
-    method:     'get',
-    pathx:      '/api/universes/',
-    auth:       'jwt',
-    component:  'Explore',
-  }),
+export const leaveChat = (params) => ({ type: 'LEAVE_CHAT_LC', payload: params });  
+/*export const leaveChat = createSocketCreator({
+  type:       'leaveChat',
+  auth:       'jwt',
+});*/
   
-  readInventory: createActionCreator({
-    intention:  'readInventory',
-    method:     'get',
-    pathx:      '/api/inventory/{p}',
-    auth:       'jwt',
-    component:  'Universe',
-  }),
+export const createMessage = (params) => ({ type: 'CREATE_MESSAGE_LC', payload: params });  
+/*export const createMessage = createSocketCreator({
+  type:       'createMessage',
+  auth:       'jwt',
+});*/
   
-  readTopic: createActionCreator({
-    intention:  'readTopic',
-    method:     'get',
-    pathx:      '/api/topic/{p}',
-    auth:       false,
-  }),
+export const receiveJoinChat =  (params) => ({ type: 'RECEIVE_JOIN_CHAT', payload: params });
   
-  readTopicAtoms: createActionCreator({
-    intention:  'readTopicAtoms',
-    method:     'get',
-    pathx:      '/api/topic/content/{p}',
-    auth:       false,
-  }),
+export const receiveLeaveChat = (params) => ({ type: 'RECEIVE_LEAVE_CHAT', payload: params });
   
-  readChat: createActionCreator({
-    intention:  'readChat',
-    method:     'get',
-    pathx:      '/api/chat/{p}',
-    auth:       false,
-  }),
-  
-  createUniverse: createActionCreator({
-    intention:  'createUniverse',
-    method:     'post',
-    pathx:      '/api/universe/',
-    auth:       'jwt',
-    component:  'NewUniverse',
-  }),
-  
-  createTopic: createActionCreator({
-    intention:  'createTopic',
-    method:     'post',
-    pathx:      '/api/topic/',
-    auth:       'jwt',
-    component:  'NewTopic',
-  }),
-  
-  createUser: createActionCreator({
-    intention:  'createUser',
-    method:     'post',
-    pathx:      '/api/user/',
-    auth:       false,
-  }),
-  
-  login: createActionCreator({
-    intention:  'login',
-    method:     'post',
-    pathx:      '/login',
-    auth:       false,
-  }),
-  
-  /**
-   * WebSocket actions for the chat component
-   */
-  joinChat: createSocketCreator({
-    type:  'joinChat',
-    auth:       'jwt',
-  }),
-  
-  leaveChat: createSocketCreator({
-    type:       'leaveChat',
-    auth:       'jwt',
-  }),
-  
-  createMessage: createSocketCreator({
-    type:       'createMessage',
-    auth:       'jwt',
-  }),
-  
-  receiveJoinChat:  (params) => ({ type: 'RECEIVE_JOIN_CHAT', payload: params }),
-  
-  receiveLeaveChat: (params) => ({ type: 'RECEIVE_LEAVE_CHAT', payload: params }),
-  
-  receiveMessage:   (params) => ({ type: 'RECEIVE_MESSAGE', payload: params }),
+export const receiveMessage = (params) => ({ type: 'RECEIVE_MESSAGE', payload: params });
+
+
+const actionCreators = {
+  transitionTo, login, logout, 
+  readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
+  createUser, createUniverse, createTopic, 
 };
+
 export default actionCreators;
 
-function createSocketCreator(shape) {
+/*function createSocketCreator(shape) {
   const {type} = shape;
   const lcType = type.replace(/[A-Z]/g, '_$&').toUpperCase() + '_LC';
   
@@ -123,16 +125,15 @@ function createSocketCreator(shape) {
   }
   
   return socketCreator;
-}
+}*/
 
 // (string)            intention   The queryDb hook, also used to create actionTypes
 // (string)            method      HTTP method
 // (string)            pathx       API path. If (method && path) an corresponding API route gets created
 // (string or false)   auth        Authentication strategy
-// (string)            component   Adds the authentication strategy to given component in routes
 function createActionCreator(shape) {
   
-  const {intention, method, pathx, auth} = shape;
+  const { intention, method, pathx } = shape;
   const types = ['REQUEST', 'SUCCESS', 'FAILURE']
     .map(type => `${type}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
   
@@ -142,25 +143,30 @@ function createActionCreator(shape) {
       
       // Server : direct db middleware call
       if (isServer) require('../server/queryDb')(intention, params).then(
-          result => resolve(result),
-          error => reject(error));
+        result => resolve(result),
+        error => reject(error)
+      );
       
       // Client : API call through XMLHttpRequest
       else {
         const path = pathx.replace(/\{\S*\}/, '');
         const isPost = method === 'post';
         const req = new XMLHttpRequest();
-        // const jwt = docCookies.getItem('jwt');
         log(`+++ --> ${method} ${path}`, params);
-        // if (auth) log('+++ with JWT:', jwt);
         
         req.onerror = err => reject(err);
         req.open(method, isPost ? path : params ? path + params : path);
-        // req.setRequestHeader('Authorization', jwt);
         req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
         
         if (isPost) { 
-          req.send(createForm(stringifyObjectValues(params)));
+          //stringifies objects before POST XMLHttpRequest
+          for (let key in params) {
+            if (params.hasOwnProperty(key)) {
+              const value = params[key];
+              params[key] = typeof(value) === 'object' ? JSON.stringify(value) : value;
+            }
+          }
+          req.send(createForm(params));
         }
         else req.send();
       }
@@ -176,7 +182,7 @@ function createActionCreator(shape) {
         log('!!! params', params);
       });
     
-    return {types, params, promise};
+    return { types, params, promise };
   };
   
   // getters
@@ -193,8 +199,10 @@ function stringifyObjectValues(params){
 }
 
 function createForm(o) {
-  let f  = new FormData();
-  for(let k in o) { f.append(k, o[k]); } 
+  let f = new FormData();
+  for (let k in o) { 
+    if (o.hasOwnProperty(k)) f.append(k, o[k]); 
+  } 
   return f;
 }
 
@@ -208,19 +216,11 @@ const authFailureTypes = ac
   .filter(ac => typeof ac.getShape === 'function' && ac.getShape().auth)
   .map(ac => ac.getTypes()[2]);
   
-const protectedComponents = acAPI
-  .map(ac => ac.getShape())
-  .filter(s => s.auth && s.component)
-  .map(s => s.component);
-
 export function isAPIUnauthorized(action) {
-  return authFailureTypes.indexOf(action.type) !== -1 && action.payload && action.payload.message === 'Unauthorized';
+  const { type, payload } = action;
+  return authFailureTypes.indexOf(type) !== -1 && payload && payload.message === 'Unauthorized';
 }
 
 export function isAPISuccess(action) {
   return APISuccessTypes.indexOf(action.type) !== -1;
-}
-
-export function isProtected(component) {
-  return protectedComponents.indexOf(component.name) !== -1;
 }

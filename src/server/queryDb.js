@@ -126,7 +126,11 @@ export default function queryDb(intention, params) {
         'WHERE chat.id = $1 GROUP BY chat.id';
         
         paramaterized = [params];
-        callback = result => result.rows[0].chat;
+        callback = result => {
+          const { chat } = result.rows[0];
+          if (chat.messages[0].content === null) chat.messages = [];
+          return chat;
+        };
         
         break;
         

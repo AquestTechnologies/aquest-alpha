@@ -1,15 +1,7 @@
-import Immutable from 'immutable';
 import log from './utils/logTailor';
 import config from '../../config/client';
 import { routerStateReducer } from 'redux-react-router';
 import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
-
-
-// From the Immutable.js Github wiki
-const fromJSGreedy = js => typeof js !== 'object' || js === null ? js : Array.isArray(js) ? 
-  Immutable.Seq(js).map(fromJSGreedy).toList() :
-  Immutable.Seq(js).map(fromJSGreedy).toMap();
-const _map = Immutable.Map();
 
 export default {
   
@@ -43,159 +35,182 @@ export default {
     return state;
   },
   
-  users: (state=_map, action) => {
-    switch (action.type) {
+  users: (state={}, {type, payload}) => {
+    switch (type) {
       
     case 'SUCCESS_CREATE_USER':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
       
     case 'SUCCESS_LOGIN':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
       
     default:
       return state;
     }
   },
   
-  universes: (state=_map, action) => {
-    switch (action.type) {
+  universes: (state={}, {type, payload, params}) => {
+    let newState;
+    switch (type) {
       
     case 'SUCCESS_READ_UNIVERSE':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
   
     case 'SUCCESS_READ_UNIVERSES':
-      let newState = state;
-      action.payload.forEach(universe => {
-        if (!newState.get(universe.id)) newState = newState.set(universe.id, fromJSGreedy(universe));
+      newState = simpleCopy(state);
+      payload.forEach(universe => {
+        if (!newState[universe.id]) newState[universe.id] = universe;
       });
       return newState;
       
     case 'SUCCESS_READ_INVENTORY':
-      const d = new Date();
-      return state.setIn([action.params, 'lastInventoryUpdate'], d.getTime());
+      newState = simpleDeepCopy(state);
+      newState[params].lastInventoryUpdate = new Date().getTime();
+      return newState;
     
     case 'SUCCESS_CREATE_UNIVERSE':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
     
     default:
       return state;
     }
   },
   
-  chats: (state=_map, action) => {
-    /*switch (action.type) {
-      
-    case 'SUCCESS_READ_CHAT':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
-      
-    default:
-      return state;
-    }*/
+  chats: (state={}, action) => {
+    let newState;
+    
     switch (action.type) {
       
     case 'SUCCESS_READ_CHAT':
       
-      return function(action){
+      return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
-      
-        if(!action.payload.messages[0].id) action.payload.messages = [];
         
-        return state.get(chatId) ?  state.mergeIn([chatId], fromJSGreedy(action.payload)) : state.set(chatId, fromJSGreedy(action.payload));                    
-      }(action);
+        newState = state[chatId] ?  simpleFusion(state[chatId], action.payload) : simpleCopy(chatId);
+        
+        return newState;                    
+      })(action);
       
     case 'CREATE_MESSAGE_LC':
-      return function(action){
+      
+      return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
-    
-        action.payload.content = JSON.parse(action.payload.content);
-        delete action.payload.chatId; // ToDo
         
-        if(!state.getIn([chatId, 'messages'])) state = state.setIn([chatId, 'messages'], fromJSGreedy([]));
+        newState[chatId] = action.payload;
         
-        return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(action.payload)));                     
-      }(action);
+        newState[chatId].content = JSON.parse(newState[chatId].content);
+        return delete newState[chatId].chatId; // is it working ?
+        
+      })(action);
       
     case 'RECEIVE_MESSAGE':
-      return function(action){
+      
+      return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         const {owner, message} = action.payload;
         
+        newState = simpleDeepCopy(state);
+        
         if(owner){
           const id = parseInt(action.payload.message.id,10);
-          const {content, userId} = action.payload.message;
-          const messageIndex = state.getIn([chatId, 'messages']).indexOf(fromJSGreedy({id, userId, content}));
+          const {content, userId} = message;
+          const messageIndex = newState[chatId].messages.findIndex((val) => JSON.stringify(val) === JSON.stringify({id, userId, content}));
           
-          if (messageIndex !== -1) return state.setIn([chatId, 'messages', messageIndex], fromJSGreedy(message));
+          if (messageIndex !== -1) return newState[chatId].messages[messageIndex] = message;
         } else {
-          return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(message)));
+          return newState[chatId].messages.push(message);
         }
-      }(action);
+      })(action);
        
     case 'JOIN_CHAT_LC':
-      return function(action){
+      
+      return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         const {userId} = action.payload;
         
-        if ( state.getIn([chatId, 'users']) ) return state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
+        newState = simpleDeepCopy(state);
+        
+        /*if ( newState[chatId].users ) return newState[chatId].users.push(userId);
         else {
-          if ( state.get(chatId) ) return state.setIn([chatId, 'users'], fromJSGreedy([userId]));  
+          if ( newState[chatId] ) return newState[chatId].users = [userId];  
           else {
-            return state.set(chatId, fromJSGreedy({users: [userId]}));          
+            return newState[chatId].users = [userId];          
           }
+        }*/
+        
+        if(newState[chatId] && newState[chatId].users) return newState[chatId].users.push(userId);
+        else if (newState[chatId]){
+          return simpleMerge(newState[chatId], {users: [userId]});  
         }
-      }(action);
+        else {
+          return newState[chatId] = {users: [userId]};
+        }
+        
+      })(action);
             
     case 'RECEIVE_JOIN_CHAT':
-      return function(action){
+      
+      return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         const {userList, userId, owner} = action.payload;
         
-        if (owner) return state.mergeIn([chatId, 'users'], fromJSGreedy(userList));
+        newState = simpleDeepCopy(state);
+        
+        if (owner) return simpleMerge(newState[chatId].users, userList);
         else {
-          return state.setIn( [chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
+          return newState[chatId].users.push(userId);
         }   
-      }(action);
+      })(action);
     
     case 'LEAVE_CHAT_LC':
-      return function(action){
+      
+      return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         
-        return state.deleteIn([chatId, 'users']);               
-      }(action);
+        newState = simpleDeepCopy(state);
+        
+        return delete newState[chatId].users;               
+      })(action);
       
     case 'RECEIVE_LEAVE_CHAT':
-      return function(action){
+      
+      return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         const {userId} = action.payload;
         
+        newState = simpleDeepCopy(state);
+        
         // remove the user from the user list
-        return state.getIn([chatId, 'users']) && state.getIn([chatId, 'users']).size ? 
-          state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).filter( user => user !== userId )) :
-          state;   
-      }(action);
+        return newState[chatId].users && newState[chatId].users.length ?
+          newState.splice(newState[chatId].users.indexOf(userId), 1) :
+          state; 
+          
+      })(action);
       
     default:
       return state;
     }
   },
   
-  topics: (state=_map, action) => {
+  topics: (state={}, {type, payload, params}) => {
     let newState;
-    switch (action.type) {
+    switch (type) {
       
     case 'SUCCESS_READ_INVENTORY':
-      newState = state;
-      action.payload.forEach(topic => newState = newState.set(topic.id, fromJSGreedy(topic)));
+      newState = simpleCopy(state);
+      payload.forEach(topic => newState[topic.id] = topic);
       return newState;
       
     case 'SUCCESS_READ_TOPIC':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
       
     case 'SUCCESS_READ_TOPIC_ATOMS':
-      return state.setIn([action.params, 'atoms'], fromJSGreedy(action.payload));
+      newState = simpleDeepCopy(state);
+      newState[params].atoms = payload;
+      return newState;
       
     case 'SUCCESS_CREATE_TOPIC':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
       
     default:
       return state;
@@ -205,12 +220,48 @@ export default {
   router: (state={}, action) => routerStateReducer(state, action),
   
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
-  records: (state = [], action) => {
-    const record = { date: new Date().getTime() };
-    Object.keys(action).forEach(key => {
-      if (action.hasOwnProperty(key)) record[key] = action[key];
-    });
-    return [...state, record];
-  },
+  records: (state = [], action) => [...state, simpleMerge({date: new Date().getTime()}, action)]
 
 };
+
+function simpleFusion(a, b) {
+  const o = {};
+  for (let k in a) {
+    if (a.hasOwnProperty(k)) o[k] = a[k];
+  }
+  for (let k in b) {
+    if (b.hasOwnProperty(k)) o[k] = b[k];
+  }
+  return o;
+}
+
+function simpleCopy(a) {
+  const o = {};
+  for (let k in a) {
+    if (a.hasOwnProperty(k)) {
+      o[k] = a[k];
+    }
+  }
+  return o;
+}
+
+function simpleDeepCopy(a) {
+  const o = {};
+  for (let k in a) {
+    if (a.hasOwnProperty(k)) {
+      const val = a[k];
+      if (typeof val === 'object' && !(val instanceof Array) && !(val instanceof Date)) o[k] = simpleDeepCopy(val);
+      else o[k] = val;
+    }
+  }
+  return o;
+}
+
+function simpleMerge(t, s) {
+  for (let k in s) {
+    if (s.hasOwnProperty(k)) {
+      t[k] = s[k];
+    }
+  }
+  return t;
+}

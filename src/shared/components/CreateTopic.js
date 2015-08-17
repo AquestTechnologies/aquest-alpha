@@ -1,7 +1,10 @@
 import React from 'react';
-import {randomInteger, randomText} from '../../utils/randomGenerators';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createTopic } from '../actionCreators';
+import { randomInteger, randomText } from '../utils/randomGenerators';
 
-export default class NewTopic extends React.Component {
+export default class CreateTopic extends React.Component {
   
   constructor() {
     super();
@@ -70,3 +73,7 @@ export default class NewTopic extends React.Component {
     );
   }
 }
+
+const mapActions = dispatch => bindActionCreators({ createTopic }, dispatch);
+
+export default connect(null, mapActions)(CreateTopic);
