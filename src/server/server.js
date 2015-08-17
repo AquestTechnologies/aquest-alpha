@@ -2,7 +2,7 @@ import Hapi from 'hapi';
 import prerender from './prerender';
 import devConfig from '../../config/development.js';
 import log, { logRequest, logAuthentication } from '../shared/utils/logTailor.js';
-import { createActivists } from './lib/activityGenerator';
+import { createActivists } from './activityGenerator';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log(`\nStarting server in ${process.env.NODE_ENV} mode...`);
@@ -73,14 +73,17 @@ server.ext('onRequest', (request, reply) => {
 server.start(() => {
   log(`Make it rain! API server started at ${server.info.uri}`);
   log(`              ws  server started at ${server.select('ws').info.uri}`);
-  console.log('  ___                        _        \n' + // !
-              ' / _ \\                      | |      \n' +
-              '/ /_\\ \\ __ _ _   _  ___  ___| |_    \n' +
-              "|  _  |/ _` | | | |/ _ \\/ __| __|    \n" +
-              '| | | | (_| | |_| |  __/\\__ \\ |_    \n' +
-              '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
-              '          | |\n' +
-              '          |_|');
+  console.log(
+    '  ___                        _        \n' + // !
+    ' / _ \\                      | |      \n' +
+    '/ /_\\ \\ __ _ _   _  ___  ___| |_    \n' +
+    '|  _  |/ _` | | | |/ _ \\/ __| __|    \n' +
+    '| | | | (_| | |_| |  __/\\__ \\ |_    \n' +
+    '\\_| |_/\\__, |\\__,_|\\___||___/\\__|\n' +
+    '          | |\n' +
+    '          |_|'
+  );
+  if (1) console.log(...server.table()[0].table.map(t => `\n${t.method} - ${t.path}`));
   if (0) {
     const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
     startActivists();

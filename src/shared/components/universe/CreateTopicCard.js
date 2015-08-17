@@ -1,9 +1,9 @@
 import React from 'react';
 
-class NewTopicCard extends React.Component {
+class CreateTopicCard extends React.Component {
   
   handleClick(transitionTo, universeId) { 
-    transitionTo(`/_${universeId}/Create_topic`);
+    transitionTo(`/~${universeId}/Create_topic`);
   };
   
   render() {
@@ -30,7 +30,7 @@ class NewTopicCard extends React.Component {
   }
 }
 
-NewTopicCard.defaultProps = {
+CreateTopicCard.defaultProps = {
     title: "Tell them what you love,",
     title2: "Ask for the impossible.",
     author: "By you, in a minute.",
@@ -38,4 +38,4 @@ NewTopicCard.defaultProps = {
     timestamp:"timestamp"
 };
 
-export default NewTopicCard;
+export default CreateTopicCard;

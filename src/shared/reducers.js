@@ -1,15 +1,7 @@
-import Immutable from 'immutable';
 import log from './utils/logTailor';
 import config from '../../config/client';
 import { routerStateReducer } from 'redux-react-router';
 import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
-
-
-// From the Immutable.js Github wiki
-const fromJSGreedy = js => typeof js !== 'object' || js === null ? js : Array.isArray(js) ? 
-  Immutable.Seq(js).map(fromJSGreedy).toList() :
-  Immutable.Seq(js).map(fromJSGreedy).toMap();
-const _map = Immutable.Map();
 
 export default {
   
@@ -43,73 +35,77 @@ export default {
     return state;
   },
   
-  users: (state=_map, action) => {
-    switch (action.type) {
+  users: (state={}, {type, payload}) => {
+    switch (type) {
       
     case 'SUCCESS_CREATE_USER':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
       
     case 'SUCCESS_LOGIN':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
       
     default:
       return state;
     }
   },
   
-  universes: (state=_map, action) => {
-    switch (action.type) {
+  universes: (state={}, {type, payload, params}) => {
+    let newState;
+    switch (type) {
       
     case 'SUCCESS_READ_UNIVERSE':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
   
     case 'SUCCESS_READ_UNIVERSES':
-      let newState = state;
-      action.payload.forEach(universe => {
-        if (!newState.get(universe.id)) newState = newState.set(universe.id, fromJSGreedy(universe));
+      newState = simpleCopy(state);
+      payload.forEach(universe => {
+        if (!newState[universe.id]) newState[universe.id] = universe;
       });
       return newState;
       
     case 'SUCCESS_READ_INVENTORY':
-      const d = new Date();
-      return state.setIn([action.params, 'lastInventoryUpdate'], d.getTime());
+      newState = simpleDeepCopy(state);
+      newState[params].lastInventoryUpdate = new Date().getTime();
+      return newState;
     
     case 'SUCCESS_CREATE_UNIVERSE':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
     
     default:
       return state;
     }
   },
   
-  chats: (state=_map, action) => {
-    switch (action.type) {
+  chats: (state={}, {type, payload}) => {
+    switch (type) {
       
     case 'SUCCESS_READ_CHAT':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
       
     default:
       return state;
     }
   },
   
-  topics: (state=_map, action) => {
+  topics: (state={}, {type, payload, params}) => {
     let newState;
-    switch (action.type) {
+    switch (type) {
       
     case 'SUCCESS_READ_INVENTORY':
-      newState = state;
-      action.payload.forEach(topic => newState = newState.set(topic.id, fromJSGreedy(topic)));
+      newState = simpleCopy(state);
+      payload.forEach(topic => newState[topic.id] = topic);
       return newState;
       
     case 'SUCCESS_READ_TOPIC':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
       
     case 'SUCCESS_READ_TOPIC_ATOMS':
-      return state.setIn([action.params, 'atoms'], fromJSGreedy(action.payload));
+      newState = simpleDeepCopy(state);
+      newState[params].atoms = payload;
+      return newState;
       
     case 'SUCCESS_CREATE_TOPIC':
-      return state.set(action.payload.id, fromJSGreedy(action.payload));
+      return simpleFusion(state, {[payload.id]: payload});
       
     default:
       return state;
@@ -119,12 +115,48 @@ export default {
   router: (state={}, action) => routerStateReducer(state, action),
   
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
-  records: (state = [], action) => {
-    const record = { date: new Date().getTime() };
-    Object.keys(action).forEach(key => {
-      if (action.hasOwnProperty(key)) record[key] = action[key];
-    });
-    return [...state, record];
-  },
+  records: (state = [], action) => [...state, simpleMerge({date: new Date().getTime()}, action)]
 
 };
+
+function simpleFusion(a, b) {
+  const o = {};
+  for (let k in a) {
+    if (a.hasOwnProperty(k)) o[k] = a[k];
+  }
+  for (let k in b) {
+    if (b.hasOwnProperty(k)) o[k] = b[k];
+  }
+  return o;
+}
+
+function simpleCopy(a) {
+  const o = {};
+  for (let k in a) {
+    if (a.hasOwnProperty(k)) {
+      o[k] = a[k];
+    }
+  }
+  return o;
+}
+
+function simpleDeepCopy(a) {
+  const o = {};
+  for (let k in a) {
+    if (a.hasOwnProperty(k)) {
+      const val = a[k];
+      if (typeof val === 'object' && !(val instanceof Array) && !(val instanceof Date)) o[k] = simpleDeepCopy(val);
+      else o[k] = val;
+    }
+  }
+  return o;
+}
+
+function simpleMerge(t, s) {
+  for (let k in s) {
+    if (s.hasOwnProperty(k)) {
+      t[k] = s[k];
+    }
+  }
+  return t;
+}

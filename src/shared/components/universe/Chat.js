@@ -58,24 +58,22 @@ export default class Chat extends React.Component {
   }
   
   render() {
-    const chat     = this.state.chat || {};
-    const messages = (chat.messages && chat.messages[0].id) ? chat.messages : []; // l'idéale est d'avoir une requête qui renvoi tableau vide s'il n'y a pas de message.
-    const samuel   = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
+    const { chat } = this.state;
+    const samuel = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
+    const messages = chat.messages || [];
     const messagesList = messages.length ? 'chat_list-visible' : 'chat_list-hidden';
     
     return (
       <div className='chat'>
-        <ChatHeader chatTitle={chat.name} />
+        <ChatHeader chatName={chat.name} />
         
         <div id='scrollMeDown' className='chat_scrollable'>
           <div className={messagesList}>
-          
-            <Message author='Extreme firster' content='First!' />
-            {messages.map(message => { 
-              return <Message key={message.id} author={message.author} content={message.content.text} />;
-            })}
-            <Message author='Jackie Chan' content='I live in the USA' />
-            <Message author={chat.name + ' L. Jackson'} content={samuel}/>
+            
+            <Message userId='Extreme firster' content={{text: 'First!'}} />
+            { messages.map(({id, userId, type, content}) => <Message key={id} userId={userId} type={type} content={content} />) }
+            <Message userId='Jackie Chan' content='I live in the USA' />
+            <Message userId={chat.name + ' L. Jackson'} content={{text: samuel}}/>
             
           </div>
         </div>

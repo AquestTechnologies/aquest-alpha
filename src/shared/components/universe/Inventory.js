@@ -1,6 +1,6 @@
 import React from 'react';
 import Card  from './Card';
-import NewTopicCard from './NewTopicCard';
+import CreateTopicCard from './CreateTopicCard';
 
 export default class Inventory extends React.Component {
   
@@ -12,13 +12,13 @@ export default class Inventory extends React.Component {
   }
   
   componentWillMount() {
-    const { universe, readInventory } = this.props;
-    if (!universe.lastInventoryUpdate) readInventory(universe.id);
+    const { universe: { id, lastInventoryUpdate }, readInventory } = this.props;
+    if (!lastInventoryUpdate) readInventory(id);
   }
   
   render() {
     const { nameVisible } = this.state;
-    const { universe: { name, description, id }, topics, transitionTo } = this.props;
+    const { universe: { id, name, description }, topicsList, transitionTo } = this.props;
     
     return (
       <div>
@@ -33,17 +33,17 @@ export default class Inventory extends React.Component {
         
         <div className='inventory_list'>
           
-          <NewTopicCard 
+          <CreateTopicCard 
             universeId={id} 
             transitionTo={transitionTo}
           />
           
           { 
-            Object.keys(topics).map(key => 
+            topicsList.map(topic => 
               <Card
-                key = {key} 
+                topic = {topic}
+                key = {topic.id} 
                 transitionTo={transitionTo}
-                topic = {topics[key]}
               />)
           }
           

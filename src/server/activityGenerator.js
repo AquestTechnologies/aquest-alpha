@@ -1,8 +1,8 @@
-import log from '../../shared/utils/logTailor';
-import {randomInteger, randomString, randomText} from '../../shared/utils/randomGenerators';
-import {generateOnePseudo} from '../../shared/utils/pseudosGenerator';
+import log from '../shared/utils/logTailor';
+import {randomInteger, randomString, randomText} from '../shared/utils/randomGenerators';
+import { generateOnePseudo } from '../shared/utils/pseudosGenerator';
 // import {} from '../../shared/utils/fetchers';
-import queryDb from '../queryDb';
+import queryDb from './queryDb';
 
 // I can't succeed in using for..in loops in here... Babel ?
 export default class Activist {

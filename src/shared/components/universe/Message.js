@@ -1,27 +1,24 @@
 import React from 'react';
 import Icon from '../common/Icon';
 
-class Message extends React.Component {
+export default class Message extends React.Component {
+  
   render() {
+    
+    const { userId, type, content: {text} } = this.props;
+    
     return (
       <div className="message">
         <Icon name="disk" cssclass="message_icon" />
         <div className="message_body">
           <div className="message_author">
-            {this.props.author}
+            {userId}
           </div>
           <div className="message_content">
-            {this.props.content}
+            {text}
           </div>
         </div>
       </div>
     );
   }
 }
-
-Message.defaultProps = {
-  author: "Cicero",
-  content: "Lorem ipsum dolor sit amet.",
-};
-
-export default Message;
