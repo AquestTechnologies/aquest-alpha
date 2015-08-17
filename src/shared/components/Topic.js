@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { readTopic, readTopicAtoms } from '../actionCreators';
+import { getAtoms } from './atoms';
 
 class Topic extends React.Component {
   
@@ -15,15 +16,24 @@ class Topic extends React.Component {
   }
   
   componentWillMount() {
-    const { topic, topicId, readTopic, readTopicAtoms } = this.props;
+    const { universe, topic, topicId, readTopic, readTopicAtoms } = this.props;
+    this.atoms = getAtoms(universe);
     if (!topic) readTopic(topicId);
     else if (!topic.atoms) readTopicAtoms(topicId);
+  }
+  
+  renderAtoms(atoms) {
+    return atoms.map(({type, content}, i) => 
+      <div key={i}>
+        { React.createElement(this.atoms[type], {content}) }
+      </div>
+    );
   }
   
   render() {
     const { topic } = this.props || {};
     const { title, userId, createdAt } = topic;
-    const atoms = topic.atoms || ['Loading...'];
+    const atoms = topic.atoms || [{type: 'text', content: {text: 'Loading...'}}];
     
     return !topic ? <div>Loading...</div> : (
       <div>
@@ -35,7 +45,7 @@ class Topic extends React.Component {
             {`By ${userId}, ${createdAt} ago.`}
           </div>
           <div className="topic_content">
-            {atoms.map((atom, index) => <div key={index}>{JSON.stringify(atom)}</div>)}
+            { this.renderAtoms(atoms) }
           </div>
         </div>
           
