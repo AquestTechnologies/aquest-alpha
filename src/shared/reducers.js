@@ -94,77 +94,85 @@ export default {
     switch (action.type) {
       
     case 'SUCCESS_READ_CHAT':
-      let {chatId} = action.payload && action.payload.chatId ? parseInt(action.payload.chatId, 10) : action.params ? parseInt(action.params, 10) : false;
       
-      if(!action.payload.messages[0].id) action.payload.messages = [];
-      return state.get(chatId) ?  state.mergeIn([chatId], fromJSGreedy(action.payload)) : state.set(chatId, fromJSGreedy(action.payload));          
+      return function(action){
+        const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
+      
+        if(!action.payload.messages[0].id) action.payload.messages = [];
         
+        return state.get(chatId) ?  state.mergeIn([chatId], fromJSGreedy(action.payload)) : state.set(chatId, fromJSGreedy(action.payload));                    
+      }(action);
+      
     case 'CREATE_MESSAGE_LC':
-      chatId = parseInt(action.payload.chatId, 10);
-      
-      action.payload.content = JSON.parse(action.payload.content);
-      delete action.payload.chatId;
-      
-      if(!state.getIn([chatId, 'messages'])) console.log('table not defined'); state = state.setIn([chatId, 'messages'], fromJSGreedy([]));
-      
-      return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(action.payload)));         
+      return function(action){
+        const chatId = parseInt(action.payload.chatId, 10);
+    
+        action.payload.content = JSON.parse(action.payload.content);
+        delete action.payload.chatId; // ToDo
+        
+        if(!state.getIn([chatId, 'messages'])) state = state.setIn([chatId, 'messages'], fromJSGreedy([]));
+        
+        return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(action.payload)));                     
+      }(action);
       
     case 'RECEIVE_MESSAGE':
-      let {owner, message} = action.payload;
-      console.log(action.payload);
-      
-      chatId = parseInt(action.payload.chatId, 10);
-      
-      if(owner){
-        const messageId = parseInt(action.payload.message.id,10);
-        const {content} = action.payload.message;
-        const messageUserId = action.payload.message.userId;
-        const messageIndex = state.getIn([chatId, 'messages']).indexOf(fromJSGreedy({messageId, messageUserId, content}));
+      return function(action){
+        const chatId = parseInt(action.payload.chatId, 10);
+        const {owner, message} = action.payload;
         
-        if (messageIndex !== -1) return state.setIn([chatId, 'messages', messageIndex], fromJSGreedy(message));
-      } else {
-        return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(message)));
-      }
-      
-      return state;
-    
-    case 'JOIN_CHAT_LC':
-      let {userId} = action.payload;
-      
-      chatId = parseInt(action.payload.chatId, 10);
-      
-      if ( state.getIn([chatId, 'users']) ) return state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
-      else {
-        if ( state.get(chatId) ) return state.setIn([chatId, 'users'], fromJSGreedy([userId]));  
-        else {
-          return state.set(chatId, fromJSGreedy({users: [userId]}));          
+        if(owner){
+          const id = parseInt(action.payload.message.id,10);
+          const {content, userId} = action.payload.message;
+          const messageIndex = state.getIn([chatId, 'messages']).indexOf(fromJSGreedy({id, userId, content}));
+          
+          if (messageIndex !== -1) return state.setIn([chatId, 'messages', messageIndex], fromJSGreedy(message));
+        } else {
+          return state.setIn([chatId, 'messages'], state.getIn([chatId, 'messages']).push(fromJSGreedy(message)));
         }
-      }
+      }(action);
+       
+    case 'JOIN_CHAT_LC':
+      return function(action){
+        const chatId = parseInt(action.payload.chatId, 10);
+        const {userId} = action.payload;
+        
+        if ( state.getIn([chatId, 'users']) ) return state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
+        else {
+          if ( state.get(chatId) ) return state.setIn([chatId, 'users'], fromJSGreedy([userId]));  
+          else {
+            return state.set(chatId, fromJSGreedy({users: [userId]}));          
+          }
+        }
+      }(action);
             
     case 'RECEIVE_JOIN_CHAT':
-      let {userList} = action.payload;
-      
-      chatId = parseInt(action.payload.chatId, 10);
-      userId = action.payload.userId;
-      owner = action.payload.owner;
-      
-      if (owner) return state.mergeIn([chatId, 'users'], fromJSGreedy(userList));
-      else {
-        return state.setIn( [chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
-      }
+      return function(action){
+        const chatId = parseInt(action.payload.chatId, 10);
+        const {userList, userId, owner} = action.payload;
+        
+        if (owner) return state.mergeIn([chatId, 'users'], fromJSGreedy(userList));
+        else {
+          return state.setIn( [chatId, 'users'], state.getIn([chatId, 'users']).push(fromJSGreedy(userId)) );
+        }   
+      }(action);
     
     case 'LEAVE_CHAT_LC':
-      chatId = parseInt(action.payload.chatId, 10);
-      return state.deleteIn([chatId, 'users']);        
+      return function(action){
+        const chatId = parseInt(action.payload.chatId, 10);
+        
+        return state.deleteIn([chatId, 'users']);               
+      }(action);
       
     case 'RECEIVE_LEAVE_CHAT':
-      chatId = parseInt(action.payload.chatId, 10);
-      userId = action.payload.userId;
-      
-      // remove the user from the user list
-      return state.getIn([chatId, 'users']) && state.getIn([chatId, 'users']).size ? 
-        state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).filter( user => !(user === userId) )) :
-        state;
+      return function(action){
+        const chatId = parseInt(action.payload.chatId, 10);
+        const {userId} = action.payload;
+        
+        // remove the user from the user list
+        return state.getIn([chatId, 'users']) && state.getIn([chatId, 'users']).size ? 
+          state.setIn([chatId, 'users'], state.getIn([chatId, 'users']).filter( user => user !== userId )) :
+          state;   
+      }(action);
       
     default:
       return state;

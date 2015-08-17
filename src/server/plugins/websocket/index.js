@@ -198,7 +198,7 @@ exports.register = function (server, options, next) {
         result => {
           log('authentication succeded', result);
           
-          next(result);
+          return next();
         },
         error => {
           log('websocket authentication - no jwt cookie object :', error.stack);
