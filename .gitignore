@@ -7,5 +7,6 @@ dist/app.js
 dist/app.css
 dist/index.html
 dist
-config/ip.js
+config/dev_local.js
+config/dev_aws.js
 

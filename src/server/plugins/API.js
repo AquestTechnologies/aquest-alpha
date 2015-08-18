@@ -2,12 +2,12 @@ import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
 import queryDb from '../queryDb.js';
 import log from '../../shared/utils/logTailor.js';
-import devConfig from '../../../config/development.js';
+import devConfig from '../../../config/dev_server';
 import actionCreators from '../../shared/actionCreators';
 import {API_VALIDATION_SCHEMA as validationSchema} from '../validationSchema.js';
 
 function apiPlugin(server, options, next) {
-  const {key, ttl} = devConfig().jwt;
+  const { key, ttl } = devConfig.jwt;
   
   // Allows validation and params mutation before querying db
   const beforeQuery = {

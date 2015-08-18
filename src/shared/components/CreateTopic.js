@@ -16,6 +16,8 @@ export default class CreateTopic extends React.Component {
   }
   
   handleSubmit(e) {
+    // We should make sure the user can post only once 
+    // (by disabling every UI thing between REQUEST and SUCCESS for example)
     const { title, atoms } = this.state;
     const { universe: { id }, createTopic } = this.props;
     createTopic({
@@ -33,23 +35,22 @@ export default class CreateTopic extends React.Component {
   
   addAtom(type) {
     this.setState({
-      // simpleDeepCopy is used to make sure no reference is passed (otherwise editing one atom edits another)
-      atoms: [...this.state.atoms, {type, content: this.atomCreators[type].defaultContent}]
+      atoms: [...this.state.atoms, {type, content: this.atomCreators[type].getDefaultContent()}]
     });
   }
   
   removeAtom(i) {
     const { atoms } = this.state;
     this.setState({
-      // Array.prototype.splice cannot be used here as it is destructive
+      // Array.prototype.splice cannot be used here since it is destructive
       atoms: atoms.slice(0, i).concat(atoms.slice(i + 1, atoms.length))
     });
   }
   
   moveAtomUp(i) {
-    const { atoms } = this.state;
-    
     if (!i) return;
+    
+    const { atoms } = this.state;
     const previousAtom = atoms[i - 1];
     atoms[i - 1] = atoms[i];
     atoms[i] = previousAtom;
@@ -69,33 +70,31 @@ export default class CreateTopic extends React.Component {
   }
   
   // Updates this component state when atom child call this.props.update()
-  updateAtom(i, content) {
+  updateAtom(i, content, callback) {
     const { atoms } = this.state;
     atoms[i].content = content;
-    this.setState({ atoms });
+    this.setState({ atoms }, callback);
   }
   
   renderAtoms(atoms) {
     
-    return atoms.map(({type, content}, i) => {
-      const { atomCreators, updateAtom, moveAtomUp, moveAtomDown, removeAtom } = this;
-      
-      return <div key={i} className='createTopic_atom'>
-        <button className='createTopic_atom_up' onClick={moveAtomUp.bind(this, i)}>↑</button>
-        <button className='createTopic_atom_down' onClick={moveAtomDown.bind(this, i)}>↓</button>
-        <button className='createTopic_atom_remove' onClick={removeAtom.bind(this, i)}>x</button>
+    return atoms.map(({type, content}, i) =>
+      <div key={i} className='createTopic_atom'>
+        <button className='createTopic_atom_up' onClick={this.moveAtomUp.bind(this, i)}>↑</button>
+        <button className='createTopic_atom_down' onClick={this.moveAtomDown.bind(this, i)}>↓</button>
+        <button className='createTopic_atom_remove' onClick={this.removeAtom.bind(this, i)}>x</button>
         { /* Selects correct ReactClass from type and passes a update function so the child can update its parent's state */ }
-        { React.createElement(atomCreators[type], {content, ref: i, update: updateAtom.bind(this, i)}) }
+        { React.createElement(this.atomCreators[type], {content, ref: i, update: this.updateAtom.bind(this, i)}) }
         <hr/>
-      </div>;
-    });
+      </div>
+    );
   }
   
-  renderButtons(atomCreators) {
-    const ac = this.atomCreators;
-    return Object.keys(ac).map(key => 
-      <button key={key} onClick={this.addAtom.bind(this, key)}>
-        { ac[key].buttonCaption }
+  renderAddAtomsButtons() {
+    const { atomCreators, addAtom } = this;
+    return Object.keys(atomCreators).map(key => 
+      <button key={key} onClick={addAtom.bind(this, key)}>
+        { atomCreators[key].buttonCaption }
       </button>
     );
   }
@@ -131,7 +130,7 @@ export default class CreateTopic extends React.Component {
         <div className="topic_author">
           {`By ${userId}`}
           {' - '}
-          { this.renderButtons() }
+          { this.renderAddAtomsButtons() }
         </div>
         
         <div className="topic_atoms">

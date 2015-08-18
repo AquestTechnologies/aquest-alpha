@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { readTopic, readTopicAtoms } from '../actionCreators';
-import { getAtoms } from './atoms';
+import { getAtomViewers } from './atoms';
 
 class Topic extends React.Component {
   
@@ -17,7 +17,7 @@ class Topic extends React.Component {
   
   componentWillMount() {
     const { universe, topic, topicId, readTopic, readTopicAtoms } = this.props;
-    this.atoms = getAtoms(universe);
+    this.atoms = getAtomViewers(universe);
     if (!topic) readTopic(topicId);
     else if (!topic.atoms) readTopicAtoms(topicId);
   }

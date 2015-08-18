@@ -4,7 +4,7 @@ import { connect }            from 'react-redux';
 import Menu                   from './universe/Menu';
 import Chat                   from './universe/Chat';
 import Inventory              from './universe/Inventory';
-import { apiUrl }             from '../../../config/client';
+import config             from '../../../config/dev_shared';
 import menuScroll             from '../../client/lib/menuScroll';
 import { readUniverse, readInventory, readChat, transitionTo } from '../actionCreators';
 
@@ -71,7 +71,7 @@ class Universe extends React.Component {
           universeName={universe.name} 
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(${apiUrl}/${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'> { 
               

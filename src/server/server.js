@@ -1,17 +1,18 @@
+import fs from 'fs';
 import Hapi from 'hapi';
 import prerender from './prerender';
-import devConfig from '../../config/development.js';
-import log, { logRequest, logAuthentication } from '../shared/utils/logTailor.js';
 import { createActivists } from './activityGenerator';
+import devConfig from '../../config/dev_server';
+import log, { logRequest, logAuthentication } from '../shared/utils/logTailor';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log(`\nStarting server in ${process.env.NODE_ENV} mode...`);
 
 //lance webpack-dev-server si on est pas en production
-if (process.env.NODE_ENV === 'development') require('./dev_server/dev_server')();
+if (process.env.NODE_ENV === 'development') require('./development/devServer')();
 
 const server = new Hapi.Server();
-const {api, ws, jwt: {key}} = devConfig();
+const {api, ws, jwt: {key}} = devConfig;
 
 function validateJWT({userId, expiration}, request, callback) {
   logAuthentication('validateJWT', userId, expiration);
@@ -45,21 +46,34 @@ server.register([{register: require('./plugins/API')}, {register: require('./plu
   server.route([
     {
       method: 'GET',
-      path: '/',
-      config: { auth: false },
-      handler: (request, reply) => prerender(request, reply)
-    },
-    {
-      method: 'GET',
       path: '/{p*}',
       config: { auth: false },
-      handler: (request, reply) => prerender(request, reply)
+      handler: prerender,
     },
     {
       method: 'GET',
       path: '/img/{filename}',
       config: { auth: false },
-      handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
+      handler: (request, reply) => reply.file('dist/img/' + request.params.filename),
+    },
+    {
+      method: 'POST', // à bouger vers l'api ?
+      path: '/uploadFile',
+      config: {
+        auth: 'jwt',
+        payload:{
+          parse: true,
+          output:'stream',
+          maxBytes: 209715200,
+        },
+      },
+      handler: function (request, reply) {
+        const response = reply.response().hold();
+        request.payload.file.pipe(fs.createWriteStream("test"));
+        console.log('post image', request.payload.file);
+        response.source = 'done';
+        response.send();
+      },
     }
   ]);
 });
@@ -83,7 +97,7 @@ server.start(() => {
     '          | |\n' +
     '          |_|'
   );
-  if (1) console.log(...server.table()[0].table.map(t => `\n${t.method} - ${t.path}`));
+  if (0) log(...server.table()[0].table.map(t => `\n${t.method} - ${t.path}`));
   if (0) {
     const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
     startActivists();

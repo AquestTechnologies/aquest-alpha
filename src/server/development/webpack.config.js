@@ -1,8 +1,8 @@
 // var webpack = require('webpack');
 import webpack from 'webpack';
-import devConfig from '../../../config/development';
+import devConfig from '../../../config/dev_server';
 
-const { path, filename, publicPath } = devConfig().wds;
+const { path, filename, publicPath } = devConfig.wds;
 
 export default {
   devtool: 'eval',

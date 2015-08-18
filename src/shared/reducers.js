@@ -1,8 +1,10 @@
 import log from './utils/logTailor';
-import config from '../../config/client';
+import config from '../../config/dev_shared';
 import { routerStateReducer } from 'redux-react-router';
 import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
 import { copy, deepCopy, merge, fuse } from './utils/objectUtils';
+
+const { sessionDuration } = config;
 
 export default {
   
@@ -14,14 +16,14 @@ export default {
     if (type === 'SUCCESS_LOGIN' || type === 'SUCCESS_CREATE_USER') return {
       redirection,
       userId: payload.id,
-      exp: new Date().getTime() + config.sessionDuration,
+      exp: new Date().getTime() + sessionDuration,
     };
     
     // If the API answers 200 then we renew the session expiration
     if (isAPISuccess(action)) return {
       userId,
       redirection,
-      exp: new Date().getTime() + config.sessionDuration,
+      exp: new Date().getTime() + sessionDuration,
     };
     
     // If the API answers 401 or user logs out then we kill the session

@@ -1,11 +1,11 @@
 import pg from 'pg';
-import log from '../shared/utils/logTailor.js';
-import devConfig from '../../config/development.js';
+import log from '../shared/utils/logTailor';
+import devConfig from '../../config/dev_server';
 
 export default function queryDb(intention, params) {
   
   const d = new Date();
-  const {user, password, host, port, database} = devConfig().pg;
+  const { user, password, host, port, database } = devConfig.pg;
   const connectionString = `postgres://${user}:${password}@${host}:${port}/${database}`;
   
   return new Promise((resolve, reject) => {

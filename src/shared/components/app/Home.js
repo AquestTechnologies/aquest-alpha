@@ -26,6 +26,22 @@ export default class Home extends React.Component {
       </div>;
   }
   
+  uploadImage() {
+    
+    const params = {
+      file: document.getElementById('inputFile').files[0],
+    };
+    const progress = e => {
+      if (e.lengthComputable) {
+        console.log('progress', Math.round((e.loaded * 100) / e.total));
+      }
+    };
+    const load = e => console.log('upload uploaded');
+    
+    const { promise } = this.props.uploadFile(params, progress, load);
+    
+  }
+  
   render() {
     const s1 = {
       fontSize: '2rem',
@@ -40,6 +56,16 @@ export default class Home extends React.Component {
         <Link to='/Explore'>Explore</Link>
         
         { this.renderLogin() }
+        
+        { /* temporary */ }
+        <br/>
+        <div>Wanna upload an image ?</div>  
+        <input 
+          type='file'
+          id='inputFile'
+          accept='image/*'
+        />
+        <button onClick={this.uploadImage.bind(this)}>Upload</button>
         
       </div>
     );

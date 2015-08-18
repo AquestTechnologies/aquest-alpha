@@ -35,16 +35,16 @@ GRANT USAGE ON TYPES TO users;
 -- TABLES --
 ------------
 CREATE TABLE aquest_schema.USER (
-  id                   TEXT PRIMARY KEY,
-  email                TEXT NOT NULL UNIQUE,
-  password_hash        TEXT NOT NULL,
-  creation_ip          INET NOT NULL,
-  first_name           TEXT DEFAULT '',
-  last_name            TEXT DEFAULT '',
-  picture              TEXT DEFAULT '',
-  bio                  TEXT DEFAULT '',
-  created_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  updated_at           TIMESTAMP WITH TIME ZONE DEFAULT now()
+  id                  TEXT PRIMARY KEY,
+  email               TEXT NOT NULL UNIQUE,
+  password_hash       TEXT NOT NULL,
+  creation_ip         INET NOT NULL,
+  first_name          TEXT DEFAULT '',
+  last_name           TEXT DEFAULT '',
+  picture             TEXT DEFAULT '',
+  bio                 TEXT DEFAULT '',
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 CREATE TABLE aquest_schema.CHAT(
@@ -55,26 +55,26 @@ CREATE TABLE aquest_schema.CHAT(
 );
 
 CREATE TABLE aquest_schema.UNIVERSE(
-  id                   TEXT PRIMARY KEY,
-  chat_id              BIGINT NOT NULL UNIQUE,
-  user_id              TEXT NOT NULL,
-  creation_ip          INET NOT NULL,
-  name                 TEXT NOT NULL,
-  picture              TEXT NOT NULL,
-  description          TEXT DEFAULT '',
-  rules                TEXT DEFAULT '',
-  created_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  updated_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  id                  TEXT PRIMARY KEY,
+  chat_id             BIGINT NOT NULL UNIQUE,
+  user_id             TEXT NOT NULL,
+  creation_ip         INET NOT NULL,
+  name                TEXT NOT NULL,
+  picture             TEXT NOT NULL,
+  description         TEXT DEFAULT '',
+  rules               TEXT DEFAULT '',
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id),
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id)
 );
 
 CREATE TABLE aquest_schema.UNIVERSE_UNIVERSE(
-  id                   BIGSERIAL PRIMARY KEY,
-  universe1_id         TEXT NOT NULL,
-  universe2_id         TEXT NOT NULL,
-  created_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  updated_at           TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  id                  BIGSERIAL PRIMARY KEY,
+  universe1_id        TEXT NOT NULL,
+  universe2_id        TEXT NOT NULL,
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (universe1_id) REFERENCES aquest_schema.UNIVERSE(id),
   FOREIGN KEY (universe2_id) REFERENCES aquest_schema.UNIVERSE(id)
 );
@@ -115,6 +115,22 @@ CREATE TABLE aquest_schema.ATOMMESSAGE(
   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (chat_id) REFERENCES aquest_schema.CHAT(id),
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id)
+);
+
+CREATE TABLE aquest_schema.IMAGE(
+  id                  BIGSERIAL PRIMARY KEY,
+  name                TEXT NOT NULL,
+  extension           TEXT NOT NULL,
+  external            BOOLEAN NOT NULL, -- Is it from the internet or from our CDN ? --
+  original_url        TEXT NOT NULL,
+  original_size       INTEGER DEFAULT 0,
+  medium_url          TEXT,
+  medium_size         INTEGER,
+  thumbnail_url       TEXT,
+  thumbnail_size      INTEGER,
+  creation_ip         INET NOT NULL,
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- CREATE TABLE aquest_schema.RANK(
@@ -352,4 +368,3 @@ INSERT INTO aquest_schema.user (email, id, first_name, last_name, password_hash,
 
 INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
   VALUES ('Test', 'admin', 'Make some, fail some, love some.', 'img/pillars_compressed.png', '192.168.0.1');
-  

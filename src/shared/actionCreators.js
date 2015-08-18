@@ -79,10 +79,32 @@ export const login = createActionCreator({
   auth:       false,
 });
 
+export function uploadFile(params, fnProgress, fnLoad) {
+  const types = ['REQUEST_UPLOAD_FILE', 'SUCCESS_UPLOAD_FILE', 'FAILURE_UPLOAD_FILE'];
+  
+  const promise = new Promise((resolve, reject) => {
+    
+    const load = typeof fnLoad === 'function' ? fnLoad : (() => {});
+    const progress = typeof fnProgress === 'function' ? fnProgress : (() => {});
+    
+    const req = new XMLHttpRequest();
+    req.upload.addEventListener('load', load);
+    req.upload.addEventListener('progress', progress);
+    req.onerror = err => reject(err);
+    req.open('post', '/uploadFile');
+    req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
+    req.send(createForm(params));
+    
+  });
+  
+  return {types, promise, params};
+}
+
 const actionCreators = {
   transitionTo, login, logout, 
   readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
   createUser, createUniverse, createTopic, 
+  uploadFile,
 };
 
 export default actionCreators;

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export class CreateTextAtom extends React.Component {
+class TextAtomCreator extends React.Component {
   
   handleTextInput(e) {
     this.props.update({text: e.currentTarget.value});
@@ -37,16 +37,25 @@ export class CreateTextAtom extends React.Component {
   }
 }
 
-CreateTextAtom.defaultContent = {
+TextAtomCreator.getDefaultContent = () => ({
   text: ''
-};
+});
 
-CreateTextAtom.buttonCaption = '+ Text';
+TextAtomCreator.buttonCaption = '+ Text';
 
-export class TextAtom extends React.Component {
+
+class TextAtomViewer extends React.Component {
   
   render() {
     
     return <div>{ this.props.content.text }</div>;
   }
 }
+
+export default {
+  name: 'text',
+  contentValidator: null,
+  Creator: TextAtomCreator,
+  Viewer: TextAtomViewer,
+  Previewer: null
+};
