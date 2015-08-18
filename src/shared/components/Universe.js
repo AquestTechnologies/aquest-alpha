@@ -97,7 +97,6 @@ class Universe extends React.Component {
         
         <Chat 
           chatId={chatId}
-          userId={userId}
           chat={chat} 
           readChat={readChat}
         />

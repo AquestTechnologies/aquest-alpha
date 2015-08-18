@@ -78,24 +78,11 @@ export const login = createActionCreator({
   auth:       false,
 });
 
-export const joinChat = (params) => ({ type: 'JOIN_CHAT_LC', payload: params });
-
-/*export const joinChat = createSocketCreator({
-  type:  'joinChat',
-  auth:       'jwt',
-});*/
+export const joinChat = (params) => ({ type: 'JOIN_CHAT', payload: params });
   
-export const leaveChat = (params) => ({ type: 'LEAVE_CHAT_LC', payload: params });  
-/*export const leaveChat = createSocketCreator({
-  type:       'leaveChat',
-  auth:       'jwt',
-});*/
+export const leaveChat = (params) => ({ type: 'LEAVE_CHAT', payload: params });  
   
-export const createMessage = (params) => ({ type: 'CREATE_MESSAGE_LC', payload: params });  
-/*export const createMessage = createSocketCreator({
-  type:       'createMessage',
-  auth:       'jwt',
-});*/
+export const createMessage = (params) => ({ type: 'CREATE_MESSAGE', payload: params });  
   
 export const receiveJoinChat =  (params) => ({ type: 'RECEIVE_JOIN_CHAT', payload: params });
   
@@ -108,6 +95,7 @@ const actionCreators = {
   transitionTo, login, logout, 
   readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
   createUser, createUniverse, createTopic, 
+  joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage
 };
 
 export default actionCreators;

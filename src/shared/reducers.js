@@ -2,6 +2,8 @@ import log from './utils/logTailor';
 import config from '../../config/client';
 import { routerStateReducer } from 'redux-react-router';
 import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
+import _findIndex from 'lodash/array/findIndex';
+import _isEqual from 'lodash/lang/isEqual';
 
 export default {
   
@@ -78,28 +80,38 @@ export default {
   
   chats: (state={}, action) => {
     let newState;
+    const {type} = action;
     
-    switch (action.type) {
+    switch (type) {
       
     case 'SUCCESS_READ_CHAT':
       
       return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
         
-        newState = state[chatId] ?  simpleFusion(state[chatId], action.payload) : simpleCopy(chatId);
+        newState = simpleDeepCopy(state);
+        
+        if (newState[chatId]) newState[chatId] = simpleFusion(newState[chatId], action.payload);
+        else {
+          newState[chatId] = action.payload;
+        }
         
         return newState;                    
       })(action);
       
-    case 'CREATE_MESSAGE_LC':
+    case 'CREATE_MESSAGE':
       
       return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         
-        newState[chatId] = action.payload;
+        newState = simpleDeepCopy(state);
         
-        newState[chatId].content = JSON.parse(newState[chatId].content);
-        return delete newState[chatId].chatId; // is it working ?
+        let newPayload = simpleDeepCopy(action.payload);
+        delete newPayload.chatId;
+        
+        newState[chatId].messages.push(newPayload);
+        
+        return newState;
         
       })(action);
       
@@ -114,38 +126,37 @@ export default {
         if(owner){
           const id = parseInt(action.payload.message.id,10);
           const {content, userId} = message;
-          const messageIndex = newState[chatId].messages.findIndex((val) => JSON.stringify(val) === JSON.stringify({id, userId, content}));
+          const messageIndex = _findIndex(newState[chatId].messages, (val) => !val.id ); // the latency compensation message doesn't have id 
           
-          if (messageIndex !== -1) return newState[chatId].messages[messageIndex] = message;
+          if (messageIndex !== -1) { 
+            newState[chatId].messages[messageIndex] = message; // must enable the ui that the message was succesfully delivered or not
+            return newState;
+          }
+          
+          return state;
         } else {
-          return newState[chatId].messages.push(message);
+          newState[chatId].messages.push(message);
+          return newState;
         }
       })(action);
        
-    case 'JOIN_CHAT_LC':
+    case 'JOIN_CHAT':
       
       return ((action) => {
-        const chatId = parseInt(action.payload.chatId, 10);
-        const {userId} = action.payload;
+        const chatId = parseInt(action.payload, 10);
         
         newState = simpleDeepCopy(state);
         
-        /*if ( newState[chatId].users ) return newState[chatId].users.push(userId);
-        else {
-          if ( newState[chatId] ) return newState[chatId].users = [userId];  
-          else {
-            return newState[chatId].users = [userId];          
-          }
-        }*/
-        
-        if(newState[chatId] && newState[chatId].users) return newState[chatId].users.push(userId);
-        else if (newState[chatId]){
-          return simpleMerge(newState[chatId], {users: [userId]});  
-        }
-        else {
-          return newState[chatId] = {users: [userId]};
+        // newState[chatId] ? newState[chatId].users ? false : newState = simpleMerge(newState[chatId], {users: []}) : newState[chatId] = {users: []};
+        if (newState[chatId] && !newState[chatId].users) {
+          newState = simpleMerge(newState[chatId], {users: []});
+        } else if (!newState[chatId]) {
+          newState[chatId] = {users: []};
         }
         
+        console.log('JOIN_CHAT', newState)
+
+        return newState;        
       })(action);
             
     case 'RECEIVE_JOIN_CHAT':
@@ -156,20 +167,25 @@ export default {
         
         newState = simpleDeepCopy(state);
         
-        if (owner) return simpleMerge(newState[chatId].users, userList);
+        console.log('RECEIVE_JOIN_CHAT', newState, 'userList', userList);
+        
+        if (owner) newState = simpleMerge(newState[chatId], {users: userList});
         else {
-          return newState[chatId].users.push(userId);
+          newState[chatId].users.push(userId);
         }   
+        
+        return newState;
       })(action);
     
-    case 'LEAVE_CHAT_LC':
+    case 'LEAVE_CHAT':
       
       return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         
         newState = simpleDeepCopy(state);
+        delete newState[chatId].users;  
         
-        return delete newState[chatId].users;               
+        return newState;      
       })(action);
       
     case 'RECEIVE_LEAVE_CHAT':
@@ -181,9 +197,11 @@ export default {
         newState = simpleDeepCopy(state);
         
         // remove the user from the user list
-        return newState[chatId].users && newState[chatId].users.length ?
+        newState[chatId].users && newState[chatId].users.length ?
           newState.splice(newState[chatId].users.indexOf(userId), 1) :
           state; 
+        
+        return newState;
           
       })(action);
       

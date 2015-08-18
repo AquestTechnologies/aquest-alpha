@@ -5,6 +5,7 @@ import devConfig  from '../../../../config/development.js';
 import Joi        from 'joi';
 import SocketIo   from 'socket.io';
 import {WEBSOCKET_VALIDATION_SCHEMA as validationSchema} from '../../validationSchema.js';
+import {randomInteger} from '../../../shared/utils/randomGenerators';
 
 // Le plugin Websocket pour Hapi
 exports.register = function (server, options, next) {
@@ -20,7 +21,7 @@ exports.register = function (server, options, next) {
   
   //namespace for the chat of a universe or a topic
   const chat = io.of('/chat-universe-topic');
-  //chat.use(socketAuthentication);
+  chat.use(socketAuthentication);
   
   let chatUsers = 0;
   chat.on('connection', (socket) => {
@@ -29,21 +30,21 @@ exports.register = function (server, options, next) {
     
     socket.on('joinChat', function(request) {
       Joi.validate(request, validationSchema['joinChat'], (err, value) => {
-        
+        console.log('hello');
         if (err) throw err;
           
-        const {chatId, userId} = request;
+        const chatId = request;
+        const {userId} = socket;
         
-        socket.userId = userId;
         this.join(chatId);
         // userList.set({userId: request.userId}, request);
         let userList = Array.isArray(chatList[chatId]) ? chatList[chatId] : chatList[chatId] = [];
         userList.push(userId);
 
-        log(`___ ${request.userId} joining chat ${request.chatId} - countUsers: ${chatList[chatId].length}`);
+        log(`___ ${userId} joining chat ${chatId} - countUsers: ${chatList[chatId].length}`);
         
         // send the current list of people in the chat to the user joining the chat
-        this.emit('receiveJoinChat', { chatId, userList, owner});
+        this.emit('receiveJoinChat', { chatId, userList, owner });
         
         //send the user info to current people in the chat
         socket.broadcast.to(chatId).emit('receiveJoinChat', { chatId, userId });
@@ -55,14 +56,15 @@ exports.register = function (server, options, next) {
         
         if (err) throw err;
         
-        const {chatId, userId} = request;
+        const {chatId} = request;
+        const {userId} = socket;
         
         this.leave(chatId);
         // userList.delete(socket);
         let userList = Array.isArray(chatList[chatId]) ? chatList[chatId] : chatList[chatId] = [];
-        userList.splice(userList.indexOf(request.userId), 1);
+        userList.splice(userList.indexOf(userId), 1);
         
-        log(`___ ${request.userId} leaving chat ${request.chatId} - countUsers: ${chatList[chatId].length}`);
+        log(`___ ${userId} leaving chat ${chatId} - countUsers: ${chatList[chatId].length}`);
         
         //send request to remove the user who left the chat from their list
         socket.broadcast.to(chatId).emit('receiveLeaveChat', { chatId, userId });
@@ -74,9 +76,10 @@ exports.register = function (server, options, next) {
         
         if (err) throw err;
         
-        const {chatId, id, userId} = request;
-        const content = request.content ? JSON.parse(request.content) : false;
+        const {chatId, content} = request;
+        const {userId} = socket;
         const d = new Date();
+        const id = randomInteger(0, 1000000);
         
         log(`___ ${userId} createMessage`, { chatId, message: { id, userId, content, timestamp: d.getTime()}});
         
@@ -98,8 +101,9 @@ exports.register = function (server, options, next) {
           if(user === userId){
             disconnectChatId = chatId;
             socket.broadcast.to(chatId).emit('leaveChat', { chatId, userId });
-            return true;
+            return false;
           }
+          return true;
         });
       }
       
@@ -173,7 +177,8 @@ exports.register = function (server, options, next) {
   }
   
   function socketAuthentication(socket, next) { 
-    console.log('cookie validation');
+    
+    console.log('cookie validation', socket.request.headers.cookie);
     if (socket.request.headers.cookie) {
       let strCookie = socket.request.headers.cookie;
       const cookie = parseCookie(strCookie);
@@ -190,20 +195,19 @@ exports.register = function (server, options, next) {
             resolve(userId);
           });
         } else {
-          reject();
+          reject('no jwt cookie object');
         }
       });
       
       authPromise.then(
         result => {
           log('authentication succeded', result);
-          
+          socket.userId = result; // keep userId in the socket object
           return next();
         },
         error => {
-          log('websocket authentication - no jwt cookie object :', error.stack);
-          
-          next(new Error('not authorized ! sign in ?'));
+          log('websocket authentication - ', error.stack ? error.stack : error);
+          next(new Error('To send messages please sign in !'));
         }
       );
     } else {

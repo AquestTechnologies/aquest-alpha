@@ -1,7 +1,9 @@
 import React from 'react';
-import {randomInteger} from '../../utils/randomGenerators';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createMessage } from '../../actionCreators';
 
-export default class ChatFooter extends React.Component {
+class ChatFooter extends React.Component {
   
   constructor() {
     super();
@@ -13,11 +15,8 @@ export default class ChatFooter extends React.Component {
       e.preventDefault();
       
       const messageParams = {
-        id:       randomInteger(0, 1000000),
         chatId:   this.props.chatId,
-        userId:   this.props.userId,
-        content:  {type: 'text', text: this.state.value},
-        socket:   this.props.socket
+        content:  {type: 'text', text: this.state.value}
       };
       
       this.props.createMessage(messageParams);
@@ -38,3 +37,9 @@ export default class ChatFooter extends React.Component {
     );
   }
 }
+
+const mapState = state => ({});
+
+const mapActions = dispatch => bindActionCreators({ createMessage }, dispatch);
+
+export default connect(mapState, mapActions)(ChatFooter);

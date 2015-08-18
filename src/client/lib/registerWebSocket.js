@@ -1,41 +1,61 @@
 import log  from '../../shared/utils/logTailor';
-import websocket from 'socket.io-client';
 import { receiveMessage, receiveJoinChat, receiveLeaveChat } from '../../shared/actionCreators';
+import websocket from 'socket.io-client';
 
-export default function registerWebSocket(store, transitionTo) {
+export default function registerWebSocket(store) {
   
-  const logR = type => log('.WS. registerWebSocket redirecting after', type);
+  let sockets = {};
 
   store.subscribe(() => {
-    const { records, router, session } = store.getState();
+    const { records } = store.getState();
     const action = records[records.length - 1];
     const { type, payload } = action;
+    let socket;
+    
+    console.log('.WS.', type);
     
     switch (type) {
       
-      case 'JOIN_CHAT_LC':
-        logR(type);
-        const socket = websocket.connect('http://23.251.143.127:9090/chat-universe-topic');
-        socket.emit('joinChat', action.payload);
+      case 'LEAVE_CHAT':
         
-        socket.on('receiveMessage', result => receiveMessage(result));
-        socket.on('receiveJoinChat', result => receiveJoinChat(result));
-        socket.on('receiveLeaveChat', result => receiveLeaveChat(result));
-        return;
-        
-      case 'LEAVE_CHAT_LC':
-        logR(type);
-        socket.emit('leaveChat', action.payload);
+        console.log(sockets);
+        socket = sockets['chat-universe-topic'];
+        socket.emit('leaveChat', payload);
         socket.removeListener('receiveMessage');
         socket.removeListener('receiveJoinChat');
         socket.removeListener('receiveLeaveChat');
+        delete socket['chat-universe-topic'];
+        
         return;
         
-      case 'CREATE_MESSAGE_LC':
-        logR(type);
-        socket.emit('createMessage', action.payload);
+      case 'JOIN_CHAT':
+        
+        console.log(sockets);
+        if (sockets['chat-universe-topic']) {
+          socket = sockets['chat-universe-topic'];
+        } else {
+          log('no websocket connection');
+          socket = sockets['chat-universe-topic'] = websocket.connect('http://23.251.143.127:9090/chat-universe-topic');
+        }
+        socket.emit('joinChat', payload);
+        socket.on('receiveMessage', result => store.dispatch(receiveMessage(result)));
+        socket.on('receiveJoinChat', result => store.dispatch(receiveJoinChat(result)));
+        socket.on('receiveLeaveChat', result => store.dispatch(receiveLeaveChat(result)));
+        socket.on('error', error => log('socket error', error));
+        // socket.on('connect', () => log('socket connected to the namespace : chat-universe-topic'));
+        
         return;
-      
+        
+      case 'CREATE_MESSAGE':
+        
+        console.log(sockets);
+        socket = sockets['chat-universe-topic'];
+        socket.emit('createMessage', payload);
+        
+        return;
+        
+      default:  
+        return;
     }
   });
 }

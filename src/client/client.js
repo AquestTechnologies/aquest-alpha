@@ -44,10 +44,8 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware';
     () => log(`... App rendered in ${new Date() - d}ms.`)
   );
   
-  log('app',app);
-  
   registerSideEffects(store, app.transitionTo);
-  registerWebSocket(store, app.transitionTo);
+  registerWebSocket(store);
 
 })();
 
