@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-class LoadingBar extends React.Component {
+export default class LoadingBar extends React.Component {
   
   constructor() {
     super();
@@ -42,9 +42,3 @@ class LoadingBar extends React.Component {
     );
   }
 }
-
-const mapState = state => ({
-  records: state.records
-});
-
-export default connect(mapState)(LoadingBar);

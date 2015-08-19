@@ -1,29 +1,66 @@
 import React from 'react';
+import validate from 'validate.js';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createTopic } from '../actionCreators';
-import { getAtomCreators } from './atoms';
+import { getAtomCreators, getAtomValidationConstraints } from './atoms';
+import { deepCopy } from '../utils/objectUtils';
 
 export default class CreateTopic extends React.Component {
   
   constructor() {
     super();
-    this.state = { title: '', atoms: [] };
+    this.state = { title: 'abc', atoms: [] };
   }
   
   componentWillMount() {
-    this.atomCreators = getAtomCreators(this.props.universe);
+    const { universe } = this.props;
+    this.atomCreators = getAtomCreators(universe);
+    this.atomValidationConstraints = getAtomValidationConstraints(universe);
   }
   
   handleSubmit(e) {
     // We should make sure the user can post only once 
     // (by disabling every UI thing between REQUEST and SUCCESS for example)
-    const { title, atoms } = this.state;
-    const { universe: { id }, createTopic } = this.props;
-    createTopic({
-      title,
-      atoms,
-      universeId: id,
+    if (!this.state.title) return; // :(
+    
+    this.validateAtoms().then(
+      validated => {
+        if (validated) {
+          const { title, atoms } = this.state;
+          const { universe: { id }, createTopic } = this.props;
+          
+          createTopic({
+            title,
+            atoms,
+            universeId: id,
+          });
+        }
+      }
+    );
+  }
+  
+  validateAtoms() {
+    // I had to use a Promise because setState is async :/
+    // return true/false did not work
+    return new Promise(resolve => {
+      const { atoms } = this.state;
+      const validationErrors = atoms.map(({type, content}) => validate(content, this.atomValidationConstraints[type]));
+      
+      if (validationErrors.every(error => !error)) this.setState({
+        // removes validationErrors
+        atoms: atoms.map(({type, content}) => ({
+          type,
+          content,
+        }))
+      }, resolve.bind(null, true));
+      else this.setState({
+        atoms: atoms.map(({type, content}, i) => ({
+          type,
+          content,
+          validationErrors: validationErrors[i],
+        }))
+      }, resolve.bind(null, false));
     });
   }
   
@@ -34,8 +71,12 @@ export default class CreateTopic extends React.Component {
   }
   
   addAtom(type) {
+    const newAtom = {
+      type,
+      content: deepCopy(this.atomCreators[type].initialContent),
+    };
     this.setState({
-      atoms: [...this.state.atoms, {type, content: this.atomCreators[type].getDefaultContent()}]
+      atoms: [...this.state.atoms, newAtom]
     });
   }
   
@@ -47,46 +88,42 @@ export default class CreateTopic extends React.Component {
     });
   }
   
-  moveAtomUp(i) {
-    if (!i) return;
+  // Moves atoms[i] to atoms[i + n]
+  moveAtom(i, n) {
     
-    const { atoms } = this.state;
-    const previousAtom = atoms[i - 1];
-    atoms[i - 1] = atoms[i];
-    atoms[i] = previousAtom;
+    const atoms = deepCopy(this.state.atoms);
+    // Checks for outer limits exeptions
+    if ((n < 0 && n + i < 0) || (n > 0 && n + i > atoms.length - 1)) return;
     
-    this.setState({atoms});
-  }
-  
-  moveAtomDown(i) {
-    const { atoms } = this.state;
-    
-    if (i === atoms.length - 1) return;
-    const nextAtom = atoms[i + 1];
-    atoms[i + 1] = atoms[i];
-    atoms[i] = nextAtom;
+    const x = atoms[i + n];
+    atoms[i + n] = atoms[i];
+    atoms[i] = x;
     
     this.setState({atoms});
   }
   
   // Updates this component state when atom child call this.props.update()
   updateAtom(i, content, callback) {
-    const { atoms } = this.state;
+    const atoms = deepCopy(this.state.atoms);
     atoms[i].content = content;
     this.setState({ atoms }, callback);
   }
   
   renderAtoms(atoms) {
     
-    return atoms.map(({type, content}, i) =>
-      <div key={i} className='createTopic_atom'>
-        <button className='createTopic_atom_up' onClick={this.moveAtomUp.bind(this, i)}>↑</button>
-        <button className='createTopic_atom_down' onClick={this.moveAtomDown.bind(this, i)}>↓</button>
-        <button className='createTopic_atom_remove' onClick={this.removeAtom.bind(this, i)}>x</button>
-        { /* Selects correct ReactClass from type and passes a update function so the child can update its parent's state */ }
-        { React.createElement(this.atomCreators[type], {content, ref: i, update: this.updateAtom.bind(this, i)}) }
-        <hr/>
-      </div>
+    return atoms.map(({type, content, validationErrors}, i) => {
+      const Creator = this.atomCreators[type];
+      
+      return(
+        <div key={i}>
+          <button onClick={this.moveAtom.bind(this, i, -1)}>↑</button>
+          <button onClick={this.moveAtom.bind(this, i, 1)}>↓</button>
+          <button onClick={this.removeAtom.bind(this, i)}>x</button>
+          <Creator content={content} validationErrors={validationErrors} update={this.updateAtom.bind(this, i)}/>
+          <hr/>
+        </div>
+      );
+    }
     );
   }
   

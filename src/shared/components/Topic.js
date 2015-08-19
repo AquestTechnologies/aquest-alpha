@@ -17,17 +17,18 @@ class Topic extends React.Component {
   
   componentWillMount() {
     const { universe, topic, topicId, readTopic, readTopicAtoms } = this.props;
-    this.atoms = getAtomViewers(universe);
+    this.atomViewers = getAtomViewers(universe);
     if (!topic) readTopic(topicId);
     else if (!topic.atoms) readTopicAtoms(topicId);
   }
   
   renderAtoms(atoms) {
-    return atoms.map(({type, content}, i) => 
-      <div key={i}>
-        { React.createElement(this.atoms[type], {content}) }
-      </div>
-    );
+    
+    return atoms.map(({type, content}, i) => {
+      const Viewer = this.atomViewers[type];
+      
+      return <Viewer key={i} content={content} />;
+    });
   }
   
   render() {

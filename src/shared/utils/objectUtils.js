@@ -9,19 +9,20 @@ export function copy(a) {
 }
 
 export function deepCopy(a) {
-  const o = {};
-  for (let k in a) {
-    if (a.hasOwnProperty(k)) {
-      const val = a[k];
-      if (val instanceof Array) {
-        o[k] = [];
-        val.forEach(item => o[k].push(deepCopy(item)));
+  if (typeof a === 'object') {
+    if (Array.isArray(a)) return a.map(i => deepCopy(i));
+    else if (a instanceof Date) return new Date(a);
+    else {
+      const b = {};
+      for (let k in a) {
+        if (a.hasOwnProperty(k)) {
+          b[k] = deepCopy(a[k]);
+        }
       }
-      else if (typeof val === 'object' && !(val instanceof Date)) o[k] = deepCopy(val);
-      else o[k] = val;
+      return b;
     }
-  }
-  return o;
+  } 
+  else return a;
 }
 
 export function merge(t, s) {

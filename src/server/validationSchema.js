@@ -40,7 +40,7 @@ const API_VALIDATION_SCHEMA = {
     universeId:   Joi.string().trim().required().min(1).regex(/^.*$/),
     atoms:        Joi.array().items(
       Joi.object().keys({
-        type: Joi.string().trim().required().min(1).regex(/^text$/), // Regex à construire dynamiquement
+        type: Joi.string().trim().required().min(1),
         content: Joi.object().required(),
       }).unknown(false).required()), 
   },

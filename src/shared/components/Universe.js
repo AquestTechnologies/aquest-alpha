@@ -76,7 +76,6 @@ class Universe extends React.Component {
             <div className='universe_main_scrolled'> { 
               
               children ? 
-                
                 React.cloneElement(children, {
                   topic,
                   userId,

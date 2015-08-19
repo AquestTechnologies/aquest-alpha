@@ -1,20 +1,17 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 class TextAtomCreator extends React.Component {
   
   handleTextInput(e) {
-    this.props.update({text: e.currentTarget.value});
-  }
-  
-  componentDidUpdate () {
+    const textarea = e.currentTarget;
+    this.props.update({text: textarea.value});
     // Adjusts the textarea's height automatically
-    const textarea = ReactDOM.findDOMNode(this);
     textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
+    textarea.style.height = textarea.scrollHeight;
   }
   
   render() {
+    const { content: {text}, validationErrors } = this.props;
     const textareaStyle = {
       width: '100%', 
       height: 'auto', 
@@ -23,39 +20,68 @@ class TextAtomCreator extends React.Component {
       overflow: 'hidden',
       border: 'none',
     };
+    const errorsDivStyle = {
+      display: validationErrors ? 'block' : 'none',
+    };
     
     return (
-      <textarea 
-        type='text'  
-        value={this.props.content.text} 
-        onChange={this.handleTextInput.bind(this)} 
-        autoComplete='false'
-        placeholder='Write your content here'
-        style={textareaStyle} 
-      />
+      <div>
+        <div style={errorsDivStyle}>
+          { JSON.stringify(validationErrors) }
+        </div>
+        <textarea 
+          type='text'  
+          value={text} 
+          onChange={this.handleTextInput.bind(this)} 
+          autoComplete='false'
+          placeholder='Write your content here'
+          style={textareaStyle} 
+        />
+      </div>
     );
   }
 }
 
-TextAtomCreator.getDefaultContent = () => ({
+TextAtomCreator.initialContent = {
   text: ''
-});
+};
 
-TextAtomCreator.buttonCaption = '+ Text';
+TextAtomCreator.buttonCaption = 'Text';
 
 
 class TextAtomViewer extends React.Component {
   
   render() {
     
-    return <div>{ this.props.content.text }</div>;
+    return (
+      <div style={{whiteSpace: 'pre'}}>
+        { this.props.content.text }
+      </div>
+    );
   }
 }
 
+function createPreview({ text }) {
+  const N = 150;
+  
+  return new Promise.resolve({
+    text: text.length > N ? text.substr(0, N) + '...' : text
+  });
+}
+
+const validationConstraints = {
+  text: {
+    presence: {
+      message: '^Content should not be empty'
+    },
+  },
+};
+
 export default {
   name: 'text',
-  contentValidator: null,
-  Creator: TextAtomCreator,
+  createPreview,
+  validationConstraints,
   Viewer: TextAtomViewer,
-  Previewer: null
+  Creator: TextAtomCreator,
+  Previewer: TextAtomViewer,
 };

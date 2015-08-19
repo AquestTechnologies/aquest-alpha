@@ -11,18 +11,21 @@
 const atomPlugins = [
   require('./textAtom'),
   require('./imageAtom'),
+  require('./youtubeAtom'),
 ];
 
 const atomViewers = {}; 
 const atomCreators = {};
 const atomPreviewers = {};
-const atomContentValidators = {};
+const atomPreviewCreator = {};
+const atomValidationConstraints = {};
 
-atomPlugins.forEach(({name, contentValidator, Creator, Viewer, Previewer}) => {
+atomPlugins.forEach(({name, Creator, Viewer, Previewer, createPreview, validationConstraints}) => {
   atomViewers[name] = Viewer;
   atomCreators[name] = Creator;
   atomPreviewers[name] = Previewer;
-  atomContentValidators[name] = contentValidator;
+  atomPreviewCreator[name] = createPreview;
+  atomValidationConstraints[name] = validationConstraints;
 });
 
 export function getAtomCreators(universe) {
@@ -45,7 +48,11 @@ export function getAtomPreviewers(universe) {
   return atomPreviewers;
 }
 
-export function getAtomContentValidators(universe) {
+export function getAtomValidationConstraints(universe) {
   
-  return atomContentValidators;
+  return atomValidationConstraints;
+}
+
+export function isValidType(type) {
+  return atomPlugins.filter(({name}) => name === type).length === 1;
 }

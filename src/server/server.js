@@ -69,10 +69,18 @@ server.register([{register: require('./plugins/API')}, {register: require('./plu
       },
       handler: function (request, reply) {
         const response = reply.response().hold();
-        request.payload.file.pipe(fs.createWriteStream("test"));
-        console.log('post image', request.payload.file);
-        response.source = 'done';
+        if (request.payload.file.readable) {
+          const fileName = request.payload.file.hapi.filename;
+          const fileType = request.payload.file.hapi.headers['content-type'];
+          console.log('uploadFile', fileName, fileType);
+          request.payload.file.pipe(fs.createWriteStream('temp/' + fileName));
+          response.source = {
+            fileName,
+            fileType
+          };
+        }
         response.send();
+        console.log('uploadFile done');
       },
     }
   ]);

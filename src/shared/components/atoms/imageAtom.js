@@ -82,19 +82,30 @@ class ImageAtomCreator extends React.Component {
   }
 }
 
-ImageAtomCreator.getDefaultContent = () => ({
+ImageAtomCreator.initialContent = {
   url: '',
   localFile: undefined,
   width: '0',
   height: '0',
-});
+};
 
-ImageAtomCreator.buttonCaption = '+ Image';
+ImageAtomCreator.buttonCaption = 'Image';
+
+function createPreview(content) {
+  return new Promise((resolve, reject) => {
+    resolve();
+  });
+}
+
+const validationConstraints = {
+  
+};
 
 export default {
   name: 'image',
-  contentValidator: null,
-  Creator: ImageAtomCreator,
+  createPreview,
+  validationConstraints,
   Viewer: null,
-  Previewer: null
+  Creator: ImageAtomCreator,
+  Previewer: null,
 };

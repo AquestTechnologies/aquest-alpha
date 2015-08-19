@@ -79,20 +79,31 @@ export const login = createActionCreator({
   auth:       false,
 });
 
-export function uploadFile(params, fnProgress, fnLoad) {
+export function uploadFile(params, fnProgress, fnUpload, fnResponse) {
   const types = ['REQUEST_UPLOAD_FILE', 'SUCCESS_UPLOAD_FILE', 'FAILURE_UPLOAD_FILE'];
   
   const promise = new Promise((resolve, reject) => {
     
-    const load = typeof fnLoad === 'function' ? fnLoad : (() => {});
-    const progress = typeof fnProgress === 'function' ? fnProgress : (() => {});
+    const onUpload = typeof fnUpload === 'function' ? fnUpload : (() => {});
+    const onProgress = typeof fnProgress === 'function' ? fnProgress : (() => {});
+    const onResponse = typeof fnResponse === 'function' ? fnResponse : (() => {});
     
     const req = new XMLHttpRequest();
-    req.upload.addEventListener('load', load);
-    req.upload.addEventListener('progress', progress);
+    req.upload.addEventListener('load', onUpload);
+    req.upload.addEventListener('progress', onProgress);
     req.onerror = err => reject(err);
     req.open('post', '/uploadFile');
-    req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
+    req.onload = () => {
+      const { status, response, statusText } = req;
+      if (status === 200) {
+        const result = JSON.parse(response);
+        onResponse(true, result); // Cela brise le flow Flux...
+        resolve(result);
+      } else {
+        onResponse(false);
+        reject(Error(statusText));
+      }
+    };
     req.send(createForm(params));
     
   });
