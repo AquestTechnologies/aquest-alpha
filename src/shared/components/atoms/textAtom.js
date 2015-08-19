@@ -1,5 +1,17 @@
 import React from 'react';
 
+class TextAtomViewer extends React.Component {
+  
+  render() {
+    
+    return (
+      <div style={{whiteSpace: 'pre'}}>
+        { this.props.content.text }
+      </div>
+    );
+  }
+}
+
 class TextAtomCreator extends React.Component {
   
   handleTextInput(e) {
@@ -42,24 +54,10 @@ class TextAtomCreator extends React.Component {
   }
 }
 
+TextAtomCreator.buttonCaption = 'Text';
 TextAtomCreator.initialContent = {
   text: ''
 };
-
-TextAtomCreator.buttonCaption = 'Text';
-
-
-class TextAtomViewer extends React.Component {
-  
-  render() {
-    
-    return (
-      <div style={{whiteSpace: 'pre'}}>
-        { this.props.content.text }
-      </div>
-    );
-  }
-}
 
 function createPreview({ text }) {
   const N = 150;

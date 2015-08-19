@@ -1,5 +1,13 @@
 import React from 'react';
 
+class ImageAtomViewer extends React.Component {
+  
+  render() {
+    const { url, width, height } = this.props.content;
+    return <img src={url} width={width} height={height} />;
+  }
+}
+
 class ImageAtomCreator extends React.Component {
   
   constructor() {
@@ -33,8 +41,12 @@ class ImageAtomCreator extends React.Component {
   }
   
   render() {
-    const { content: {url, localFile } } = this.props;
-    const src = localFile ? window.URL.createObjectURL(localFile) : url;
+    const { url, localFile, width, height } = this.props.content;
+    const contentForViewer = {
+      width,
+      height,
+      url: localFile ? window.URL.createObjectURL(localFile) : url,
+    };
     const doneStyle = {
       visibility: url ? 'visible' : 'hidden'
     };
@@ -43,16 +55,13 @@ class ImageAtomCreator extends React.Component {
     };
     
     return this.state.ready ? 
-    (
       <div>
         <div>
           <button onClick={this.handleEditClick.bind(this)}>Edit</button>
         </div>
-        <img src={src} />
+        <ImageAtomViewer content={contentForViewer} />
       </div>
-    )
-    :
-    (
+      :
       <div>
         <div>From URL</div>
         <input 
@@ -77,19 +86,17 @@ class ImageAtomCreator extends React.Component {
             style={{display: 'none'}}
           />
         </div>
-      </div>
-    );
+      </div>;
   }
 }
 
+ImageAtomCreator.buttonCaption = 'Image';
 ImageAtomCreator.initialContent = {
   url: '',
   localFile: undefined,
-  width: '0',
-  height: '0',
+  width: 0,
+  height: 0,
 };
-
-ImageAtomCreator.buttonCaption = 'Image';
 
 function createPreview(content) {
   return new Promise((resolve, reject) => {
@@ -98,14 +105,22 @@ function createPreview(content) {
 }
 
 const validationConstraints = {
-  
+  url: {
+    presence: true,
+  },
+  width: {
+    presence: true,
+  },
+  height: {
+    presence: true,
+  }
 };
 
 export default {
   name: 'image',
   createPreview,
   validationConstraints,
-  Viewer: null,
+  Viewer: ImageAtomViewer,
   Creator: ImageAtomCreator,
-  Previewer: null,
+  Previewer: ImageAtomViewer,
 };

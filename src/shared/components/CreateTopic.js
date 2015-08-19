@@ -20,8 +20,6 @@ export default class CreateTopic extends React.Component {
   }
   
   handleSubmit(e) {
-    // We should make sure the user can post only once 
-    // (by disabling every UI thing between REQUEST and SUCCESS for example)
     if (!this.state.title) return; // :(
     
     this.validateAtoms().then(
@@ -30,6 +28,8 @@ export default class CreateTopic extends React.Component {
           const { title, atoms } = this.state;
           const { universe: { id }, createTopic } = this.props;
           
+          // We should make sure the user can post only once 
+          // (by disabling every UI thing between REQUEST and SUCCESS for example)
           createTopic({
             title,
             atoms,
@@ -109,24 +109,6 @@ export default class CreateTopic extends React.Component {
     this.setState({ atoms }, callback);
   }
   
-  renderAtoms(atoms) {
-    
-    return atoms.map(({type, content, validationErrors}, i) => {
-      const Creator = this.atomCreators[type];
-      
-      return(
-        <div key={i}>
-          <button onClick={this.moveAtom.bind(this, i, -1)}>↑</button>
-          <button onClick={this.moveAtom.bind(this, i, 1)}>↓</button>
-          <button onClick={this.removeAtom.bind(this, i)}>x</button>
-          <Creator content={content} validationErrors={validationErrors} update={this.updateAtom.bind(this, i)}/>
-          <hr/>
-        </div>
-      );
-    }
-    );
-  }
-  
   renderAddAtomsButtons() {
     const { atomCreators, addAtom } = this;
     return Object.keys(atomCreators).map(key => 
@@ -165,24 +147,64 @@ export default class CreateTopic extends React.Component {
         </div>
         
         <div className="topic_author">
-          {`By ${userId}`}
-          {' - '}
+          {`By ${userId} - `}
           { this.renderAddAtomsButtons() }
         </div>
         
         <div className="topic_atoms">
-          { this.renderAtoms(atoms) }
+          {
+            atoms.map(({type, content, validationErrors}, i) => 
+              <AtomCreatorWrapper
+                key={i}
+                content={content}
+                Creator={this.atomCreators[type]}
+                validationErrors={validationErrors}
+                update={this.updateAtom.bind(this, i)}
+                remove={this.removeAtom.bind(this, i)}
+                moveUp={this.moveAtom.bind(this, i, -1)}
+                moveDown={this.moveAtom.bind(this, i, 1)}
+              />
+            )
+          }
         </div>
         
         <br/>
         <div className="topic_submit">
           <button onClick={this.handleSubmit.bind(this)}>Create Topic</button>
         </div>
-    </div>
+      </div>
     );
   }
 }
 
-const mapActions = dispatch => bindActionCreators({ createTopic }, dispatch);
+class AtomCreatorWrapper extends React.Component {
+  
+  constructor() {
+    super();
+    this.state = { commandsVisible: false };
+  }
+  
+  handleHover(commandsVisible) {
+    this.setState({ commandsVisible });
+  }
+  
+  render() {
+    const {Creator, content, validationErrors, moveUp, moveDown, remove, update} = this.props;
+    const commandsStyle = {
+      visibility: this.state.commandsVisible ? 'visible' : 'hidden'
+    };
+    
+    return <div onMouseOver={this.handleHover.bind(this, true)} onMouseOut={this.handleHover.bind(this, false)}>
+      <div style={commandsStyle}>
+        <button onClick={moveUp}>↑</button>
+        <button onClick={moveDown}>↓</button>
+        <button onClick={remove}>x</button>
+      </div>
+      <Creator content={content} validationErrors={validationErrors} update={update}/>
+      <hr/>
+    </div>;
+  }
+}
 
+const mapActions = dispatch => bindActionCreators({ createTopic }, dispatch);
 export default connect(null, mapActions)(CreateTopic);

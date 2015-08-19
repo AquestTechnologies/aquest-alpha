@@ -1,39 +1,54 @@
 import React from 'react';
 
+class YoutubeAtomViewer extends React.Component {
+  
+  render() {
+    const { id, width, height } = this.props.content;
+    
+    return <iframe 
+      width={width} 
+      height={height} 
+      src={`https://www.youtube.com/embed/${id}?rel=0&amp;showinfo=0`} 
+      frameBorder='0' 
+      allowFullScreen
+    />;
+  }
+}
+
 class YoutubeAtomCreator extends React.Component {
   
   constructor() {
     super();
-    this.state = { input: '' };
+    this.state = { inputValue: '' };
   }
   
   handleIdInput(e) {
     const { value } = e.currentTarget;
-    const { width, height } = this.props.content;
+    const { update, content: { width, height } } = this.props;
     const match = value.match(/.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/);
     
-    if (match && match[1].length === 11) {
-      this.props.update({
-        width,
-        height,
-        id: match[1]
-      });
-      this.setState({
-        input: value,
-      });
-    } else {
-      this.setState({
-        input: value,
-      });
-    }
+    this.setState({
+      inputValue: value,
+    });
+    
+    if (match && match[1].length === 11) update({
+      width,
+      height,
+      id: match[1]
+    });
   }
   
   handleEditClick(e) {
-    this.props.update({id: '' });
+    const { width, height } = this.props.content;
+    this.props.update({
+      width,
+      height,
+      id: '' 
+    });
   }
   
   render() {
-    const { input } = this.state;
+    const { inputValue } = this.state;
     const { content, validationErrors } = this.props;
     const errorsDivStyle = {
       display: validationErrors ? 'block' : 'none',
@@ -47,14 +62,16 @@ class YoutubeAtomCreator extends React.Component {
         {
           content.id ?
           <div>
-            <button onClick={this.handleEditClick.bind(this)}>Edit</button>
+            <div>
+              <button onClick={this.handleEditClick.bind(this)}>Edit</button>
+            </div>
             <YoutubeAtomViewer content={content} />
           </div>
           :
           <input 
             type='text'
             size='100'
-            value={input} 
+            value={inputValue} 
             onChange={this.handleIdInput.bind(this)} 
             autoComplete='false'
             placeholder='https://www.youtube.com/watch?v=qXvZpn_dnMs'
@@ -71,27 +88,6 @@ YoutubeAtomCreator.initialContent = {
   width: 420, // Youtube default
   height: 315,
 };
-
-
-
-class YoutubeAtomViewer extends React.Component {
-  
-  render() {
-    const { id, width, height } = this.props.content;
-    
-    return (
-      <div>
-        <iframe 
-          width={width} 
-          height={height} 
-          src={`https://www.youtube.com/embed/${id}?rel=0&amp;showinfo=0`} 
-          frameBorder="0" 
-          allowFullScreen
-        ></iframe>
-      </div>
-    );
-  }
-}
 
 const createPreview = content => new Promise.resolve(content);
 

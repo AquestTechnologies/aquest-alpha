@@ -4,6 +4,7 @@ import prerender from './prerender';
 import { createActivists } from './activityGenerator';
 import devConfig from '../../config/dev_server';
 import log, { logRequest, logAuthentication } from '../shared/utils/logTailor';
+import processImage from './processImage';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log(`\nStarting server in ${process.env.NODE_ENV} mode...`);
@@ -67,20 +68,50 @@ server.register([{register: require('./plugins/API')}, {register: require('./plu
           maxBytes: 209715200,
         },
       },
-      handler: function (request, reply) {
+      handler: (request, reply) => {
         const response = reply.response().hold();
-        if (request.payload.file.readable) {
-          const fileName = request.payload.file.hapi.filename;
-          const fileType = request.payload.file.hapi.headers['content-type'];
-          console.log('uploadFile', fileName, fileType);
-          request.payload.file.pipe(fs.createWriteStream('temp/' + fileName));
-          response.source = {
-            fileName,
-            fileType
-          };
-        }
-        response.send();
-        console.log('uploadFile done');
+        const { payload } = request;
+        if (payload.file) { // De toutes façons le payload a été validé donc prout
+          
+          const fileName = payload.file.hapi.filename;
+          const fileType = payload.file.hapi.headers['content-type'];
+          console.log('Received file:', fileName, fileType);
+          
+          const path = 'temp/' + fileName;
+          const fileStream = fs.createWriteStream(path);
+          
+          fileStream.on('error', err => console.log(err)); 
+          
+          payload.file.pipe(fileStream);
+          
+          payload.file.on('end', err => { 
+            if (err) console.log(err);
+            else {
+              if (/image\/*/.test(fileType)) {
+                processImage(path).then(
+                  data => {
+                    console.log('Result:', data);
+                    response.source = { data };
+                    response.send();
+                  },
+                  error => {
+                    // 500
+                    console.log(error);
+                    response.source = { data: error.message };
+                    response.send();
+                  }
+                );
+              } else {
+                response.source = {
+                  fileName,
+                  fileType
+                };
+                response.send();
+                console.log('uploadFile done, no image');
+              }
+            }
+          });
+        } 
       },
     }
   ]);
