@@ -30,7 +30,6 @@ exports.register = function (server, options, next) {
     
     socket.on('joinChat', function(request) {
       Joi.validate(request, validationSchema['joinChat'], (err, value) => {
-        console.log('hello');
         if (err) throw err;
           
         const chatId = request;

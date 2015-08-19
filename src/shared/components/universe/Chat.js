@@ -3,9 +3,8 @@ import Message from './Message';
 import ChatHeader from './ChatHeader';
 import ChatFooter from './ChatFooter';
 import { bindActionCreators } from 'redux';
-import { readChat, joinChat, leaveChat } from '../../actionCreators';
+import { joinChat, leaveChat } from '../../actionCreators';
 import { connect } from 'react-redux';
-// import websocket from 'socket.io-client';
 
 class Chat extends React.Component {
   
@@ -95,8 +94,7 @@ const mapState = state => ({});
 
 const mapActions = dispatch => bindActionCreators({ 
   joinChat,
-  leaveChat, 
-  readChat
+  leaveChat
 }, dispatch);
 
 export default connect(mapState, mapActions)(Chat);

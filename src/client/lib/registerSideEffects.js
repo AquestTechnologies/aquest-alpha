@@ -66,6 +66,7 @@ export default function registerSideEffects(store, transitionTo) {
         logR(type);
         transitionTo(`/~${universeId}/${id}`);
         return;
+        
     }
   });
 }

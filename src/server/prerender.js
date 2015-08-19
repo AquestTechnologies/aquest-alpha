@@ -8,12 +8,12 @@ import {createStore, combineReducers, applyMiddleware} from 'redux';
 import Router, { Route } from 'react-router';
 import phidippides       from './phidippides';
 import reducers          from '../shared/reducers';
-import devConfig         from '../../config/development';
+import devConfig         from '../../config/dev_server';
 import promiseMiddleware from '../shared/utils/promiseMiddleware';
 import log, { logAuthentication }  from '../shared/utils/logTailor';
 import protectRoutes from '../shared/routes';
 
-const { wds: { hotFile, publicPath, filename }, jwt: { key, ttl } } = devConfig();
+const { wds: { hotFile, publicPath, filename }, jwt: { key, ttl } } = devConfig;
 const HTML = fs.readFileSync('src/server/index.html', 'utf8');
 
 // Replies a prerendered application

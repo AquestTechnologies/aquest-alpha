@@ -16,27 +16,13 @@ export default function registerWebSocket(store) {
     
     switch (type) {
       
-      case 'LEAVE_CHAT':
-        
-        console.log(sockets);
-        socket = sockets['chat-universe-topic'];
-        socket.emit('leaveChat', payload);
-        socket.removeListener('receiveMessage');
-        socket.removeListener('receiveJoinChat');
-        socket.removeListener('receiveLeaveChat');
-        delete socket['chat-universe-topic'];
-        
-        return;
-        
       case 'JOIN_CHAT':
         
-        console.log(sockets);
-        if (sockets['chat-universe-topic']) {
-          socket = sockets['chat-universe-topic'];
-        } else {
-          log('no websocket connection');
+        if (sockets['chat-universe-topic']) socket = sockets['chat-universe-topic'];
+        else {
           socket = sockets['chat-universe-topic'] = websocket.connect('http://23.251.143.127:9090/chat-universe-topic');
         }
+        
         socket.emit('joinChat', payload);
         socket.on('receiveMessage', result => store.dispatch(receiveMessage(result)));
         socket.on('receiveJoinChat', result => store.dispatch(receiveJoinChat(result)));
@@ -46,9 +32,19 @@ export default function registerWebSocket(store) {
         
         return;
         
+      case 'LEAVE_CHAT':
+        
+        socket = sockets['chat-universe-topic'];
+        socket.emit('leaveChat', payload);
+        socket.removeListener('receiveMessage');
+        socket.removeListener('receiveJoinChat');
+        socket.removeListener('receiveLeaveChat');
+        delete sockets['chat-universe-topic'];
+        
+        return;
+        
       case 'CREATE_MESSAGE':
         
-        console.log(sockets);
         socket = sockets['chat-universe-topic'];
         socket.emit('createMessage', payload);
         

@@ -4,7 +4,7 @@ import { connect }            from 'react-redux';
 import Menu                   from './universe/Menu';
 import Chat                   from './universe/Chat';
 import Inventory              from './universe/Inventory';
-import { apiUrl }             from '../../../config/client';
+import config             from '../../../config/dev_shared';
 import menuScroll             from '../../client/lib/menuScroll';
 import { readUniverse, readInventory, readChat, transitionTo } from '../actionCreators';
 
@@ -53,7 +53,7 @@ class Universe extends React.Component {
     const { 
       universes, topics, chats, userId,
       readInventory, readChat, transitionTo, 
-      children, location: { pathname }, params: { universeId, topicId }
+      children, location: { pathname }, params: { universeId, topicId },
     } = this.props;
     
     const universe = universes[universeId];
@@ -71,12 +71,11 @@ class Universe extends React.Component {
           universeName={universe.name} 
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(${apiUrl}/${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'> { 
               
               children ? 
-                
                 React.cloneElement(children, {
                   topic,
                   userId,
@@ -96,8 +95,8 @@ class Universe extends React.Component {
         </div>  
         
         <Chat 
-          chatId={chatId}
           chat={chat} 
+          chatId={chatId}
           readChat={readChat}
         />
       </div>
@@ -109,14 +108,14 @@ const mapState = state => ({
   chats:     state.chats,
   topics:    state.topics,
   universes: state.universes,
-  userId:    state.session.userId
+  userId:    state.session.userId,
 });
 
 const mapActions = dispatch => bindActionCreators({ 
   transitionTo,
   readUniverse, 
-  readInventory, 
-  readChat
+  readInventory,
+  readChat,
 }, dispatch);
 
 export default connect(mapState, mapActions)(Universe);

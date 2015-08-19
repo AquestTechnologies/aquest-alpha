@@ -4,6 +4,7 @@ import { routerStateReducer } from 'redux-react-router';
 import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
 import _findIndex from 'lodash/array/findIndex';
 import _isEqual from 'lodash/lang/isEqual';
+import { copy, deepCopy, merge, fuse } from './utils/objectUtils';
 
 export default {
   
@@ -41,10 +42,10 @@ export default {
     switch (type) {
       
     case 'SUCCESS_CREATE_USER':
-      return simpleFusion(state, {[payload.id]: payload});
+      return fuse(state, {[payload.id]: payload});
       
     case 'SUCCESS_LOGIN':
-      return simpleFusion(state, {[payload.id]: payload});
+      return fuse(state, {[payload.id]: payload});
       
     default:
       return state;
@@ -56,22 +57,22 @@ export default {
     switch (type) {
       
     case 'SUCCESS_READ_UNIVERSE':
-      return simpleFusion(state, {[payload.id]: payload});
+      return fuse(state, {[payload.id]: payload});
   
     case 'SUCCESS_READ_UNIVERSES':
-      newState = simpleCopy(state);
+      newState = copy(state);
       payload.forEach(universe => {
         if (!newState[universe.id]) newState[universe.id] = universe;
       });
       return newState;
       
     case 'SUCCESS_READ_INVENTORY':
-      newState = simpleDeepCopy(state);
+      newState = deepCopy(state);
       newState[params].lastInventoryUpdate = new Date().getTime();
       return newState;
     
     case 'SUCCESS_CREATE_UNIVERSE':
-      return simpleFusion(state, {[payload.id]: payload});
+      return fuse(state, {[payload.id]: payload});
     
     default:
       return state;
@@ -89,9 +90,9 @@ export default {
       return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
         
-        newState = simpleDeepCopy(state);
+        newState = deepCopy(state);
         
-        if (newState[chatId]) newState[chatId] = simpleFusion(newState[chatId], action.payload);
+        if (newState[chatId]) newState[chatId] = fuse(newState[chatId], action.payload);
         else {
           newState[chatId] = action.payload;
         }
@@ -104,9 +105,9 @@ export default {
       return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         
-        newState = simpleDeepCopy(state);
+        newState = deepCopy(state);
         
-        let newPayload = simpleDeepCopy(action.payload);
+        let newPayload = deepCopy(action.payload);
         delete newPayload.chatId;
         
         newState[chatId].messages.push(newPayload);
@@ -121,7 +122,7 @@ export default {
         const chatId = parseInt(action.payload.chatId, 10);
         const {owner, message} = action.payload;
         
-        newState = simpleDeepCopy(state);
+        newState = deepCopy(state);
         
         if(owner){
           const id = parseInt(action.payload.message.id,10);
@@ -145,17 +146,14 @@ export default {
       return ((action) => {
         const chatId = parseInt(action.payload, 10);
         
-        newState = simpleDeepCopy(state);
+        newState = deepCopy(state);
         
-        // newState[chatId] ? newState[chatId].users ? false : newState = simpleMerge(newState[chatId], {users: []}) : newState[chatId] = {users: []};
         if (newState[chatId] && !newState[chatId].users) {
-          newState = simpleMerge(newState[chatId], {users: []});
+          newState = merge(newState[chatId], {users: []});
         } else if (!newState[chatId]) {
           newState[chatId] = {users: []};
         }
         
-        console.log('JOIN_CHAT', newState)
-
         return newState;        
       })(action);
             
@@ -165,11 +163,11 @@ export default {
         const chatId = parseInt(action.payload.chatId, 10);
         const {userList, userId, owner} = action.payload;
         
-        newState = simpleDeepCopy(state);
+        newState = deepCopy(state);
         
         console.log('RECEIVE_JOIN_CHAT', newState, 'userList', userList);
         
-        if (owner) newState = simpleMerge(newState[chatId], {users: userList});
+        if (owner) newState = merge(newState[chatId], {users: userList});
         else {
           newState[chatId].users.push(userId);
         }   
@@ -182,7 +180,7 @@ export default {
       return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         
-        newState = simpleDeepCopy(state);
+        newState = deepCopy(state);
         delete newState[chatId].users;  
         
         return newState;      
@@ -194,7 +192,7 @@ export default {
         const chatId = parseInt(action.payload.chatId, 10);
         const {userId} = action.payload;
         
-        newState = simpleDeepCopy(state);
+        newState = deepCopy(state);
         
         // remove the user from the user list
         newState[chatId].users && newState[chatId].users.length ?
@@ -215,20 +213,20 @@ export default {
     switch (type) {
       
     case 'SUCCESS_READ_INVENTORY':
-      newState = simpleCopy(state);
+      newState = copy(state);
       payload.forEach(topic => newState[topic.id] = topic);
       return newState;
       
     case 'SUCCESS_READ_TOPIC':
-      return simpleFusion(state, {[payload.id]: payload});
+      return fuse(state, {[payload.id]: payload});
       
     case 'SUCCESS_READ_TOPIC_ATOMS':
-      newState = simpleDeepCopy(state);
+      newState = deepCopy(state);
       newState[params].atoms = payload;
       return newState;
       
     case 'SUCCESS_CREATE_TOPIC':
-      return simpleFusion(state, {[payload.id]: payload});
+      return fuse(state, {[payload.id]: payload});
       
     default:
       return state;
@@ -238,48 +236,6 @@ export default {
   router: (state={}, action) => routerStateReducer(state, action),
   
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
-  records: (state = [], action) => [...state, simpleMerge({date: new Date().getTime()}, action)]
+  records: (state = [], action) => [...state, merge({date: new Date().getTime()}, action)]
 
 };
-
-function simpleFusion(a, b) {
-  const o = {};
-  for (let k in a) {
-    if (a.hasOwnProperty(k)) o[k] = a[k];
-  }
-  for (let k in b) {
-    if (b.hasOwnProperty(k)) o[k] = b[k];
-  }
-  return o;
-}
-
-function simpleCopy(a) {
-  const o = {};
-  for (let k in a) {
-    if (a.hasOwnProperty(k)) {
-      o[k] = a[k];
-    }
-  }
-  return o;
-}
-
-function simpleDeepCopy(a) {
-  const o = {};
-  for (let k in a) {
-    if (a.hasOwnProperty(k)) {
-      const val = a[k];
-      if (typeof val === 'object' && !(val instanceof Array) && !(val instanceof Date)) o[k] = simpleDeepCopy(val);
-      else o[k] = val;
-    }
-  }
-  return o;
-}
-
-function simpleMerge(t, s) {
-  for (let k in s) {
-    if (s.hasOwnProperty(k)) {
-      t[k] = s[k];
-    }
-  }
-  return t;
-}
