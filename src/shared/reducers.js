@@ -90,14 +90,7 @@ export default {
       return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
         
-        newState = deepCopy(state);
-        
-        if (newState[chatId]) newState[chatId] = fuse(newState[chatId], action.payload);
-        else {
-          newState[chatId] = action.payload;
-        }
-        
-        return newState;                    
+        return fuse(state, {[chatId]: action.payload});                   
       })(action);
       
     case 'CREATE_MESSAGE':

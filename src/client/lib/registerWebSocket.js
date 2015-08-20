@@ -6,7 +6,7 @@ export default function registerWebSocket(store) {
   
   let sockets = {};
 
-  store.subscribe(() => {
+  store.subscribe(function registerWebSocketListerner() {
     const { records } = store.getState();
     const action = records[records.length - 1];
     const { type, payload } = action;

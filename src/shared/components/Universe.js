@@ -32,11 +32,14 @@ class Universe extends React.Component {
   }
   
   componentWillMount() {
-    const { universes, readUniverse, params: { universeId } } = this.props;
-    if (!universes[universeId]) readUniverse(universeId);
+    // const { universes, readUniverse, params: { universeId } } = this.props;
+    // if (!universes[universeId]) readUniverse(universeId);
+    console.log('.C. componentWillMount');
   }
   
   componentDidMount() {
+    const { universes, readUniverse, params: { universeId } } = this.props;
+    if (!universes[universeId]) readUniverse(universeId);
     menuScroll('main_scrollable');
   }
   
