@@ -18,9 +18,6 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware';
   
   // State from server --> Immutable maps
   const stateFromServer = window.STATE_FROM_SERVER || {};
-  const immutableKeys = stateFromServer.immutableKeys; 
-  if (immutableKeys instanceof Array) immutableKeys.forEach(key => stateFromServer[key] = Immutable.fromJS(stateFromServer[key]));
-  delete stateFromServer.immutableKeys;
   
   // Store creation
   const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
@@ -32,7 +29,7 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware';
   //   router.replaceWith(url.slice(0,-1), null, routerState.query);
   //   return;
   // }
-
+  
   const history = new BrowserHistory();
   const app = React.render(
     <Router history={history}>
