@@ -15,8 +15,14 @@ class Chat extends React.Component {
   componentWillMount() {
     console.log('.C. Chat.componentWillMount');
     
-    const {chatId, readChat, joinChat} = this.props;
-    readChat(chatId);
+    const {chatId, chat, readChat, joinChat} = this.props;
+    
+    if (chat && chat.messages.length) {
+      readChat({chatId, chatOffset: chat[chatId].messages[chat[chatId].messages.length - 1]});
+    } else {
+      readChat(chatId);
+    }
+    
     joinChat(chatId);
   }
   

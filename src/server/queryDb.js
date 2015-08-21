@@ -33,7 +33,7 @@ export default function queryDb(intention, params) {
   // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
-    const {id, userId, universeId, title, chatId, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture} = 
+    const {id, userId, universeId, title, chatId, chatOffset, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback, paramaterized;
@@ -105,27 +105,57 @@ export default function queryDb(intention, params) {
         
       case 'readChat':
         
-        sql =
-        'SELECT ' +
-          'json_build_object(' + 
-            `'id', chat.id,` + 
-            `'name', chat.name,` + 
-            `'messages', array_agg(` + 
-              'json_build_object(' + 
-                `'userId', aquest_user.id,` + 
-                `'type', atommessage.type,` +
-                `'content', atommessage.content,` +
-                `'createdAt', atommessage.created_at` +
-              ')' + 
-            ')' + 
-          ') as chat ' +
-        'FROM ' +
-          'aquest_schema.chat ' +
-        'LEFT JOIN aquest_schema.atommessage atommessage ON chat.id = atommessage.chat_id ' +
-        'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
-        'WHERE chat.id = $1 GROUP BY chat.id';
+        // define the maximum number of message the 
+        const nbrChatMessages = 30;
         
-        paramaterized = [params];
+        if (chatOffset) {
+        
+          sql = 'SELECT ' +
+            'json_build_object(' + 
+              `'id', chat.id,` + 
+              `'name', chat.name,` + 
+              `'messages', array_agg(` + 
+                'json_build_object(' + 
+                  `'id', atommessage.id,` +
+                  `'userId', aquest_user.id,` + 
+                  `'type', atommessage.type,` +
+                  `'content', atommessage.content,` +
+                  `'createdAt', atommessage.created_at` +
+                ')' + 
+              ')' + 
+            ') as chat ' +
+          'FROM ' +
+            'aquest_schema.chat ' +
+          `LEFT JOIN (SELECT * from aquest_schema.atommessage OFFSET $2) AS atommessage ON chat.id = atommessage.chat_id ` +
+          'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
+          'WHERE chat.id = $1 GROUP BY chat.id';
+          
+          paramaterized = [chatId, chatOffset];
+        } else {
+        
+          sql = 'SELECT ' +
+            'json_build_object(' + 
+              `'id', chat.id,` + 
+              `'name', chat.name,` + 
+              `'messages', array_agg(` + 
+                'json_build_object(' + 
+                  `'id', atommessage.id,` +
+                  `'userId', aquest_user.id,` + 
+                  `'type', atommessage.type,` +
+                  `'content', atommessage.content,` +
+                  `'createdAt', atommessage.created_at` +
+                ')' + 
+              ')' + 
+            ') as chat ' +
+          'FROM ' +
+            'aquest_schema.chat ' +
+          'LEFT JOIN (SELECT * from aquest_schema.atommessage ORDER BY id DESC LIMIT ${nbrChatMessages}) ON chat.id = atommessage.chat_id ' +
+          'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
+          'WHERE chat.id = $1 GROUP BY chat.id'
+          
+          paramaterized = [params];
+        }
+        
         callback = result => {
           const { chat } = result.rows[0];
           if (chat.messages[0].content === null) chat.messages = [];
