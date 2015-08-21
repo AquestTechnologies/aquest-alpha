@@ -50,6 +50,13 @@ export const readChat = createActionCreator({
   auth:       false,
 });
 
+export const readChatOffset = createActionCreator({
+  intention:  'readChatOffset',
+  method:     'get',
+  pathx:      '/api/chat/{chatId}/offset/{offset}', 
+  auth:       false,
+});
+
 export const createUniverse = createActionCreator({
   intention:  'createUniverse',
   method:     'post',
@@ -142,8 +149,10 @@ function createActionCreator(shape) {
         const req = new XMLHttpRequest();
         log(`+++ --> ${method} ${path}`, params);
         
+        // params.length == 1 ? console.log(params) : console.log(pathx.replace(/[A-Za-z]*\/{([A-Za-z]*)}/g, (match, p1, offset, string) => p1 + '/' + params[p1]));
+        
         req.onerror = err => reject(err);
-        req.open(method, isPost ? path : params ? path + params : path);
+        req.open(method, isPost ? path : params ? (Object.keys(params).length == 1 ? params : pathx.replace(/[A-Za-z]*\/{([A-Za-z]*)}/g, (match, p1, offset, string) => p1 + '/' + params[p1])) : path); //Handle HTTP GET method mulitple parameters
         req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
         
         if (isPost) { 

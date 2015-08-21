@@ -3,7 +3,7 @@ import Message from './Message';
 import ChatHeader from './ChatHeader';
 import ChatFooter from './ChatFooter';
 import { bindActionCreators } from 'redux';
-import { joinChat, leaveChat } from '../../actionCreators';
+import { joinChat, leaveChat, readChatOffset } from '../../actionCreators';
 import { connect } from 'react-redux';
 
 class Chat extends React.Component {
@@ -15,15 +15,13 @@ class Chat extends React.Component {
   componentWillMount() {
     console.log('.C. Chat.componentWillMount');
     
-    const {chatId, chat, readChat, joinChat} = this.props;
+    const {chatId, chat, readChat, readChatOffset, joinChat} = this.props;
     
-    if (chat && chat.messages.length) {
-      readChat({ chatId, chatOffset: chat.messages[chat.messages.length - 1].id });
-    } else {
+    if (chat && chat.messages.length) readChatOffset({ chatId, offset: chat.messages[chat.messages.length - 1].id });
+    else {
       readChat(chatId);
     }
     
-    joinChat(chatId);
   }
   
   componentWillReceiveProps(nextProps) {
@@ -50,6 +48,10 @@ class Chat extends React.Component {
   componentDidMount() {
     //permet de scroller les messages tout en bas après le mount.
     console.log('.C. Chat mount');
+    
+    const {chatId, joinChat} = this.props;
+    joinChat(chatId);
+    
     setTimeout(() => { // Pourquoi un timeout de merde ? Pke sans ça chrome le fait pas ! 
       let scrollable = document.getElementById('scrollMeDown');
       scrollable.scrollTop = scrollable.scrollHeight;
@@ -100,7 +102,8 @@ const mapState = state => ({});
 
 const mapActions = dispatch => bindActionCreators({ 
   joinChat,
-  leaveChat
+  leaveChat,
+  readChatOffset
 }, dispatch);
 
 export default connect(mapState, mapActions)(Chat);

@@ -59,7 +59,7 @@ server.register([{register: require('inert')}, {register: require('./plugins/API
       method: 'GET',
       path: '/img/{filename}',
       config: { auth: false },
-      handler: (request, reply) => reply.file(request.params.filename)
+      handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
     }
   ]);
 });
