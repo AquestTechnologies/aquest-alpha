@@ -1,7 +1,6 @@
 import fs        from 'fs';
 import React     from 'react';
 import JWT       from 'jsonwebtoken';
-import ReactDOM  from 'react-dom/server';
 import Location  from 'react-router/lib/Location';
 import { reduxRouteComponent } from 'redux-react-router';
 import {createStore, combineReducers, applyMiddleware} from 'redux';
@@ -73,7 +72,7 @@ export default function prerender(request, reply) {
         
         // Renders the app (try...catch to be removed in production)
         try {
-          var mountMeImFamous = ReactDOM.renderToString(
+          var mountMeImFamous = React.renderToString(
             <Router {...routerState} children={routes} />
           );
         } 

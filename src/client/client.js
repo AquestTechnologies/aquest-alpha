@@ -1,5 +1,4 @@
 import React                   from 'react';
-import ReactDOM                from 'react-dom';
 import Router, { Route }       from 'react-router';  
 import { reduxRouteComponent } from 'redux-react-router';
 import BrowserHistory          from 'react-router/lib/BrowserHistory';
@@ -35,7 +34,7 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware';
   // }
 
   const history = new BrowserHistory();
-  const app = ReactDOM.render(
+  const app = React.render(
     <Router history={history}>
       <Route children={protectRoutes(store)} component={reduxRouteComponent(store)} />
     </Router>,
