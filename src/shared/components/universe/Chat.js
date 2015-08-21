@@ -18,7 +18,7 @@ class Chat extends React.Component {
     const {chatId, chat, readChat, joinChat} = this.props;
     
     if (chat && chat.messages.length) {
-      readChat({chatId, chatOffset: chat[chatId].messages[chat[chatId].messages.length - 1]});
+      readChat({ chatId, chatOffset: chat.messages[chat.messages.length - 1].id });
     } else {
       readChat(chatId);
     }
@@ -81,7 +81,7 @@ class Chat extends React.Component {
         <div id='scrollMeDown' className='chat_scrollable'>
           <div className={messagesList}>
             
-            <Message userId='Extreme firster' content={{text: 'First!'}} />
+            <Message key='-1' userId='Extreme firster' content={{text: 'First!'}} />
             { messages.map(({id, userId, type, content}) => <Message key={id} userId={userId} type={type} content={content} />) }
             
           </div>

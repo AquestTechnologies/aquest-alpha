@@ -37,7 +37,7 @@ server.register(require('hapi-auth-jwt2'), err => {
 });
   
 // API and WS plugin registration
-server.register([{register: require('./plugins/API')}, {register: require('./plugins/websocket')}], err => {
+server.register([{register: require('inert')}, {register: require('./plugins/API')}, {register: require('./plugins/websocket')}], err => {
   if (err) throw err;
   log('API and WS plugins registered');
   
@@ -59,7 +59,7 @@ server.register([{register: require('./plugins/API')}, {register: require('./plu
       method: 'GET',
       path: '/img/{filename}',
       config: { auth: false },
-      handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
+      handler: (request, reply) => reply.file(request.params.filename)
     }
   ]);
 });

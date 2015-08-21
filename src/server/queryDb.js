@@ -18,7 +18,6 @@ export default function queryDb(intention, params) {
       if (err) throw err;
       
       const {sql, paramaterized, callback} = buildQuery(intention, params); // Query construction
-      
       if (sql) client.query(sql, paramaterized, (err, result) => {
         done();
         if (err) return reject(err);
@@ -149,7 +148,7 @@ export default function queryDb(intention, params) {
             ') as chat ' +
           'FROM ' +
             'aquest_schema.chat ' +
-          'LEFT JOIN (SELECT * from aquest_schema.atommessage ORDER BY id DESC LIMIT ${nbrChatMessages}) ON chat.id = atommessage.chat_id ' +
+          `LEFT JOIN (SELECT * from aquest_schema.atommessage ORDER BY id DESC LIMIT ${nbrChatMessages}) AS atommessage ON chat.id = atommessage.chat_id ` +
           'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
           'WHERE chat.id = $1 GROUP BY chat.id'
           
