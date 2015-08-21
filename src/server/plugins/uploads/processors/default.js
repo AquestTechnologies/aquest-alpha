@@ -1,0 +1,17 @@
+// import log from '../../../../shared/utils/logTailor';
+import { uploadStreamToS3 } from '../../../queryS3';
+
+// The default processor for any file types
+export default function processAnyFile(fileStream, workingDir) {
+  
+  // Simply uploads the stream to S3 while keeping its name unchanged
+  return new Promise((resolve, reject) => {
+    
+    const name = fileStream.hapi.filename;
+    
+    uploadStreamToS3(fileStream, name, 'public-read').then(
+      url => resolve({ name, url }),
+      error => reject(error)
+    );
+  });
+}

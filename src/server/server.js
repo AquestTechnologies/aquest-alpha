@@ -1,10 +1,8 @@
-import fs from 'fs';
 import Hapi from 'hapi';
 import prerender from './prerender';
 import { createActivists } from './activityGenerator';
 import devConfig from '../../config/dev_server';
 import log, { logRequest, logAuthentication } from '../shared/utils/logTailor';
-import processImage from './processImage';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log(`\nStarting server in ${process.env.NODE_ENV} mode...`);
@@ -39,7 +37,11 @@ server.register(require('hapi-auth-jwt2'), err => {
 });
   
 // API and WS plugin registration
-server.register([{register: require('./plugins/API')}, {register: require('./plugins/websocket')}], err => {
+server.register([
+  { register: require('./plugins/API') }, 
+  { register: require('./plugins/uploads') },
+  { register: require('./plugins/websocket') },
+], err => {
   if (err) throw err;
   log('API and WS plugins registered');
   
@@ -57,69 +59,12 @@ server.register([{register: require('./plugins/API')}, {register: require('./plu
       config: { auth: false },
       handler: (request, reply) => reply.file('dist/img/' + request.params.filename),
     },
-    {
-      method: 'POST', // à bouger vers l'api ?
-      path: '/uploadFile',
-      config: {
-        auth: 'jwt',
-        payload:{
-          parse: true,
-          output:'stream',
-          maxBytes: 209715200,
-        },
-      },
-      handler: (request, reply) => {
-        const response = reply.response().hold();
-        const { payload } = request;
-        if (payload.file) { // De toutes façons le payload a été validé donc prout
-          
-          const fileName = payload.file.hapi.filename;
-          const fileType = payload.file.hapi.headers['content-type'];
-          console.log('Received file:', fileName, fileType);
-          
-          const path = 'temp/' + fileName;
-          const fileStream = fs.createWriteStream(path);
-          
-          fileStream.on('error', err => console.log(err)); 
-          
-          payload.file.pipe(fileStream);
-          
-          payload.file.on('end', err => { 
-            if (err) console.log(err);
-            else {
-              if (/image\/*/.test(fileType)) {
-                processImage(path).then(
-                  data => {
-                    console.log('Result:', data);
-                    response.source = { data };
-                    response.send();
-                  },
-                  error => {
-                    // 500
-                    console.log(error);
-                    response.source = { data: error.message };
-                    response.send();
-                  }
-                );
-              } else {
-                response.source = {
-                  fileName,
-                  fileType
-                };
-                response.send();
-                console.log('uploadFile done, no image');
-              }
-            }
-          });
-        } 
-      },
-    }
   ]);
 });
 
 server.ext('onRequest', (request, reply) => {
   logRequest(request);
-  return reply.continue();
+  reply.continue();
 });
 
 // Démarrage du server

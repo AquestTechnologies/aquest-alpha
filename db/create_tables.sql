@@ -117,17 +117,11 @@ CREATE TABLE aquest_schema.ATOMMESSAGE(
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id)
 );
 
-CREATE TABLE aquest_schema.IMAGE(
+CREATE TABLE aquest_schema.FILE(
   id                  BIGSERIAL PRIMARY KEY,
+  user_id             TEXT NOT NULL,
   name                TEXT NOT NULL,
-  extension           TEXT NOT NULL,
-  external            BOOLEAN NOT NULL, -- Is it from the internet or from our CDN ? --
-  original_url        TEXT NOT NULL,
-  original_size       INTEGER DEFAULT 0,
-  medium_url          TEXT,
-  medium_size         INTEGER,
-  thumbnail_url       TEXT,
-  thumbnail_size      INTEGER,
+  url                 TEXT NOT NULL,
   creation_ip         INET NOT NULL,
   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now()
@@ -280,6 +274,10 @@ CREATE TRIGGER update_timestamp
 -- AtomMessage
 CREATE TRIGGER update_timestamp
   BEFORE UPDATE ON aquest_schema.atommessage
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
+-- File
+CREATE TRIGGER update_timestamp
+  BEFORE UPDATE ON aquest_schema.file
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
   
 

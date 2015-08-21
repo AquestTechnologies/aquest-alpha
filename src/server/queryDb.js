@@ -33,7 +33,7 @@ export default function queryDb(intention, params) {
   // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
-    const {id, userId, universeId, title, chatId, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture} = 
+    const {id, userId, universeId, title, chatId, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture, url} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
     
     let sql, callback, paramaterized;
@@ -290,6 +290,17 @@ export default function queryDb(intention, params) {
         
         break;
         
+      case 'createFile':
+        sql = 
+        'INSERT INTO aquest_schema.file ' +
+          '(user_id, name, url, creation_ip) ' +
+        'VALUES ' +
+          '($1, $2, $3, $4)';
+        
+        paramaterized = [userId, name, url, ip];
+        callback = result => result.rows[0];
+        
+        break;
         
       case 'randomRow':
         

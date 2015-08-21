@@ -100,7 +100,7 @@ export function uploadFile(params, fnProgress, fnUpload, fnResponse) {
         onResponse(true, result); // Cela brise le flow Flux...
         resolve(result);
       } else {
-        onResponse(false);
+        onResponse(false, statusText);
         reject(Error(statusText));
       }
     };
@@ -112,10 +112,9 @@ export function uploadFile(params, fnProgress, fnUpload, fnResponse) {
 }
 
 const actionCreators = {
-  transitionTo, login, logout, 
+  transitionTo, login, logout, uploadFile,
   readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
   createUser, createUniverse, createTopic, 
-  uploadFile,
 };
 
 export default actionCreators;

@@ -1,3 +1,4 @@
+import Boom from 'boom';
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
 import queryDb from '../queryDb.js';
@@ -96,12 +97,9 @@ function apiPlugin(server, options, next) {
           validate: { 
             payload: validationSchema[intention],
             failAction: (request, reply, source, error) => { 
-              // servira à renvoyer des messages d'erreur custom
-              const response = reply.response().hold();
-              log('... Joi failed:', error.data.details); // Pas pour la prod mais c'est relou d'aller dans console/network pour voir le message en devlopement
-              response.statusCode = 400;
-              response.source = error.data.details;
-              response.send();
+              const { details } = error.data;
+              log('... Joi failed:', details);
+              reply(Boom.badRequest(JSON.stringify(details)));
             }
           }
         },

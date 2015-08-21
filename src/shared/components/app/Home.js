@@ -71,11 +71,11 @@ class FileUploader extends React.Component {
     const load = e => this.setState({
       message: 'Upload complete, server is processing file...'
     });
-    const onResponse = (done, result) => this.setState({
-      message: done ? JSON.stringify(result) : ':( An error occured on server'
+    const onResponse = (isSuccess, result) => this.setState({
+      message: isSuccess ? result : 'Error: ' + result
     });
     const action = this.props.uploadFile(params, progress, load, onResponse);
-    // console.log('action', action); // Bug redux
+    console.log('action', action); // Bug redux
     
   }
   
@@ -86,7 +86,6 @@ class FileUploader extends React.Component {
       <input 
         type='file'
         id='inputFile'
-        accept='image/*'
       />
       <button onClick={this.uploadImage.bind(this)}>Upload</button>
       <br/>
