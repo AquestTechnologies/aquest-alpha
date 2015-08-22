@@ -7,8 +7,9 @@ import log from '../../../shared/utils/logTailor';
 
 export default function uploadsPlugin(server, options, next) {
   
-  const tempDir = 'temp/';
-  const processors = [ // A list of authorized MIME type
+  // A list of authorized MIME type
+  // paired with a file processor
+  const processors = [
     {
       MIMERegex: /image\/*/,
       processor: require('./processors/image')
@@ -54,7 +55,7 @@ export default function uploadsPlugin(server, options, next) {
       const typeMatch = processors.find(({MIMERegex}) => MIMERegex.test(MIMEType));
       
       if (!typeMatch) reply(Boom.unsupportedMediaType('That media is not supported')); // 415
-      else typeMatch.processor(file, tempDir).then( // Processes the stream
+      else typeMatch.processor(file).then( // Processes the stream
         ({ name, url }) => {
           
           log('Upload processed, will query DB');

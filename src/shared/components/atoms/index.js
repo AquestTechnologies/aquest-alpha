@@ -1,3 +1,5 @@
+import validate from 'validate.js';
+
 // An atom is a single piece of formated information (a text, a picture, ...)
 // It can be created (in CreateTopic or ChatFooter)
 // ... viewed (in Topic, or Message)
@@ -28,7 +30,7 @@ atomPlugins.forEach(({name, Creator, Viewer, Previewer, createPreview, validatio
   atomValidationConstraints[name] = validationConstraints;
 });
 
-export function getAtomCreators(universe) {
+export function getAtomCreators(universeId) {
   
   // On peut imaginer un champ de la bdd universe.availableAtoms='text;image;tablature' ou une table universe_atoms
   // Pour dire quel univers a le droit à quels atomes
@@ -38,21 +40,23 @@ export function getAtomCreators(universe) {
   return atomCreators;
 }
 
-export function getAtomViewers(universe) {
+export function getAtomViewers(universeId) {
   
   return atomViewers;
 }
 
-export function getAtomPreviewers(universe) {
+export function getAtomPreviewers(universeId) {
   
   return atomPreviewers;
 }
 
-export function getAtomValidationConstraints(universe) {
+export function getAtomValidationConstraints(universeId) {
   
   return atomValidationConstraints;
 }
 
-export function isValidType(type) {
-  return atomPlugins.filter(({name}) => name === type).length === 1;
+export function validateAtoms(atoms) {
+  const validationErrors = atoms.map(({type, content}) => validate(content, atomValidationConstraints[type]));
+  
+  return validationErrors.every(error => !error) ? undefined : validationErrors;
 }

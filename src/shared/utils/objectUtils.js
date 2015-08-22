@@ -27,19 +27,21 @@ export function deepCopy(a) {
 
 export function merge(t, s) {
   for (let k in s) {
-    if (s.hasOwnProperty(k)) {
-      t[k] = s[k];
-    }
+    if (s.hasOwnProperty(k)) t[k] = s[k];
   }
   return t;
 }
 
 export function deepMerge(t, s) {
+
   for (let k in s) {
     if (s.hasOwnProperty(k)) {
-      t[k] = deepCopy(s[k]);
+      const val = s[k];
+      if (typeof val === 'object' && Object.getPrototypeOf(val) === Object.prototype) t[k] = deepMerge(t[k], val);
+      else t[k] = val;
     }
   }
+
   return t;
 }
 
@@ -50,17 +52,6 @@ export function fuse(a, b) {
   }
   for (let k in b) {
     if (b.hasOwnProperty(k)) o[k] = b[k];
-  }
-  return o;
-}
-
-export function deepFuse(a, b) {
-  const o = {};
-  for (let k in a) {
-    if (a.hasOwnProperty(k)) o[k] = deepCopy(a[k]);
-  }
-  for (let k in b) {
-    if (b.hasOwnProperty(k)) o[k] = deepCopy(b[k]);
   }
   return o;
 }

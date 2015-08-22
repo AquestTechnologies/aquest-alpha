@@ -4,6 +4,7 @@ class ImageAtomViewer extends React.Component {
   
   render() {
     const { url, width, height } = this.props.content;
+    
     return <img src={url} width={width} height={height} />;
   }
 }
@@ -12,21 +13,26 @@ class ImageAtomCreator extends React.Component {
   
   constructor() {
     super();
-    this.state = { ready: false };
+    this.state = { 
+      urlInput: '',
+      hasContent: false,
+    };
   }
   
   handleDoneClick(e) {
-    this.setState({ ready: true });
+    // this.setState({ ready: true });
   }
   
   handleEditClick(e) {
-    this.setState({ ready: false });
+    // this.setState({ ready: false });
   }
   
   handleURLInput(e) {
     const { content, update } = this.props;
-    content.url = e.currentTarget.value;
-    update(content);
+    // const newContent = deepCopy()
+    this.setState({ urlInput: e.currentTarget.value});
+    // content.url = e.currentTarget.value;
+    // update(content, false);
   }
   
   handleSelectFileClick(e) {
@@ -34,14 +40,15 @@ class ImageAtomCreator extends React.Component {
   }
   
   handleFileChange(e) {
-    const { content, update } = this.props;
-    content.localFile = document.getElementById('inputFile').files[0];
-    update(content);
-    this.setState({ ready: true });
+    // const { content, update } = this.props;
+    // content.localFile = document.getElementById('inputFile').files[0];
+    // update(content);
+    // this.setState({ ready: true });
   }
   
   render() {
     const { url, localFile, width, height } = this.props.content;
+    // const { urlInput, 
     const contentForViewer = {
       width,
       height,
@@ -50,9 +57,9 @@ class ImageAtomCreator extends React.Component {
     const doneStyle = {
       visibility: url ? 'visible' : 'hidden'
     };
-    const done2Style = {
-      visibility: localFile ? 'visible' : 'hidden'
-    };
+    // const done2Style = {
+    //   visibility: localFile ? 'visible' : 'hidden'
+    // };
     
     return this.state.ready ? 
       <div>
@@ -63,6 +70,7 @@ class ImageAtomCreator extends React.Component {
       </div>
       :
       <div>
+      
         <div>From URL</div>
         <input 
           size='50'
@@ -73,11 +81,13 @@ class ImageAtomCreator extends React.Component {
           placeholder='http://website.com/image.xyz'
         />
         <button onClick={this.handleDoneClick.bind(this)} style={doneStyle}>Done</button>
-        <div>- or -</div>
-        <div>
-          <span onClick={this.handleSelectFileClick.bind(this)}>From your computer</span>
+        
+        <div>{'- or -'}</div>
+        
+        <div onClick={this.handleSelectFileClick.bind(this)}>
+          <span>From your computer</span>
           <span>{ localFile ? `(${localFile.name})` : '' }</span>
-          <button onClick={this.handleDoneClick.bind(this)} style={done2Style}>Done</button>
+          {/*<button onClick={this.handleDoneClick.bind(this)} style={done2Style}>Done</button>*/}
           <input 
             type='file'
             id='inputFile'

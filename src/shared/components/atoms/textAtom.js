@@ -16,8 +16,17 @@ class TextAtomCreator extends React.Component {
   
   handleTextInput(e) {
     const textarea = e.currentTarget;
-    this.props.update({text: textarea.value});
+    const text = textarea.value;
+    this.props.update({
+      content: { text },
+      ready: text ? 'yes' : 'no',
+    });
+  }
+  
+  componentDidUpdate() {
+    
     // Adjusts the textarea's height automatically
+    const textarea = React.findDOMNode(this.refs.textarea);
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight;
   }
@@ -42,11 +51,12 @@ class TextAtomCreator extends React.Component {
           { JSON.stringify(validationErrors) }
         </div>
         <textarea 
-          type='text'  
+          type='text' 
           value={text} 
+          ref='textarea'
           onChange={this.handleTextInput.bind(this)} 
           autoComplete='false'
-          placeholder='Write your content here'
+          placeholder='Write your story here'
           style={textareaStyle} 
         />
       </div>
@@ -55,6 +65,7 @@ class TextAtomCreator extends React.Component {
 }
 
 TextAtomCreator.buttonCaption = 'Text';
+TextAtomCreator.initialState = {};
 TextAtomCreator.initialContent = {
   text: ''
 };

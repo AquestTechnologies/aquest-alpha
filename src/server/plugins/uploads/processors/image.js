@@ -17,7 +17,7 @@ const maxWidth = 800;
 
 // This plugin does not handle errors from unsupported image format (delegate not found)
 // Which is bad
-export default function processImage(fileStream, workingDir) {
+export default function processImage(fileStream) {
   
   return new Promise((resolve, reject) => {
     log('Processing image...');
@@ -26,7 +26,7 @@ export default function processImage(fileStream, workingDir) {
     // gm buffers the stream in memory... https://github.com/aheckmann/gm#streams
     // Not knowing if this is as bad as it looks I'm doing it anyway
     
-    const image = gm(fileStream)
+    const image = gm(fileStream) // Full stream image processing!
     .identify({bufferStream: true}, (err, data) => {
       if (err) return reject(err);
       

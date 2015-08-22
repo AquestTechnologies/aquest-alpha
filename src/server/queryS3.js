@@ -1,8 +1,5 @@
-// import fs from 'fs';
 import AWS from 'aws-sdk';
-import log from '../shared/utils/logTailor';
-import queryDb from './queryDb';
-import { region , accessKeyId, secretAccessKey, imageBucketName, cloudFrontDomainName } from '../../config/dev_aws';
+import { accessKeyId, secretAccessKey, imageBucketName, cloudFrontDomainName } from '../../config/dev_aws';
 
 
 // This is sooooo unsecure, before prod we need to use something more recommended
