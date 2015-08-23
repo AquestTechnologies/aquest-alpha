@@ -85,11 +85,11 @@ export default {
     
     switch (type) {
       
+    case 'SUCCESS_READ_CHAT_OFFSET':  
     case 'SUCCESS_READ_CHAT':
       
       return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
-        
         return fuse(state, {[chatId]: action.payload});                   
       })(action);
       
@@ -119,11 +119,14 @@ export default {
         
         if(owner){
           const id = parseInt(action.payload.message.id,10);
-          const {content, userId} = message;
-          const messageIndex = _findIndex(newState[chatId].messages, (val) => !val.id ); // the latency compensation message doesn't have id 
+          const {content, userId, lcId} = message;
+          const messageIndex = _findIndex(newState[chatId].messages, (val) => val.id === lcId); // the latency compensation message doesn't have id 
+          
+          let newMessage = deepCopy(message);
+          delete newMessage.lcId;
           
           if (messageIndex !== -1) { 
-            newState[chatId].messages[messageIndex] = message; // must enable the ui that the message was succesfully delivered or not
+            newState[chatId].messages[messageIndex] = newMessage; // must enable the ui to know if the message was succesfully delivered or not
             return newState;
           }
           
@@ -142,7 +145,7 @@ export default {
         newState = deepCopy(state);
         
         if (newState[chatId] && !newState[chatId].users) {
-          newState = merge(newState[chatId], {users: []});
+          newState[chatId] = merge(newState[chatId], {users: []});
         } else if (!newState[chatId]) {
           newState[chatId] = {users: []};
         }
@@ -158,9 +161,7 @@ export default {
         
         newState = deepCopy(state);
         
-        console.log('RECEIVE_JOIN_CHAT', newState, 'userList', userList);
-        
-        if (owner) newState = merge(newState[chatId], {users: userList});
+        if (owner) newState[chatId] = merge(newState[chatId], {users: userList});
         else {
           newState[chatId].users.push(userId);
         }   
@@ -171,9 +172,10 @@ export default {
     case 'LEAVE_CHAT':
       
       return ((action) => {
-        const chatId = parseInt(action.payload.chatId, 10);
+        const chatId = parseInt(action.payload, 10);
         
         newState = deepCopy(state);
+        
         delete newState[chatId].users;  
         
         return newState;      

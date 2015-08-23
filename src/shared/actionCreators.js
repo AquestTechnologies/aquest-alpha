@@ -100,7 +100,7 @@ export const receiveMessage = (params) => ({ type: 'RECEIVE_MESSAGE', payload: p
 
 const actionCreators = {
   transitionTo, login, logout, 
-  readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
+  readUniverse, readUniverses, readInventory, readChat, readChatOffset, readTopic, readTopicAtoms, 
   createUser, createUniverse, createTopic, 
   joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage
 };
@@ -144,15 +144,15 @@ function createActionCreator(shape) {
       
       // Client : API call through XMLHttpRequest
       else {
-        const path = pathx.replace(/\{\S*\}/, '');
         const isPost = method === 'post';
+        const path = isPost ? 
+          pathx : params ? 
+            pathx.replace(/{([A-Za-z]*)}/g, (match, p1, offset, string) => typeof params === 'object' ? params[p1] : params) : pathx;
         const req = new XMLHttpRequest();
         log(`+++ --> ${method} ${path}`, params);
         
-        // params.length == 1 ? console.log(params) : console.log(pathx.replace(/[A-Za-z]*\/{([A-Za-z]*)}/g, (match, p1, offset, string) => p1 + '/' + params[p1]));
-        
         req.onerror = err => reject(err);
-        req.open(method, isPost ? path : params ? (Object.keys(params).length == 1 ? params : pathx.replace(/[A-Za-z]*\/{([A-Za-z]*)}/g, (match, p1, offset, string) => p1 + '/' + params[p1])) : path); //Handle HTTP GET method mulitple parameters
+        req.open(method, path);
         req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
         
         if (isPost) { 

@@ -10,6 +10,7 @@ import registerSideEffects from './lib/registerSideEffects';
 import registerWebSocket   from './lib/registerWebSocket';
 import log, { logWelcome } from '../shared/utils/logTailor';
 import promiseMiddleware   from '../shared/utils/promiseMiddleware';
+import websocketMiddleware   from '../shared/utils/websocketMiddleware';
 
 (() => {
   const d = new Date();
@@ -24,7 +25,7 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware';
   delete stateFromServer.immutableKeys;*/
   
   // Store creation
-  const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
+  const store = applyMiddleware(promiseMiddleware, websocketMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
   registerShortcuts(store.getState);
   
   // Gère les trailing slash des url
@@ -43,8 +44,8 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware';
     () => log(`... App rendered in ${new Date() - d}ms.`)
   );
   
+  console.log('resisterSideEffects & registerWebSocket');
   registerSideEffects(store, app.transitionTo);
-  registerWebSocket(store);
 
 })();
 

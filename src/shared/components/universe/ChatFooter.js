@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createMessage } from '../../actionCreators';
+import {randomInteger} from '../../utils/randomGenerators';
 
 class ChatFooter extends React.Component {
   
@@ -15,6 +16,7 @@ class ChatFooter extends React.Component {
       e.preventDefault();
       
       const messageParams = {
+        id: randomInteger(0, 1000000),
         chatId:   this.props.chatId,
         content:  {type: 'text', text: this.state.value}
       };

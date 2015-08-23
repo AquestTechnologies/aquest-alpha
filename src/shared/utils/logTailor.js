@@ -43,6 +43,10 @@ const colorMatching = { // Color schemes definition, text isn't optionnal
     text: 'white',
     bg: 'black'
   },
+  '.W.': {
+    text: 'white',
+    bg: 'green'
+  },
 };
 
 export default function log(...messages) {

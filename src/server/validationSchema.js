@@ -53,10 +53,9 @@ const API_VALIDATION_SCHEMA = {
 
 const WEBSOCKET_VALIDATION_SCHEMA = {
   joinChat: chatId,
-  leaveChat: {
-    chatId
-  },
+  leaveChat: chatId,
   createMessage: {
+    id: Joi.number().positive().integer().required().min(1),
     chatId,
     content:      Joi.object({
                     type: Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,}$/)

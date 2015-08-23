@@ -37,9 +37,9 @@ class Chat extends React.Component {
     if ( chatId && nextChatId && chatId !== nextChatId ) {
       console.log('chat has changed');
       readChat(nextProps.chatId);
-      
-      leaveChat({chatId});
-      joinChat({chatId: nextChatId});
+    
+      leaveChat(chatId);
+      joinChat(nextChatId);
     }
     
     console.log('messages', chat ? chat.messages : false,'nextMessages', nextChat ? nextChat.messages : false);
@@ -67,7 +67,7 @@ class Chat extends React.Component {
   
   componentWillUnmount(){
     const {chatId, leaveChat} = this.props;
-    leaveChat({chatId});
+    leaveChat(chatId);
   }
   
   render() {

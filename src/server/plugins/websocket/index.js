@@ -29,6 +29,7 @@ exports.register = function (server, options, next) {
     log('___ [' + chatUsers + '] New client connected in a chat universe | topic');
     
     socket.on('joinChat', function(request) {
+      console.log('joinChat', request);
       Joi.validate(request, validationSchema['joinChat'], (err, value) => {
         if (err) throw err;
           
@@ -76,13 +77,14 @@ exports.register = function (server, options, next) {
         if (err) throw err;
         
         const {chatId, content} = request;
+        const lcId = request.id; // the user provide a temporary id
         const {userId} = socket;
         const d = new Date();
-        const id = randomInteger(0, 1000000);
+        const id = randomInteger(0, 1000000); // it's supposed to be the real id
         
-        log(`___ ${userId} createMessage`, { chatId, message: { id, userId, content, timestamp: d.getTime()}});
+        log(`___ ${userId} createMessage`, { chatId, message: { id, lcId, userId, content, timestamp: d.getTime()}});
         
-        this.emit('receiveMessage', { chatId, message: { id, userId, content, timestamp: d.getTime()}, owner});
+        this.emit('receiveMessage', { chatId, message: { id, lcId, userId, content, timestamp: d.getTime()}, owner});
         
         socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, timestamp: d.getTime()} });
       

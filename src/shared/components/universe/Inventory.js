@@ -13,7 +13,7 @@ export default class Inventory extends React.Component {
   
   componentWillMount() {
     const { universe: { id, lastInventoryUpdate }, readInventory } = this.props;
-    if (!lastInventoryUpdate) readInventory(id);
+    if (!lastInventoryUpdate) {console.log('call readInventory', id); readInventory(id);}
   }
   
   render() {

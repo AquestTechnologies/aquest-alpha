@@ -127,6 +127,12 @@ export default function queryDb(intention, params) {
           
         paramaterized = [chatId, offset];
         
+        callback = result => {
+          const { chat } = result.rows[0];
+          if (chat.messages[0].content === null) chat.messages = [];
+          return chat;
+        };
+        
         break;
         
       case 'readChat':
