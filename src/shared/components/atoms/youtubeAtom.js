@@ -7,12 +7,13 @@ class YoutubeAtomViewer extends React.Component {
   render() {
     const { id, width, height } = this.props.content;
     
+    // https://developers.google.com/youtube/player_parameters
     return <iframe 
-      width={width} 
-      height={height} 
-      src={`https://www.youtube.com/embed/${id}?rel=0&amp;showinfo=0`} 
-      frameBorder='0' 
+      width={width}
+      height={height}
+      frameBorder='0'
       allowFullScreen
+      src={`https://www.youtube.com/embed/${id}?rel=0`} 
     />;
   }
 }
@@ -26,17 +27,18 @@ class YoutubeAtomCreator extends React.Component {
     const id = match && match[1].length === 11 ? match[1] : '';
     
     this.props.update({
-      state: { inputValue },
+      ready: 'no',
       content: { id },
+      state: { inputValue },
     });
   }
   
   handleEditClick(e) {
     
     this.props.update({
-      state: { inputValue: '' },
-      content: { id: '' },
       ready: 'no',
+      content: { id: '' },
+      state: { inputValue: '' },
     });
   }
   
@@ -108,11 +110,11 @@ class YoutubeAtomCreator extends React.Component {
           </div>
           :
           <input 
-            type='text'
             size='100'
+            type='text'
             value={inputValue} 
-            onChange={this.handleIdInput.bind(this)} 
             autoComplete='false'
+            onChange={this.handleIdInput.bind(this)} 
             placeholder='https://www.youtube.com/watch?v=qXvZpn_dnMs'
           />
         }

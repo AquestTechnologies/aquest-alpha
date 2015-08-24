@@ -5,90 +5,84 @@ import queryDb from '../queryDb.js';
 import log from '../../shared/utils/logTailor.js';
 import devConfig from '../../../config/dev_server';
 import actionCreators from '../../shared/actionCreators';
-import { validateAtoms } from '../../shared/components/atoms';
+import { getAtomsValidationErrors, generatePreview } from '../../shared/components/atoms';
 import {API_VALIDATION_SCHEMA as validationSchema} from '../validationSchema.js';
 
 function apiPlugin(server, options, next) {
   const { key, ttl } = devConfig.jwt;
+  const cookieOptions = {ttl, path: '/'};
+  const createReason = (code, msg, err) => ({code, msg, err});
   
   // Allows validation and params mutation before querying db
   const beforeQuery = {
     
-    createUser: (request, response, params) => new Promise((resolve, reject) =>
+    createUser: (request, params) => new Promise((resolve, reject) =>
       bcrypt.genSalt(10, (err, salt) => {
-        if (err) return reject(500, 'createUser bcrypt.genSalt', err);
+        if (err) return reject(createReason(500, 'createUser bcrypt.genSalt', err));
         
         bcrypt.hash(params.password, salt, (err, hash) => {
-          if (err) return reject(500, 'createUser bcrypt.hash', err);
+          if (err) return reject(createReason(500, 'createUser bcrypt.hash', err));
           
+          params.picture = '';
           params.passwordHash = hash;
           params.ip = request.info.remoteAddress;
-          params.picture = '';
           delete params.password;
           resolve();
         });
       })
     ),
     
-    createUniverse: (request, response, params) => new Promise((resolve, reject) =>
-      JWT.decode(request.state.jwt, key, (err, decoded) => {
-        if (err) return reject(500, 'createUniverse JWT.decode', err);
-        
-        params.name = params.name.trim(),
-        params.userId = decoded.userId; // The real user id
-        params.ip = request.info.remoteAddress;
-        resolve();
-      })
-    ),
+    createUniverse: (request, params) => new Promise((resolve, reject) => {
+      params.name = params.name.trim(),
+      params.ip = request.info.remoteAddress;
+      params.userId = JWT.decode(request.state.jwt).userId; // The real user id
+      resolve();
+    }),
     
-    createTopic: (request, response, params) => new Promise((resolve, reject) => 
-      JWT.decode(request.state.jwt, key, (err, decoded) => {
-        if (err) return reject(500, 'createTopic JWT.decode', err);
-        
-        params.title = params.title.trim(),
-        params.userId = decoded.userId; // The real user id
-        params.previewType = 'text',
-        params.previewContent = {
-          text: 'This needs to be generated dynamically.',
-        };
-        
-        const validationErrors = validateAtoms(params.atoms);
-        validationErrors.every(error => !error) ? resolve() : reject(400, validationErrors);
-      })
-    ),
+    createTopic: (request, params) => new Promise((resolve, reject) => {
+      
+      const validationErrors = getAtomsValidationErrors(params.atoms); // On both client and server
+      if (validationErrors.some(error => error)) return reject(createReason(400, validationErrors));
+      
+      params.title = params.title.trim(),
+      params.userId = JWT.decode(request.state.jwt).userId; // The real user id
+      
+      // generatePreview(params.atoms[params.previewAtomPosition]).then(...)
+      params.previewType = 'text',
+      params.previewContent = {
+        text: 'This needs to be generated dynamically.',
+      };
+      resolve();
+    }),
   };
   
   // ...
   const afterQuery = {
     
-    login: (request, response, {email, password}, result) => new Promise((resolve, reject) => {
+    login: (request, {email, password}, result) => new Promise((resolve, reject) => {
       if (result) bcrypt.compare(password, result.passwordHash, (err, isValid) => {
-        if (err) return reject(500, 'login bcrypt.compare', err);
+        if (err) return reject(createReason(500, 'login bcrypt.compare', err));
         
         if (isValid) {
           delete result.passwordHash; // We know how to keep secrets
           
-          const token = {
+          resolve({
             userId: result.id,
             expiration: new Date().getTime() + ttl,
-          };
-          response.state('jwt', JWT.sign(token, key), {ttl, path: '/'}); // Note: somehow, path: '/' is important
-          resolve(true); // Skips token renewal
+          });
         }
         else reject(401, 'invalid password');
       });
       else reject(401, 'user not found');
     }),
     
-    createUser: (request, response, params, result) => new Promise((resolve, reject) => {
-      if (!result || !result.id) return reject(500, 'createUser no userId');
+    createUser: (request, params, result) => new Promise((resolve, reject) => {
+      if (!result || !result.id) return reject(createReason(500, 'createUser no userId'));
       
-      const token = {
+      resolve({
         userId: result.id,
         expiration: new Date().getTime() + ttl,
-      };
-      response.state('jwt', JWT.sign(token, key), {ttl, path: '/'});
-      resolve(true);
+      });
     }),
   };
   
@@ -97,7 +91,7 @@ function apiPlugin(server, options, next) {
   for (let acKey in actionCreators) {
     
     const getShape = actionCreators[acKey].getShape || undefined;
-    const {intention, method, pathx, auth} = getShape ? getShape() : {};
+    const { intention, method, pathx, auth } = getShape ? getShape() : {};
     
     if (method && pathx) {
       const before = beforeQuery[intention] || (() => Promise.resolve());
@@ -118,27 +112,30 @@ function apiPlugin(server, options, next) {
           }
         },
         handler: (request, reply) => {
-          const { jwt } = request.state;
+          const requestToken = request.state.jwt;
           const response = reply.response().hold();
           const params = method === 'post' ? request.payload : request.params.p;
           
-          before(request, response, params).then(
+          before(request, params).then(
             () => queryDb(intention, params).then(
-              result => after(request, response, params, result).then(
-                skipRenewToken => {
+              result => after(request, params, result).then(
+                token => {
+                  
                   response.source = result;
                   
-                  // Adds a renewed JWT in the response cookie
-                  if (!skipRenewToken && jwt) JWT.verify(jwt, key, (err, {userId, expiration}) => {
-                    const t = new Date().getTime();
+                  if (token) response.state('jwt', JWT.sign(token, key), cookieOptions).send();
+                  
+                  else if (requestToken) JWT.verify(requestToken, key, (err, {userId, expiration}) => {
+                    if (err) return handleError(response, 'handler JWT.verify', err);
                     
-                    if (err) return handleError(response, 'handler', 500, 'JWT.verify', err);
-                    else if (expiration > t) {
-                      response.state('jwt', JWT.sign({userId, expiration: t + ttl}, key), {ttl, path: '/'});
+                    const t = new Date().getTime();
+                    if (expiration > t) {
+                      response.state('jwt', JWT.sign({userId, expiration: t + ttl}, key), cookieOptions);
                       log('... Token renewed');
                     }
                     response.send();
                   });
+                  
                   else response.send();
                 },
                 
@@ -155,27 +152,19 @@ function apiPlugin(server, options, next) {
 
   next();
   
-  // Boom!
-  function handleError(response, origin, code, msg, err) {
+  function handleError(response, origin, reason) {
+    
+    const msg = reason.msg || '';
+    const code = reason.code || 500;
+    const err = reason.code ? reason.err : reason;
     
     log('!!! Error while API', origin, msg);
     log('Replying', code);
-    if (err) log(err, err.stack);
+    log('Reason:', err);
+    if (err.stack) log(err.stack);
     
-    switch (code) {
-      case 400:
-        response.source = Boom.badRequest(msg);
-        break;
-        
-      case 401:
-        response.source = Boom.unauthorized(msg);
-        break;
-        
-      default: // 500, game over
-        response.source = Boom.badImplementation(msg, err);
-    }
-    
-    response.send();
+    response.source = code < 500 ? msg : 'Internal server error';
+    response.code(code).send(); 
   }
 }
 

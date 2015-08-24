@@ -14,25 +14,23 @@ class TextAtomViewer extends React.Component {
 
 class TextAtomCreator extends React.Component {
   
-  handleTextInput(e) {
-    const textarea = e.currentTarget;
-    const text = textarea.value;
-    this.props.update({
-      content: { text },
-      ready: text ? 'yes' : 'no',
-    });
-  }
-  
   componentDidUpdate() {
-    
     // Adjusts the textarea's height automatically
     const textarea = React.findDOMNode(this.refs.textarea);
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight;
   }
   
+  handleTextInput(e) {
+    const text = e.currentTarget.value;
+    this.props.update({
+      content: { text },
+      ready: text ? 'yes' : 'no',
+    });
+  }
+  
   render() {
-    const { content: {text}, validationErrors } = this.props;
+    const { content: { text }, validationErrors } = this.props;
     const textareaStyle = {
       width: '100%', 
       height: 'auto', 
@@ -54,10 +52,10 @@ class TextAtomCreator extends React.Component {
           type='text' 
           value={text} 
           ref='textarea'
-          onChange={this.handleTextInput.bind(this)} 
           autoComplete='false'
-          placeholder='Write your story here'
           style={textareaStyle} 
+          placeholder='Write your story here'
+          onChange={this.handleTextInput.bind(this)} 
         />
       </div>
     );
@@ -70,7 +68,7 @@ TextAtomCreator.initialContent = {
   text: ''
 };
 
-function createPreview({ text }) {
+function createPreview({ text }) { 
   const N = 150;
   
   return new Promise.resolve({

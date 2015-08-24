@@ -143,12 +143,12 @@ function createActionCreator(shape) {
       else {
         const path = pathx.replace(/\{\S*\}/, '');
         const isPost = method === 'post';
-        const req = new XMLHttpRequest();
+        const xhr = new XMLHttpRequest();
         log(`+++ --> ${method} ${path}`, params);
         
-        req.onerror = err => reject(err);
-        req.open(method, isPost ? path : params ? path + params : path);
-        req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
+        xhr.onerror = err => reject(err);
+        xhr.open(method, isPost ? path : params ? path + params : path);
+        xhr.onload = () => xhr.status === 200 ? resolve(JSON.parse(xhr.response)) : reject(Error(xhr.statusText));
         
         if (isPost) { 
           //stringifies objects before POST XMLHttpRequest
@@ -158,9 +158,9 @@ function createActionCreator(shape) {
               params[key] = typeof(value) === 'object' ? JSON.stringify(value) : value;
             }
           }
-          req.send(createForm(params));
+          xhr.send(createForm(params));
         }
-        else req.send();
+        else xhr.send();
       }
     });
     

@@ -19,14 +19,14 @@ const atomPlugins = [
 const atomViewers = {}; 
 const atomCreators = {};
 const atomPreviewers = {};
-const atomPreviewCreator = {};
+const atomPreviewCreators = {};
 const atomValidationConstraints = {};
 
 atomPlugins.forEach(({name, Creator, Viewer, Previewer, createPreview, validationConstraints}) => {
   atomViewers[name] = Viewer;
   atomCreators[name] = Creator;
   atomPreviewers[name] = Previewer;
-  atomPreviewCreator[name] = createPreview;
+  atomPreviewCreators[name] = createPreview;
   atomValidationConstraints[name] = validationConstraints;
 });
 
@@ -50,13 +50,12 @@ export function getAtomPreviewers(universeId) {
   return atomPreviewers;
 }
 
-export function getAtomValidationConstraints(universeId) {
+export function getAtomsValidationErrors(atoms) {
   
-  return atomValidationConstraints;
+  return atoms.map(({type, content}) => validate(content, atomValidationConstraints[type]));
 }
 
-export function validateAtoms(atoms) {
-  const validationErrors = atoms.map(({type, content}) => validate(content, atomValidationConstraints[type]));
+export function generatePreview({ type, content }) {
   
-  return validationErrors.every(error => !error) ? undefined : validationErrors;
+  return atomPreviewCreators[type](content);
 }
