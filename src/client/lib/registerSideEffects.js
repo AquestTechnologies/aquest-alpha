@@ -18,7 +18,7 @@ export default function registerSideEffects(store, transitionTo) {
     setRedirection('');
   }
   
-  store.subscribe(() => {
+  store.subscribe(function sideEffectsProvider() {
     const { records, router, session } = store.getState();
     const action = records[records.length - 1];
     const { type, payload } = action;

@@ -15,7 +15,7 @@ class Chat extends React.Component {
   componentWillMount() {
     console.log('.C. Chat.componentWillMount');
     
-    const {chatId, chat, readChat, readChatOffset, joinChat} = this.props;
+    const {chatId, chat, readChat, readChatOffset} = this.props;
     
     if (chat && chat.messages.length) readChatOffset({ chatId, offset: chat.messages[chat.messages.length - 1].id });
     else {
@@ -84,7 +84,7 @@ class Chat extends React.Component {
           <div className={messagesList}>
             
             <Message key='-1' userId='Extreme firster' content={{text: 'First!'}} />
-            { messages.map(({id, userId, type, content}) => <Message key={id} userId={userId} type={type} content={content} />) }
+            { messages.map(({id, userId, type, content, createdAt}) => <Message key={id} id={id} createdAt={createdAt} userId={userId} type={type} content={content} />) }
             
           </div>
         </div>

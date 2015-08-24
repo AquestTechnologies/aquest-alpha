@@ -7,7 +7,6 @@ import reducers       from '../shared/reducers';
 import protectRoutes  from '../shared/routes';
 import registerShortcuts   from './lib/registerShortcuts';
 import registerSideEffects from './lib/registerSideEffects';
-import registerWebSocket   from './lib/registerWebSocket';
 import log, { logWelcome } from '../shared/utils/logTailor';
 import promiseMiddleware   from '../shared/utils/promiseMiddleware';
 import websocketMiddleware   from '../shared/utils/websocketMiddleware';
@@ -25,6 +24,7 @@ import websocketMiddleware   from '../shared/utils/websocketMiddleware';
   delete stateFromServer.immutableKeys;*/
   
   // Store creation
+  // const store = applyMiddleware(promiseMiddleware, websocketMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
   const store = applyMiddleware(promiseMiddleware, websocketMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
   registerShortcuts(store.getState);
   
@@ -46,7 +46,7 @@ import websocketMiddleware   from '../shared/utils/websocketMiddleware';
   
   console.log('resisterSideEffects & registerWebSocket');
   registerSideEffects(store, app.transitionTo);
-
+  
 })();
 
 require('./css/app.css');

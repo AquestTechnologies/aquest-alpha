@@ -106,7 +106,7 @@ function apiPlugin(server, options, next) {
           }
         },
         handler: (request, reply) => {
-          const params = method === 'post' ? request.payload : request.params.p ? request.params.p : request.params;
+          const params = method === 'post' ? request.payload : Object.keys(request.params).length === 1 && request.params.p ? request.params.p : request.params;
           const response = reply.response().hold();
           
           before(request, params).then(
