@@ -107,21 +107,6 @@ const actionCreators = {
 
 export default actionCreators;
 
-/*function createSocketCreator(shape) {
-  const {type} = shape;
-  const lcType = type.replace(/[A-Z]/g, '_$&').toUpperCase() + '_LC';
-  
-  const socketCreator = params => {
-    const socket = params.socket;
-    delete params.socket;
-    socket.emit(type, stringifyObjectValues(params));
-    
-    return {type: lcType, payload: params};
-  }
-  
-  return socketCreator;
-}*/
-
 // (string)            intention   The queryDb hook, also used to create actionTypes
 // (string)            method      HTTP method
 // (string)            pathx       API path. If (method && path) an corresponding API route gets created

@@ -67,3 +67,45 @@ contact: bonjour@aquest.fr
 ### Visualiser les tables de la base de données
 - psql aquestdb
 - \dt aquest_schema.*
+
+### INSTALL POSTGRESQL 9.4 AND PLV8
+
+sudo apt-get update
+sudo touch /etc/apt/sources.list.d/pgdg.list
+echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" | sudo tee -a /etc/apt/sources.list.d/pgdg.list
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install postgresql-9.4
+sudo apt-get install postgresql-9.4-plv8
+sudo useradd aquest
+sudo passwd aquest
+--> <password1 here>
+--> <password1 here>
+sudo mkdir /home/aquest
+sudo chown aquest /home/aquest
+sudo su postgres // sudo -u postgres psql postgres ne fonctionne pas
+psql postgres
+postgres=#CREATE ROLE aquest LOGIN PASSWORD '<password1 here>' SUPERUSER VALID UNTIL 'infinity';
+postgres=#CREATE ROLE aquestuser LOGIN PASSWORD 'aquestuser' VALID UNTIL 'infinity';
+postgres=#GRANT admin TO aquest;
+postgres=#GRANT users TO aquestuser;
+postgres=#\q
+su aquest
+--> <password1 here>
+mkdir /home/createDataBase
+vi createDataBase/create_dataBase.sql # insert conf
+vi createDataBase/create_tables.sql # insert conf
+psql postres < createDataBase/create_dataBase.sql
+psql aquestdb
+postgres=#CREATE EXTENSION plv8;
+postgres=#\q
+psql postres < createDataBase/create_tables.sql
+sudo vi /etc/postgresql/9.4/main/pg_hba.conf 
+--> host aquestdb aquestuser ip/32     md5
+--> host all      all        0.0.0.0/0 md5
+sudo vi /etc/postgresql/9.4/main/postgresql.conf 
+--> listen_addresses = '*'
+sudo /etc/init.d/postgresql restart
+psql postgres 
+postgres=#CREATE ROLE admin INHERIT;
+postgres=#CREATE ROLE users INHERIT;

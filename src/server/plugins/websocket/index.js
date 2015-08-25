@@ -78,16 +78,31 @@ exports.register = function (server, options, next) {
         
         const {chatId, content} = request;
         const lcId = request.id; // the user provide a temporary id
-        const {userId} = socket;
-        const d = new Date(); // let's fix that later
-        const id = randomInteger(0, 1000000); // it's supposed to be the real id
         
-        log(`___ ${userId} createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
-        
-        this.emit('receiveMessage', { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}, owner});
-        
-        socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, createdAt: d.getTime()} });
-      
+        userAuthentication(socket).then(
+          result => {
+            log('authentication succeded', result);
+            
+            const {userId} = socket;
+            const d = new Date(); // let's fix that later
+            const id = randomInteger(0, 1000000); // it's supposed to be the real id
+            
+            log(`___ ${userId} createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
+            
+            socket.emit('receiveMessage', { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}, owner});
+            
+            socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, createdAt: d.getTime()} });
+          },
+          error => {
+            log('websocket authentication - ', error.stack ? error.stack : error);
+            
+            const id = 'feelFreeToSignUp-'+randomInteger(0, 1000000);
+            const d = new Date(); // let's fix that later
+            
+            socket.error('To send messages please sign in !');
+            socket.error( {chatId, message: {id, lcId, userId: 'aquest', content: {type: 'text', text:'To send messages please sign in !'}, createdAt: d.getTime()}, owner} );
+          }
+        );
       });
     });
     
@@ -177,44 +192,65 @@ exports.register = function (server, options, next) {
     return strCookie;
   }
   
-  function socketAuthentication(socket, next) { 
+  function userAuthentication(socket) { 
     
-    console.log('cookie validation', socket.request.headers.cookie);
+    console.log('.W. userAuthentication cookie validation', socket.request.headers.cookie);
     if (socket.request.headers.cookie) {
       let strCookie = socket.request.headers.cookie;
       const cookie = parseCookie(strCookie);
         
-      let authPromise = new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         if (cookie.jwt) {
           JWT.verify(cookie.jwt, key, (err, {userId, expiration}) => { // JWT.decode() should be enough since the token has already been verified by Hapi-Auth-JWT2
             const t = new Date().getTime();
             if (err) return reject(err);
-            else if (expiration > t) {
-              strCookie = setJWTCookie( cookie, JWT.sign({userId, expiration: t + ttl}, key) );
-              log('... WebSocket : token renewed');
-            }
+            // else if (expiration > t) {
+            //   strCookie = setJWTCookie( cookie, JWT.sign({userId, expiration: t + ttl}, key) );
+            //   log('... WebSocket : token renewed');
+            // }
             resolve(userId);
           });
         } else {
           reject('no jwt cookie object');
         }
       });
-      
-      authPromise.then(
-        result => {
-          log('authentication succeded', result);
-          socket.userId = result; // keep userId in the socket object
-          return next();
-        },
-        error => {
-          log('websocket authentication - ', error.stack ? error.stack : error);
-          next(new Error('To send messages please sign in !'));
-        }
-      );
     } else {
       log('websocket authentication - no cookie');
-      next(new Error('not authorized ! sign in ?'));
+      socket.error('not authorized ! sign in ?');
     }
+  }
+  
+  function socketAuthentication(socket, next) { 
+    console.log('.W. socketAuthentication cookie validation', socket.request.headers.cookie);
+    let strCookie = socket.request.headers.cookie;
+    const cookie = strCookie ? parseCookie(strCookie) : false;
+      
+    let authPromise = new Promise((resolve, reject) => {
+      if (cookie && cookie.jwt) {
+        JWT.verify(cookie.jwt, key, (err, {userId, expiration}) => { // JWT.decode() should be enough since the token has already been verified by Hapi-Auth-JWT2
+          const t = new Date().getTime();
+          if (err) return reject(err);
+          else if (expiration > t) {
+            strCookie = setJWTCookie( cookie, JWT.sign({userId, expiration: t + ttl}, key) );
+            log('... WebSocket : token renewed');
+          }
+          resolve(userId);
+        });
+      } else {
+        resolve(socket.id);
+      }
+    });
+    
+    authPromise.then(
+      result => {
+        log('retrieved or generate userId succeded', result);
+        socket.userId = result; // keep userId in the socket object of the user
+        return next();
+      },
+      error => {
+        log('retrieved or generate userId Failed : ', error.stack ? error.stack : error);
+      }
+    );
   }
   
   next();

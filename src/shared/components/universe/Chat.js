@@ -10,6 +10,20 @@ class Chat extends React.Component {
   
   constructor() {
     super();
+    
+    this.state = { isLoading: false };
+    
+    this.handleScroll = e => {
+      const {chatId, chat, readChatOffset} = this.props;
+      const {isLoading} = this.state;
+      
+      if(!isLoading && e.target.scrollTop === 0 && chat.firstMessageId !== chat.messages[0].id ) {
+        readChatOffset({chatId, offset: chat.messages.length});
+        this.setState({isLoading: true});
+      }
+    };
+    
+    this.handleResize = e => { console.log('jey'); console.log(e.targert);};
   }
   
   componentWillMount() {
@@ -17,7 +31,13 @@ class Chat extends React.Component {
     
     const {chatId, chat, readChat, readChatOffset} = this.props;
     
-    if (chat && chat.messages.length) readChatOffset({ chatId, offset: chat.messages[chat.messages.length - 1].id });
+    if (chat && chat.messages.length) {
+      let messageIndex = chat.messages.length - 1;
+      while(typeof chat.messages[messageIndex].id === 'string' && (chat.messages[messageIndex].id.substr(0,2) === 'lc' || chat.messages[messageIndex].id.substr(0,2) === 'fe')) { // feelFreeToSignUp --> for fun when a user send a message and isn't authenticated
+        messageIndex--;
+      }
+      readChatOffset({ chatId, offset: chat.messages[messageIndex].id });
+    }
     else {
       readChat(chatId);
     }
@@ -42,7 +62,7 @@ class Chat extends React.Component {
       joinChat(nextChatId);
     }
     
-    console.log('messages', chat ? chat.messages : false,'nextMessages', nextChat ? nextChat.messages : false);
+    if (chat.messages.length < nextChat.messages.length) this.setState({isLoading: false});
   }
   
   componentDidMount() {
@@ -60,9 +80,6 @@ class Chat extends React.Component {
   
   componentDidUpdate() {
     console.log('.C. Chat update');
-    //permet de scroller les messages tout en bas après avoir reçu de nouveaux props.
-    let scrollable       = document.getElementById('scrollMeDown');
-    scrollable.scrollTop = scrollable.scrollHeight;
   }
   
   componentWillUnmount(){
@@ -80,10 +97,9 @@ class Chat extends React.Component {
       <div className='chat'>
         <ChatHeader chatName={chat.name} />
         
-        <div id='scrollMeDown' className='chat_scrollable'>
+        <div id='scrollMeDown' className='chat_scrollable' onScroll={this.handleScroll} onResize={this.handleResize}>
           <div className={messagesList}>
             
-            <Message key='-1' userId='Extreme firster' content={{text: 'First!'}} />
             { messages.map(({id, userId, type, content, createdAt}) => <Message key={id} id={id} createdAt={createdAt} userId={userId} type={type} content={content} />) }
             
           </div>

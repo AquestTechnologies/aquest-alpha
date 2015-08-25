@@ -12,7 +12,7 @@ export default class Message extends React.Component {
         <Icon name="disk" cssclass="message_icon" />
         <div className="message_body">
           <div className="message_author">
-            {userId}
+            {userId} {id}
           </div>
           <div className="message_content">
             {text}

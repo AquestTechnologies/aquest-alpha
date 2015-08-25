@@ -34,6 +34,9 @@ export default function queryDb(intention, params) {
     
     const {id, userId, universeId, title, chatId, offset, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
+      
+    // define the maximum number of message to load
+    const nbrChatMessages = 30;
     
     let sql, callback, paramaterized;
     
@@ -121,7 +124,7 @@ export default function queryDb(intention, params) {
           ') as chat ' +
         'FROM ' +
           'aquest_schema.chat ' +
-        `LEFT JOIN (SELECT * from aquest_schema.atommessage OFFSET $2) AS atommessage ON chat.id = atommessage.chat_id ` +
+        `LEFT JOIN (SELECT * FROM (SELECT * from aquest_schema.atommessage ORDER BY id DESC OFFSET $2 LIMIT ${nbrChatMessages}) atommessagedesc ORDER BY id ASC) AS atommessage ON chat.id = atommessage.chat_id ` +
         'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
         'WHERE chat.id = $1 GROUP BY chat.id';
           
@@ -137,14 +140,12 @@ export default function queryDb(intention, params) {
         
       case 'readChat':
         
-        // define the maximum number of message the 
-        const nbrChatMessages = 30;
-        
         sql = 
         'SELECT ' +
           'json_build_object(' + 
             `'id', chat.id,` + 
             `'name', chat.name,` + 
+            `'firstMessageId', (SELECT id FROM aquest_schema.atommessage WHERE atommessage.chat_id = $1 ORDER BY id ASC LIMIT 1),` +
             `'messages', array_agg(` + 
               'json_build_object(' + 
                 `'id', atommessage.id,` +
@@ -153,11 +154,11 @@ export default function queryDb(intention, params) {
                 `'content', atommessage.content,` +
                 `'createdAt', atommessage.created_at` +
               ')' + 
-            ')' + 
+            ')' +
           ') as chat ' +
         'FROM ' +
           'aquest_schema.chat ' +
-        `LEFT JOIN (SELECT * from aquest_schema.atommessage ORDER BY id DESC LIMIT ${nbrChatMessages}) AS atommessage ON chat.id = atommessage.chat_id ` +
+        `LEFT JOIN (SELECT * FROM (SELECT * from aquest_schema.atommessage ORDER BY id DESC LIMIT ${nbrChatMessages}) atommessagedesc ORDER BY id ASC) AS atommessage ON chat.id = atommessage.chat_id ` +
         'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
         'WHERE chat.id = $1 GROUP BY chat.id';
           

@@ -2,9 +2,7 @@ import log from './utils/logTailor';
 import config from '../../config/client';
 import { routerStateReducer } from 'redux-react-router';
 import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
-import _findIndex from 'lodash/array/findIndex';
-import _isEqual from 'lodash/lang/isEqual';
-import { copy, deepCopy, merge, fuse } from './utils/objectUtils';
+import { copy, deepCopy, merge, fuse, fuseArray } from './utils/objectUtils';
 
 export default {
   
@@ -85,12 +83,22 @@ export default {
     
     switch (type) {
       
-    case 'SUCCESS_READ_CHAT_OFFSET':  
+    case 'SUCCESS_READ_CHAT_OFFSET':
+      
+      return ((action) => {
+        const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
+        newState = deepCopy(state);
+        if (action.payload.messages.length) newState[chatId].messages = action.payload.messages.concat(newState[chatId].messages);
+        return newState;
+      })(action);
+      
     case 'SUCCESS_READ_CHAT':
       
       return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
-        return fuse(state, {[chatId]: action.payload});                   
+        newState = deepCopy(state);
+        newState[chatId] = fuse(newState[chatId], action.payload);
+        return newState;
       })(action);
       
     case 'CREATE_MESSAGE':
@@ -119,8 +127,8 @@ export default {
         
         if(owner){
           const id = parseInt(action.payload.message.id,10);
-          const {content, userId, lcId} = message;
-          const messageIndex = _findIndex(newState[chatId].messages, (val) => val.id === lcId); // the latency compensation message doesn't have id 
+          const {lcId} = message;
+          const messageIndex = newState[chatId].messages.findIndex(({id}) => id === lcId);
           
           let newMessage = deepCopy(message);
           delete newMessage.lcId;

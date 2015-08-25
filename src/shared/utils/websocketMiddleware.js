@@ -29,8 +29,8 @@ export default function sideEffectsMiddleware({ dispatch, getState }) {
         socket.emit('joinChat', payload);
         socket.on('receiveMessage', result => next(receiveMessage(result)));
         socket.on('receiveJoinChat', result => next(receiveJoinChat(result)));
-        socket.on('receiveLeaveChat', result => next.dispatch(receiveLeaveChat(result)));
-        socket.on('error', error => log('socket error', error));
+        socket.on('receiveLeaveChat', result => next(receiveLeaveChat(result)));
+        socket.on('error', error => typeof error === 'object' && error.message ? next(receiveMessage(error)) : log('!!! socket error', error));
         // socket.on('connect', () => log('socket connected to the namespace : chat-universe-topic'));
         break;
         
