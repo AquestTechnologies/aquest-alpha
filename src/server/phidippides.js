@@ -84,21 +84,24 @@ export default function phidippides(routerState, dispatch) {
       
       logMeOrNot('.P. clearOneTask', id);
       
-      if(!dependency || completedTasks[dependency]) {
+      if (!dependency || completedTasks[dependency]) {
         
         // Traitement des arguments
         args.forEach(arg => {
           logMeOrNot('.P. _ processing arg', arg);
           let realArg = arg;
+          
           // Si un argument string possède PLACEHOLDER alors il faut le traiter
           if (typeof arg === 'string' && arg.search(PLACEHOLDER) !== -1) {
             logMeOrNot('.P. __ dependency found');
-            // '__dependency.foo.bar' --> ['foo', 'bar'] --> completedTasks[dependency]['foo']['bar']
+            
+            // '__dependency.foo.bar' --> ['foo', 'bar'] --> completedTasks[task.dependency]['foo']['bar']
             const dataTree = arg.replace(PLACEHOLDER, '').split('.'); 
             realArg = completedTasks[dependency];
             for (let i = 0, l = dataTree.length; i < l; i++) {
               realArg = realArg[dataTree[i]]; 
             }
+            
             logMeOrNot('.P. __ real arg is', realArg.toString().substring(0,20));
           }
           realArgs.push(realArg);
@@ -106,25 +109,25 @@ export default function phidippides(routerState, dispatch) {
         
         logMeOrNot(`.P. _ calling ${creator} with args`, ...realArgs);
         const action = actionCreators[creator](...realArgs);
-        const {promise, payload} = action;
+        const { promise, payload } = action;
         
         dispatch(action);
         
         if (!promise) {
           completedTasks[id] = payload;
           resolve();
-        } else {
-          promise.then(
-            data => {
-              logMeOrNot(`.P.  _ Dispatch for ${id} resolved`);
-              logMeOrNot(JSON.stringify(data).substr(0,150));
-              logMeOrNot(`.P. clearOneTask ${id} complete`);
-              completedTasks[id] = data;
-              resolve();
-            },
-            error => reject(error)
-          );
-        }
+        } 
+        
+        else promise.then(
+          data => {
+            logMeOrNot(`.P.  _ Dispatch for ${id} resolved`);
+            logMeOrNot(JSON.stringify(data).substr(0,150));
+            logMeOrNot(`.P. clearOneTask ${id} complete`);
+            completedTasks[id] = data;
+            resolve();
+          },
+          error => reject(error)
+        );
         
       } else {
         failedTasks.push(task);
@@ -159,9 +162,11 @@ export default function phidippides(routerState, dispatch) {
       
       if (whatIsWrong.length) {
         log('!!! Please check format for task:', JSON.stringify(task), whatIsWrong);
+        
         return false;
       }
     }
+    
     return true;
   }
 }

@@ -1,10 +1,8 @@
 import React from 'react';
-import validate from 'validate.js';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createTopic } from '../actionCreators';
 import { getAtomCreators, getAtomViewers, getAtomsValidationErrors } from './atoms';
-import { deepCopy, deepMerge } from '../utils/objectUtils';
 
 // Atom shape:
 // type: string
@@ -19,7 +17,8 @@ export default class CreateTopic extends React.Component {
     super();
     this.state = { 
       atoms: [],
-      title: 'Aquest', 
+      title: '', 
+      titleIsValidated: true, // It's actually false, but otherwise it would display the 'empty title' warning at page load.
       atomsShouldGetReady: false,
     };
   }
@@ -33,46 +32,50 @@ export default class CreateTopic extends React.Component {
   
   // Calls the creation action
   callCreateTopic() {
+    
     console.log('createTopic');
     const { title, atoms } = this.state;
-    const { createTopic, universe: { id } } = this.props;
     
-    createTopic({
-      title,
-      universeId: id,
-      atoms: atoms.map(({type, content}) => ({type, content})), // Only the best part goes up
-    });
+    // If one of them has some error, we go back to the editing state
+    if (atoms.some(({ ready }) => ready === 'error')) return this.setState({ atomsShouldGetReady: false });
+    
+    // If every atom is ready it's time to create that topic
+    if (atoms.every(({ ready }) => ready === 'yes')) {
+      const { createTopic, universe: { id } } = this.props;
+      
+      createTopic({
+        title,
+        universeId: id,
+        atoms: atoms.map(({type, content}) => ({type, content})), // Only the best part goes up
+      });
+    }
+    
   }
   
   handleTitleInput(e) {
+    const title = e.currentTarget.value;
     this.setState({
-      title: e.currentTarget.value
+      title,
+      titleIsValidated: !!title,
     });
   }
   
   // On submit click, validates the atoms and tell them to get ready
   handleSubmitClick(e) {
-    if (!this.state.title) return; // :( A BOUGER !!!
+    const { title, atoms } = this.state;
     
-    const { atoms } = this.state;
-    const validationErrors = getAtomsValidationErrors(atoms);
-    const atomsShouldGetReady = validationErrors.every(error => !error); // No error? get ready.
+    const newAtoms = Object.assign({}, atoms);
+    const validationErrors = getAtomsValidationErrors(newAtoms);
+    const atomsShouldGetReady = title && validationErrors.every(error => !error); // No error? get ready.
+    validationErrors.forEach((errors, i) => newAtoms[i].validationErrors = errors);
     
-    this.setState(
-      {
-        atomsShouldGetReady, // This should disable the UI somehow, so the user cannot modify anything while atoms are getting ready
-        atoms: atoms.map(({type, ready, content, state}, i) => ({
-          type,
-          ready,
-          state,
-          content,
-          validationErrors: validationErrors[i], // Keyed object or undefined
-        }))
-      }, 
-      () => { // If every atom is ready then we create the topic.
-        if (atoms.length && atomsShouldGetReady && atoms.every(a => a.ready === 'yes')) this.callCreateTopic();
-      }
-    );
+    this.setState({
+      atoms: newAtoms,
+      atomsShouldGetReady, // This should disable the UI somehow, so the user cannot modify anything while atoms are getting ready
+      titleIsValidated: !!title,
+    }, () => {
+      if (atomsShouldGetReady) this.callCreateTopic();
+    });
   }
   
   // Appends a new atom a the end of the list
@@ -81,8 +84,8 @@ export default class CreateTopic extends React.Component {
       atoms: [...this.state.atoms, {
         type,
         ready: 'no', // Wasn't born ready
-        state: deepCopy(this.atomCreators[type].initialState), // deepCopy to get rid of the reference
-        content: deepCopy(this.atomCreators[type].initialContent),
+        state: Object.assign({}, this.atomCreators[type].initialState), // Object.assign to get rid of the reference
+        content: Object.assign({}, this.atomCreators[type].initialContent),
       }]
     });
   }
@@ -99,7 +102,7 @@ export default class CreateTopic extends React.Component {
   // Moves atoms[i] to atoms[i + n]
   moveAtom(i, n) {
     const j = i + n;
-    const atoms = deepCopy(this.state.atoms); // If you mutate your state you go to React hell
+    const atoms = Object.assign({}, this.state.atoms); // If you mutate your state you go to React hell
     
     // Checks for outer limits exeptions
     if (j < 0 || j > atoms.length - 1) return;
@@ -114,27 +117,17 @@ export default class CreateTopic extends React.Component {
   updateAtom(i, {content, state, ready}, callback) {
     
     const { atoms, atomsShouldGetReady } = this.state;
-    const newAtoms = deepCopy(atoms);
+    const newAtoms = Object.assign({}, atoms);
     const atom = newAtoms[i];
     
     // Only content, state and ready are allowed to be mutated
-    if (content) deepMerge(atom.content, content); // Object.assign here would be better
-    if (state) deepMerge(atom.state, state);
+    if (content) Object.assign(atom.content, content);
+    if (state) Object.assign(atom.state, state);
     if (ready !== undefined) atom.ready = ready;
     
     this.setState({ atoms: newAtoms }, () => {
-      
       if (typeof callback === 'function') callback();
-      if (atomsShouldGetReady) {
-        
-        // If every atom is now good to go
-        if (newAtoms.every(({ ready }) => ready === 'yes')) this.callCreateTopic();
-        
-        // If one of them has some error, we go back to the editing state
-        else if (newAtoms.some(({ ready }) => ready === 'error')) this.setState({
-          atomsShouldGetReady: false,
-        });
-      }
+      if (atomsShouldGetReady) this.callCreateTopic();
     });
     
   }
@@ -155,7 +148,7 @@ export default class CreateTopic extends React.Component {
   }
   
   render() {
-    const { title, atoms, atomsShouldGetReady } = this.state;
+    const { title, atoms, atomsShouldGetReady, titleIsValidated } = this.state;
     const { userId, universe: {rules} } = this.props;
     
     const titleStyle = {
@@ -173,6 +166,7 @@ export default class CreateTopic extends React.Component {
         </div>
         
         <div className="topic_title">
+          <div>{ titleIsValidated ? '' : 'Title should not be empty.' }</div>
           <textarea 
             type="text" 
             value={title} 
@@ -191,25 +185,18 @@ export default class CreateTopic extends React.Component {
           {
             atoms.map((atom, i) => {
               
-              const { type, content, ready } = atom;
-              const Viewer = this.atomViewers[type];
+              const { type } = atom;
               
-              return atomsShouldGetReady && ready === 'yes' ? // Viewer will be wrapped I think
-                <Viewer 
-                  key={i}
-                  content={content} 
-                />
-                :
-                <AtomCreatorWrapper
-                  key={i}
-                  atom={atom}
-                  atomsShouldGetReady={atomsShouldGetReady}
-                  Creator={this.atomCreators[type]}
-                  update={this.updateAtom.bind(this, i)}
-                  remove={this.removeAtom.bind(this, i)}
-                  moveUp={this.moveAtom.bind(this, i, -1)}
-                  moveDown={this.moveAtom.bind(this, i, 1)}
-                />;
+              return <AtomCreatorWrapper
+                key={i}
+                atom={atom}
+                atomsShouldGetReady={atomsShouldGetReady}
+                Creator={this.atomCreators[type]}
+                update={this.updateAtom.bind(this, i)}
+                remove={this.removeAtom.bind(this, i)}
+                moveUp={this.moveAtom.bind(this, i, -1)}
+                moveDown={this.moveAtom.bind(this, i, 1)}
+              />;
             })
           }
         </div>

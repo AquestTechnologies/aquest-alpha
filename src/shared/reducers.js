@@ -1,17 +1,16 @@
 import log from './utils/logTailor';
 import config from '../../config/dev_shared';
 import { routerStateReducer } from 'redux-react-router';
-import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
-import { copy, deepCopy, merge, fuse } from './utils/objectUtils';
+import { isAPIUnauthorized, isAPISuccess, isAPIFailure } from './actionCreators';
 
 const { sessionDuration } = config;
 
 export default {
   
   session: (state={}, action) => {
-    const {type, payload} = action;
-    const {userId, exp, redirection} = state;
-    log('.R. ' + type); // This line in first reducer
+    const { userId, exp, redirection } = state;
+    const { type, payload } = action;
+    log('.R. ' + type); // Please keep this line in the first reducer
     
     if (type === 'SUCCESS_LOGIN' || type === 'SUCCESS_CREATE_USER') return {
       redirection,
@@ -42,10 +41,10 @@ export default {
     switch (type) {
       
     case 'SUCCESS_CREATE_USER':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
       
     case 'SUCCESS_LOGIN':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
       
     default:
       return state;
@@ -57,22 +56,22 @@ export default {
     switch (type) {
       
     case 'SUCCESS_READ_UNIVERSE':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
   
     case 'SUCCESS_READ_UNIVERSES':
-      newState = copy(state);
+      newState = Object.assign({}, state);
       payload.forEach(universe => {
         if (!newState[universe.id]) newState[universe.id] = universe;
       });
       return newState;
       
     case 'SUCCESS_READ_INVENTORY':
-      newState = deepCopy(state);
+      newState = Object.assign({}, state);
       newState[params].lastInventoryUpdate = new Date().getTime();
       return newState;
     
     case 'SUCCESS_CREATE_UNIVERSE':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
     
     default:
       return state;
@@ -83,7 +82,7 @@ export default {
     switch (type) {
       
     case 'SUCCESS_READ_CHAT':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
       
     default:
       return state;
@@ -95,29 +94,31 @@ export default {
     switch (type) {
       
     case 'SUCCESS_READ_INVENTORY':
-      newState = copy(state);
+      newState = Object.assign({}, state);
       payload.forEach(topic => newState[topic.id] = topic);
       return newState;
       
     case 'SUCCESS_READ_TOPIC':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
       
     case 'SUCCESS_READ_TOPIC_ATOMS':
-      newState = deepCopy(state);
+      newState = Object.assign({}, state);
       newState[params].atoms = payload;
       return newState;
       
     case 'SUCCESS_CREATE_TOPIC':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
       
     default:
       return state;
     }
   },
   
+  lastError: (state=false, action) => isAPIFailure(action) ? action.payload : false,
+  
   router: (state={}, action) => routerStateReducer(state, action),
   
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
-  records: (state = [], action) => [...state, merge({date: new Date().getTime()}, action)]
+  records: (state = [], action) => [...state, Object.assign({date: new Date().getTime()}, action)]
 
 };

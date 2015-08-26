@@ -87,10 +87,9 @@ export default function prerender(request, reply) {
         
         // Passage du state dans window
         const serverState = store.getState();
-        delete serverState.records;
-        delete serverState.router;
+        ['router', 'records', 'lastError'].forEach(key => delete serverState[key]);
         for (let key in serverState) {
-          if (Object.keys(serverState[key]).length === 0) delete serverState[key];
+          if (!Object.keys(serverState[key]).length) delete serverState[key];
         }
         
         response.source = html

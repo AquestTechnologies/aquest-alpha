@@ -8,20 +8,21 @@ class YoutubeAtomViewer extends React.Component {
     const { id, width, height } = this.props.content;
     
     // https://developers.google.com/youtube/player_parameters
-    return <iframe 
-      width={width}
-      height={height}
-      frameBorder='0'
-      allowFullScreen
-      src={`https://www.youtube.com/embed/${id}?rel=0`} 
-    />;
+    return <div>
+      <iframe 
+        width={width}
+        height={height}
+        frameBorder='0'
+        allowFullScreen
+        src={`https://www.youtube.com/embed/${id}?rel=0`} 
+      />
+    </div>;
   }
 }
 
 class YoutubeAtomCreator extends React.Component {
   
   handleIdInput(e) {
-    
     const inputValue = e.currentTarget.value;
     const match = inputValue.match(/.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/);
     const id = match && match[1].length === 11 ? match[1] : '';
@@ -82,9 +83,14 @@ class YoutubeAtomCreator extends React.Component {
         });
       };
       
-      xhr.send();
+      xhr.send(); // Bon voyage !
     }
   }
+  
+  // Idea:
+  // shouldComponentUpdate(nextProps) {
+  //   return this.props.content.url !== nextProps.content.url;
+  // }
   
   render() {
     const { content, state: { inputValue, errorMessage }, validationErrors } = this.props;
@@ -103,9 +109,7 @@ class YoutubeAtomCreator extends React.Component {
         {
           content.id ?
           <div>
-            <div>
-              <button onClick={this.handleEditClick.bind(this)}>Edit</button>
-            </div>
+            <button onClick={this.handleEditClick.bind(this)}>Edit</button>
             <YoutubeAtomViewer content={content} />
           </div>
           :

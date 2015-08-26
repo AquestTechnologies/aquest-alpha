@@ -10,8 +10,10 @@ export function copy(a) {
 
 export function deepCopy(a) {
   if (typeof a === 'object') {
-    if (Array.isArray(a)) return a.map(i => deepCopy(i));
+    if (a === null) return null;
     else if (a instanceof Date) return new Date(a);
+    else if (a instanceof RegExp) return new RegExp(a);
+    else if (Array.isArray(a)) return a.map(i => deepCopy(i));
     else {
       const b = {};
       for (let k in a) {

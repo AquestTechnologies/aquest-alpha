@@ -40,7 +40,6 @@ function apiPlugin(server, options, next) {
     }),
     
     createTopic: (request, params) => new Promise((resolve, reject) => {
-      
       const validationErrors = getAtomsValidationErrors(params.atoms); // On both client and server
       if (validationErrors.some(error => error)) return reject(createReason(400, validationErrors));
       
@@ -160,10 +159,18 @@ function apiPlugin(server, options, next) {
     
     log('!!! Error while API', origin, msg);
     log('Replying', code);
-    log('Reason:', err);
-    if (err.stack) log(err.stack);
+    if (err) {
+      log('Reason:', err);
+      if (err instanceof Error) log(err.stack);
+    }
     
+    // console.log('sent1');
     response.source = code < 500 ? msg : 'Internal server error';
+    // console.log('sent2');
+    // response.statusCode = code;
+    // console.log('sent3');
+    // response.send();
+    // console.log('sent4');
     response.code(code).send(); 
   }
 }

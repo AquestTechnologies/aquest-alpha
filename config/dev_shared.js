@@ -1,4 +1,4 @@
-import { localIP, wsPort, apiPort} from './dev_local';
+import { localIP, wsPort, apiPort } from './dev_local';
 
 export default {
   wsUrl: `http://${localIP}:${wsPort}`,

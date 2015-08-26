@@ -8,7 +8,8 @@ export default {
   devtool: 'eval',
   entry: [
     'webpack/hot/dev-server',
-    './src/client/client.js'
+    './src/client/client.js',
+    'babel/polyfill'
   ],
   output: {
     path,

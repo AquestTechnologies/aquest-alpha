@@ -126,8 +126,7 @@ export default actionCreators;
 function createActionCreator(shape) {
   
   const { intention, method, pathx } = shape;
-  const types = ['REQUEST', 'SUCCESS', 'FAILURE']
-    .map(type => `${type}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
+  const types = ['REQUEST', 'SUCCESS', 'FAILURE'].map(t => `${t}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
   
   const actionCreator = params => {
     log('.A.', intention, params ? JSON.stringify(params) : '');
@@ -148,10 +147,15 @@ function createActionCreator(shape) {
         
         xhr.onerror = err => reject(err);
         xhr.open(method, isPost ? path : params ? path + params : path);
-        xhr.onload = () => xhr.status === 200 ? resolve(JSON.parse(xhr.response)) : reject(Error(xhr.statusText));
+        xhr.onload = () => xhr.status === 200 ? 
+          resolve(JSON.parse(xhr.response)) : 
+          reject({
+            intention,
+            status: xhr.status,
+            response: xhr.response,
+          });
         
-        if (isPost) { 
-          //stringifies objects before POST XMLHttpRequest
+        if (isPost) { // Stringifies objects before a POST request
           for (let key in params) {
             if (params.hasOwnProperty(key)) {
               const value = params[key];
@@ -168,10 +172,10 @@ function createActionCreator(shape) {
       result => {
         if (!isServer) log(`+++ <-- ${intention}`, result);
       }, 
-      error => {
-        log('!!! Action error', error);
-        log('!!! shape', shape);
+      ({ status, response, intention }) => {
+        log('!!! API Action error', intention);
         log('!!! params', params);
+        log('!!! response', status, response);
       });
     
     return { types, params, promise };
@@ -192,21 +196,39 @@ function createForm(o) {
   return f;
 }
 
-const ac = Object.keys(actionCreators).map(key => actionCreators[key]);
-const acAPI = ac.filter(ac => typeof ac.getShape === 'function');
+const acAPI = Object.keys(actionCreators)
+  .map(key => actionCreators[key])
+  .filter(ac => typeof ac.getTypes === 'function');
 
 const APISuccessTypes = acAPI
   .map(ac => ac.getTypes()[1]);
   
-const authFailureTypes = ac
-  .filter(ac => typeof ac.getShape === 'function' && ac.getShape().auth)
+const APIFailureTypes = acAPI
+  .map(ac => ac.getTypes()[2]);
+  
+const APIAuthFailureTypes = acAPI
+  .filter(ac => ac.getShape().auth)
   .map(ac => ac.getTypes()[2]);
   
 export function isAPIUnauthorized(action) {
   const { type, payload } = action;
-  return authFailureTypes.indexOf(type) !== -1 && payload && payload.message === 'Unauthorized';
+  return APIAuthFailureTypes.indexOf(type) !== -1 && payload && payload.message === 'Unauthorized';
 }
 
 export function isAPISuccess(action) {
   return APISuccessTypes.indexOf(action.type) !== -1;
 }
+
+export function isAPIFailure(action) {
+  return APIFailureTypes.indexOf(action.type) !== -1;
+}
+
+// function convertIntentionToType(intention, subType) {
+//   return `${subType}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase();
+// }
+
+// function convertTypeToIntention(type) {
+//   if (!/REQUEST|SUCCESS|FAILURE/.test(type.substr(0, 7))) return false;
+  
+//   return type.substr(8).split('_').map((s, i) => i ? s.toLowerCase() : s.substr(0, 1) + s.substr(1).toLowerCase()).join();
+// }

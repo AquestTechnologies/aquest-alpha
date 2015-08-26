@@ -1,11 +1,16 @@
 import React from 'react';
 
+// A regex to test URL 
+const pattern = "^https?://(?:[a-z0-9\-]+\.)+[a-z]{2,6}(?:/[^/#?]+)+\.(?:jpe?g|gif|png)$";
+
 class ImageAtomViewer extends React.Component {
   
   render() {
     const { url, width, height } = this.props.content;
     
-    return <img src={url} width={width} height={height} />;
+    return <div>
+      <img src={url} width={width} height={height} />
+    </div>;
   }
 }
 
@@ -13,81 +18,106 @@ class ImageAtomCreator extends React.Component {
   
   constructor() {
     super();
-    this.state = { 
-      urlInput: '',
-      hasContent: false,
-    };
+    this.imageURLRegex = new RegExp(pattern);
   }
   
-  handleDoneClick(e) {
-    // this.setState({ ready: true });
+  handleURLDoneClick(e) {
+    
+    const { state: { urlInput }, update } = this.props;
+    
+    if (this.imageURLRegex.test(urlInput)) update({
+      content: {
+        url: urlInput
+      },
+      state: {
+        hasContent: true,
+        urlMessage: '',
+      }
+    });
+    else update({
+      state: { 
+        hasContent: false,
+        urlMessage: 'Please enter a valid image URL',
+      }
+    });
   }
   
   handleEditClick(e) {
-    // this.setState({ ready: false });
+    this.props.update({
+      state: { 
+        fileInput: null,
+        hasContent: false,
+      }
+    });
   }
   
   handleURLInput(e) {
-    const { content, update } = this.props;
-    // const newContent = deepCopy()
-    this.setState({ urlInput: e.currentTarget.value});
-    // content.url = e.currentTarget.value;
-    // update(content, false);
+    this.props.update({
+      state: { 
+        urlInput: e.currentTarget.value 
+      }
+    });
   }
   
   handleSelectFileClick(e) {
+    // The real file selector is hidden for design purpose
     document.getElementById('inputFile').click();
   }
   
   handleFileChange(e) {
-    // const { content, update } = this.props;
-    // content.localFile = document.getElementById('inputFile').files[0];
-    // update(content);
-    // this.setState({ ready: true });
+    this.props.update({
+      state: { 
+        hasContent: true, 
+        fileInput: document.getElementById('inputFile').files[0],
+      }
+    });
   }
   
   render() {
-    const { url, localFile, width, height } = this.props.content;
-    // const { urlInput, 
-    const contentForViewer = {
-      width,
-      height,
-      url: localFile ? window.URL.createObjectURL(localFile) : url,
-    };
-    const doneStyle = {
-      visibility: url ? 'visible' : 'hidden'
-    };
-    // const done2Style = {
-    //   visibility: localFile ? 'visible' : 'hidden'
-    // };
+    const {
+      content: { url, width, height }, 
+      state: { urlInput, urlMessage, fileInput, fileMessage, hasContent }
+    } = this.props;
     
-    return this.state.ready ? 
+    const doneStyle = {
+      visibility: urlInput ? 'visible' : 'hidden'
+    };
+    
+    return hasContent ? 
       <div>
-        <div>
-          <button onClick={this.handleEditClick.bind(this)}>Edit</button>
-        </div>
-        <ImageAtomViewer content={contentForViewer} />
+        <button onClick={this.handleEditClick.bind(this)}>Edit</button>
+        <ImageAtomViewer content={{
+          width,
+          height,
+          url: fileInput ? window.URL.createObjectURL(fileInput) : url,
+        }} />
       </div>
       :
       <div>
-      
+        <br />
+        
         <div>From URL</div>
-        <input 
-          size='50'
-          type='text' 
-          value={url}
-          onChange={this.handleURLInput.bind(this)} 
-          autoComplete='false'
-          placeholder='http://website.com/image.xyz'
-        />
-        <button onClick={this.handleDoneClick.bind(this)} style={doneStyle}>Done</button>
+        <div>
+          <div>{ urlMessage }</div>
+          <input 
+            size='50'
+            type='text' 
+            value={urlInput}
+            autoComplete='false'
+            onChange={this.handleURLInput.bind(this)} 
+            placeholder='http://website.com/image.xyz'
+          />
+          <button onClick={this.handleURLDoneClick.bind(this)} style={doneStyle}>Done</button>
+        </div>
         
+        <br />
         <div>{'- or -'}</div>
+        <br />
         
+        <div>{ fileMessage }</div>
         <div onClick={this.handleSelectFileClick.bind(this)}>
-          <span>From your computer</span>
-          <span>{ localFile ? `(${localFile.name})` : '' }</span>
-          {/*<button onClick={this.handleDoneClick.bind(this)} style={done2Style}>Done</button>*/}
+          <div>From your computer</div>
+          <div>Valid formats: png, jpg, jpeg, gif</div>
           <input 
             type='file'
             id='inputFile'
@@ -101,9 +131,16 @@ class ImageAtomCreator extends React.Component {
 }
 
 ImageAtomCreator.buttonCaption = 'Image';
+
+ImageAtomCreator.initialState = {
+  urlInput: '',
+  urlMessage: '',
+  fileInput: null,
+  fileMessage: '',
+  hasContent: false,
+};
 ImageAtomCreator.initialContent = {
   url: '',
-  localFile: undefined,
   width: 0,
   height: 0,
 };
@@ -117,6 +154,10 @@ function createPreview(content) {
 const validationConstraints = {
   url: {
     presence: true,
+    format: {
+      pattern,
+      message: "Invalid image URL."
+    }
   },
   width: {
     presence: true,
