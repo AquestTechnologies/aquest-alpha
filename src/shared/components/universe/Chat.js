@@ -54,7 +54,7 @@ class Chat extends React.Component {
     const nextMessages = (nextProps.chat || {}).messages || {};
     
     if ( chatId && nextChatId && chatId !== nextChatId ) {
-      if (!nextMessages || !nextMessages.length ) { 
+      if (!nextMessages || nextMessages.length ) { 
         readChat(nextProps.chatId);
       }
     
