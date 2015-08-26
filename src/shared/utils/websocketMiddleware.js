@@ -1,6 +1,6 @@
 import log from './logTailor.js';
 import websocket from 'socket.io-client';
-import { receiveMessage, receiveJoinChat, receiveLeaveChat } from '../actionCreators';
+import { receiveMessage, receiveJoinChat, receiveLeaveChat, login } from '../actionCreators';
 // Copié depuis https://github.com/gaearon/redux/blob/master/docs/middleware.md
 // Modifié depuis
 
@@ -31,7 +31,12 @@ export default function sideEffectsMiddleware({ dispatch, getState }) {
         socket.on('receiveJoinChat', result => next(receiveJoinChat(result)));
         socket.on('receiveLeaveChat', result => next(receiveLeaveChat(result)));
         socket.on('error', error => typeof error === 'object' && error.message ? next(receiveMessage(error)) : log('!!! socket error', error));
-        // socket.on('connect', () => log('socket connected to the namespace : chat-universe-topic'));
+        socket.on('connect_failed', () => console.log('connect_failed'));
+        socket.on('disconnect', () => {
+          //handle reconnection or create transitionTo the login page ?
+          console.log('disconnect');
+          socket = sockets['chat-universe-topic'] = websocket.connect('http://23.251.143.127:9090/chat-universe-topic');
+        });
         break;
         
       case 'LEAVE_CHAT':

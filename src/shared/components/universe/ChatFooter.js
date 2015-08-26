@@ -23,7 +23,7 @@ class ChatFooter extends React.Component {
         content:  {type: 'text', text: this.state.messageContent}
       };
       
-      this.setState({messageId: messageId + 1});
+      this.setState({messageContent: '', messageId: messageId + 1});
       
       this.props.createMessage(messageParams);
     };

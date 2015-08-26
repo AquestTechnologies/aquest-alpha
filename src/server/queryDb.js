@@ -132,7 +132,8 @@ export default function queryDb(intention, params) {
         
         callback = result => {
           const { chat } = result.rows[0];
-          if (chat.messages[0].content === null) chat.messages = [];
+          if (!chat.messages[0].content) chat.messages = [];
+          
           return chat;
         };
         
@@ -166,7 +167,8 @@ export default function queryDb(intention, params) {
         
         callback = result => {
           const { chat } = result.rows[0];
-          if (chat.messages[0].content === null) chat.messages = [];
+          if (!chat.messages[0].content) chat.messages = [];
+          
           return chat;
         };
         

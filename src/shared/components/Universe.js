@@ -101,6 +101,7 @@ class Universe extends React.Component {
           chat={chat} 
           chatId={chatId}
           readChat={readChat}
+          userId={userId}
         />
       </div>
     );

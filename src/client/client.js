@@ -44,7 +44,6 @@ import websocketMiddleware   from '../shared/utils/websocketMiddleware';
     () => log(`... App rendered in ${new Date() - d}ms.`)
   );
   
-  console.log('resisterSideEffects & registerWebSocket');
   registerSideEffects(store, app.transitionTo);
   
 })();

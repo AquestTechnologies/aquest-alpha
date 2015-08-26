@@ -125,7 +125,6 @@ function apiPlugin(server, options, next) {
                     }
                   });
                   
-                  console.log('result', result);
                   response.source = result;
                   response.send();
                 },

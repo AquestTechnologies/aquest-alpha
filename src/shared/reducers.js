@@ -2,7 +2,7 @@ import log from './utils/logTailor';
 import config from '../../config/client';
 import { routerStateReducer } from 'redux-react-router';
 import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
-import { copy, deepCopy, merge, fuse, fuseArray } from './utils/objectUtils';
+import { copy, deepCopy, merge, fuse } from './utils/objectUtils';
 
 export default {
   
