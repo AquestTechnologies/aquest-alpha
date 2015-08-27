@@ -1,13 +1,13 @@
-export function uploadFile(params, fnProgress, fnUpload) {
-  
-  if (!params) return Promise.reject(new Error('uploadFile: no params found in args'));
+export default function uploadFile(file, fnProgress, fnLoad) {
   
   return new Promise((resolve, reject) => {
     
     const xhr = new XMLHttpRequest();
     
-    if (typeof fnUpload === 'function') xhr.upload.addEventListener('load', fnUpload);
-    if (typeof fnProgress === 'function') xhr.upload.addEventListener('progress', fnProgress);
+    if (typeof fnLoad === 'function') xhr.upload.addEventListener('load', fnLoad);
+    if (typeof fnProgress === 'function') xhr.upload.addEventListener('progress', e => {
+      fnProgress(Math.floor(e.loaded * 100 / e.total));
+    });
     
     xhr.onerror = err => reject(err);
     xhr.open('post', '/uploadFile');
@@ -18,9 +18,7 @@ export function uploadFile(params, fnProgress, fnUpload) {
     };
     
     let form = new FormData();
-    for (let key in params) { 
-      if (params.hasOwnProperty(key)) form.append(key, params[key]); 
-    } 
+    form.append('file', file);
     
     xhr.send(form);
   });

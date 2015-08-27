@@ -1,6 +1,7 @@
 import React from 'react';
 import log from '../../utils/logTailor';
 import uploadFile from '../../../client/lib/uploadFile';
+import makeHttpRequest from '../../../client/lib/makeHttpRequest';
 
 // A regex to test image URL 
 // Also matches any string starting with "blob"
@@ -56,20 +57,53 @@ class ImageAtomCreator extends React.Component {
   }
   
   componentWillReceiveProps(nextProps) {
-    const { atomsShouldGetReady, ready } = this.props;
+    const { atomsShouldGetReady, ready } = nextProps;
     
     if (atomsShouldGetReady && ready === 'no') {
-      const { update, uploadFile, content: { url }, state: { contentType } } = this.props;
+      const { update, content: { url }, state: { contentType, fileInput } } = nextProps;
+      
+      update({ ready: 'pending' });
       
       if (contentType === 'url') {
-        
-          // update({
-          //   ready: 'error',
-          //   state: { errorMessage: err.message }, // A bit brutal for the user...
-          // });
+        const image = new Image();
+        image.onload = () => update({ ready: 'yes' });
+        image.onerror = () => update({
+          ready: 'error',
+          state: {
+            errorMessage: 'The given URL does not lead to a valid image'
+          }
+        });
+        image.src = url;
         
       } else {
         
+        const onProgress = perCent => update({ 
+          state: {
+            uploadMessage: `uploading... ${perCent}%`
+          }
+        });
+        
+        const onLoad = () => update({ 
+          state: {
+            uploadMessage: `Upload complete! Please wait while server is processing file...`
+          }
+        });
+        
+        uploadFile(fileInput, onProgress, onLoad).then(
+          ({ url }) => update({
+            ready: 'yes',
+            content: { url }
+          }),
+          error => update({
+            ready: 'error',
+            state: {
+              uploadMessage: '',
+              errorMessage: error instanceof Error ? 
+                'Their was a problem with your internet connection' :
+                error.response
+            }
+          })
+        );
       }
     }
   }
@@ -102,6 +136,8 @@ class ImageAtomCreator extends React.Component {
       },
       state: { 
         contentType: '',
+        errorMessage: '',
+        uploadMessage: '',
       }
     });
   }
@@ -117,15 +153,18 @@ class ImageAtomCreator extends React.Component {
   
   handleSelectFileClick(e) {
     // The real file selector is hidden for design purpose
-    document.getElementById('inputFile').click();
+    this.refs.fileInput.click();
   }
   
   handleFileChange(e) {
+    const fileInput = this.refs.fileInput.files[0];
+    
     this.props.update({
       content: {
-        url: window.URL.createObjectURL(document.getElementById('inputFile').files[0]),
+        url: window.URL.createObjectURL(this.refs.fileInput.files[0]),
       },
       state: { 
+        fileInput,
         contentType: 'blob', 
       }
     });
@@ -134,58 +173,76 @@ class ImageAtomCreator extends React.Component {
   render() {
     const {
       content: { url }, 
-      state: { urlInput, urlMessage, fileMessage, contentType },
+      state: { urlInput, contentType, urlMessage, fileMessage, errorMessage, uploadMessage },
       validationErrors,
     } = this.props;
     
-    const doneStyle = {
+    const doneButtonStyle = {
       visibility: urlInput ? 'visible' : 'hidden'
     };
     const validationDivStyle = { 
       display: validationErrors ? 'block' : 'none' 
     };
+    const errorMessageDivStyle = { 
+      display: errorMessage ? 'block' : 'none' 
+    };
+    const uploadMessageDivStyle = {
+      display: uploadMessage ? 'block' : 'none' 
+    };
     
-    return contentType ? 
-      <div>
-        <button onClick={this.handleEditClick.bind(this)}>Edit</button>
-        <ImageAtomViewer content={{url}} />
+    
+    return <div>
+      <div style={errorMessageDivStyle}>
+        { errorMessage }
       </div>
-      :
-      <div>
-        <div style={validationDivStyle}>
-          { JSON.stringify(validationErrors) }
-        </div>
-        <div>From URL</div>
+      <div style={uploadMessageDivStyle}>
+        { uploadMessage }
+      </div>
+      {
+        contentType ? 
         <div>
-          <div>{ urlMessage }</div>
-          <input 
-            size='50'
-            type='text' 
-            value={urlInput}
-            autoComplete='false'
-            onChange={this.handleURLInput.bind(this)} 
-            placeholder='http://website.com/image.xyz'
-          />
-          <button onClick={this.handleURLDoneClick.bind(this)} style={doneStyle}>Done</button>
+          <button onClick={this.handleEditClick.bind(this)}>Edit</button>
+          <ImageAtomViewer content={{url}} />
         </div>
-        
-        <br />
-        <div>{'- or -'}</div>
-        <br />
-        
-        <div>{ fileMessage }</div>
-        <div onClick={this.handleSelectFileClick.bind(this)}>
-          <div>From your computer</div>
-          <div>Valid formats: png, jpg, jpeg, gif</div>
-          <input 
-            type='file'
-            id='inputFile'
-            accept='image/*'
-            onChange={this.handleFileChange.bind(this)}
-            style={{display: 'none'}}
-          />
+        :
+        <div>
+          <div style={validationDivStyle}>
+            { JSON.stringify(validationErrors) }
+          </div>
+          <div>From URL</div>
+          <div>
+            <div>{ urlMessage }</div>
+            <input 
+              size='50'
+              type='text' 
+              value={urlInput}
+              autoComplete='false'
+              onChange={this.handleURLInput.bind(this)} 
+              placeholder='http://website.com/image.xyz'
+            />
+            <button onClick={this.handleURLDoneClick.bind(this)} style={doneButtonStyle}>Done</button>
+          </div>
+          
+          <br />
+          <div>{'- or -'}</div>
+          <br />
+          
+          <div>{ fileMessage }</div>
+          <div onClick={this.handleSelectFileClick.bind(this)}>
+            <div>From your computer</div>
+            <div>Valid formats: png, jpg, jpeg, gif</div>
+            <input 
+              type='file'
+              id='inputFile'
+              ref='fileInput'
+              accept='image/*'
+              onChange={this.handleFileChange.bind(this)}
+              style={{display: 'none'}}
+            />
+          </div>
         </div>
-      </div>;
+      }
+    </div>;
   }
 }
 
@@ -193,8 +250,10 @@ ImageAtomCreator.buttonCaption = 'Image';
 ImageAtomCreator.initialState = {
   urlInput: '',
   urlMessage: '',
+  fileInput: null,
   fileMessage: '',
   contentType: '',
+  errorMessage: '',
 };
 ImageAtomCreator.initialContent = {
   url: '',

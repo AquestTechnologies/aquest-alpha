@@ -15,6 +15,7 @@ contact: bonjour@aquest.fr
 ### En manque d'idées ?
 
 - [ ] Pagination
+- [ ] Gérer formdata
 - [ ] Gérer les 400 et les 401 lors de login
 - [ ] Rendre les atoms disabled quand `atomsShouldGetReady === true`
 - [ ] Interdire les '/' et autres charactères spéciaux dans les titres de topics et les noms d'univers

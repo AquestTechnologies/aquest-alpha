@@ -212,7 +212,7 @@ const APIAuthFailureTypes = acAPI
   
 export function isAPIUnauthorized(action) {
   const { type, payload } = action;
-  return APIAuthFailureTypes.indexOf(type) !== -1 && payload && payload.message === 'Unauthorized';
+  return APIAuthFailureTypes.indexOf(type) !== -1 && payload && payload.status === 401;
 }
 
 export function isAPISuccess(action) {

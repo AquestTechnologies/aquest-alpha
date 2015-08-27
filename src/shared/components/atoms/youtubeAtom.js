@@ -7,9 +7,12 @@ class YoutubeAtomViewer extends React.Component {
   
   render() {
     const { id, width, height } = this.props.content;
+    const divStyle = {
+      textAlign: 'center',
+    };
     
     // https://developers.google.com/youtube/player_parameters
-    return <div>
+    return <div style={divStyle}>
       <iframe 
         width={width}
         height={height}
@@ -72,7 +75,9 @@ class YoutubeAtomCreator extends React.Component {
         error => update({
           ready: 'error',
           state: { 
-            errorMessage: error instanceof Error ? error.message : 'Youtube service unavailable'
+            errorMessage: error instanceof Error ? 
+              'Their was a problem with your internet connection' : 
+              'Youtube service unavailable'
           }
         })
       );

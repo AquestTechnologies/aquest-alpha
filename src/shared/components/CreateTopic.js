@@ -71,9 +71,10 @@ export default class CreateTopic extends React.Component {
     
     this.setState({
       atoms: newAtoms,
-      atomsShouldGetReady, // This should disable the UI somehow, so the user cannot modify anything while atoms are getting ready
+      atomsShouldGetReady, // This should disableomse UI somehow, so the user cannot modify anything while atoms are getting ready
       titleIsValidated: !!title,
     }, () => {
+      console.log('afterSetState');
       if (atomsShouldGetReady) this.callCreateTopic();
     });
   }
@@ -163,6 +164,11 @@ export default class CreateTopic extends React.Component {
       <div className='topic'>
         <div className="createTopic_rules">
           {`Rules: ${rules}`}
+          { /*
+            You can be ignorant, but don't be stupid
+            You can disagree, but don't be hateful
+            You can be opiniated, but don't be hurtful
+          */ }
         </div>
         
         <div className="topic_title">
@@ -235,9 +241,6 @@ class AtomCreatorWrapper extends React.Component {
         <button onClick={moveUp}>↑</button>
         <button onClick={moveDown}>↓</button>
         <button onClick={remove}>x</button>
-      </div>
-      <div>
-        { JSON.stringify(atom) /* debug */ }
       </div>
       <Creator {...atom} update={update} atomsShouldGetReady={atomsShouldGetReady} />
       <hr />
