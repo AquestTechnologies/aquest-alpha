@@ -1,15 +1,49 @@
 import React from 'react';
+import log from '../../utils/logTailor';
+import uploadFile from '../../../client/lib/uploadFile';
 
-// A regex to test URL 
-const pattern = "^https?://(?:[a-z0-9\-]+\.)+[a-z]{2,6}(?:/[^/#?]+)+\.(?:jpe?g|gif|png)$";
+// A regex to test image URL 
+// Also matches any string starting with "blob"
+const pattern = '^blob.*|^https?:\/\/(?:[a-z0-9\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)+\.(?:jpe?g|gif|png)$';
 
+// Loading the image with JS is a strong choice
+// But it allows for a better UI
 class ImageAtomViewer extends React.Component {
   
-  render() {
-    const { url, width, height } = this.props.content;
+  constructor() {
+    super();
+    this.state = {
+      url: null,
+      errorMessage: '',
+    };
+  }
+  
+  componentWillMount() {
+    const { url } = this.props.content;
+    const image = new Image();
     
-    return <div>
-      <img src={url} width={width} height={height} />
+    image.onload = () => this.setState({ url });
+    image.onerror = () => this.setState({ errorMessage: ':( Image not found'});
+    image.src = this.props.content.url;
+  }
+  
+  render() {
+    const divStyle = {
+      textAlign: 'center',
+    };
+    const imageStyle = {
+      width: 'auto',
+      height: 'auto',
+      maxWidth: '100%',
+      maxHeight: '100%',
+    };
+    
+    const { url, errorMessage } = this.state;
+    
+    return <div style={divStyle}>
+      { 
+        errorMessage ? errorMessage : url ? <img src={url} style={imageStyle} /> : 'Loading image...' 
+      }
     </div>;
   }
 }
@@ -21,6 +55,25 @@ class ImageAtomCreator extends React.Component {
     this.imageURLRegex = new RegExp(pattern);
   }
   
+  componentWillReceiveProps(nextProps) {
+    const { atomsShouldGetReady, ready } = this.props;
+    
+    if (atomsShouldGetReady && ready === 'no') {
+      const { update, uploadFile, content: { url }, state: { contentType } } = this.props;
+      
+      if (contentType === 'url') {
+        
+          // update({
+          //   ready: 'error',
+          //   state: { errorMessage: err.message }, // A bit brutal for the user...
+          // });
+        
+      } else {
+        
+      }
+    }
+  }
+  
   handleURLDoneClick(e) {
     
     const { state: { urlInput }, update } = this.props;
@@ -30,13 +83,13 @@ class ImageAtomCreator extends React.Component {
         url: urlInput
       },
       state: {
-        hasContent: true,
+        contentType: 'url',
         urlMessage: '',
       }
     });
     else update({
       state: { 
-        hasContent: false,
+        contentType: '',
         urlMessage: 'Please enter a valid image URL',
       }
     });
@@ -44,9 +97,11 @@ class ImageAtomCreator extends React.Component {
   
   handleEditClick(e) {
     this.props.update({
+      content: {
+        url: '',
+      },
       state: { 
-        fileInput: null,
-        hasContent: false,
+        contentType: '',
       }
     });
   }
@@ -54,7 +109,8 @@ class ImageAtomCreator extends React.Component {
   handleURLInput(e) {
     this.props.update({
       state: { 
-        urlInput: e.currentTarget.value 
+        urlMessage: '',
+        urlInput: e.currentTarget.value,
       }
     });
   }
@@ -66,36 +122,39 @@ class ImageAtomCreator extends React.Component {
   
   handleFileChange(e) {
     this.props.update({
+      content: {
+        url: window.URL.createObjectURL(document.getElementById('inputFile').files[0]),
+      },
       state: { 
-        hasContent: true, 
-        fileInput: document.getElementById('inputFile').files[0],
+        contentType: 'blob', 
       }
     });
   }
   
   render() {
     const {
-      content: { url, width, height }, 
-      state: { urlInput, urlMessage, fileInput, fileMessage, hasContent }
+      content: { url }, 
+      state: { urlInput, urlMessage, fileMessage, contentType },
+      validationErrors,
     } = this.props;
     
     const doneStyle = {
       visibility: urlInput ? 'visible' : 'hidden'
     };
+    const validationDivStyle = { 
+      display: validationErrors ? 'block' : 'none' 
+    };
     
-    return hasContent ? 
+    return contentType ? 
       <div>
         <button onClick={this.handleEditClick.bind(this)}>Edit</button>
-        <ImageAtomViewer content={{
-          width,
-          height,
-          url: fileInput ? window.URL.createObjectURL(fileInput) : url,
-        }} />
+        <ImageAtomViewer content={{url}} />
       </div>
       :
       <div>
-        <br />
-        
+        <div style={validationDivStyle}>
+          { JSON.stringify(validationErrors) }
+        </div>
         <div>From URL</div>
         <div>
           <div>{ urlMessage }</div>
@@ -131,18 +190,14 @@ class ImageAtomCreator extends React.Component {
 }
 
 ImageAtomCreator.buttonCaption = 'Image';
-
 ImageAtomCreator.initialState = {
   urlInput: '',
   urlMessage: '',
-  fileInput: null,
   fileMessage: '',
-  hasContent: false,
+  contentType: '',
 };
 ImageAtomCreator.initialContent = {
   url: '',
-  width: 0,
-  height: 0,
 };
 
 function createPreview(content) {
@@ -153,19 +208,16 @@ function createPreview(content) {
 
 const validationConstraints = {
   url: {
-    presence: true,
+    presence: {
+      message: '^Please provide an URL of a file',
+    },
     format: {
       pattern,
-      message: "Invalid image URL."
-    }
+      message : "^Invalid image URL",
+    },
   },
-  width: {
-    presence: true,
-  },
-  height: {
-    presence: true,
-  }
 };
+
 
 export default {
   name: 'image',

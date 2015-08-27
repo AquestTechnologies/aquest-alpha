@@ -116,6 +116,12 @@ export default {
   
   lastError: (state=false, action) => isAPIFailure(action) ? action.payload : false,
   
+  lastSuccess: (state='', { type }) => {
+    if (type === 'SUCCESS_CREATE_TOPIC') return 'Topic creation success!';
+    if (type === 'SUCCESS_CREATE_UNIVERSE') return 'Universe creation success!';
+    return '';
+  },
+  
   router: (state={}, action) => routerStateReducer(state, action),
   
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants

@@ -64,7 +64,7 @@ export default class CreateTopic extends React.Component {
   handleSubmitClick(e) {
     const { title, atoms } = this.state;
     
-    const newAtoms = Object.assign({}, atoms);
+    const newAtoms = atoms.map(a => Object.assign({}, a));
     const validationErrors = getAtomsValidationErrors(newAtoms);
     const atomsShouldGetReady = title && validationErrors.every(error => !error); // No error? get ready.
     validationErrors.forEach((errors, i) => newAtoms[i].validationErrors = errors);
@@ -102,7 +102,7 @@ export default class CreateTopic extends React.Component {
   // Moves atoms[i] to atoms[i + n]
   moveAtom(i, n) {
     const j = i + n;
-    const atoms = Object.assign({}, this.state.atoms); // If you mutate your state you go to React hell
+    const atoms = this.state.atoms.map(a => Object.assign({}, a)); // If you mutate your state you go to React hell
     
     // Checks for outer limits exeptions
     if (j < 0 || j > atoms.length - 1) return;
@@ -117,7 +117,7 @@ export default class CreateTopic extends React.Component {
   updateAtom(i, {content, state, ready}, callback) {
     
     const { atoms, atomsShouldGetReady } = this.state;
-    const newAtoms = Object.assign({}, atoms);
+    const newAtoms = atoms.map(a => Object.assign({}, a));
     const atom = newAtoms[i];
     
     // Only content, state and ready are allowed to be mutated

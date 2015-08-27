@@ -1,5 +1,6 @@
 import React from 'react';
 import log from '../../utils/logTailor';
+import makeHttpRequest from '../../../client/lib/makeHttpRequest';
 import { youtubeAPIKey } from '../../../../config/dev_google';
 
 class YoutubeAtomViewer extends React.Component {
@@ -45,45 +46,36 @@ class YoutubeAtomCreator extends React.Component {
   
   componentWillReceiveProps(nextProps) {
     
-    const { atomsShouldGetReady, ready, update, content: { id } } = nextProps;
+    const { atomsShouldGetReady, ready } = nextProps;
     
     // Checks if given video id leads to a valid youtube video
     if (atomsShouldGetReady && ready === 'no') {
       
+      const { update, content: { id } } = nextProps;
+      const path = `https://www.googleapis.com/youtube/v3/videos?key=${youtubeAPIKey}&part=id&id=${id}`;
+      
       update({ ready: 'pending' });
       log('Youtube atom getting ready');
       
-      const xhr = new XMLHttpRequest();
-      xhr.onerror = err => {
-        log(err);
-        update({
+      makeHttpRequest('get', path).then(
+        result => update(result.pageInfo.totalResults ? // result.pageInfo.totalResults should be === 1
+          {
+            ready: 'yes',
+          } :
+          {
+            ready: 'error',
+            state: { 
+              errorMessage: 'This video does not exist or is private' // Not sure if that is true
+            }
+          }
+        ),
+        error => update({
           ready: 'error',
-          state: { errorMessage: err.message }, // A bit brutal for the user...
-        });
-      };
-      
-      // https://developers.google.com/youtube/v3/docs/videos/list
-      xhr.open('get', `https://www.googleapis.com/youtube/v3/videos?key=${youtubeAPIKey}&part=id&id=${id}`);
-      xhr.onload = () => {
-        const { status, response } = xhr;
-        log(status, response);
-        
-        if (status !== 200) return update({
-          ready: 'error',
-          state: { errorMessage: 'Youtube service unavailable' },
-        });
-        
-        // response.pageInfo.totalResults should be === 1
-        if (!JSON.parse(response).pageInfo.totalResults) update({
-          ready: 'error',
-          state: { errorMessage: 'This video is either private or deleted' }, // Not sure if that is true
-        });
-        else update({
-          ready: 'yes',
-        });
-      };
-      
-      xhr.send(); // Bon voyage !
+          state: { 
+            errorMessage: error instanceof Error ? error.message : 'Youtube service unavailable'
+          }
+        })
+      );
     }
   }
   
