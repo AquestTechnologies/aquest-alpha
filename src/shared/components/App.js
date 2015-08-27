@@ -4,6 +4,7 @@ import { bindActionCreators } from 'redux';
 import { logout, createUser } from '../actionCreators';
 import LoadingBar from './app/LoadingBar';
 import Home from './app/Home';
+// import websocket from 'socket.io-client';
 
 class App extends React.Component {
   
@@ -19,6 +20,7 @@ class App extends React.Component {
   }
 }
 
+// const mapState = state => ({ userId: state.session.userId, websocket });
 const mapState = state => ({ userId: state.session.userId });
 const mapActions = dispatch => bindActionCreators({ logout, createUser }, dispatch);
 

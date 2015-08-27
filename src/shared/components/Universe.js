@@ -4,9 +4,9 @@ import { connect }            from 'react-redux';
 import Menu                   from './universe/Menu';
 import Chat                   from './universe/Chat';
 import Inventory              from './universe/Inventory';
-import { apiUrl }             from '../../../config/client';
+import config                 from '../../../config/dev_shared';
 import menuScroll             from '../../client/lib/menuScroll';
-import { readUniverse, readInventory, readChat, transitionTo } from '../actionCreators';
+import { readUniverse, readInventory, readChat, joinChat, leaveChat, readChatOffset, createMessage, transitionTo } from '../actionCreators';
 
 class Universe extends React.Component {
   
@@ -32,11 +32,14 @@ class Universe extends React.Component {
   }
   
   componentWillMount() {
+    console.log('.C. componentWillMount');
     const { universes, readUniverse, params: { universeId } } = this.props;
     if (!universes[universeId]) readUniverse(universeId);
   }
   
   componentDidMount() {
+    const { universes, readUniverse, params: { universeId } } = this.props;
+    if (!universes[universeId]) readUniverse(universeId);
     menuScroll('main_scrollable');
   }
   
@@ -52,7 +55,8 @@ class Universe extends React.Component {
     // console.log('.C. Universe.render');
     const { 
       universes, topics, chats, userId,
-      readInventory, readChat, transitionTo, 
+      readInventory, transitionTo, 
+      readChat, joinChat, leaveChat, readChatOffset, createMessage,
       children, location: { pathname }, params: { universeId, topicId },
     } = this.props;
     
@@ -71,12 +75,11 @@ class Universe extends React.Component {
           universeName={universe.name} 
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(${apiUrl}/${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'> { 
               
               children ? 
-                
                 React.cloneElement(children, {
                   topic,
                   userId,
@@ -99,6 +102,11 @@ class Universe extends React.Component {
           chat={chat} 
           chatId={chatId}
           readChat={readChat}
+          userId={userId}
+          joinChat={joinChat}
+          leaveChat={leaveChat}
+          readChatOffset={readChatOffset}
+          createMessage={createMessage}
         />
       </div>
     );
@@ -115,8 +123,12 @@ const mapState = state => ({
 const mapActions = dispatch => bindActionCreators({ 
   transitionTo,
   readUniverse, 
-  readInventory, 
+  readInventory,
   readChat,
+  joinChat,
+  leaveChat,
+  readChatOffset,
+  createMessage
 }, dispatch);
 
 export default connect(mapState, mapActions)(Universe);

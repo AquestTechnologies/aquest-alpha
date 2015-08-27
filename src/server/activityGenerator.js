@@ -14,32 +14,32 @@ export default class Activist {
 		this.actionProbabilities = {}; // Will be constructed from this.probabilities
 		this.probabilities = { // Reflects the chances to perform a given action
 			'createMessage': {
-				prob: 0.3,
+				prob: 1,
 				params: {
-					userId: 'abeseven',
+					userId: 'testme',
 					chatId: '1', 
-					messageContent: {type: 'text', text: randomText(30)}
+					content: {type: 'text', text: randomText(30)}
 				}
 			},
-			'readUniverses': {
-				prob: 0.2
-			},
-			'readUniverse': {
-				prob: 0.4,
-				params: 'Startups'
-			},
-			'createTopic': {
-				// prob: 0.09,
-				prob: 0.1,
-				params: {
-					id: 'required',
-					userId: 'abeseven', 
-					universeId: 'Startups',
-					title: randomText(5),
-					description: randomText(10),
-					content: [{type:'text', text: randomText(20)}]
-				}
-			}
+			// 'readUniverses': {
+			// 	prob: 0.2
+			// },
+			// 'readUniverse': {
+			// 	prob: 0.4,
+			// 	params: 'Startups'
+			// },
+			// 'createTopic': {
+			// 	// prob: 0.09,
+			// 	prob: 0.1,
+			// 	params: {
+			// 		id: 'required',
+			// 		userId: 'abeseven', 
+			// 		universeId: 'Startups',
+			// 		title: randomText(5),
+			// 		description: randomText(10),
+			// 		content: [{type:'text', text: randomText(20)}]
+			// 	}
+			// }
 			// 'createVote': {
 			// 	prob: 0.3,
 			// 	data: {

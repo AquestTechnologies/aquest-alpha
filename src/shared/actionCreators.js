@@ -2,7 +2,6 @@ import log from './utils/logTailor';
 import isClient from './utils/isClient';
 const isServer = !isClient();
 
-  
 // Si une transition peut avoir lieu dans les sides effects alors preferer cette methode
 // Cet AC est provisoire et devra être remplacé par <Link/> partout (SEO friendly)
 export const transitionTo = (pathname, query, state) => ({ type: 'TRANSITION_TO', payload: {pathname, query, state} });
@@ -51,6 +50,13 @@ export const readChat = createActionCreator({
   auth:       false,
 });
 
+export const readChatOffset = createActionCreator({
+  intention:  'readChatOffset',
+  method:     'get',
+  pathx:      '/api/chat/{chatId}/offset/{offset}', 
+  auth:       false,
+});
+
 export const createUniverse = createActionCreator({
   intention:  'createUniverse',
   method:     'post',
@@ -79,10 +85,24 @@ export const login = createActionCreator({
   auth:       false,
 });
 
+export const joinChat = (params) => ({ type: 'JOIN_CHAT', payload: params });
+  
+export const leaveChat = (params) => ({ type: 'LEAVE_CHAT', payload: params });  
+  
+export const createMessage = (params) => ({ type: 'CREATE_MESSAGE', payload: params });  
+  
+export const receiveJoinChat =  (params) => ({ type: 'RECEIVE_JOIN_CHAT', payload: params });
+  
+export const receiveLeaveChat = (params) => ({ type: 'RECEIVE_LEAVE_CHAT', payload: params });
+  
+export const receiveMessage = (params) => ({ type: 'RECEIVE_MESSAGE', payload: params });
+
+
 const actionCreators = {
   transitionTo, login, logout, 
-  readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
+  readUniverse, readUniverses, readInventory, readChat, readChatOffset, readTopic, readTopicAtoms, 
   createUser, createUniverse, createTopic, 
+  joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage
 };
 
 export default actionCreators;
@@ -109,13 +129,17 @@ function createActionCreator(shape) {
       
       // Client : API call through XMLHttpRequest
       else {
-        const path = pathx.replace(/\{\S*\}/, '');
         const isPost = method === 'post';
+        
+        const path = isPost ? 
+          pathx : params ? 
+            pathx.replace(/{([A-Za-z]*)}/g, (match, p1, offset, string) => typeof params === 'object' ? params[p1] : params) : pathx;
+            
         const req = new XMLHttpRequest();
         log(`+++ --> ${method} ${path}`, params);
         
         req.onerror = err => reject(err);
-        req.open(method, isPost ? path : params ? path + params : path);
+        req.open(method, path);
         req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
         
         if (isPost) { 
@@ -150,6 +174,12 @@ function createActionCreator(shape) {
   actionCreator.getShape = () => shape;
   
   return actionCreator;
+}
+
+//stringify objects value before send params to the server
+function stringifyObjectValues(params){
+  Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value])
+  return params;
 }
 
 function createForm(o) {

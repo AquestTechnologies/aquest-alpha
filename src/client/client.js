@@ -9,6 +9,7 @@ import registerShortcuts   from './lib/registerShortcuts';
 import registerSideEffects from './lib/registerSideEffects';
 import log, { logWelcome } from '../shared/utils/logTailor';
 import promiseMiddleware   from '../shared/utils/promiseMiddleware';
+import websocketMiddleware   from '../shared/utils/websocketMiddleware';
 
 (() => {
   const d = new Date();
@@ -20,7 +21,8 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware';
   const stateFromServer = window.STATE_FROM_SERVER || {};
   
   // Store creation
-  const store = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
+  // const store = applyMiddleware(promiseMiddleware, websocketMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
+  const store = applyMiddleware(promiseMiddleware, websocketMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
   registerShortcuts(store.getState);
   
   // Gère les trailing slash des url
@@ -40,7 +42,7 @@ import promiseMiddleware   from '../shared/utils/promiseMiddleware';
   );
   
   registerSideEffects(store, app.transitionTo);
-
+  
 })();
 
 require('./css/app.css');

@@ -7,78 +7,119 @@ export default class Chat extends React.Component {
   
   constructor() {
     super();
-    this.state = { 
-      chat:      {},
-      isLoading: false
+    
+    this.state = { isLoading: false };
+    
+    this.handleScroll = e => {
+      const {chatId, chat, readChatOffset} = this.props;
+      const {isLoading} = this.state;
+      const messages = (chat || []).messages || [];
+      
+      if (!isLoading && messages.length && e.target.scrollTop === 0 && chat.firstMessageId !== messages[0].id ) {
+        readChatOffset({chatId, offset: messages.length});
+        this.setState({isLoading: true});
+      }
     };
   }
   
   componentWillMount() {
     // console.log('.C. Chat.componentWillMount');
-    let { chat, readChat, chatId } = this.props;
-    let isLoading = false;
-    if (!chat) {
-      chat = {};
-      isLoading = true;
+    
+    const {chatId, chat, readChat, readChatOffset} = this.props;
+    const messages = (chat || []).messages || [];
+    
+    if (messages && messages.length) {
+      let messageIndex = messages.length - 1;
+      
+      while(typeof messages[messageIndex].id === 'string' && (messages[messageIndex].id.substr(0,2) === 'lc' || messages[messageIndex].id.substr(0,2) === 'fe')) {
+        messageIndex--;
+      }
+      
+      readChatOffset({ chatId, offset: messages[messageIndex].id });
+    }
+    else {
       readChat(chatId);
     }
-    this.setState({chat, isLoading});
+    
   }
   
   componentWillReceiveProps(nextProps) {
     // console.log('.C. Chat.componentWillReceiveProps');
-    const { chat, readChat, chatId } = nextProps;
-    const isLoading = false;
-    if (!chat) {
-      if (!this.state.isLoading) {
-        readChat(chatId);
-        this.setState({ 
-          chat: {},
-          isLoading: true
-        });
+    
+    const {chatId, chat, readChat, joinChat, leaveChat} = this.props;
+    const messages = (chat || []).messages || [];
+    
+    const nextChatId = nextProps.chatId;
+    const nextMessages = (nextProps.chat || []).messages || [];
+    
+    if ( chatId && nextChatId && chatId !== nextChatId ) {
+      if (!nextMessages || !nextMessages.length ) { 
+        readChat(nextProps.chatId);
       }
-    } 
-    else this.setState({ chat, isLoading });
+    
+      leaveChat(chatId);
+      joinChat(nextChatId);
+    }
+    
+    if (messages.length && nextMessages.length && messages.length < nextMessages.length) this.setState({isLoading: false});
   }
   
   componentDidMount() {
     //permet de scroller les messages tout en bas après le mount.
     // console.log('.C. Chat mount');
+    
+    const {chatId, joinChat} = this.props;
+    joinChat(chatId);
+    
     setTimeout(() => { // Pourquoi un timeout de merde ? Pke sans ça chrome le fait pas ! 
       let scrollable = document.getElementById('scrollMeDown');
       scrollable.scrollTop = scrollable.scrollHeight;
     }, 100);
   }
   
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     // console.log('.C. Chat update');
-    //permet de scroller les messages tout en bas après avoir reçu de nouveaux props.
-    let scrollable       = document.getElementById('scrollMeDown');
-    scrollable.scrollTop = scrollable.scrollHeight;
+    
+    const {chat} = this.props;
+    let scrollable = document.getElementById('scrollMeDown');
+    
+    var messages = (chat || []).messages || [];
+    
+    // scrolldown if the user sends a message
+    if (chat && prevProps.chat && chat.id !== prevProps.chat.id) scrollable.scrollTop = scrollable.scrollHeight;
+    else if (messages && messages.length && typeof messages[messages.length - 1].id === 'string' && messages[messages.length - 1].id.substr(0,2) === 'lc' ) {
+      scrollable.scrollTop = scrollable.scrollHeight;
+    }
+  }
+  
+  componentWillUnmount(){
+    const {chatId, leaveChat} = this.props;
+    leaveChat(chatId);
   }
   
   render() {
-    const { chat } = this.state;
-    const samuel = "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.";
-    const messages = chat.messages || [];
+    const {chatId, users, chat, createMessage} = this.props;
+    const name     = (chat || '').name || '';
+    const messages = (chat || []).messages || [];
     const messagesList = messages.length ? 'chat_list-visible' : 'chat_list-hidden';
     
     return (
       <div className='chat'>
-        <ChatHeader chatName={chat.name} />
+        <ChatHeader chatName={name} />
         
-        <div id='scrollMeDown' className='chat_scrollable'>
+        <div id='scrollMeDown' className='chat_scrollable' onScroll={this.handleScroll}>
           <div className={messagesList}>
             
-            <Message userId='Extreme firster' content={{text: 'First!'}} />
-            { messages.map(({id, userId, type, content}) => <Message key={id} userId={userId} type={type} content={content} />) }
-            <Message userId='Jackie Chan' content='I live in the USA' />
-            <Message userId={chat.name + ' L. Jackson'} content={{text: samuel}}/>
+            { messages.map(({id, userId, type, content, createdAt}) => <Message key={id} id={id} createdAt={createdAt} userId={userId} type={type} content={content} />) }
             
           </div>
         </div>
           
-        <ChatFooter />
+        <ChatFooter
+          chatId        = {chatId}
+          users         = {users}
+          createMessage = {createMessage}
+        />
       </div>
     );
   }

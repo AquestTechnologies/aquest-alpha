@@ -32,6 +32,8 @@ export default function registerSideEffects(store, transitionTo) {
       return;
     }
     
+    console.log('.E. ', type);
+    
     switch (type) {
       
       case 'TRANSITION_TO':
@@ -42,6 +44,7 @@ export default function registerSideEffects(store, transitionTo) {
         
       case 'LOGOUT':
         logR(type);
+        console.log('no more cookie');
         docCookies.removeItem('jwt');
         transitionTo('/');
         return;
@@ -64,6 +67,7 @@ export default function registerSideEffects(store, transitionTo) {
         logR(type);
         transitionTo(`/~${universeId}/${id}`);
         return;
+        
     }
   });
 }

@@ -22,8 +22,8 @@ class Topic extends React.Component {
   
   render() {
     const { topic } = this.props || {};
-    const { title, userId, createdAt } = topic;
-    const atoms = topic.atoms || ['Loading...'];
+    const { title, userId, createdAt } = topic || {};
+    const atoms = topic && topic.atoms ? topic.atoms : ['Loading...'];
     
     return !topic ? <div>Loading...</div> : (
       <div>
