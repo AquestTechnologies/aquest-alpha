@@ -20,6 +20,7 @@
     "chalk": "^1.0.0",
     "hapi": "^9.0.3",
     "hapi-auth-jwt2": "^5.0.0",
+    "inert": "^3.0.1",
     "joi": "^6.6.1",
     "jsonwebtoken": "^5.0.4",
     "node-babel": "^0.1.2",
