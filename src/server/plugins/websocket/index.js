@@ -29,7 +29,6 @@ exports.register = function (server, options, next) {
     log('___ [' + chatUsers + '] New client connected in a chat universe | topic');
     
     socket.on('joinChat', function(request) {
-      console.log('joinChat', request);
       Joi.validate(request, validationSchema['joinChat'], (err, value) => {
         if (err) throw err;
           
@@ -110,20 +109,21 @@ exports.register = function (server, options, next) {
       chatUsers--;
       let disconnectChatId = -1;
       
+      log(`___ [${chatUsers}] ${socket.userId} id: ${socket.id}`);
+      
       //dirty wait for RabbitMQ
       const {userId} = socket;
       for(let chatId in chatList) {
         chatList[chatId] = chatList[chatId].filter((user) => {
           if(user === userId){
             disconnectChatId = chatId;
+            log(`disconnected from a chatId: ${disconnectChatId} - universe | topic`);
             socket.broadcast.to(chatId).emit('leaveChat', { chatId, userId });
             return false;
           }
           return true;
         });
       }
-      
-      log(`___ [${chatUsers}] ${socket.userId} id: ${socket.id} disconnected from a chatId: ${disconnectChatId} - universe | topic`);
     });
   });
   

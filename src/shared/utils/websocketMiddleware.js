@@ -1,13 +1,12 @@
 import log from './logTailor.js';
+import config from '../../../config/dev_shared';
 import websocket from 'socket.io-client';
-import { receiveMessage, receiveJoinChat, receiveLeaveChat, login } from '../actionCreators';
-// Copié depuis https://github.com/gaearon/redux/blob/master/docs/middleware.md
-// Modifié depuis
+import { receiveMessage, receiveJoinChat, receiveLeaveChat } from '../actionCreators';
 
-export default function sideEffectsMiddleware({ dispatch, getState }) {
+export default function websocketMiddleware({ dispatch, getState }) {
   // log('.M. promiseMiddleware');
   
-  let sockets = {};
+  const sockets = {};
   const logWs = (type, payload) => log('.W.', type, payload);
   
   return next => action => {
@@ -17,12 +16,20 @@ export default function sideEffectsMiddleware({ dispatch, getState }) {
     
     switch (type) {
       
+      case 'SUCCESS_LOGIN':
+        for(let key in sockets){
+          sockets[key].disconnect();
+        }
+        break;
+      
       case 'JOIN_CHAT':
         
         if (sockets['chat-universe-topic']) socket = sockets['chat-universe-topic'];
         else {
-          socket = sockets['chat-universe-topic'] = websocket.connect('http://23.251.143.127:9090/chat-universe-topic');
+          socket = sockets['chat-universe-topic'] = websocket.connect(`${config.wsUrl}/chat-universe-topic`);
         }
+        
+        if (socket.disconnected) socket = sockets['chat-universe-topic'] = websocket.connect(`${config.wsUrl}/chat-universe-topic`, {forceNew: true});
         
         logWs(type, payload);
         
@@ -31,12 +38,8 @@ export default function sideEffectsMiddleware({ dispatch, getState }) {
         socket.on('receiveJoinChat', result => next(receiveJoinChat(result)));
         socket.on('receiveLeaveChat', result => next(receiveLeaveChat(result)));
         socket.on('error', error => typeof error === 'object' && error.message ? next(receiveMessage(error)) : log('!!! socket error', error));
-        socket.on('connect_failed', () => console.log('connect_failed'));
-        socket.on('disconnect', () => {
-          //handle reconnection or create transitionTo the login page ?
-          console.log('disconnect');
-          socket = sockets['chat-universe-topic'] = websocket.connect('http://23.251.143.127:9090/chat-universe-topic');
-        });
+        socket.on('connect_failed', () => log('connect_failed'));
+        socket.on('disconnect', () => log('.W. websocket disconnected from server'));
         break;
         
       case 'LEAVE_CHAT':
@@ -48,7 +51,6 @@ export default function sideEffectsMiddleware({ dispatch, getState }) {
         socket.removeListener('receiveMessage');
         socket.removeListener('receiveJoinChat');
         socket.removeListener('receiveLeaveChat');
-        delete sockets['chat-universe-topic'];
         break;
         
       case 'CREATE_MESSAGE':
