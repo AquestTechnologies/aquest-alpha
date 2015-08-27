@@ -16,12 +16,13 @@ export default function websocketMiddleware({ dispatch, getState }) {
     
     switch (type) {
       
+      case 'LOGOUT':
       case 'SUCCESS_LOGIN':
         for(let key in sockets){
           sockets[key].disconnect();
         }
         break;
-      
+        
       case 'JOIN_CHAT':
         
         if (sockets['chat-universe-topic']) socket = sockets['chat-universe-topic'];
