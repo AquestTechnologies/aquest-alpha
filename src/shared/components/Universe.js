@@ -6,7 +6,7 @@ import Chat                   from './universe/Chat';
 import Inventory              from './universe/Inventory';
 import config                 from '../../../config/dev_shared';
 import menuScroll             from '../../client/lib/menuScroll';
-import { readUniverse, readInventory, readChat, transitionTo } from '../actionCreators';
+import { readUniverse, readInventory, readChat, joinChat, leaveChat, readChatOffset, createMessage, transitionTo } from '../actionCreators';
 
 class Universe extends React.Component {
   
@@ -55,7 +55,8 @@ class Universe extends React.Component {
     // console.log('.C. Universe.render');
     const { 
       universes, topics, chats, userId,
-      readInventory, readChat, transitionTo, 
+      readInventory, transitionTo, 
+      readChat, joinChat, leaveChat, readChatOffset, createMessage,
       children, location: { pathname }, params: { universeId, topicId },
     } = this.props;
     
@@ -102,6 +103,10 @@ class Universe extends React.Component {
           chatId={chatId}
           readChat={readChat}
           userId={userId}
+          joinChat={joinChat}
+          leaveChat={leaveChat}
+          readChatOffset={readChatOffset}
+          createMessage={createMessage}
         />
       </div>
     );
@@ -120,6 +125,10 @@ const mapActions = dispatch => bindActionCreators({
   readUniverse, 
   readInventory,
   readChat,
+  joinChat,
+  leaveChat,
+  readChatOffset,
+  createMessage
 }, dispatch);
 
 export default connect(mapState, mapActions)(Universe);

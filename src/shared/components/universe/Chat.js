@@ -2,11 +2,8 @@ import React from 'react';
 import Message from './Message';
 import ChatHeader from './ChatHeader';
 import ChatFooter from './ChatFooter';
-import { bindActionCreators } from 'redux';
-import { joinChat, leaveChat, readChatOffset } from '../../actionCreators';
-import { connect } from 'react-redux';
 
-class Chat extends React.Component {
+export default class Chat extends React.Component {
   
   constructor() {
     super();
@@ -18,7 +15,7 @@ class Chat extends React.Component {
       const {isLoading} = this.state;
       const messages = (chat || []).messages || [];
       
-      if(!isLoading && messages.length && e.target.scrollTop === 0 && chat.firstMessageId !== messages[0].id ) {
+      if (!isLoading && messages.length && e.target.scrollTop === 0 && chat.firstMessageId !== messages[0].id ) {
         readChatOffset({chatId, offset: messages.length});
         this.setState({isLoading: true});
       }
@@ -33,9 +30,11 @@ class Chat extends React.Component {
     
     if (messages && messages.length) {
       let messageIndex = messages.length - 1;
-      while(typeof messages[messageIndex].id === 'string' && (messages[messageIndex].id.substr(0,2) === 'lc' || messages[messageIndex].id.substr(0,2) === 'fe')) { // feelFreeToSignUp --> for fun when a user send a message and isn't authenticated
+      
+      while(typeof messages[messageIndex].id === 'string' && (messages[messageIndex].id.substr(0,2) === 'lc' || messages[messageIndex].id.substr(0,2) === 'fe')) {
         messageIndex--;
       }
+      
       readChatOffset({ chatId, offset: messages[messageIndex].id });
     }
     else {
@@ -45,16 +44,16 @@ class Chat extends React.Component {
   }
   
   componentWillReceiveProps(nextProps) {
-    console.log('.C. Chat.componentWillReceiveProps');
+    // console.log('.C. Chat.componentWillReceiveProps');
     
     const {chatId, chat, readChat, joinChat, leaveChat} = this.props;
     const messages = (chat || []).messages || [];
     
     const nextChatId = nextProps.chatId;
-    const nextMessages = (nextProps.chat || {}).messages || {};
+    const nextMessages = (nextProps.chat || []).messages || [];
     
     if ( chatId && nextChatId && chatId !== nextChatId ) {
-      if (!nextMessages || nextMessages.length ) { 
+      if (!nextMessages || !nextMessages.length ) { 
         readChat(nextProps.chatId);
       }
     
@@ -99,7 +98,7 @@ class Chat extends React.Component {
   }
   
   render() {
-    const {chatId, users, chat} = this.props;
+    const {chatId, users, chat, createMessage} = this.props;
     const name     = (chat || '').name || '';
     const messages = (chat || []).messages || [];
     const messagesList = messages.length ? 'chat_list-visible' : 'chat_list-hidden';
@@ -117,20 +116,11 @@ class Chat extends React.Component {
         </div>
           
         <ChatFooter
-          chatId              = {chatId}
-          users               = {users}
+          chatId        = {chatId}
+          users         = {users}
+          createMessage = {createMessage}
         />
       </div>
     );
   }
 }
-
-const mapState = state => ({});
-
-const mapActions = dispatch => bindActionCreators({ 
-  joinChat,
-  leaveChat,
-  readChatOffset
-}, dispatch);
-
-export default connect(mapState, mapActions)(Chat);

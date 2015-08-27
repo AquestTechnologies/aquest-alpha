@@ -89,6 +89,7 @@ export default {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
         newState = deepCopy(state);
         if (action.payload.messages.length) newState[chatId].messages = action.payload.messages.concat(newState[chatId].messages);
+        
         return newState;
       })(action);
       
@@ -98,6 +99,7 @@ export default {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
         newState = deepCopy(state);
         newState[chatId] = fuse(newState[chatId], action.payload);
+        
         return newState;
       })(action);
       
@@ -114,7 +116,6 @@ export default {
         newState[chatId].messages.push(newPayload);
         
         return newState;
-        
       })(action);
       
     case 'RECEIVE_MESSAGE':
@@ -141,6 +142,7 @@ export default {
           return state;
         } else {
           newState[chatId].messages.push(message);
+          
           return newState;
         }
       })(action);
@@ -198,12 +200,9 @@ export default {
         newState = deepCopy(state);
         
         // remove the user from the user list
-        newState[chatId].users && newState[chatId].users.length ?
-          newState.splice(newState[chatId].users.indexOf(userId), 1) :
-          state; 
+        if (newState[chatId].users && newState[chatId].users.length) newState[chatId].users.splice(newState[chatId].users.indexOf(userId), 1);
         
         return newState;
-          
       })(action);
       
     default:

@@ -108,8 +108,8 @@ exports.register = function (server, options, next) {
     socket.on('disconnect', (request) => {
       chatUsers--;
       let disconnectChatId = -1;
-      
-      log(`___ [${chatUsers}] ${socket.userId} id: ${socket.id}`);
+
+      log(`___ [${chatUsers}] ${socket.userId} id: ${socket.id} disconnected`);
       
       //dirty wait for RabbitMQ
       const {userId} = socket;
@@ -117,7 +117,7 @@ exports.register = function (server, options, next) {
         chatList[chatId] = chatList[chatId].filter((user) => {
           if(user === userId){
             disconnectChatId = chatId;
-            log(`disconnected from a chatId: ${disconnectChatId} - universe | topic`);
+            log(`from a chatId: ${disconnectChatId} - universe | topic`);
             socket.broadcast.to(chatId).emit('leaveChat', { chatId, userId });
             return false;
           }

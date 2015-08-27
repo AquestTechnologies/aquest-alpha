@@ -130,9 +130,11 @@ function createActionCreator(shape) {
       // Client : API call through XMLHttpRequest
       else {
         const isPost = method === 'post';
+        
         const path = isPost ? 
           pathx : params ? 
             pathx.replace(/{([A-Za-z]*)}/g, (match, p1, offset, string) => typeof params === 'object' ? params[p1] : params) : pathx;
+            
         const req = new XMLHttpRequest();
         log(`+++ --> ${method} ${path}`, params);
         

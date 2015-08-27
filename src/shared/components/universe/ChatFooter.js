@@ -1,9 +1,6 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { createMessage } from '../../actionCreators';
 
-class ChatFooter extends React.Component {
+export default class ChatFooter extends React.Component {
   
   constructor() {
     super();
@@ -43,9 +40,3 @@ class ChatFooter extends React.Component {
     );
   }
 }
-
-const mapState = state => ({});
-
-const mapActions = dispatch => bindActionCreators({ createMessage }, dispatch);
-
-export default connect(mapState, mapActions)(ChatFooter);

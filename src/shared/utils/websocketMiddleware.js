@@ -1,6 +1,7 @@
 import log from './logTailor.js';
 import config from '../../../config/dev_shared';
 import websocket from 'socket.io-client';
+import docCookies from '../../client/vendor/cookie';
 import { receiveMessage, receiveJoinChat, receiveLeaveChat } from '../actionCreators';
 
 export default function websocketMiddleware({ dispatch, getState }) {
@@ -40,7 +41,7 @@ export default function websocketMiddleware({ dispatch, getState }) {
         socket.on('receiveLeaveChat', result => next(receiveLeaveChat(result)));
         socket.on('error', error => typeof error === 'object' && error.message ? next(receiveMessage(error)) : log('!!! socket error', error));
         socket.on('connect_failed', () => log('connect_failed'));
-        socket.on('disconnect', () => log('.W. websocket disconnected from server'));
+        socket.on('disconnect', (result) => log(`.W. ${result}`));
         break;
         
       case 'LEAVE_CHAT':
