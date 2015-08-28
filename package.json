@@ -9,7 +9,7 @@
     "d": "scripts/start_david",
     "lint": "eslint ./src --ext .js --ext .jsx || true",
     "linto": "eslint ./src --ext .js --ext .jsx -o ./log/lint.log || true",
-    "start": "scripts/start",
+    "start": "clear && nodemon -q -x \"babel-node\" --watch ./src/server -e js,html ./src/server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "Copyrights Aquest Technologies SAS",
