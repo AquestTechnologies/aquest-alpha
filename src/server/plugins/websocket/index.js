@@ -35,7 +35,7 @@ exports.register = function (server, options, next) {
         const chatId = request;
         const {userId} = socket;
         
-        this.join(chatId);
+        socket.join(chatId);
         // userList.set({userId: request.userId}, request);
         let userList = Array.isArray(chatList[chatId]) ? chatList[chatId] : chatList[chatId] = [];
         userList.push(userId);
@@ -43,7 +43,7 @@ exports.register = function (server, options, next) {
         log(`___ ${userId} joining chat ${chatId} - countUsers: ${chatList[chatId].length}`);
         
         // send the current list of people in the chat to the user joining the chat
-        this.emit('receiveJoinChat', { chatId, userList, owner });
+        socket.emit('receiveJoinChat', { chatId, userList, owner });
         
         //send the user info to current people in the chat
         socket.broadcast.to(chatId).emit('receiveJoinChat', { chatId, userId });
@@ -58,7 +58,7 @@ exports.register = function (server, options, next) {
         const chatId = request;
         const {userId} = socket;
         
-        this.leave(chatId);
+        socket.leave(chatId);
         // userList.delete(socket);
         let userList = Array.isArray(chatList[chatId]) ? chatList[chatId] : chatList[chatId] = [];
         userList.splice(userList.indexOf(userId), 1);
