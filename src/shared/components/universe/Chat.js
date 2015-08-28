@@ -39,6 +39,7 @@ export default class Chat extends React.Component {
     }
     else {
         console.log('yolo');
+        console.log('yolo');
       readChat(chatId);
     }
     
