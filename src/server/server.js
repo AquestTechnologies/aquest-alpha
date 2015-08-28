@@ -1,17 +1,17 @@
 import Hapi from 'hapi';
 import prerender from './prerender';
-import devConfig from '../../config/development.js';
-import log, { logRequest, logAuthentication } from '../shared/utils/logTailor.js';
 import { createActivists } from './activityGenerator';
+import devConfig from '../../config/dev_server';
+import log, { logRequest, logAuthentication } from '../shared/utils/logTailor';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 log(`\nStarting server in ${process.env.NODE_ENV} mode...`);
 
 //lance webpack-dev-server si on est pas en production
-if (process.env.NODE_ENV === 'development') require('./dev_server/dev_server')();
+if (process.env.NODE_ENV === 'development') require('./development/devServer')();
 
 const server = new Hapi.Server();
-const {api, ws, jwt: {key}} = devConfig();
+const {api, ws, jwt: {key}} = devConfig;
 
 function validateJWT({userId, expiration}, request, callback) {
   logAuthentication('validateJWT', userId, expiration);
@@ -37,7 +37,12 @@ server.register(require('hapi-auth-jwt2'), err => {
 });
   
 // API and WS plugin registration
-server.register([{register: require('inert')}, {register: require('./plugins/API')}, {register: require('./plugins/websocket')}], err => {
+server.register([
+  { register: require('inert') },
+  { register: require('./plugins/API') }, 
+  { register: require('./plugins/uploads') },
+  { register: require('./plugins/websocket') },
+], err => {
   if (err) throw err;
   log('API and WS plugins registered');
   
@@ -45,28 +50,22 @@ server.register([{register: require('inert')}, {register: require('./plugins/API
   server.route([
     {
       method: 'GET',
-      path: '/',
-      config: { auth: false },
-      handler: (request, reply) => prerender(request, reply)
-    },
-    {
-      method: 'GET',
       path: '/{p*}',
       config: { auth: false },
-      handler: (request, reply) => prerender(request, reply)
+      handler: prerender,
     },
     {
       method: 'GET',
       path: '/img/{filename}',
       config: { auth: false },
-      handler: (request, reply) => reply.file('dist/img/' + request.params.filename)
-    }
+      handler: (request, reply) => reply.file('dist/img/' + request.params.filename),
+    },
   ]);
 });
 
 server.ext('onRequest', (request, reply) => {
   logRequest(request);
-  return reply.continue();
+  reply.continue();
 });
 
 // Démarrage du server
@@ -83,7 +82,7 @@ server.start(() => {
     '          | |\n' +
     '          |_|'
   );
-  if (1) console.log(...server.table()[0].table.map(t => `\n${t.method} - ${t.path}`));
+  if (0) log(...server.table()[0].table.map(t => `\n${t.method} - ${t.path}`));
   if (0) {
     const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
     startActivists();

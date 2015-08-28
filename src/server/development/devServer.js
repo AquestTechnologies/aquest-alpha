@@ -3,13 +3,13 @@ import webpack from 'webpack';
 import config from './webpack.config';
 import log from '../../shared/utils/logTailor';
 import webpackDevServer from 'webpack-dev-server';
-import devConfig from '../../../config/development';
+import devConfig from '../../../config/dev_server';
 
 export default function devServer() {
   
   let startTime;
   const bundle = webpack(config);
-  const { api, wds: { host, port, proxyPathRegex } } = devConfig();
+  const { api, wds: { host, port, proxyPathRegex } } = devConfig;
   
   bundle.plugin('compile', () => {
     startTime  = Date.now();

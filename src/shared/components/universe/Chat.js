@@ -38,6 +38,7 @@ export default class Chat extends React.Component {
       readChatOffset({ chatId, offset: messages[messageIndex].id });
     }
     else {
+        console.log('yolo');
       readChat(chatId);
     }
     

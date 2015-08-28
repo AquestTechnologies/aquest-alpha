@@ -1,11 +1,11 @@
 import pg from 'pg';
-import log from '../shared/utils/logTailor.js';
-import devConfig from '../../config/development.js';
+import log from '../shared/utils/logTailor';
+import devConfig from '../../config/dev_server';
 
 export default function queryDb(intention, params) {
   
   const d = new Date();
-  const {user, password, host, port, database} = devConfig().pg;
+  const { user, password, host, port, database } = devConfig.pg;
   const connectionString = `postgres://${user}:${password}@${host}:${port}/${database}`;
   
   return new Promise((resolve, reject) => {
@@ -32,7 +32,7 @@ export default function queryDb(intention, params) {
   // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
-    const {id, userId, universeId, title, chatId, offset, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture} = 
+    const {id, userId, universeId, title, chatId, offset, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture, url} = 
       typeof params === 'object' && !(params instanceof Array) ? params : {};
       
     // define the maximum number of message to load
@@ -166,10 +166,12 @@ export default function queryDb(intention, params) {
         paramaterized = [params];
         
         callback = result => {
-          const { chat } = result.rows[0];
-          if (!chat.messages[0].content) chat.messages = [];
-          
-          return chat;
+          if (result.rows[0]) {
+            const { chat } = result.rows[0];
+            if (!chat.messages[0].content) chat.messages = [];
+            
+            return chat;
+          }
         };
         
         break;
@@ -337,6 +339,17 @@ export default function queryDb(intention, params) {
         
         break;
         
+      case 'createFile':
+        sql = 
+        'INSERT INTO aquest_schema.file ' +
+          '(user_id, name, url, creation_ip) ' +
+        'VALUES ' +
+          '($1, $2, $3, $4)';
+        
+        paramaterized = [userId, name, url, ip];
+        callback = result => result.rows[0];
+        
+        break;
         
       case 'randomRow':
         

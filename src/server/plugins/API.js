@@ -1,79 +1,87 @@
+import Boom from 'boom';
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
 import queryDb from '../queryDb.js';
 import log from '../../shared/utils/logTailor.js';
-import devConfig from '../../../config/development.js';
+import devConfig from '../../../config/dev_server';
 import actionCreators from '../../shared/actionCreators';
+import { getAtomsValidationErrors, generatePreview } from '../../shared/components/atoms';
 import {API_VALIDATION_SCHEMA as validationSchema} from '../validationSchema.js';
 
 function apiPlugin(server, options, next) {
-  const {key, ttl} = devConfig().jwt;
+  const { key, ttl } = devConfig.jwt;
+  const cookieOptions = {ttl, path: '/'};
+  const createReason = (code, msg, err) => ({code, msg, err});
   
   // Allows validation and params mutation before querying db
   const beforeQuery = {
     
     createUser: (request, params) => new Promise((resolve, reject) =>
       bcrypt.genSalt(10, (err, salt) => {
-        if (err) return reject(err);
+        if (err) return reject(createReason(500, 'createUser bcrypt.genSalt', err));
+        
         bcrypt.hash(params.password, salt, (err, hash) => {
-          if (err) return reject(err);
+          if (err) return reject(createReason(500, 'createUser bcrypt.hash', err));
+          
+          params.picture = '';
           params.passwordHash = hash;
           params.ip = request.info.remoteAddress;
-          params.picture = '';
           delete params.password;
           resolve();
         });
       })
     ),
     
-    createUniverse: (request, params) => new Promise((resolve, reject) =>
-      JWT.verify(request.state.jwt, key, (err, decoded) => { // JWT.decode() should be enough since the token has already been verified by Hapi-Auth-JWT2
-        if (err) return reject(err);
-        params.name = params.name.trim(),
-        params.userId = decoded.userId; // The real user id
-        params.ip = request.info.remoteAddress;
-        resolve();
-      })
-    ),
+    createUniverse: (request, params) => new Promise((resolve, reject) => {
+      params.name = params.name.trim(),
+      params.ip = request.info.remoteAddress;
+      params.userId = JWT.decode(request.state.jwt).userId; // The real user id
+      resolve();
+    }),
     
-    createTopic: (request, params) => new Promise((resolve, reject) => 
-      JWT.verify(request.state.jwt, key, (err, decoded) => { // JWT.decode() should be enough since the token has already been verified by Hapi-Auth-JWT2
-        if (err) return reject(err);
-        params.title = params.title.trim(),
-        params.userId = decoded.userId; // The real user id
-        params.previewType = 'text',
-        params.previewContent = {
-          text: 'This needs to be generated dynamically.',
-        };
-        resolve();
-      })
-    ),
+    createTopic: (request, params) => new Promise((resolve, reject) => {
+      const validationErrors = getAtomsValidationErrors(params.atoms); // On both client and server
+      if (validationErrors.some(error => error)) return reject(createReason(400, validationErrors));
+      
+      params.title = params.title.trim(),
+      params.userId = JWT.decode(request.state.jwt).userId; // The real user id
+      
+      // generatePreview(params.atoms[params.previewAtomPosition]).then(...)
+      params.previewType = 'text',
+      params.previewContent = {
+        text: 'This needs to be generated dynamically.',
+      };
+      resolve();
+    }),
   };
   
   // ...
   const afterQuery = {
     
-    login: ({email, password}, result, response) => new Promise((resolve, reject) => {
+    login: (request, {email, password}, result) => new Promise((resolve, reject) => {
       if (result) bcrypt.compare(password, result.passwordHash, (err, isValid) => {
-        if (err) return reject(err);
+        if (err) return reject(createReason(500, 'login bcrypt.compare', err));
+        
         if (isValid) {
-          delete result.passwordHash;
-          const userId = result.id;
-          const expiration = new Date().getTime() + ttl;
-          response.state('jwt', JWT.sign({userId, expiration}, key), {ttl, path: '/'}); // Note: somehow, path: '/' is important
-          resolve(true); // Skips token renewal
+          delete result.passwordHash; // We know how to keep secrets
+          
+          resolve({
+            userId: result.id,
+            expiration: new Date().getTime() + ttl,
+          });
         }
-        else reject('password mismatch'); // Alerte : reject n'est pas le comportement attendu
+        else reject(401, 'invalid password');
       });
-      else reject('user not found');
+      else reject(401, 'user not found');
     }),
     
-    createUser: (params, result, response) => new Promise((resolve, reject) => {
-      // Alerte!!! Il faut que la bdd reponde ok pour pouvoir creer un cookie/token !!!!
-      const userId = result.id;
-      const expiration = new Date().getTime() + ttl;
-      response.state('jwt', JWT.sign({userId, expiration}, key), {ttl, path: '/'});
-      resolve(true); // Skips token renewal
+    createUser: (request, params, result) => new Promise((resolve, reject) => {
+      if (!result || !result.id) return reject(createReason(500, 'createUser no userId'));
+      
+      resolve({
+        userId: result.id,
+        expiration: new Date().getTime() + ttl,
+      });
     }),
   };
   
@@ -82,7 +90,7 @@ function apiPlugin(server, options, next) {
   for (let acKey in actionCreators) {
     
     const getShape = actionCreators[acKey].getShape || undefined;
-    const {intention, method, pathx, auth} = getShape ? getShape() : {};
+    const { intention, method, pathx, auth } = getShape ? getShape() : {};
     
     if (method && pathx) {
       const before = beforeQuery[intention] || (() => Promise.resolve());
@@ -96,56 +104,45 @@ function apiPlugin(server, options, next) {
           validate: { 
             payload: validationSchema[intention],
             failAction: (request, reply, source, error) => { 
-              // servira à renvoyer des messages d'erreur custom
-              const response = reply.response().hold();
-              log('... Joi failed:', error.data.details); // Pas pour la prod mais c'est relou d'aller dans console/network pour voir le message en devlopement
-              response.statusCode = 400;
-              response.source = error.data.details;
-              response.send();
+              const { details } = error.data;
+              log('... Joi failed:', details);
+              reply(Boom.badRequest(JSON.stringify(details)));
             }
           }
         },
         handler: (request, reply) => {
-          const params = method === 'post' ? request.payload : Object.keys(request.params).length === 1 && request.params.p ? request.params.p : request.params;
+          const requestToken = request.state.jwt;
           const response = reply.response().hold();
+          const params = method === 'post' ? request.payload : Object.keys(request.params).length === 1 && request.params.p ? request.params.p : request.params;
           
           before(request, params).then(
             () => queryDb(intention, params).then(
-              result => after(params, result, response).then(
-                skipRenewToken => {
-                  
-                  // Adds a renewed JWT in the response cookie
-                  const { jwt } = request.state;
-                  if (!skipRenewToken && jwt) JWT.verify(jwt, key, (err, {userId, expiration}) => {
-                    const t = new Date().getTime();
-                    if (err) log(err);
-                    else if (expiration > t) {
-                      response.state('jwt', JWT.sign({userId, expiration: t + ttl}, key), {ttl, path: '/'});
-                      log('... Token renewed');
-                    }
-                  });
+              result => after(request, params, result).then(
+                token => {
                   
                   response.source = result;
-                  response.send();
+                  
+                  if (token) response.state('jwt', JWT.sign(token, key), cookieOptions).send();
+                  
+                  else if (requestToken) JWT.verify(requestToken, key, (err, {userId, expiration}) => {
+                    if (err) return handleError(response, 'handler JWT.verify', err);
+                    
+                    const t = new Date().getTime();
+                    if (expiration > t) {
+                      response.state('jwt', JWT.sign({userId, expiration: t + ttl}, key), cookieOptions);
+                      log('... Token renewed');
+                    }
+                    response.send();
+                  });
+                  
+                  else response.send();
                 },
                 
-                error => {
-                  log('!!! Error while API afterQuery:', error.stack);
-                  response.statusCode  = 500;
-                  response.send();
-                }
+                handleError.bind(null, response, 'afterQuery')
               ),
-              error => {
-                log('!!! Error while queryDb:', error.message, JSON.stringify(error));
-                response.statusCode  = 500;
-                response.send();
-              }
+              handleError.bind(null, response, 'queryDb')
             ),
-            error => {
-              log('!!! Error while API beforeQuery:', error.stack);
-              response.statusCode  = 500;
-              response.send();
-            }
+            handleError.bind(null, response, 'beforeQuery')
           );
         },
       });
@@ -153,6 +150,29 @@ function apiPlugin(server, options, next) {
   }
 
   next();
+  
+  function handleError(response, origin, reason) {
+    
+    const msg = reason.msg || '';
+    const code = reason.code || 500;
+    const err = reason.code ? reason.err : reason;
+    
+    log('!!! Error while API', origin, msg);
+    log('Replying', code);
+    if (err) {
+      log('Reason:', err);
+      if (err instanceof Error) log(err.stack);
+    }
+    
+    // console.log('sent1');
+    response.source = code < 500 ? msg : 'Internal server error';
+    // console.log('sent2');
+    // response.statusCode = code;
+    // console.log('sent3');
+    // response.send();
+    // console.log('sent4');
+    response.code(code).send(); 
+  }
 }
 
 apiPlugin.attributes = {

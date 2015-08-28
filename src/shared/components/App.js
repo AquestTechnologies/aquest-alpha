@@ -1,27 +1,35 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { logout, createUser } from '../actionCreators';
+import { logout, createUser, uploadFile } from '../actionCreators';
 import LoadingBar from './app/LoadingBar';
+import ErrorBar from './app/ErrorBar';
+import SuccessBar from './app/SuccessBar';
 import Home from './app/Home';
 // import websocket from 'socket.io-client';
 
 class App extends React.Component {
   
   render() {
-    const { children, userId, logout, createUser } = this.props;
+    const { children, userId, records, logout, createUser, uploadFile, lastError, lastSuccess } = this.props;
     
     return (
       <div> 
-        <LoadingBar />
-        { children ? children : <Home userId={userId} logout={logout} createUser={createUser} /> }
+        <SuccessBar lastSuccess={lastSuccess} />
+        <ErrorBar lastError={lastError} />
+        <LoadingBar records={records} />
+        { children ? children : <Home userId={userId} logout={logout} createUser={createUser} uploadFile={uploadFile} /> }
       </div>
     );
   }
 }
 
-// const mapState = state => ({ userId: state.session.userId, websocket });
-const mapState = state => ({ userId: state.session.userId });
-const mapActions = dispatch => bindActionCreators({ logout, createUser }, dispatch);
+const mapState = state => ({ 
+  records: state.records,
+  lastError: state.lastError,
+  userId: state.session.userId,
+  lastSuccess: state.lastSuccess,
+});
+const mapActions = dispatch => bindActionCreators({ logout, createUser, uploadFile }, dispatch);
 
 export default connect(mapState, mapActions)(App);

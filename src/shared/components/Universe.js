@@ -4,7 +4,7 @@ import { connect }            from 'react-redux';
 import Menu                   from './universe/Menu';
 import Chat                   from './universe/Chat';
 import Inventory              from './universe/Inventory';
-import config                 from '../../../config/dev_shared';
+import config             from '../../../config/dev_shared';
 import menuScroll             from '../../client/lib/menuScroll';
 import { readUniverse, readInventory, readChat, joinChat, leaveChat, readChatOffset, createMessage, transitionTo } from '../actionCreators';
 

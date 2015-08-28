@@ -1,12 +1,13 @@
 // var webpack = require('webpack');
 import webpack from 'webpack';
-import devConfig from '../../../config/development';
+import devConfig from '../../../config/dev_server';
 
-const { path, filename, publicPath } = devConfig().wds;
+const { path, filename, publicPath } = devConfig.wds;
 
 export default {
   devtool: 'eval',
   entry: [
+    'babel/polyfill',
     'webpack/hot/dev-server',
     './src/client/client.js',
     'babel/polyfill'
@@ -15,7 +16,7 @@ export default {
     path,
     filename,
     publicPath,
-     // https://github.com/webpack/webpack-dev-server/issues/135
+    // https://github.com/webpack/webpack-dev-server/issues/135
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),

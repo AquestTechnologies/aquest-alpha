@@ -1,7 +1,7 @@
 import Handlers   from './handlers';
 import JWT        from 'jsonwebtoken';
 import log        from '../../../shared/utils/logTailor.js';
-import devConfig  from '../../../../config/development.js';
+import devConfig  from '../../../../config/dev_server';
 import Joi        from 'joi';
 import SocketIo   from 'socket.io';
 import {WEBSOCKET_VALIDATION_SCHEMA as validationSchema} from '../../validationSchema.js';
@@ -9,7 +9,7 @@ import {randomInteger} from '../../../shared/utils/randomGenerators';
 
 // Le plugin Websocket pour Hapi
 exports.register = function (server, options, next) {
-  const {key, ttl} = devConfig().jwt;
+  const { key, ttl } = devConfig.jwt;
     
   // creates websocket server using 'ws' defined port
   const io = new SocketIo(server.select('ws').listener);

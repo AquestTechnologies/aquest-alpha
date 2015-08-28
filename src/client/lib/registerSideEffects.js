@@ -20,10 +20,10 @@ export default function registerSideEffects(store, transitionTo) {
   
   store.subscribe(() => {
     const { records, router, session } = store.getState();
-    const action = records[records.length - 1];
-    const { type, payload } = action;
+    const lastAction = records[records.length - 1];
+    const { type, payload } = lastAction;
     
-    if (isAPIUnauthorized(action)) {
+    if (isAPIUnauthorized(lastAction)) {
       const { pathname } = router;
       log('.E. Unauthorized access, will redirect to', pathname);
       docCookies.removeItem('jwt');

@@ -6,6 +6,8 @@ _misc/profile_pictures_generator/node_modules
 dist/app.js
 dist/app.css
 dist/index.html
-dist
-config/ip.js
+dist/*
+config/dev_local.js
+config/dev_aws.js
+temp/*
 

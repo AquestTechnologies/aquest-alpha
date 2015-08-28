@@ -1,27 +1,26 @@
 import log from './utils/logTailor';
-import config from '../../config/client';
+import { sessionDuration } from '../../config/dev_shared';
 import { routerStateReducer } from 'redux-react-router';
-import { isAPIUnauthorized, isAPISuccess } from './actionCreators';
-import { copy, deepCopy, merge, fuse } from './utils/objectUtils';
+import { isAPIUnauthorized, isAPISuccess, isAPIFailure } from './actionCreators';
 
 export default {
   
   session: (state={}, action) => {
-    const {type, payload} = action;
-    const {userId, exp, redirection} = state;
-    log('.R. ' + type); // This line in first reducer
+    const { userId, exp, redirection } = state;
+    const { type, payload } = action;
+    log('.R. ' + type); // Please keep this line in the first reducer
     
     if (type === 'SUCCESS_LOGIN' || type === 'SUCCESS_CREATE_USER') return {
       redirection,
       userId: payload.id,
-      exp: new Date().getTime() + config.sessionDuration,
+      exp: new Date().getTime() + sessionDuration,
     };
     
     // If the API answers 200 then we renew the session expiration
     if (isAPISuccess(action)) return {
       userId,
       redirection,
-      exp: new Date().getTime() + config.sessionDuration,
+      exp: new Date().getTime() + sessionDuration,
     };
     
     // If the API answers 401 or user logs out then we kill the session
@@ -40,10 +39,10 @@ export default {
     switch (type) {
       
     case 'SUCCESS_CREATE_USER':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
       
     case 'SUCCESS_LOGIN':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
       
     default:
       return state;
@@ -55,22 +54,22 @@ export default {
     switch (type) {
       
     case 'SUCCESS_READ_UNIVERSE':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
   
     case 'SUCCESS_READ_UNIVERSES':
-      newState = copy(state);
+      newState = Object.assign({}, state);
       payload.forEach(universe => {
         if (!newState[universe.id]) newState[universe.id] = universe;
       });
       return newState;
       
     case 'SUCCESS_READ_INVENTORY':
-      newState = deepCopy(state);
+      newState = Object.assign({}, state);
       newState[params].lastInventoryUpdate = new Date().getTime();
       return newState;
     
     case 'SUCCESS_CREATE_UNIVERSE':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
     
     default:
       return state;
@@ -87,7 +86,7 @@ export default {
       
       return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
-        newState = deepCopy(state);
+        newState = Object.assign({}, state);
         if (action.payload.messages.length) newState[chatId].messages = action.payload.messages.concat(newState[chatId].messages);
         
         return newState;
@@ -97,8 +96,8 @@ export default {
       
       return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
-        newState = deepCopy(state);
-        newState[chatId] = fuse(newState[chatId], action.payload);
+        newState = Object.assign({}, state);
+        newState[chatId] = Object.assign({}, newState[chatId], action.payload);
         
         return newState;
       })(action);
@@ -108,9 +107,9 @@ export default {
       return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         
-        newState = deepCopy(state);
+        newState = Object.assign({}, state);
         
-        let newPayload = deepCopy(action.payload);
+        let newPayload = Object.assign({}, action.payload);
         delete newPayload.chatId;
         
         newState[chatId].messages.push(newPayload);
@@ -124,14 +123,14 @@ export default {
         const chatId = parseInt(action.payload.chatId, 10);
         const {owner, message} = action.payload;
         
-        newState = deepCopy(state);
+        newState = Object.assign({}, state);
         
         if(owner){
           const id = parseInt(action.payload.message.id,10);
           const {lcId} = message;
           const messageIndex = newState[chatId].messages.findIndex(({id}) => id === lcId);
           
-          let newMessage = deepCopy(message);
+          let newMessage = Object.assign({}, message);
           delete newMessage.lcId;
           
           if (messageIndex !== -1) { 
@@ -152,10 +151,10 @@ export default {
       return ((action) => {
         const chatId = parseInt(action.payload, 10);
         
-        newState = deepCopy(state);
+        newState = Object.assign({}, state);
         
         if (newState[chatId] && !newState[chatId].users) {
-          newState[chatId] = merge(newState[chatId], {users: []});
+          newState[chatId] = Object.assign({}, newState[chatId], {users: []});
         } else if (!newState[chatId]) {
           newState[chatId] = {users: []};
         }
@@ -169,9 +168,9 @@ export default {
         const chatId = parseInt(action.payload.chatId, 10);
         const {userList, userId, owner} = action.payload;
         
-        newState = deepCopy(state);
+        newState = Object.assign({}, state);
         
-        if (owner) newState[chatId] = merge(newState[chatId], {users: userList});
+        if (owner) newState[chatId] = Object.assign({}, newState[chatId], {users: userList});
         else {
           newState[chatId].users.push(userId);
         }   
@@ -184,7 +183,7 @@ export default {
       return ((action) => {
         const chatId = parseInt(action.payload, 10);
         
-        newState = deepCopy(state);
+        newState = Object.assign({}, state);
         
         delete newState[chatId].users;  
         
@@ -197,7 +196,7 @@ export default {
         const chatId = parseInt(action.payload.chatId, 10);
         const {userId} = action.payload;
         
-        newState = deepCopy(state);
+        newState = Object.assign({}, state);
         
         // remove the user from the user list
         if (newState[chatId].users && newState[chatId].users.length) newState[chatId].users.splice(newState[chatId].users.indexOf(userId), 1);
@@ -215,29 +214,36 @@ export default {
     switch (type) {
       
     case 'SUCCESS_READ_INVENTORY':
-      newState = copy(state);
+      newState = Object.assign({}, state);
       payload.forEach(topic => newState[topic.id] = topic);
       return newState;
       
     case 'SUCCESS_READ_TOPIC':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
       
     case 'SUCCESS_READ_TOPIC_ATOMS':
-      newState = deepCopy(state);
+      newState = Object.assign({}, state);
       newState[params].atoms = payload;
       return newState;
       
     case 'SUCCESS_CREATE_TOPIC':
-      return fuse(state, {[payload.id]: payload});
+      return Object.assign({}, state, {[payload.id]: payload});
       
     default:
       return state;
     }
   },
   
+  lastError: (state=false, action) => isAPIFailure(action) ? action.payload : false,
+  
+  lastSuccess: (state='', { type }) => {
+    if (type === 'SUCCESS_CREATE_TOPIC') return 'Topic creation success!';
+    if (type === 'SUCCESS_CREATE_UNIVERSE') return 'Universe creation success!';
+    return '';
+  },
+  
   router: (state={}, action) => routerStateReducer(state, action),
   
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
-  records: (state = [], action) => [...state, merge({date: new Date().getTime()}, action)]
-
+  records: (state = [], action) => [...state, Object.assign({date: new Date().getTime()}, action)]
 };

@@ -98,9 +98,41 @@ export const receiveLeaveChat = (params) => ({ type: 'RECEIVE_LEAVE_CHAT', paylo
 export const receiveMessage = (params) => ({ type: 'RECEIVE_MESSAGE', payload: params });
 
 
+export function uploadFile(params, fnProgress, fnUpload, fnResponse) {
+  const types = ['REQUEST_UPLOAD_FILE', 'SUCCESS_UPLOAD_FILE', 'FAILURE_UPLOAD_FILE'];
+  
+  const promise = new Promise((resolve, reject) => {
+    
+    const onUpload = typeof fnUpload === 'function' ? fnUpload : (() => {});
+    const onProgress = typeof fnProgress === 'function' ? fnProgress : (() => {});
+    const onResponse = typeof fnResponse === 'function' ? fnResponse : (() => {});
+    
+    const req = new XMLHttpRequest();
+    req.upload.addEventListener('load', onUpload);
+    req.upload.addEventListener('progress', onProgress);
+    req.onerror = err => reject(err);
+    req.open('post', '/uploadFile');
+    req.onload = () => {
+      const { status, response, statusText } = req;
+      if (status === 200) {
+        const result = JSON.parse(response);
+        onResponse(true, result); // Cela brise le flow Flux...
+        resolve(result);
+      } else {
+        onResponse(false, statusText);
+        reject(Error(statusText));
+      }
+    };
+    req.send(createForm(params));
+    
+  });
+  
+  return {types, promise, params};
+}
+
 const actionCreators = {
-  transitionTo, login, logout, 
-  readUniverse, readUniverses, readInventory, readChat, readChatOffset, readTopic, readTopicAtoms, 
+  transitionTo, login, logout, uploadFile,
+  readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
   createUser, createUniverse, createTopic, 
   joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage
 };
@@ -114,8 +146,7 @@ export default actionCreators;
 function createActionCreator(shape) {
   
   const { intention, method, pathx } = shape;
-  const types = ['REQUEST', 'SUCCESS', 'FAILURE']
-    .map(type => `${type}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
+  const types = ['REQUEST', 'SUCCESS', 'FAILURE'].map(t => `${t}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase());
   
   const actionCreator = params => {
     log('.A.', intention, params ? JSON.stringify(params) : '');
@@ -130,29 +161,33 @@ function createActionCreator(shape) {
       // Client : API call through XMLHttpRequest
       else {
         const isPost = method === 'post';
-        
         const path = isPost ? 
           pathx : params ? 
             pathx.replace(/{([A-Za-z]*)}/g, (match, p1, offset, string) => typeof params === 'object' ? params[p1] : params) : pathx;
             
-        const req = new XMLHttpRequest();
+        const xhr = new XMLHttpRequest();
         log(`+++ --> ${method} ${path}`, params);
         
-        req.onerror = err => reject(err);
-        req.open(method, path);
-        req.onload = () => req.status === 200 ? resolve(JSON.parse(req.response)) : reject(Error(req.statusText));
+        xhr.onerror = err => reject(err);
+        xhr.open(method, isPost ? path : params ? path + params : path);
+        xhr.onload = () => xhr.status === 200 ? 
+          resolve(JSON.parse(xhr.response)) : 
+          reject({
+            intention,
+            status: xhr.status,
+            response: xhr.response,
+          });
         
-        if (isPost) { 
-          //stringifies objects before POST XMLHttpRequest
+        if (isPost) { // Stringifies objects before a POST request
           for (let key in params) {
             if (params.hasOwnProperty(key)) {
               const value = params[key];
               params[key] = typeof(value) === 'object' ? JSON.stringify(value) : value;
             }
           }
-          req.send(createForm(params));
+          xhr.send(createForm(params));
         }
-        else req.send();
+        else xhr.send();
       }
     });
     
@@ -160,10 +195,10 @@ function createActionCreator(shape) {
       result => {
         if (!isServer) log(`+++ <-- ${intention}`, result);
       }, 
-      error => {
-        log('!!! Action error', error);
-        log('!!! shape', shape);
+      ({ status, response, intention }) => {
+        log('!!! API Action error', intention);
         log('!!! params', params);
+        log('!!! response', status, response);
       });
     
     return { types, params, promise };
@@ -178,7 +213,7 @@ function createActionCreator(shape) {
 
 //stringify objects value before send params to the server
 function stringifyObjectValues(params){
-  Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value])
+  Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
   return params;
 }
 
@@ -190,21 +225,39 @@ function createForm(o) {
   return f;
 }
 
-const ac = Object.keys(actionCreators).map(key => actionCreators[key]);
-const acAPI = ac.filter(ac => typeof ac.getShape === 'function');
+const acAPI = Object.keys(actionCreators)
+  .map(key => actionCreators[key])
+  .filter(ac => typeof ac.getTypes === 'function');
 
 const APISuccessTypes = acAPI
   .map(ac => ac.getTypes()[1]);
   
-const authFailureTypes = ac
-  .filter(ac => typeof ac.getShape === 'function' && ac.getShape().auth)
+const APIFailureTypes = acAPI
+  .map(ac => ac.getTypes()[2]);
+  
+const APIAuthFailureTypes = acAPI
+  .filter(ac => ac.getShape().auth)
   .map(ac => ac.getTypes()[2]);
   
 export function isAPIUnauthorized(action) {
   const { type, payload } = action;
-  return authFailureTypes.indexOf(type) !== -1 && payload && payload.message === 'Unauthorized';
+  return APIAuthFailureTypes.indexOf(type) !== -1 && payload && payload.status === 401;
 }
 
 export function isAPISuccess(action) {
   return APISuccessTypes.indexOf(action.type) !== -1;
 }
+
+export function isAPIFailure(action) {
+  return APIFailureTypes.indexOf(action.type) !== -1;
+}
+
+// function convertIntentionToType(intention, subType) {
+//   return `${subType}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase();
+// }
+
+// function convertTypeToIntention(type) {
+//   if (!/REQUEST|SUCCESS|FAILURE/.test(type.substr(0, 7))) return false;
+  
+//   return type.substr(8).split('_').map((s, i) => i ? s.toLowerCase() : s.substr(0, 1) + s.substr(1).toLowerCase()).join();
+// }
