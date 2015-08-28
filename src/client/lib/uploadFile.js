@@ -1,3 +1,4 @@
+// A promise wrapper around XMLHttpRequest
 export default function uploadFile(file, fnProgress, fnLoad) {
   
   return new Promise((resolve, reject) => {

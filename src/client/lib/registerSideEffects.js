@@ -44,7 +44,6 @@ export default function registerSideEffects(store, transitionTo) {
         
       case 'LOGOUT':
         logR(type);
-        console.log('no more cookie');
         docCookies.removeItem('jwt');
         transitionTo('/');
         return;

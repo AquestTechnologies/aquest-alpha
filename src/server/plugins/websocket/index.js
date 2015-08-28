@@ -1,92 +1,87 @@
-import Handlers   from './handlers';
-import JWT        from 'jsonwebtoken';
-import log        from '../../../shared/utils/logTailor.js';
-import devConfig  from '../../../../config/dev_server';
 import Joi        from 'joi';
 import SocketIo   from 'socket.io';
-import {WEBSOCKET_VALIDATION_SCHEMA as validationSchema} from '../../validationSchema.js';
-import {randomInteger} from '../../../shared/utils/randomGenerators';
+import JWT        from 'jsonwebtoken';
+import devConfig  from '../../../../config/dev_server';
+import log        from '../../../shared/utils/logTailor.js';
+import { randomInteger } from '../../../shared/utils/randomGenerators';
+import { WEBSOCKET_VALIDATION_SCHEMA as validationSchema } from '../../validationSchema.js';
 
 // Le plugin Websocket pour Hapi
-exports.register = function (server, options, next) {
+export default function websocketPlugin(server, options, next) {
   const { key, ttl } = devConfig.jwt;
-    
+  
   // creates websocket server using 'ws' defined port
   const io = new SocketIo(server.select('ws').listener);
+  const chatNamespace = io.of('/chat');
+  chatNamespace.use(socketAuthentication);
   
-  //before RabbitMQ implementation
-  // let userList = new WeakMap(); --> Doesn't work at the moment
-  let chatList = {};
+  let chatsUsers = 0;
+  const UserLists = {};
   const owner = true;
   
-  //namespace for the chat of a universe or a topic
-  const chat = io.of('/chat-universe-topic');
-  chat.use(socketAuthentication);
-  
-  let chatUsers = 0;
-  chat.on('connection', (socket) => {
-    chatUsers++;
-    log('___ [' + chatUsers + '] New client connected in a chat universe | topic');
+  chatNamespace.on('connection', socket => {
+    chatsUsers++;
     
-    socket.on('joinChat', function(request) {
+    socket.on('joinChat', request => {
       Joi.validate(request, validationSchema['joinChat'], (err, value) => {
-        if (err) throw err;
-          
+        if (err) return log(err);
+        
         const chatId = request;
-        const {userId} = socket;
+        const { userId } = socket;
         
         socket.join(chatId);
-        // userList.set({userId: request.userId}, request);
-        let userList = Array.isArray(chatList[chatId]) ? chatList[chatId] : chatList[chatId] = [];
-        userList.push(userId);
-
-        log(`___ ${userId} joining chat ${chatId} - countUsers: ${chatList[chatId].length}`);
+        if (!UserLists[chatId]) UserLists[chatId] = [];
         
-        // send the current list of people in the chat to the user joining the chat
+        let userList = UserLists[chatId];
+        userList.push(userId);
+        
+        log(`_w_ ${userId} joining chat ${chatId} - ${userList.length}/${chatsUsers}`);
+        
+        // Sends the current list of people in the chat to the user joining the chat
         socket.emit('receiveJoinChat', { chatId, userList, owner });
         
-        //send the user info to current people in the chat
+        // Sends the user info to current people in the chat
         socket.broadcast.to(chatId).emit('receiveJoinChat', { chatId, userId });
       });
     });
-
-    socket.on('leaveChat', function(request) {
+  
+    socket.on('leaveChat', request => {
       Joi.validate(request, validationSchema['leaveChat'], (err, value) => {
-        
-        if (err) throw err;
+        if (err) return log(err);
         
         const chatId = request;
-        const {userId} = socket;
+        const { userId } = socket;
         
         socket.leave(chatId);
-        // userList.delete(socket);
-        let userList = Array.isArray(chatList[chatId]) ? chatList[chatId] : chatList[chatId] = [];
+        
+        if (!UserLists[chatId]) UserLists[chatId] = [];
+        
+        let userList = UserLists[chatId];
         userList.splice(userList.indexOf(userId), 1);
         
-        log(`___ ${userId} leaving chat ${chatId} - countUsers: ${chatList[chatId].length}`);
+        log(`_w_ ${userId} leaving chat ${chatId} - ${userList.length}/${chatsUsers}`);
         
-        //send request to remove the user who left the chat from their list
+        // Sends a request to remove the user who left the chat from their list
         socket.broadcast.to(chatId).emit('receiveLeaveChat', { chatId, userId });
       });
     });
     
-    socket.on('createMessage', function(request) {
+    socket.on('createMessage', request => {
       Joi.validate(request, validationSchema['createMessage'], (err, value) => {
+        if (err) return log(err);
         
-        if (err) throw err;
-        
-        const {chatId, content} = request;
+        const { chatId, content } = request;
         const lcId = request.id; // the user provide a temporary id
         
         userAuthentication(socket).then(
           result => {
             log('authentication succeded', result);
             
-            const {userId} = socket;
+            const { userId } = socket;
             const d = new Date(); // let's fix that later
             const id = randomInteger(0, 1000000); // it's supposed to be the real id
             
-            log(`___ ${userId} createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
+            log(`_w_ createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
             
             socket.emit('receiveMessage', { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}, owner});
             
@@ -105,19 +100,19 @@ exports.register = function (server, options, next) {
       });
     });
     
-    socket.on('disconnect', (request) => {
-      chatUsers--;
+    socket.on('disconnect', request => {
+      chatsUsers--;
       let disconnectChatId = -1;
-
-      log(`___ [${chatUsers}] ${socket.userId} id: ${socket.id} disconnected`);
+      
+      const { userId, id } = socket;
+      log(`_w_ [${chatsUsers}] ${userId} id: ${id} disconnected`);
       
       //dirty wait for RabbitMQ
-      const {userId} = socket;
-      for(let chatId in chatList) {
-        chatList[chatId] = chatList[chatId].filter((user) => {
-          if(user === userId){
+      for (let chatId in UserLists) {
+        UserLists[chatId] = UserLists[chatId].filter(user => {
+          if (user === userId) {
             disconnectChatId = chatId;
-            log(`from a chatId: ${disconnectChatId} - universe | topic`);
+            // log(`from a chatId: ${disconnectChatId} - universe | topic`);
             socket.broadcast.to(chatId).emit('leaveChat', { chatId, userId });
             return false;
           }
@@ -131,18 +126,18 @@ exports.register = function (server, options, next) {
    * Should we really use socketio to vote ?
    * namespace to vote for a topic/message
    * */
-  const vote = io.of('/vote');
+  const voteNamespace = io.of('/vote');
   let voteUsers = 0;
-  vote.on('connection', (socket) => {
+  voteNamespace.on('connection', (socket) => {
       voteUsers++;
       log('___ [' + voteUsers + '] New client is able to vote for a topic | message');
       
-      socket.on('createVote', Handlers.createVote);
+      socket.on('createVote', (() => console.log('vote')));
       
       socket.on('disconnect', (socket) => {
         voteUsers--;
         log('___ [' + voteUsers + '] A client disconnected from voting for a topic | message');
-      })
+      });
   });
   
   //Simplified version of cookie parsing from https://github.com/jshttp/cookie/blob/master/index.js
@@ -150,112 +145,73 @@ exports.register = function (server, options, next) {
     if (typeof str !== 'string') {
       throw new TypeError('parseCookie argument str must be a string');
     }
-  
+    
     let obj = {};
     const pairs = str.split(/; /g);
-  
+    
     pairs.forEach(function(pair) {
       let eq_idx = pair.indexOf('=');
-  
+      
       // skip things that don't look like key=value
       if (eq_idx < 0) {
         return;
       }
-  
-      var key = pair.substr(0, eq_idx).trim()
+      
+      var key = pair.substr(0, eq_idx).trim();
       var val = pair.substr(++eq_idx, pair.length).trim();
-  
+      
       // quoted values
       if ('"' == val[0]) {
         val = val.slice(1, -1);
       }
-  
+      
       // only assign once
       if (undefined == obj[key]) {
         obj[key] = val;
       }
     });
-  
+    
     return obj;
-  }
-  
-  function setJWTCookie(jwt, cookie){
-    let strCookie;
-    
-    for(let key in cookie){
-      if(key === 'jwt') strCookie += `${key}=${jwt}; `;
-      else {
-        strCookie += `${key}=${cookie[key]}; `;
-      }
-    }
-    
-    return strCookie;
   }
   
   function userAuthentication(socket) { 
     
-    console.log('.W. userAuthentication cookie validation', socket.request.headers.cookie);
-    if (socket.request.headers.cookie) {
-      let strCookie = socket.request.headers.cookie;
-      const cookie = parseCookie(strCookie);
+    // console.log('.W. userAuthentication cookie validation', socket.request.headers.cookie);
+    return !socket.request.headers.cookie ?
+      Promise.reject('not authorized ! sign in ?') :
+      new Promise((resolve, reject) => {
+        const cookie = parseCookie(socket.request.headers.cookie);
         
-      return new Promise((resolve, reject) => {
-        if (cookie.jwt) {
-          JWT.verify(cookie.jwt, key, (err, {userId, expiration}) => { // JWT.decode() should be enough since the token has already been verified by Hapi-Auth-JWT2
-            const t = new Date().getTime();
-            if (err) return reject(err);
-            // else if (expiration > t) {
-            //   strCookie = setJWTCookie( cookie, JWT.sign({userId, expiration: t + ttl}, key) );
-            //   log('... WebSocket : token renewed');
-            // }
-            resolve(userId);
-          });
-        } else {
-          reject('no jwt cookie object');
-        }
+        if (cookie.jwt) JWT.verify(cookie.jwt, key, (err, {userId, expiration}) => {
+          if (err) return reject(err);
+          
+          if (expiration > new Date().getTime()) resolve(userId);
+          else reject('not authorized ! sign in ?');
+        });
+        else reject('no jwt cookie object');
       });
-    } else {
-      log('websocket authentication - no cookie');
-      socket.error('not authorized ! sign in ?');
+  }
+  
+  const authError = new Error('Authentication error');
+  function socketAuthentication(socket, next) { 
+    // console.log('.W. socketAuthentication cookie validation', socket.request.headers.cookie);
+    const strCookie = socket.request.headers.cookie;
+    const cookie = strCookie ? parseCookie(strCookie) : {};
+    
+    if (cookie.jwt) JWT.verify(cookie.jwt, key, (err, {userId, expiration}) => { 
+      if (err) return next(authError);
+      socket.id = userId;
+      next();
+    });
+    else {
+      socket.userId = socket.id;
+      next();
     }
   }
   
-  function socketAuthentication(socket, next) { 
-    console.log('.W. socketAuthentication cookie validation', socket.request.headers.cookie);
-    let strCookie = socket.request.headers.cookie;
-    const cookie = strCookie ? parseCookie(strCookie) : false;
-      
-    let authPromise = new Promise((resolve, reject) => {
-      if (cookie && cookie.jwt) {
-        JWT.verify(cookie.jwt, key, (err, {userId, expiration}) => { // JWT.decode() should be enough since the token has already been verified by Hapi-Auth-JWT2
-          const t = new Date().getTime();
-          if (err) return reject(err);
-          else if (expiration > t) {
-            strCookie = setJWTCookie( cookie, JWT.sign({userId, expiration: t + ttl}, key) );
-            log('... WebSocket : token renewed');
-          }
-          resolve(userId);
-        });
-      } else {
-        resolve(socket.id);
-      }
-    });
-    
-    authPromise.then(
-      result => {
-        log('retrieved or generate userId succeded', result);
-        socket.userId = result; // keep userId in the socket object of the user
-        return next();
-      },
-      error => {
-        log('retrieved or generate userId Failed : ', error.stack ? error.stack : error);
-      }
-    );
-  }
-  
   next();
-};
+}
 
-exports.register.attributes = {
-  name: 'hapi-ws'
+websocketPlugin.attributes = {
+  name: 'websocketPlugin'
 };

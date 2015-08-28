@@ -38,8 +38,6 @@ export default class Chat extends React.Component {
       readChatOffset({ chatId, offset: messages[messageIndex].id });
     }
     else {
-        console.log('yolo');
-        console.log('yolo');
       readChat(chatId);
     }
     
@@ -118,9 +116,9 @@ export default class Chat extends React.Component {
         </div>
           
         <ChatFooter
-          chatId        = {chatId}
-          users         = {users}
-          createMessage = {createMessage}
+          users={users}
+          chatId={chatId}
+          createMessage={createMessage}
         />
       </div>
     );
