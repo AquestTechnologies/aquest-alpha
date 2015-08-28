@@ -183,8 +183,7 @@ export default class CreateTopic extends React.Component {
         </div>
         
         <div className="topic_author">
-          {`By ${userId} - `}
-          { this.renderAddAtomsButtons() }
+          {`By ${userId}`}
         </div>
         
         <div className="topic_atoms">
@@ -214,6 +213,8 @@ export default class CreateTopic extends React.Component {
           onClick={this.handleSubmitClick.bind(this)}
           value={atomsShouldGetReady ? 'Loading...' : 'Create Topic'}
         />
+        { ' - ' }
+        { this.renderAddAtomsButtons() }
       </div>
     );
   }

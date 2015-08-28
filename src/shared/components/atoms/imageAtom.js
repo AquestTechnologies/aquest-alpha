@@ -1,7 +1,6 @@
 import React from 'react';
-import log from '../../utils/logTailor';
+// import log from '../../utils/logTailor';
 import uploadFile from '../../../client/lib/uploadFile';
-import makeHttpRequest from '../../../client/lib/makeHttpRequest';
 
 // A regex to test image URL 
 // Also matches any string starting with "blob"

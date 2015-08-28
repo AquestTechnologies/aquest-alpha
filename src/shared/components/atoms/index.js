@@ -12,6 +12,7 @@ import validate from 'validate.js';
 
 const atomPlugins = [
   require('./textAtom'),
+  require('./linkAtom'),
   require('./imageAtom'),
   require('./youtubeAtom'),
 ];
