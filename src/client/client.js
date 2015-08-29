@@ -8,8 +8,8 @@ import protectRoutes  from '../shared/routes';
 import registerShortcuts   from './lib/registerShortcuts';
 import registerSideEffects from './lib/registerSideEffects';
 import log, { logWelcome } from '../shared/utils/logTailor';
-import promiseMiddleware   from '../shared/utils/promiseMiddleware';
-import websocketMiddleware   from '../shared/utils/websocketMiddleware';
+import promiseMiddleware   from '../shared/middleware/promiseMiddleware';
+import websocketMiddleware from '../shared/middleware/websocketMiddleware';
 
 (() => {
   const d = new Date();

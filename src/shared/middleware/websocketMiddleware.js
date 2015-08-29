@@ -1,19 +1,18 @@
-import log from './logTailor.js';
-import config from '../../../config/dev_shared';
+import log from '../utils/logTailor.js';
 import websocket from 'socket.io-client';
-import docCookies from '../../client/vendor/cookie';
+import { wsUrl } from '../../../config/dev_shared';
 import { receiveMessage, receiveJoinChat, receiveLeaveChat } from '../actionCreators';
 
 export default function websocketMiddleware({ dispatch, getState }) {
-  // log('.M. promiseMiddleware');
   
   const sockets = {};
-  const logWs = (type, payload) => log('.W.', type, payload);
+  const logWs = (type, payload) => log('_w_', type, payload);
   
   return next => action => {
-    const {type, payload} = action;
     
     let socket;
+    let continueDispatch = true; // interupts the dispatch chain if false;
+    const {type, payload} = action;
     
     switch (type) {
       
@@ -22,49 +21,52 @@ export default function websocketMiddleware({ dispatch, getState }) {
         for(let key in sockets){
           sockets[key].disconnect();
         }
+        
+        continueDispatch = false;
         break;
         
       case 'JOIN_CHAT':
-        
-        if (sockets['chat-universe-topic']) socket = sockets['chat-universe-topic'];
-        else {
-          socket = sockets['chat-universe-topic'] = websocket.connect(`${config.wsUrl}/chat-universe-topic`);
-        }
-        
-        if (socket.disconnected) socket = sockets['chat-universe-topic'] = websocket.connect(`${config.wsUrl}/chat-universe-topic`, {forceNew: true});
-        
         logWs(type, payload);
         
+        if (!sockets['chat']) sockets['chat'] = websocket.connect(`${wsUrl}/chat`);
+        else if (sockets['chat'].disconnected) sockets['chat'] = websocket.connect(`${wsUrl}/chat`, {forceNew: true});
+        
+        socket = sockets['chat'];
         socket.emit('joinChat', payload);
         socket.on('receiveMessage', result => next(receiveMessage(result)));
         socket.on('receiveJoinChat', result => next(receiveJoinChat(result)));
         socket.on('receiveLeaveChat', result => next(receiveLeaveChat(result)));
-        socket.on('error', error => typeof error === 'object' && error.message ? next(receiveMessage(error)) : log('!!! socket error', error));
         socket.on('connect_failed', () => log('connect_failed'));
-        socket.on('disconnect', (result) => log(`.W. ${result}`));
+        socket.on('disconnect', result => log(`.W. ${result}`));
+        socket.on('error', error => typeof error === 'object' && error.message ? 
+          next(receiveMessage(error)) : 
+          log('!!! socket error', error));
+          
+        continueDispatch = false;
         break;
         
       case 'LEAVE_CHAT':
-        socket = sockets['chat-universe-topic'];
-        
         logWs(type, payload);
         
+        socket = sockets['chat'];
         socket.emit('leaveChat', payload);
         socket.removeListener('receiveMessage');
         socket.removeListener('receiveJoinChat');
         socket.removeListener('receiveLeaveChat');
+        
+        continueDispatch = false;
         break;
         
       case 'CREATE_MESSAGE':
-        socket = sockets['chat-universe-topic'];
-        
         logWs(type, payload);
         
+        socket = sockets['chat'];
         socket.emit('createMessage', payload);
+        
+        continueDispatch = false;
         break;
     }
     
-    return next(action);
+    if (continueDispatch) return next(action);
   };
 }
-

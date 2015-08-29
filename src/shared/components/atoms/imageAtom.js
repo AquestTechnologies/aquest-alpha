@@ -18,7 +18,7 @@ class ImageAtomViewer extends React.Component {
     };
   }
   
-  componentWillMount() {
+  componentDidMount() {
     const { url } = this.props.content;
     const image = new Image();
     

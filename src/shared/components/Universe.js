@@ -31,12 +31,6 @@ class Universe extends React.Component {
     return topicId ? tasks : tasks.concat(inventory);
   }
   
-  componentWillMount() {
-    console.log('.C. componentWillMount');
-    const { universes, readUniverse, params: { universeId } } = this.props;
-    if (!universes[universeId]) readUniverse(universeId);
-  }
-  
   componentDidMount() {
     const { universes, readUniverse, params: { universeId } } = this.props;
     if (!universes[universeId]) readUniverse(universeId);

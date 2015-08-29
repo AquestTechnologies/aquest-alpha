@@ -130,13 +130,13 @@ export default function websocketPlugin(server, options, next) {
   let voteUsers = 0;
   voteNamespace.on('connection', (socket) => {
       voteUsers++;
-      log('___ [' + voteUsers + '] New client is able to vote for a topic | message');
+      log('_w_ [' + voteUsers + '] New client is able to vote for a topic | message');
       
       socket.on('createVote', (() => console.log('vote')));
       
       socket.on('disconnect', (socket) => {
         voteUsers--;
-        log('___ [' + voteUsers + '] A client disconnected from voting for a topic | message');
+        log('_w_ [' + voteUsers + '] A client disconnected from voting for a topic | message');
       });
   });
   
@@ -176,7 +176,7 @@ export default function websocketPlugin(server, options, next) {
   
   function userAuthentication(socket) { 
     
-    // console.log('.W. userAuthentication cookie validation', socket.request.headers.cookie);
+    // console.log('_w_ userAuthentication cookie validation', socket.request.headers.cookie);
     return !socket.request.headers.cookie ?
       Promise.reject('not authorized ! sign in ?') :
       new Promise((resolve, reject) => {
@@ -190,17 +190,16 @@ export default function websocketPlugin(server, options, next) {
         });
         else reject('no jwt cookie object');
       });
-  }
+  } 
   
-  const authError = new Error('Authentication error');
   function socketAuthentication(socket, next) { 
-    // console.log('.W. socketAuthentication cookie validation', socket.request.headers.cookie);
+    // console.log('_w_ socketAuthentication cookie validation', socket.request.headers.cookie);
     const strCookie = socket.request.headers.cookie;
     const cookie = strCookie ? parseCookie(strCookie) : {};
     
     if (cookie.jwt) JWT.verify(cookie.jwt, key, (err, {userId, expiration}) => { 
-      if (err) return next(authError);
-      socket.id = userId;
+      if (err) return next(new Error('Authentication error'));
+      socket.userId = userId;
       next();
     });
     else {

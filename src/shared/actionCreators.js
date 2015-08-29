@@ -53,7 +53,7 @@ export const readChat = createActionCreator({
 export const readChatOffset = createActionCreator({
   intention:  'readChatOffset',
   method:     'get',
-  pathx:      '/api/chat/{chatId}/offset/{offset}', 
+  pathx:      '/api/chat/{chatId}/{offset}', 
   auth:       false,
 });
 
@@ -85,56 +85,23 @@ export const login = createActionCreator({
   auth:       false,
 });
 
-export const joinChat = (params) => ({ type: 'JOIN_CHAT', payload: params });
+export const joinChat = params => ({ type: 'JOIN_CHAT', payload: params });
   
-export const leaveChat = (params) => ({ type: 'LEAVE_CHAT', payload: params });  
+export const leaveChat = params => ({ type: 'LEAVE_CHAT', payload: params });  
   
-export const createMessage = (params) => ({ type: 'CREATE_MESSAGE', payload: params });  
+export const createMessage = params => ({ type: 'CREATE_MESSAGE', payload: params });  
   
-export const receiveJoinChat =  (params) => ({ type: 'RECEIVE_JOIN_CHAT', payload: params });
+export const receiveJoinChat =  params => ({ type: 'RECEIVE_JOIN_CHAT', payload: params });
   
-export const receiveLeaveChat = (params) => ({ type: 'RECEIVE_LEAVE_CHAT', payload: params });
+export const receiveLeaveChat = params => ({ type: 'RECEIVE_LEAVE_CHAT', payload: params });
   
-export const receiveMessage = (params) => ({ type: 'RECEIVE_MESSAGE', payload: params });
-
-
-export function uploadFile(params, fnProgress, fnUpload, fnResponse) {
-  const types = ['REQUEST_UPLOAD_FILE', 'SUCCESS_UPLOAD_FILE', 'FAILURE_UPLOAD_FILE'];
-  
-  const promise = new Promise((resolve, reject) => {
-    
-    const onUpload = typeof fnUpload === 'function' ? fnUpload : (() => {});
-    const onProgress = typeof fnProgress === 'function' ? fnProgress : (() => {});
-    const onResponse = typeof fnResponse === 'function' ? fnResponse : (() => {});
-    
-    const req = new XMLHttpRequest();
-    req.upload.addEventListener('load', onUpload);
-    req.upload.addEventListener('progress', onProgress);
-    req.onerror = err => reject(err);
-    req.open('post', '/uploadFile');
-    req.onload = () => {
-      const { status, response, statusText } = req;
-      if (status === 200) {
-        const result = JSON.parse(response);
-        onResponse(true, result); // Cela brise le flow Flux...
-        resolve(result);
-      } else {
-        onResponse(false, statusText);
-        reject(Error(statusText));
-      }
-    };
-    req.send(createForm(params));
-    
-  });
-  
-  return {types, promise, params};
-}
+export const receiveMessage = params => ({ type: 'RECEIVE_MESSAGE', payload: params });
 
 const actionCreators = {
-  transitionTo, login, logout, uploadFile,
-  readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
+  transitionTo, login, logout,
   createUser, createUniverse, createTopic, 
-  joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage
+  readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
+  joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage,
 };
 
 export default actionCreators;
@@ -160,32 +127,36 @@ function createActionCreator(shape) {
       
       // Client : API call through XMLHttpRequest
       else {
-        const isPost = method === 'post';
-        const path = isPost ? 
-          pathx : params ? 
-            pathx.replace(/{([A-Za-z]*)}/g, (match, p1, offset, string) => typeof params === 'object' ? params[p1] : params) : pathx;
-            
         const xhr = new XMLHttpRequest();
+        const isPost = method === 'post' || method === 'put';
+        const path = isPost || !params ? pathx : 
+          pathx.replace(/{([A-Za-z]*)}/g, (match, p1) => params[p1] || params);
+          
         log(`+++ --> ${method} ${path}`, params);
         
-        xhr.onerror = err => reject(err);
-        xhr.open(method, isPost ? path : params ? path + params : path);
-        xhr.onload = () => xhr.status === 200 ? 
-          resolve(JSON.parse(xhr.response)) : 
-          reject({
-            intention,
-            status: xhr.status,
-            response: xhr.response,
-          });
+        xhr.onerror = err => reject({ 
+          intention,
+          status: 0, 
+          response: 'An error occured, check your internet connection: ' + err.message, 
+        });
+        
+        xhr.open(method, path);
+        
+        xhr.onload = () => {
+          const { status } = xhr;
+          const response = JSON.parse(xhr.response);
+          status === 200 ? resolve(response) : reject({ status, response, intention });
+        };
         
         if (isPost) { // Stringifies objects before a POST request
+          let form = new FormData();
           for (let key in params) {
             if (params.hasOwnProperty(key)) {
               const value = params[key];
-              params[key] = typeof(value) === 'object' ? JSON.stringify(value) : value;
+              form.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
             }
           }
-          xhr.send(createForm(params));
+          xhr.send(form);
         }
         else xhr.send();
       }
@@ -209,20 +180,6 @@ function createActionCreator(shape) {
   actionCreator.getShape = () => shape;
   
   return actionCreator;
-}
-
-//stringify objects value before send params to the server
-function stringifyObjectValues(params){
-  Object.keys(params).map(value => params[value] = typeof(params[value]) === 'object' ? JSON.stringify(params[value]) : params[value]);
-  return params;
-}
-
-function createForm(o) {
-  let f = new FormData();
-  for (let k in o) { 
-    if (o.hasOwnProperty(k)) f.append(k, o[k]); 
-  } 
-  return f;
 }
 
 const acAPI = Object.keys(actionCreators)
@@ -251,13 +208,3 @@ export function isAPISuccess(action) {
 export function isAPIFailure(action) {
   return APIFailureTypes.indexOf(action.type) !== -1;
 }
-
-// function convertIntentionToType(intention, subType) {
-//   return `${subType}_${intention.replace(/[A-Z]/g, '_$&')}`.toUpperCase();
-// }
-
-// function convertTypeToIntention(type) {
-//   if (!/REQUEST|SUCCESS|FAILURE/.test(type.substr(0, 7))) return false;
-  
-//   return type.substr(8).split('_').map((s, i) => i ? s.toLowerCase() : s.substr(0, 1) + s.substr(1).toLowerCase()).join();
-// }

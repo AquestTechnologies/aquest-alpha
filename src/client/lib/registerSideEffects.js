@@ -32,8 +32,6 @@ export default function registerSideEffects(store, transitionTo) {
       return;
     }
     
-    console.log('.E. ', type);
-    
     switch (type) {
       
       case 'TRANSITION_TO':
