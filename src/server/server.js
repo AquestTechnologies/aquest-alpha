@@ -58,7 +58,7 @@ server.register([
       method: 'GET',
       path: '/img/{filename}',
       config: { auth: false },
-      handler: (request, reply) => reply.file('dist/img/' + request.params.filename),
+      handler: (request, reply) => reply.file('public/img/' + request.params.filename),
     },
   ]);
 });

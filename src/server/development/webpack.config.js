@@ -9,8 +9,7 @@ export default {
   entry: [
     'babel/polyfill',
     'webpack/hot/dev-server',
-    './src/client/client.js',
-    'babel/polyfill'
+    './src/client/client.js'
   ],
   output: {
     path,
