@@ -13,7 +13,7 @@ import { uploadStreamToS3 } from '../../../queryS3';
 // And retry 'gm convert -list formats', JPEG and PNG should be there.
 
 // -- Config --
-const maxWidth = 800;
+const maxWidth = 1024;
 
 // This plugin does not handle errors from unsupported image format (delegate not found)
 // Which is bad
@@ -27,7 +27,7 @@ export default function processImage(fileStream) {
     // Not knowing if this is as bad as it looks I'm doing it anyway
     
     const image = gm(fileStream) // Full stream image processing!
-    .identify({bufferStream: true}, (err, data) => {
+    .identify({bufferStream: true}, (err, data) => { // Not really, it's a buffer now...
       if (err) return reject(err);
       
       // console.log(data)

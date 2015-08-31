@@ -3,11 +3,6 @@ node_modules
 _misc/davidfaitdeschoses/img
 _misc/profile_pictures_generator/img
 _misc/profile_pictures_generator/node_modules
-dist/app.js
-dist/app.css
-dist/index.html
-dist/*
 config/dev_local.js
 config/dev_aws.js
 temp/*
-

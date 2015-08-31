@@ -22,28 +22,6 @@ export default class Chat extends React.Component {
     };
   }
   
-  componentWillMount() {
-    // console.log('.C. Chat.componentWillMount');
-    
-    const {chatId, chat, readChat, readChatOffset} = this.props;
-    const messages = (chat || []).messages || [];
-    
-    if (messages && messages.length) {
-      let messageIndex = messages.length - 1;
-      
-      while(typeof messages[messageIndex].id === 'string' && (messages[messageIndex].id.substr(0,2) === 'lc' || messages[messageIndex].id.substr(0,2) === 'fe')) {
-        messageIndex--;
-      }
-      
-      readChatOffset({ chatId, offset: messages[messageIndex].id });
-    }
-    else {
-        console.log('yolo');
-      readChat(chatId);
-    }
-    
-  }
-  
   componentWillReceiveProps(nextProps) {
     // console.log('.C. Chat.componentWillReceiveProps');
     
@@ -69,7 +47,20 @@ export default class Chat extends React.Component {
     //permet de scroller les messages tout en bas après le mount.
     // console.log('.C. Chat mount');
     
-    const {chatId, joinChat} = this.props;
+    const {chatId, chat, readChat, readChatOffset, joinChat} = this.props;
+    const messages = (chat || []).messages || [];
+    
+    if (messages && messages.length) {
+      let messageIndex = messages.length - 1;
+      
+      while (typeof messages[messageIndex].id === 'string' && (messages[messageIndex].id.substr(0,2) === 'lc' || messages[messageIndex].id.substr(0,2) === 'fe')) {
+        messageIndex--;
+      }
+      
+      readChatOffset({ chatId, offset: messages[messageIndex].id });
+    }
+    else readChat(chatId);
+    
     joinChat(chatId);
     
     setTimeout(() => { // Pourquoi un timeout de merde ? Pke sans ça chrome le fait pas ! 
@@ -117,9 +108,9 @@ export default class Chat extends React.Component {
         </div>
           
         <ChatFooter
-          chatId        = {chatId}
-          users         = {users}
-          createMessage = {createMessage}
+          users={users}
+          chatId={chatId}
+          createMessage={createMessage}
         />
       </div>
     );

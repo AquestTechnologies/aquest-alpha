@@ -4,13 +4,13 @@ import JWT       from 'jsonwebtoken';
 import Location  from 'react-router/lib/Location';
 import { reduxRouteComponent } from 'redux-react-router';
 import {createStore, combineReducers, applyMiddleware} from 'redux';
+import log, { logAuthentication }  from '../shared/utils/logTailor';
 import Router, { Route } from 'react-router';
 import phidippides       from './phidippides';
+import protectRoutes     from '../shared/routes';
 import reducers          from '../shared/reducers';
 import devConfig         from '../../config/dev_server';
-import promiseMiddleware from '../shared/utils/promiseMiddleware';
-import log, { logAuthentication }  from '../shared/utils/logTailor';
-import protectRoutes from '../shared/routes';
+import promiseMiddleware from '../shared/middleware/promiseMiddleware';
 
 const { wds: { hotFile, publicPath, filename }, jwt: { key, ttl } } = devConfig;
 const HTML = fs.readFileSync('src/server/index.html', 'utf8');

@@ -35,61 +35,11 @@ export default class Home extends React.Component {
     
     return (
       <div style={s1}>    
-      
         <h1>Aquest</h1>
         <Link to='/Explore'>Explore</Link>
         
         { this.renderLogin() }
-        
-        { /* temporary */ }
-        <FileUploader uploadFile={this.props.uploadFile} />
-        
-        
       </div>
     );
-  }
-}
-
-class FileUploader extends React.Component {
-  constructor() {
-    super();
-    this.state = { message: 'Please select a file to upload' };
-  }
-  
-  uploadImage() {
-    
-    const params = {
-      file: document.getElementById('inputFile').files[0],
-    };
-    const progress = e => {
-      if (e.lengthComputable) {
-        this.setState({
-          message: 'Uploading... ' + Math.round(e.loaded * 100 / e.total) + '%'
-        });
-      }
-    };
-    const load = e => this.setState({
-      message: 'Upload complete, server is processing file...'
-    });
-    const onResponse = (isSuccess, result) => this.setState({
-      message: isSuccess ? result : 'Error: ' + result
-    });
-    const action = this.props.uploadFile(params, progress, load, onResponse);
-    console.log('action', action); // Bug redux
-    
-  }
-  
-  render() {
-    
-    return <div>
-      <div>Wanna upload ?</div>  
-      <input 
-        type='file'
-        id='inputFile'
-      />
-      <button onClick={this.uploadImage.bind(this)}>Upload</button>
-      <br/>
-      <div>{this.state.message}</div>
-    </div>;
   }
 }

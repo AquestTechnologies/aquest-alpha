@@ -1,7 +1,0 @@
-{
-  "server": {
-    "WDSPort": 3000,
-    "apiPort": 8080,
-    "wsPort": 8081
-  }
-}

@@ -1,4 +1,4 @@
-// import log from './logTailor.js';
+// import log from '../utils/logTailor.js';
 
 export default function promiseMiddleware({ dispatch, getState }) {
   // log('.M. promiseMiddleware');

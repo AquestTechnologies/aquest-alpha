@@ -1,5 +1,6 @@
 import log from '../../shared/utils/logTailor';
 
+// A promise wrapper around XMLHttpRequest 
 export default function makeHttpRequest(method, path, params) {
   
   log('... makeHttpRequest', method, path, params);

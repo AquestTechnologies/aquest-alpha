@@ -25,9 +25,7 @@ const colorMatching = { // Color schemes definition, text isn't optionnal
     bgClient: 'SkyBlue'
   },
   '.X.': {
-    text: 'white',
-    bg: 'black',
-    bgClient: 'SlateGray'
+    text: 'gray',
   },
   '.E.': {
     text: 'white',
@@ -41,11 +39,8 @@ const colorMatching = { // Color schemes definition, text isn't optionnal
   },
   '_w_': {
     text: 'white',
-    bg: 'black'
-  },
-  '.W.': {
-    text: 'white',
-    bg: 'green'
+    bg: 'black',
+    bgClient: 'DarkSlateGray'
   },
 };
 

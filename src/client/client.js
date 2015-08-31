@@ -8,8 +8,8 @@ import protectRoutes  from '../shared/routes';
 import registerShortcuts   from './lib/registerShortcuts';
 import registerSideEffects from './lib/registerSideEffects';
 import log, { logWelcome } from '../shared/utils/logTailor';
-import promiseMiddleware   from '../shared/utils/promiseMiddleware';
-import websocketMiddleware   from '../shared/utils/websocketMiddleware';
+import promiseMiddleware   from '../shared/middleware/promiseMiddleware';
+import websocketMiddleware from '../shared/middleware/websocketMiddleware';
 
 (() => {
   const d = new Date();
@@ -17,22 +17,12 @@ import websocketMiddleware   from '../shared/utils/websocketMiddleware';
   logWelcome(0);
   log('... Initializing Redux and React Router');
   
-  // State from server --> Immutable maps
   const stateFromServer = window.STATE_FROM_SERVER || {};
   
-  // Store creation
-  // const store = applyMiddleware(promiseMiddleware, websocketMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
   const store = applyMiddleware(promiseMiddleware, websocketMiddleware)(createStore)(combineReducers(reducers), stateFromServer);
-  registerShortcuts(store.getState);
-  
-  // Gère les trailing slash des url
-  // const url = routerState.pathname;
-  // if (url.slice(-1) === '/' && url !== '/') {
-  //   router.replaceWith(url.slice(0,-1), null, routerState.query);
-  //   return;
-  // }
   
   const history = new BrowserHistory();
+  
   const app = React.render(
     <Router history={history}>
       <Route children={protectRoutes(store)} component={reduxRouteComponent(store)} />
@@ -41,6 +31,7 @@ import websocketMiddleware   from '../shared/utils/websocketMiddleware';
     () => log(`... App rendered in ${new Date() - d}ms.`)
   );
   
+  registerShortcuts(store.getState);
   registerSideEffects(store, app.transitionTo);
   
 })();
