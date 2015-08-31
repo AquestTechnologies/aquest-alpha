@@ -43,7 +43,6 @@ export default function registerSideEffects(store, transitionTo) {
       case 'LOGOUT':
         logR(type);
         docCookies.removeItem('jwt');
-        log('cookie should be deleted but : ', docCookies.getItem('jwt'));
         transitionTo('/');
         return;
         
