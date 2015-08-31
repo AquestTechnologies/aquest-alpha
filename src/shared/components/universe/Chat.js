@@ -15,7 +15,7 @@ export default class Chat extends React.Component {
       const {isLoading} = this.state;
       const messages = (chat || []).messages || [];
       
-      if (!isLoading && messages.length && e.target.scrollTop === 0 && chat.firstMessageId !== messages[0].id ) {
+      if ( !isLoading && messages.length && e.target.scrollTop === 0 && chat.firstMessageId !== messages[0].id ) {
         readChatOffset({chatId, offset: messages.length});
         this.setState({isLoading: true});
       }
@@ -25,7 +25,7 @@ export default class Chat extends React.Component {
   componentWillReceiveProps(nextProps) {
     // console.log('.C. Chat.componentWillReceiveProps');
     
-    const {chatId, chat, readChat, joinChat, leaveChat} = this.props;
+    const {chatId, chat, readChat, emitJoinChat, emitLeaveChat} = this.props;
     const messages = (chat || []).messages || [];
     
     const nextChatId = nextProps.chatId;
@@ -36,8 +36,8 @@ export default class Chat extends React.Component {
         readChat(nextProps.chatId);
       }
     
-      leaveChat(chatId);
-      joinChat(nextChatId);
+      emitLeaveChat(chatId);
+      emitJoinChat(nextChatId);
     }
     
     if (messages.length && nextMessages.length && messages.length < nextMessages.length) this.setState({isLoading: false});
@@ -47,7 +47,7 @@ export default class Chat extends React.Component {
     //permet de scroller les messages tout en bas après le mount.
     // console.log('.C. Chat mount');
     
-    const {chatId, chat, readChat, readChatOffset, joinChat} = this.props;
+    const {chatId, chat, readChat, readChatOffset, emitJoinChat} = this.props;
     const messages = (chat || []).messages || [];
     
     if (messages && messages.length) {
@@ -61,12 +61,14 @@ export default class Chat extends React.Component {
     }
     else readChat(chatId);
     
-    joinChat(chatId);
+    emitJoinChat(chatId);
     
     setTimeout(() => { // Pourquoi un timeout de merde ? Pke sans ça chrome le fait pas ! 
       let scrollable = document.getElementById('scrollMeDown');
       scrollable.scrollTop = scrollable.scrollHeight;
     }, 100);
+    
+    React.findDOMNode(this.refs.scrollMeDown).addEventListener('scroll', this.handleScroll);
   }
   
   componentDidUpdate(prevProps, prevState) {
@@ -85,12 +87,13 @@ export default class Chat extends React.Component {
   }
   
   componentWillUnmount(){
-    const {chatId, leaveChat} = this.props;
-    leaveChat(chatId);
+    const {chatId, emitLeaveChat} = this.props;
+    emitLeaveChat(chatId);
+    React.findDOMNode(this.refs.scrollMeDown).removeEventListener('scroll', this.handleScroll);
   }
   
   render() {
-    const {chatId, users, chat, createMessage} = this.props;
+    const {chatId, users, chat, emitCreateMessage} = this.props;
     const name     = (chat || '').name || '';
     const messages = (chat || []).messages || [];
     const messagesList = messages.length ? 'chat_list-visible' : 'chat_list-hidden';
@@ -99,7 +102,7 @@ export default class Chat extends React.Component {
       <div className='chat'>
         <ChatHeader chatName={name} />
         
-        <div id='scrollMeDown' className='chat_scrollable' onScroll={this.handleScroll}>
+        <div ref='scrollMeDown' id='scrollMeDown' className='chat_scrollable'>
           <div className={messagesList}>
             
             { messages.map(({id, userId, type, content, createdAt}) => <Message key={id} id={id} createdAt={createdAt} userId={userId} type={type} content={content} />) }
@@ -110,7 +113,7 @@ export default class Chat extends React.Component {
         <ChatFooter
           users={users}
           chatId={chatId}
-          createMessage={createMessage}
+          emitCreateMessage={emitCreateMessage}
         />
       </div>
     );

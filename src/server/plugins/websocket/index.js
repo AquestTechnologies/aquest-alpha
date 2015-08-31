@@ -17,7 +17,6 @@ export default function websocketPlugin(server, options, next) {
   
   let chatsUsers = 0;
   const UserLists = {};
-  const owner = true;
   
   chatNamespace.on('connection', socket => {
     chatsUsers++;
@@ -38,7 +37,7 @@ export default function websocketPlugin(server, options, next) {
         log(`_w_ ${userId} joining chat ${chatId} - ${userList.length}/${chatsUsers}`);
         
         // Sends the current list of people in the chat to the user joining the chat
-        socket.emit('receiveJoinChat', { chatId, userList, owner });
+        socket.emit('receiveJoinChatOwner', { chatId, userList });
         
         // Sends the user info to current people in the chat
         socket.broadcast.to(chatId).emit('receiveJoinChat', { chatId, userId });
@@ -70,8 +69,8 @@ export default function websocketPlugin(server, options, next) {
       Joi.validate(request, validationSchema['createMessage'], (err, value) => {
         if (err) return log(err);
         
-        const { chatId, content } = request;
-        const lcId = request.id; // the user provide a temporary id
+        const { chatId, message: {content} } = request;
+        const lcId = request.message.id; // the user provide a temporary id
         
         userAuthentication(socket).then(
           result => {
@@ -83,7 +82,7 @@ export default function websocketPlugin(server, options, next) {
             
             log(`_w_ createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
             
-            socket.emit('receiveMessage', { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}, owner});
+            socket.emit('receiveMessageOwner', { chatId, lcId, message: { id, userId, content, createdAt: d.getTime()}});
             
             socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, createdAt: d.getTime()} });
           },
@@ -94,7 +93,7 @@ export default function websocketPlugin(server, options, next) {
             const d = new Date(); // let's fix that later
             
             socket.error('To send messages please sign in !');
-            socket.error( {chatId, message: {id, lcId, userId: 'aquest', content: {type: 'text', text:'To send messages please sign in !'}, createdAt: d.getTime()}, owner} );
+            socket.error( {chatId, lcId, message: {id, userId: 'aquest', content: {type: 'text', text:'To send messages please sign in !'}, createdAt: d.getTime()}} );
           }
         );
       });

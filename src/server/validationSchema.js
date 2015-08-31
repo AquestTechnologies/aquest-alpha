@@ -55,11 +55,13 @@ const WEBSOCKET_VALIDATION_SCHEMA = {
   joinChat: chatId,
   leaveChat: chatId,
   createMessage: {
-    id: Joi.string().trim().required().regex(/^lc-[0-9]+$/),
     chatId,
-    content:      Joi.object({
-                    type: Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,}$/)
-                  }).unknown(true).required()
+    message: {
+      id: Joi.string().trim().required().regex(/^lc-[0-9]+$/),      
+      content:  Joi.object({
+                  type: Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,}$/)
+                }).unknown(true).required()
+    }
   }
 };  
 

@@ -85,22 +85,26 @@ export const login = createActionCreator({
   auth:       false,
 });
 
-export const joinChat = params => ({ type: 'JOIN_CHAT', payload: params });
+export const emitJoinChat = params => ({ type: 'EMIT_JOIN_CHAT', payload: params });
   
-export const leaveChat = params => ({ type: 'LEAVE_CHAT', payload: params });  
+export const emitLeaveChat = params => ({ type: 'EMIT_LEAVE_CHAT', payload: params });  
   
-export const createMessage = params => ({ type: 'CREATE_MESSAGE', payload: params });  
+export const emitCreateMessage = params => ({ type: 'EMIT_CREATE_MESSAGE', payload: params });  
   
 export const receiveJoinChat =  params => ({ type: 'RECEIVE_JOIN_CHAT', payload: params });
+
+export const receiveJoinChatOwner =  params => ({ type: 'RECEIVE_JOIN_CHAT_OWNER', payload: params });
   
 export const receiveLeaveChat = params => ({ type: 'RECEIVE_LEAVE_CHAT', payload: params });
   
 export const receiveMessage = params => ({ type: 'RECEIVE_MESSAGE', payload: params });
 
+export const receiveMessageOwner = params => ({ type: 'RECEIVE_MESSAGE_OWNER', payload: params });
+
 const actionCreators = {
   transitionTo, login, logout,
   createUser, createUniverse, createTopic, 
-  joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage,
+  emitJoinChat, emitLeaveChat, emitCreateMessage, receiveJoinChat, receiveLeaveChat, receiveMessage,
   readUniverse, readUniverses, readInventory, readChat, readChatOffset, readTopic, readTopicAtoms, 
 };
 

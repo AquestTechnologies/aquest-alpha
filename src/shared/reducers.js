@@ -1,4 +1,5 @@
 import log from './utils/logTailor';
+import _cloneDeep from 'lodash.clonedeep';
 import { sessionDuration } from '../../config/dev_shared';
 import { routerStateReducer } from 'redux-react-router';
 import { isAPIUnauthorized, isAPISuccess, isAPIFailure } from './actionCreators';
@@ -77,7 +78,6 @@ export default {
   },
   
   chats: (state={}, action) => {
-    let newState;
     const {type} = action;
     
     switch (type) {
@@ -86,7 +86,8 @@ export default {
       
       return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
-        newState = Object.assign({}, state);
+        const newState = _cloneDeep(state);
+        
         if (action.payload.messages.length) newState[chatId].messages = action.payload.messages.concat(newState[chatId].messages);
         
         return newState;
@@ -96,62 +97,57 @@ export default {
       
       return ((action) => {
         const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
-        newState = Object.assign({}, state);
+        const newState = _cloneDeep(state);
         newState[chatId] = Object.assign({}, newState[chatId], action.payload);
         
         return newState;
       })(action);
       
-    case 'CREATE_MESSAGE':
+    case 'EMIT_CREATE_MESSAGE':
       
       return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
+        const newState = _cloneDeep(state);
         
-        newState = Object.assign({}, state);
-        
-        let newPayload = Object.assign({}, action.payload);
-        delete newPayload.chatId;
-        
-        newState[chatId].messages.push(newPayload);
+        newState[chatId].messages.push(action.payload.message);
         
         return newState;
+      })(action);
+      
+    case 'RECEIVE_MESSAGE_OWNER':
+      
+      return ((action) => {
+        const chatId = parseInt(action.payload.chatId, 10);
+        const { message, lcId } = action.payload;
+        const messageIndex = state[chatId].messages.findIndex(({id}) => id === lcId);
+        
+        if (messageIndex !== -1) { 
+          const newState = _cloneDeep(state);
+          newState[chatId].messages[messageIndex] = message; // must enable the ui to know if the message was succesfully delivered or not
+          
+          return newState;
+        }
+        
+        return state;
       })(action);
       
     case 'RECEIVE_MESSAGE':
       
       return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
-        const {owner, message} = action.payload;
+        const { message } = action.payload;
+        const newState = _cloneDeep(state);
         
-        newState = Object.assign({}, state);
+        newState[chatId].messages.push(message);
         
-        if(owner){
-          const id = parseInt(action.payload.message.id,10);
-          const {lcId} = message;
-          const messageIndex = newState[chatId].messages.findIndex(({id}) => id === lcId);
-          
-          let newMessage = Object.assign({}, message);
-          delete newMessage.lcId;
-          
-          if (messageIndex !== -1) { 
-            newState[chatId].messages[messageIndex] = newMessage; // must enable the ui to know if the message was succesfully delivered or not
-            return newState;
-          }
-          
-          return state;
-        } else {
-          newState[chatId].messages.push(message);
-          
-          return newState;
-        }
+        return newState;
       })(action);
        
-    case 'JOIN_CHAT':
+    case 'EMIT_JOIN_CHAT':
       
       return ((action) => {
         const chatId = parseInt(action.payload, 10);
-        
-        newState = Object.assign({}, state);
+        const newState = _cloneDeep(state);
         
         if (newState[chatId] && !newState[chatId].users) {
           newState[chatId] = Object.assign({}, newState[chatId], {users: []});
@@ -162,28 +158,35 @@ export default {
         return newState;        
       })(action);
             
+    case 'RECEIVE_JOIN_CHAT_OWNER':
+      
+      return ((action) => {
+        const chatId = parseInt(action.payload.chatId, 10);
+        const { userList } = action.payload;
+        const newState = _cloneDeep(state);
+        
+        newState[chatId] = Object.assign({}, newState[chatId], {users: userList});
+        
+        return newState;
+      })(action);
+      
     case 'RECEIVE_JOIN_CHAT':
       
       return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
-        const {userList, userId, owner} = action.payload;
+        const { userId } = action.payload;
+        const newState = _cloneDeep(state);
         
-        newState = Object.assign({}, state);
-        
-        if (owner) newState[chatId] = Object.assign({}, newState[chatId], {users: userList});
-        else {
-          newState[chatId].users.push(userId);
-        }   
+        newState[chatId].users.push(userId);
         
         return newState;
       })(action);
     
-    case 'LEAVE_CHAT':
+    case 'EMIT_LEAVE_CHAT':
       
       return ((action) => {
         const chatId = parseInt(action.payload, 10);
-        
-        newState = Object.assign({}, state);
+        const newState = _cloneDeep(state);
         
         delete newState[chatId].users;  
         
@@ -195,8 +198,7 @@ export default {
       return ((action) => {
         const chatId = parseInt(action.payload.chatId, 10);
         const {userId} = action.payload;
-        
-        newState = Object.assign({}, state);
+        const newState = _cloneDeep(state);
         
         // remove the user from the user list
         if (newState[chatId].users && newState[chatId].users.length) newState[chatId].users.splice(newState[chatId].users.indexOf(userId), 1);

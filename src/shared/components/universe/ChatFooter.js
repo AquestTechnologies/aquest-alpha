@@ -15,14 +15,16 @@ export default class ChatFooter extends React.Component {
       const {messageId} = this.state;
       
       const messageParams = {
-        id: `lc-${messageId}`,
         chatId:   this.props.chatId,
-        content:  {type: 'text', text: this.state.messageContent}
+        message: {
+          id: `lc-${messageId}`,
+          content:  {type: 'text', text: this.state.messageContent}
+        }
       };
       
       this.setState({messageContent: '', messageId: messageId + 1});
       
-      this.props.createMessage(messageParams);
+      this.props.emitCreateMessage(messageParams);
     };
   }
   

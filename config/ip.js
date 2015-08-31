@@ -1,0 +1,1 @@
+export default {localServer: '23.251.143.127', postgresql: '130.211.111.160'};
