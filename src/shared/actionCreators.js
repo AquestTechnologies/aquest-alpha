@@ -85,6 +85,7 @@ export const login = createActionCreator({
   auth:       false,
 });
 
+// ------------------------------- Instant messaging -------------------------------
 export const emitJoinChat = params => ({ type: 'EMIT_JOIN_CHAT', payload: params });
   
 export const emitLeaveChat = params => ({ type: 'EMIT_LEAVE_CHAT', payload: params });  
@@ -101,10 +102,25 @@ export const receiveMessage = params => ({ type: 'RECEIVE_MESSAGE', payload: par
 
 export const receiveMessageOwner = params => ({ type: 'RECEIVE_MESSAGE_OWNER', payload: params });
 
+
+// ------------------------------- Instant Vote -------------------------------
+export const emitJoinVote = params => ({ type: 'EMIT_JOIN_VOTE', payload: params });
+
+export const emitLeaveVote = params => ({ type: 'EMIT_LEAVE_VOTE', payload: params });
+
+export const emitCreateVoteMessage = params => ({ type: 'EMIT_CREATE_VOTE_MESSAGE', payload: params });
+
+export const emitDeleteVoteMessage = params => ({ type: 'EMIT_DELETE_VOTE_MESSAGE', payload: params });
+
+export const receiveVoteMessage = params => ({ type: 'RECEIVE_VOTE_MESSAGE', payload: params });
+
+export const receiveVoteMessageOwner = params => ({ type: 'RECEIVE_VOTE_MESSAGE_OWNER', payload: params });
+
 const actionCreators = {
   transitionTo, login, logout,
   createUser, createUniverse, createTopic, 
   emitJoinChat, emitLeaveChat, emitCreateMessage, receiveJoinChat, receiveLeaveChat, receiveMessage,
+  emitJoinVote, emitLeaveVote, emitCreateVoteMessage, emitDeleteVoteMessage, receiveVoteMessage, receiveVoteMessageOwner,
   readUniverse, readUniverses, readInventory, readChat, readChatOffset, readTopic, readTopicAtoms, 
 };
 

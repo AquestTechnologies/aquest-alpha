@@ -93,7 +93,11 @@ export default class Chat extends React.Component {
   }
   
   render() {
-    const {chatId, users, chat, emitCreateMessage} = this.props;
+    const { 
+      chatId, users, chat, emitCreateMessage, 
+      emitCreateVoteMessage, emitDeleteVoteMessage, universeId, sessionUserId, chatContextId
+    } = this.props;
+    
     const name     = (chat || '').name || '';
     const messages = (chat || []).messages || [];
     const messagesList = messages.length ? 'chat_list-visible' : 'chat_list-hidden';
@@ -105,7 +109,24 @@ export default class Chat extends React.Component {
         <div ref='scrollMeDown' id='scrollMeDown' className='chat_scrollable'>
           <div className={messagesList}>
             
-            { messages.map(({id, userId, type, content, createdAt}) => <Message key={id} id={id} createdAt={createdAt} userId={userId} type={type} content={content} />) }
+            { messages.map(({id, userId, type, content, createdAt, vote}, index) => 
+              <Message 
+                id={id} 
+                key={id}
+                vote={vote}
+                type={type} 
+                chatId={chatId}
+                userId={userId} 
+                content={content} 
+                messageIndex={index}
+                createdAt={createdAt} 
+                universeId={universeId} 
+                sessionUserId={sessionUserId}
+                chatContextId={chatContextId}
+                emitCreateVoteMessage={emitCreateVoteMessage}
+                emitDeleteVoteMessage={emitDeleteVoteMessage}
+              />) 
+            }
             
           </div>
         </div>

@@ -22,6 +22,16 @@ class Topic extends React.Component {
     else if (!topic.atoms) readTopicAtoms(topicId);
   }
   
+  componentDidMount() {
+    const { topic: {id}, emitJoinVote } = this.props;
+    emitJoinVote(`topic-${id}`);
+  }
+  
+  componentWillUnmount(){
+    const { topic: {id}, emitLeaveVote } = this.props;
+    emitLeaveVote(`topic-${id}`);
+  }
+  
   renderAtoms(atoms) {
     
     return atoms.map(({type, content}, i) => {

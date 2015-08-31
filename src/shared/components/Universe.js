@@ -6,7 +6,11 @@ import Chat                   from './universe/Chat';
 import Inventory              from './universe/Inventory';
 import config             from '../../../config/dev_shared';
 import menuScroll             from '../../client/lib/menuScroll';
-import { readUniverse, readInventory, readChat, emitJoinChat, emitLeaveChat, readChatOffset, emitCreateMessage, transitionTo } from '../actionCreators';
+import { 
+  readUniverse, readInventory, transitionTo,
+  readChat, readChatOffset, emitJoinChat, emitLeaveChat, emitCreateMessage, emitCreateVoteMessage,
+  emitJoinVote, emitLeaveVote
+} from '../actionCreators';
 
 class Universe extends React.Component {
   
@@ -51,6 +55,7 @@ class Universe extends React.Component {
       universes, topics, chats, userId,
       readInventory, transitionTo, 
       readChat, emitJoinChat, emitLeaveChat, readChatOffset, emitCreateMessage,
+      emitJoinVote, emitLeaveVote, emitCreateVoteMessage, emitDeleteVoteMessage,
       children, location: { pathname }, params: { universeId, topicId },
     } = this.props;
     
@@ -59,6 +64,8 @@ class Universe extends React.Component {
     const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
     const filteredTopics = !children ? this.createTopicsList(topics, universeId) : undefined;
     const chat = chats[chatId];
+    
+    const chatContextId = topicId ? `topic-${topicId}` : `universe-${universeId}`;
     
     return !universe ? <div>Loading...</div> : (
       <div> 
@@ -79,12 +86,17 @@ class Universe extends React.Component {
                   userId,
                   topicId,
                   universe,
+                  emitJoinVote, 
+                  emitLeaveVote
                 }) 
                 :
                 <Inventory 
                   universe={universe}
+                  universeId={universeId}
                   topicsList={filteredTopics}
                   transitionTo={transitionTo}
+                  emitJoinVote={emitJoinVote}
+                  emitLeaveVote={emitLeaveVote}
                   readInventory={readInventory}
                 />
                 
@@ -95,12 +107,17 @@ class Universe extends React.Component {
         <Chat 
           chat={chat} 
           chatId={chatId}
-          readChat={readChat}
           userId={userId}
+          readChat={readChat}
+          sessionUserId={userId}
+          universeId={universeId}
           emitJoinChat={emitJoinChat}
           emitLeaveChat={emitLeaveChat}
+          chatContextId={chatContextId}
           readChatOffset={readChatOffset}
           emitCreateMessage={emitCreateMessage}
+          emitCreateVoteMessage={emitCreateVoteMessage}
+          emitDeleteVoteMessage={emitDeleteVoteMessage}
         />
       </div>
     );
@@ -122,7 +139,10 @@ const mapActions = dispatch => bindActionCreators({
   emitJoinChat,
   emitLeaveChat,
   readChatOffset,
-  emitCreateMessage
+  emitCreateMessage,
+  emitJoinVote, 
+  emitLeaveVote,
+  emitCreateVoteMessage
 }, dispatch);
 
 export default connect(mapState, mapActions)(Universe);

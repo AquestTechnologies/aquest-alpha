@@ -206,6 +206,52 @@ export default {
         return newState;
       })(action);
       
+    case 'EMIT_CREATE_VOTE_MESSAGE':
+      
+      return ( (action) => {
+        const {id, voteTargetContext: {chatId, messageIndex}, sessionUserId} = action.payload;
+        const newState = _cloneDeep(state);
+        
+        if (!newState[chatId].messages[messageIndex].vote) newState[chatId].messages[messageIndex].vote = { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
+        
+        newState[chatId].messages[messageIndex].vote[id].push(sessionUserId);
+        
+        return newState;
+      })(action);
+      
+    case 'RECEIVE_VOTE_MESSAGE_OWNER':
+      
+      return ( (action) => {
+        const {id, chatId, messageIndex, userId, createdAt} = action.payload;
+        const newState = _cloneDeep(state);
+        
+        const userIndex = state[chatId].messages[messageIndex].vote[id].findIndex( (user) => user === userId );
+        if( userIndex !== -1 ) newState[chatId].messages[messageIndex].vote[id][userIndex] = {id: userId, createdAt};
+        
+        return newState;
+      })(action);
+      
+    case 'RECEIVE_VOTE_MESSAGE':
+      
+      return ( (action) => {
+        const chatId = parseInt(action.payload.chatId, 10);
+        const {id, messageId, userId, createdAt} = action.payload;
+        const newState = _cloneDeep(state);
+        
+        const messageIndex = state[chatId].messages.findIndex( (message) => message.id === messageId );
+        if (messageIndex !== -1) {
+          if (!newState[chatId].messages[messageIndex].vote) newState[chatId].messages[messageIndex].vote = { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
+          newState[chatId].messages[messageIndex].vote[id].push({id: userId, createdAt});
+        }
+        
+        return newState;
+      })(action);
+      
+    case 'EMIT_DELETE_VOTE_MESSAGE':
+      
+      return ( (action) => {
+      })(action);
+      
     default:
       return state;
     }

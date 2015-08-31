@@ -6,25 +6,24 @@ export default class Vote extends React.Component {
     super();
     
     this.handleVote = e => {
-      const { id, createVote, messageIndex, chatId, elementId, sessionUserId } = this.props;
+      const { id, users, voteTargetContext, sessionUserId, universeId, createVote, deleteVote } = this.props;
       
-      console.log({ id, chatId, elementId, sessionUserId, messageIndex });
+      const voteIndex = users && users.length ? users.findIndex( (user) => user === sessionUserId ) : -1;
       
-      messageIndex ? 
-        createVote({ id, chatId, elementId, sessionUserId, messageIndex }) :
-        createVote({ id, chatId, elementId, sessionUserId });
+      if (voteIndex === -1) createVote({id, voteTargetContext, sessionUserId, universeId});
+      else deleteVote({id, voteTargetContext, sessionUserId});
     };
   }
   
   render() {
       
-    const { content, users} = this.props;
+    const { id, users} = this.props;
     return (
       <span className="vote">
-        <input type='button' value={`${content} ${users.length}`} onClick={this.handleVote}></input>
+        <input type='button' value={`${id} ${users.length}`} onClick={this.handleVote}></input>
         {users.length > 3 ? 
           <span className="voteAuthorsCollapsed">'...'</span> : 
-          <span className="voteAuthors"> {users.map( (name) => name)} </span>}
+          <span className="voteAuthors"> {users.map( (user) => typeof user === 'object' ? user.id : user)} </span>}
       </span>
     );
   }

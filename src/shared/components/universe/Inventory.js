@@ -16,9 +16,19 @@ export default class Inventory extends React.Component {
     if (!lastInventoryUpdate) readInventory(id);
   }
   
+  componentDidMount() {
+    const { universe: {id}, emitJoinVote} = this.props;
+    emitJoinVote(`universe-${id}`);
+  }
+  
+  componentWillUnmount(){
+    const { universe: {id}, emitLeaveVote} = this.props;
+    emitLeaveVote(`universe-${id}`);
+  }
+  
   render() {
     const { nameVisible } = this.state;
-    const { universe: { id, name, description }, topicsList, transitionTo } = this.props;
+    const { universe: { id, name, description }, topicsList, transitionTo, universeId } = this.props;
     
     return (
       <div>
@@ -43,6 +53,7 @@ export default class Inventory extends React.Component {
               <Card
                 topic = {topic}
                 key = {topic.id} 
+                universeId={universeId}
                 transitionTo={transitionTo}
               />)
           }
