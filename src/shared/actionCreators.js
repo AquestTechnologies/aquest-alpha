@@ -100,8 +100,8 @@ export const receiveMessage = params => ({ type: 'RECEIVE_MESSAGE', payload: par
 const actionCreators = {
   transitionTo, login, logout,
   createUser, createUniverse, createTopic, 
-  readUniverse, readUniverses, readInventory, readChat, readTopic, readTopicAtoms, 
   joinChat, leaveChat, createMessage, receiveJoinChat, receiveLeaveChat, receiveMessage,
+  readUniverse, readUniverses, readInventory, readChat, readChatOffset, readTopic, readTopicAtoms, 
 };
 
 export default actionCreators;

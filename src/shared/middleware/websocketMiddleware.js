@@ -11,8 +11,7 @@ export default function websocketMiddleware({ dispatch, getState }) {
   return next => action => {
     
     let socket;
-    let continueDispatch = true; // interupts the dispatch chain if false;
-    const {type, payload} = action;
+    const { type, payload } = action;
     
     switch (type) {
       
@@ -22,7 +21,6 @@ export default function websocketMiddleware({ dispatch, getState }) {
           sockets[key].disconnect();
         }
         
-        continueDispatch = false;
         break;
         
       case 'JOIN_CHAT':
@@ -41,8 +39,7 @@ export default function websocketMiddleware({ dispatch, getState }) {
         socket.on('error', error => typeof error === 'object' && error.message ? 
           next(receiveMessage(error)) : 
           log('!!! socket error', error));
-          
-        continueDispatch = false;
+        
         break;
         
       case 'LEAVE_CHAT':
@@ -54,7 +51,6 @@ export default function websocketMiddleware({ dispatch, getState }) {
         socket.removeListener('receiveJoinChat');
         socket.removeListener('receiveLeaveChat');
         
-        continueDispatch = false;
         break;
         
       case 'CREATE_MESSAGE':
@@ -63,10 +59,9 @@ export default function websocketMiddleware({ dispatch, getState }) {
         socket = sockets['chat'];
         socket.emit('createMessage', payload);
         
-        continueDispatch = false;
         break;
     }
     
-    if (continueDispatch) return next(action);
+    return next(action);
   };
 }
