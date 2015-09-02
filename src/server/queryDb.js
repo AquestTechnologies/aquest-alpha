@@ -225,7 +225,9 @@ export default function queryDb(intention, params) {
         'WHERE topic.id = $1';
         
         paramaterized = [params];
-        callback = result => result.rows[0].topic;
+        callback = result => {
+          if (result.rows[0]) return result.rows[0].topic;
+        };
         
         break;
       

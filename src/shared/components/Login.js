@@ -48,6 +48,7 @@ class Login extends React.Component {
   }
 }
 
+const mapState = state => ({lastError: state.lastError});
 const mapActions = dispatch => bindActionCreators({ login }, dispatch);
 
-export default connect(null, mapActions)(Login);
+export default connect(mapState, mapActions)(Login);

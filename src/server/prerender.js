@@ -2,13 +2,14 @@ import fs        from 'fs';
 import React     from 'react';
 import JWT       from 'jsonwebtoken';
 import Location  from 'react-router/lib/Location';
+import Router, { Route } from 'react-router';
 import { reduxRouteComponent } from 'redux-react-router';
 import log, { logAuthentication }  from '../shared/utils/logTailor';
-import Router, { Route } from 'react-router';
-import phidippides       from './phidippides';
-import protectRoutes     from '../shared/routes';
-import devConfig         from '../../config/dev_server';
-import configureStore    from '../shared/configureStore';
+import phidippides    from './phidippides';
+import protectRoutes  from '../shared/routes';
+import devConfig      from '../../config/dev_server';
+import configureStore from '../shared/configureStore';
+import NotFound       from '../shared/components/NotFound';
 
 const { wds: { hotFile, publicPath, filename }, jwt: { key, ttl } } = devConfig;
 const HTML = fs.readFileSync('src/server/index.html', 'utf8');
@@ -63,15 +64,18 @@ export default function prerender(request, reply) {
       // Fetches initial data for components in router's branch
       log('... Entering phidippides');
       const dd = new Date();
-      phidippides(routerState, store.dispatch).then(() => {
+      phidippides(routerState, store.dispatch).then(is404 => {
         
         log(`... Exiting phidippides (${new Date() - dd}ms)`);
+        if (is404) log('... 404');
         log('... Entering React.renderToString');
         
         // Renders the app (try...catch to be removed in production)
         try {
           var mountMeImFamous = React.renderToString(
-            <Router {...routerState} children={routes} />
+            is404 ?
+              <NotFound /> :
+              <Router {...routerState} children={routes} />
           );
         } 
         catch(err) { log('!!! Error while React.renderToString', err.message, err.stack); }

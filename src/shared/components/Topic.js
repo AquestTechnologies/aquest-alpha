@@ -1,17 +1,15 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { readTopic, readTopicAtoms } from '../actionCreators';
 import { getAtomViewers } from './atoms';
 
-class Topic extends React.Component {
+export default class Topic extends React.Component {
   
   // Load les données initiales
   static runPhidippides(routerState) {
     return [{
-      id:         'topic',
-      creator:    'readTopic',
-      args:       [routerState.params.topicId]
+      nullIs404: true,
+      id:        'topic',
+      creator:   'readTopic',
+      args:      [routerState.params.topicId],
     }];
   }
   
@@ -32,6 +30,7 @@ class Topic extends React.Component {
   }
   
   render() {
+    console.log('render topic');
     const { topic } = this.props || {};
     const { title, userId, createdAt } = topic;
     const atoms = topic.atoms || [{type: 'text', content: {text: 'Loading...'}}];
@@ -54,7 +53,3 @@ class Topic extends React.Component {
     );
   }
 }
-
-const mapActions = dispatch => bindActionCreators({ readTopic, readTopicAtoms }, dispatch);
-
-export default connect(null, mapActions)(Topic);

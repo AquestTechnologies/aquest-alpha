@@ -6,16 +6,17 @@ import Chat                   from './universe/Chat';
 import Inventory              from './universe/Inventory';
 import config             from '../../../config/dev_shared';
 import menuScroll             from '../../client/lib/menuScroll';
-import { readUniverse, readInventory, readChat, emitJoinChat, emitLeaveChat, readChatOffset, emitCreateMessage, transitionTo } from '../actionCreators';
+import { readUniverse, readInventory, readChat, readTopic, readTopicAtoms, emitJoinChat, emitLeaveChat, readChatOffset, emitCreateMessage, transitionTo } from '../actionCreators';
 
 class Universe extends React.Component {
   
   static runPhidippides(routerState) {
     const { universeId, topicId } = routerState.params;
     const tasks = [{
+      nullIs404:  true,
       id:         'universe',
       creator:    'readUniverse',
-      args:       [universeId]
+      args:       [universeId],
     },{
       id:         'chat',
       dependency: topicId ? 'topic' : 'universe',
@@ -49,7 +50,7 @@ class Universe extends React.Component {
     // console.log('.C. Universe.render');
     const { 
       universes, topics, chats, userId,
-      readInventory, transitionTo, 
+      readInventory, transitionTo, readTopic, readTopicAtoms,
       readChat, emitJoinChat, emitLeaveChat, readChatOffset, emitCreateMessage,
       children, location: { pathname }, params: { universeId, topicId },
     } = this.props;
@@ -79,6 +80,8 @@ class Universe extends React.Component {
                   userId,
                   topicId,
                   universe,
+                  readTopic, // If not passed here, Topic does not re-render after atoms fetch
+                  readTopicAtoms, 
                 }) 
                 :
                 <Inventory 
@@ -95,8 +98,8 @@ class Universe extends React.Component {
         <Chat 
           chat={chat} 
           chatId={chatId}
-          readChat={readChat}
           userId={userId}
+          readChat={readChat}
           emitJoinChat={emitJoinChat}
           emitLeaveChat={emitLeaveChat}
           readChatOffset={readChatOffset}
@@ -118,11 +121,13 @@ const mapActions = dispatch => bindActionCreators({
   transitionTo,
   readUniverse, 
   readInventory,
+  readTopic,
+  readTopicAtoms,
   readChat,
   emitJoinChat,
   emitLeaveChat,
   readChatOffset,
-  emitCreateMessage
+  emitCreateMessage,
 }, dispatch);
 
 export default connect(mapState, mapActions)(Universe);
