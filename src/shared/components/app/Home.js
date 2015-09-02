@@ -2,6 +2,7 @@ import React from 'react';
 import Login from '../Login';
 import Signup from './Signup';
 import { Link } from 'react-router';
+// import { createActivists } from '../../../client/activityGenerator';
 
 export default class Home extends React.Component {
   
@@ -37,7 +38,6 @@ export default class Home extends React.Component {
       <div style={s1}>    
         <h1>Aquest</h1>
         <Link to='/Explore'>Explore</Link>
-        
         { this.renderLogin() }
       </div>
     );

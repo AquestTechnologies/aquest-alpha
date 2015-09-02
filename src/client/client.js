@@ -2,12 +2,11 @@ import React                   from 'react';
 import Router, { Route }       from 'react-router';  
 import { reduxRouteComponent } from 'redux-react-router';
 import BrowserHistory          from 'react-router/lib/BrowserHistory';
-import protectRoutes                from '../shared/routes';
-import configureStore               from '../shared/configureStore';
-import log, { logWelcome }          from '../shared/utils/logTailor';
-import registerShortcuts            from './lib/registerShortcuts';
-import registerSideEffects          from './lib/registerSideEffects';
-import initializeActivityGenerator  from './activityGenerator';
+import protectRoutes           from '../shared/routes';
+import log, { logWelcome }     from '../shared/utils/logTailor';
+import registerShortcuts       from './lib/registerShortcuts';
+import registerSideEffects     from './lib/registerSideEffects';
+import configureStore          from '../shared/configureStore';
 
 
 logWelcome(0);
@@ -26,6 +25,5 @@ const app = React.render(
 
 registerShortcuts(store.getState);
 registerSideEffects(store, app.transitionTo);
-initializeActivityGenerator(store);
 
 require('./css/app.css');

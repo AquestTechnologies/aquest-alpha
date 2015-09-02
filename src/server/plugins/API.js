@@ -8,7 +8,8 @@ import actionCreators from '../../shared/actionCreators';
 import { getAtomsValidationErrors, generatePreview } from '../../shared/components/atoms';
 import {API_VALIDATION_SCHEMA as validationSchema} from '../validationSchema.js';
 
-function apiPlugin(server, options, next) {
+export default function apiPlugin(server, options, next) {
+  
   const { key, ttl } = devConfig.jwt;
   const cookieOptions = {ttl, path: '/'};
   const createReason = (code, msg, err) => ({code, msg, err});
@@ -84,7 +85,6 @@ function apiPlugin(server, options, next) {
       });
     }),
   };
-  
   
   // Dynamic construction of the API routes from actionCreator with API calls
   for (let acKey in actionCreators) {
@@ -164,13 +164,7 @@ function apiPlugin(server, options, next) {
       if (err instanceof Error) log(err.stack);
     }
     
-    // console.log('sent1');
     response.source = code < 500 ? msg : 'Internal server error';
-    // console.log('sent2');
-    // response.statusCode = code;
-    // console.log('sent3');
-    // response.send();
-    // console.log('sent4');
     response.code(code).send(); 
   }
 }
@@ -180,5 +174,3 @@ apiPlugin.attributes = {
   description:  'REST API',
   main:         'API.js'
 };
-
-export default apiPlugin;
