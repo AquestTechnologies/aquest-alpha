@@ -82,9 +82,5 @@ server.start(() => {
     '          | |\n' +
     '          |_|'
   );
-  if (1) log(...server.table()[0].table.map(t => `\n${t.method} - ${t.path}`));
-  if (0) {
-    const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
-    startActivists();
-  }
+  if (0) log(...server.table()[0].table.map(t => `\n${t.method} - ${t.path}`));
 });
