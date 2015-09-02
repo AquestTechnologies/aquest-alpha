@@ -14,6 +14,10 @@ const colorMatching = { // Color schemes definition, text isn't optionnal
     text: 'white',
     bg: 'yellow'
   },
+  'o_o': {
+    text: 'white',
+    bg: 'yellow'
+  },
   '.A.': {
     text: 'white',
     bg: 'green',
