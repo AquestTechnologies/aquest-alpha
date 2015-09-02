@@ -36,8 +36,10 @@ export default class Card extends React.Component {
         </div>
         
         <div className='card_author'>
-          { `By ${userId}, ${createdAt} ago.` }
-          { Object.keys(vote).reduce( (prev, key) => {prev + (vote[key].value * vote[key].users.length)}, 0) }
+          <span>{ `By ${userId}, ${createdAt} ago.` }</span>
+          <span>{ Object.keys(vote).reduce( (prev, key) => {
+            return prev + (vote[key].value * vote[key].users.length);
+          }, 0) + ' up' }</span>
         </div>
         
         { this.renderPreview(previewType, previewContent) }

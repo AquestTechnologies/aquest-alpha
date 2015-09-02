@@ -16,7 +16,16 @@ export default class Chat extends React.Component {
       const messages = (chat || []).messages || [];
       
       if ( !isLoading && messages.length && e.target.scrollTop === 0 && chat.firstMessageId !== messages[0].id ) {
-        readChatOffset({chatId, offset: messages.length});
+        // NOTE : we might want keep this info in the state to avoid recompute this value
+        let originalMessageLength = messages.length;
+      
+        //fastest method
+        for (let i=0, messagesLength = messages.length ; i < messagesLength ; i++) {
+          if (typeof messages[i].id === 'string' && (messages[i].id.substr(0,2) === 'lc' || messages[i].id.substr(0,2) === 'fe')) {
+            originalMessageLength--;
+          }
+        }
+        readChatOffset({chatId, offset: originalMessageLength});
         this.setState({isLoading: true});
       }
     };
@@ -48,16 +57,21 @@ export default class Chat extends React.Component {
     // console.log('.C. Chat mount');
     
     const {chatId, chat, readChat, readChatOffset, emitJoinChat} = this.props;
-    const messages = (chat || []).messages || [];
+    const messages = (chat || {}).messages || [];
     
     if (messages && messages.length) {
-      let messageIndex = messages.length - 1;
+      if (chat.firstMessageId !== messages[0].id) { 
+        // NOTE : we might want keep this info in the state to avoid recompute this value
+        let originalMessageLength = messages.length;
       
-      while (typeof messages[messageIndex].id === 'string' && (messages[messageIndex].id.substr(0,2) === 'lc' || messages[messageIndex].id.substr(0,2) === 'fe')) {
-        messageIndex--;
+        //fastest method
+        for (let i=0, messagesLength = messages.length ; i < messagesLength ; i++) {
+          if (typeof messages[i].id === 'string' && (messages[i].id.substr(0,2) === 'lc' || messages[i].id.substr(0,2) === 'fe')) {
+            originalMessageLength--;
+          }
+        }
+        readChatOffset({ chatId, offset: originalMessageLength });
       }
-      
-      readChatOffset({ chatId, offset: messages.length });
     }
     else readChat(chatId);
     

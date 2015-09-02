@@ -18,7 +18,6 @@ export default function queryDb(intention, params) {
       if (err) throw err;
       
       const {sql, paramaterized, callback} = buildQuery(intention, params); // Query construction
-      console.log(sql);
       if (sql) client.query(sql, paramaterized, (err, result) => {
         done();
         if (err) return reject(err);
