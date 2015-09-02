@@ -28,7 +28,7 @@ export default class Inventory extends React.Component {
   
   render() {
     const { nameVisible } = this.state;
-    const { universe: { id, name, description }, topicsList, transitionTo, universeId } = this.props;
+    const { universe: { id, name, description }, topicsList, transitionTo, universeId, emitCreateVoteTopic, emitDeleteVoteTopic, sessionUserId, voteContextId } = this.props;
     
     return (
       <div>
@@ -51,10 +51,14 @@ export default class Inventory extends React.Component {
           { 
             topicsList.map(topic => 
               <Card
-                topic = {topic}
-                key = {topic.id} 
+                key={topic.id} 
+                topic={topic}
                 universeId={universeId}
                 transitionTo={transitionTo}
+                voteContextId={voteContextId}
+                sessionUserId={sessionUserId}
+                emitCreateVoteTopic={emitCreateVoteTopic}
+                emitDeleteVoteTopic={emitDeleteVoteTopic}
               />)
           }
           

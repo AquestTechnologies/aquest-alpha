@@ -116,6 +116,14 @@ export const receiveVoteMessage = params => ({ type: 'RECEIVE_VOTE_MESSAGE', pay
 
 export const receiveVoteMessageOwner = params => ({ type: 'RECEIVE_VOTE_MESSAGE_OWNER', payload: params });
 
+export const emitCreateVoteTopic = params => ({ type: 'EMIT_CREATE_VOTE_TOPIC', payload: params });
+
+export const emitDeleteVoteTopic = params => ({ type: 'EMIT_DELETE_VOTE_TOPIC', payload: params });
+
+export const receiveVoteTopic = params => ({ type: 'RECEIVE_VOTE_TOPIC', payload: params });
+
+export const receiveVoteTopicOwner = params => ({ type: 'RECEIVE_VOTE_TOPIC_OWNER', payload: params });
+
 const actionCreators = {
   transitionTo, login, logout,
   createUser, createUniverse, createTopic, 

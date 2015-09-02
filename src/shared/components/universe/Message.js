@@ -6,12 +6,11 @@ export default class Message extends React.Component {
   
   render() {
     
-    const { id, userId, type, content: {text}, createdAt, universeId, chatId, sessionUserId, chatContextId, emitCreateVoteMessage, emitDeleteVoteMessage, messageIndex } = this.props;
+    const { id, userId, type, content: {text}, createdAt, universeId, chatId, sessionUserId, voteContextId, emitCreateVoteMessage, emitDeleteVoteMessage, messageIndex } = this.props;
     const vote = this.props.vote || { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
-      
     if (!vote[universeId]) vote[universeId] = []; 
     
-    const voteTargetContext = {chatId, chatContextId, messageId: id, messageIndex};
+    const voteTargetContext = {chatId, voteContextId, messageId: id, messageIndex};
     
     return (
       <div className="message">
@@ -28,10 +27,9 @@ export default class Message extends React.Component {
               <Vote 
                 id={key}
                 key={key}
-                users={vote[key]}
-                universeId={universeId}
+                users={vote[key].users}
+                universeId={universeId} // not really necessary, depends on the database query optimization
                 sessionUserId={sessionUserId}
-                chatContextId={chatContextId}
                 createVote={emitCreateVoteMessage}
                 deleteVote={emitDeleteVoteMessage}
                 voteTargetContext={voteTargetContext}

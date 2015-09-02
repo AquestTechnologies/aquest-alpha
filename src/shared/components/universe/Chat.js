@@ -57,7 +57,7 @@ export default class Chat extends React.Component {
         messageIndex--;
       }
       
-      readChatOffset({ chatId, offset: messages[messageIndex].id });
+      readChatOffset({ chatId, offset: messages.length });
     }
     else readChat(chatId);
     
@@ -95,7 +95,7 @@ export default class Chat extends React.Component {
   render() {
     const { 
       chatId, users, chat, emitCreateMessage, 
-      emitCreateVoteMessage, emitDeleteVoteMessage, universeId, sessionUserId, chatContextId
+      emitCreateVoteMessage, emitDeleteVoteMessage, universeId, sessionUserId, voteContextId
     } = this.props;
     
     const name     = (chat || '').name || '';
@@ -122,7 +122,7 @@ export default class Chat extends React.Component {
                 createdAt={createdAt} 
                 universeId={universeId} 
                 sessionUserId={sessionUserId}
-                chatContextId={chatContextId}
+                voteContextId={voteContextId}
                 emitCreateVoteMessage={emitCreateVoteMessage}
                 emitDeleteVoteMessage={emitDeleteVoteMessage}
               />) 

@@ -148,21 +148,50 @@ export default function websocketPlugin(server, options, next) {
               log('authentication succeded', result);
               const { userId } = socket;
               
-              const { id, voteTargetContext: {chatId, chatContextId, messageIndex, messageId} } = request;
+              const { id, voteTargetContext: {chatId, voteContextId, messageIndex, messageId} } = request;
               const d = new Date(); // let's fix that later
+              const createdAt = d.getTime();
               
-              log(`_w_ createVoteMessage`, { id, chatId, chatContextId, messageIndex, messageId, userId, createdAt: d.getTime() });
+              log(`_w_ createVoteMessage`, { id, chatId, voteContextId, messageIndex, messageId, userId, createdAt });
               
-              socket.emit('receiveVoteMessageOwner', { id, chatId, messageIndex, userId, createdAt: d.getTime() } );
+              socket.emit('receiveVoteMessageOwner', { id, chatId, messageIndex, userId, createdAt } );
               
-              socket.broadcast.to(chatContextId).emit('receiveVoteMessage', { id, chatId, messageId, userId, createdAt: d.getTime() });
+              socket.broadcast.to(voteContextId).emit('receiveVoteMessage', { id, chatId, messageId, userId, createdAt });
             },
             error => {
               log('websocket authentication - ', error.stack ? error.stack : error);
               
               socket.error('To vote on a message please sign in !');
             }
-        );
+          );
+        });
+      });
+      
+      socket.on('createVoteTopic', request => {
+        Joi.validate(request, validationSchema['createVoteTopic'], (err, value) => {
+          if (err) return log(err);
+          
+          userAuthentication(socket).then(
+            result => {
+              log('authentication succeded', result);
+              const { userId } = socket;
+              
+              const { id, voteTargetContext: {topicId, voteContextId} } = request;
+              const d = new Date(); // let's fix that later
+              const createdAt = d.getTime();
+              
+              log(`_w_ createVoteTopic`, { id, topicId, voteContextId, userId, createdAt });
+              
+              socket.emit('receiveVoteTopic', { id, topicId, userId, createdAt } );
+              
+              socket.broadcast.to(voteContextId).emit('receiveVoteTopic', { id, topicId, userId, createdAt });
+            },
+            error => {
+              log('websocket authentication - ', error.stack ? error.stack : error);
+              
+              socket.error('To vote on a topic please sign in !');
+            }
+          );
         });
       });
       

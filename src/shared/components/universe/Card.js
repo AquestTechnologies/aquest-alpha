@@ -1,4 +1,5 @@
 import React from 'react';
+import Vote from '../common/Vote';
 
 export default class Card extends React.Component {
   
@@ -18,17 +19,25 @@ export default class Card extends React.Component {
   }
     
   render() {
-    const { topic: {id, title, userId, createdAt, universeId, previewType, previewContent} } = this.props;
+    const { 
+      topic: {id, title, userId, createdAt, universeId, previewType, previewContent}, 
+      emitCreateVoteTopic, emitDeleteVoteTopic, voteContextId, sessionUserId 
+    } = this.props;
+    
+    const vote = this.props.topic.vote || { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
+    if (!vote[universeId]) vote[universeId] = []; 
+    
+    const voteTargetContext = {voteContextId, topicId: id};
     
     return (
       <div className='card' onClick={this.handleClick.bind(this, universeId, id)}>
-      
         <div className='card_title'>
           { title }
         </div>
         
         <div className='card_author'>
           { `By ${userId}, ${createdAt} ago.` }
+          { Object.keys(vote).reduce( (prev, key) => {prev + (vote[key].value * vote[key].users.length)}, 0) }
         </div>
         
         { this.renderPreview(previewType, previewContent) }
