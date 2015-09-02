@@ -1,11 +1,7 @@
 import Hapi from 'hapi';
-import inert from 'inert';
 import prerender from './prerender';
-import devConfig from '../../config/dev_server';
-import APIPlugin from './plugins/API';
-import uploadsPlugin from './plugins/uploads';
-import websocketPlugin from './plugins/websocket';
 import { createActivists } from './activityGenerator';
+import devConfig from '../../config/dev_server';
 import log, { logRequest, logAuthentication } from '../shared/utils/logTailor';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -42,10 +38,10 @@ server.register(require('hapi-auth-jwt2'), err => {
   
 // API and WS plugin registration
 server.register([
-  { register: inert },
-  { register: APIPlugin }, 
-  { register: uploadsPlugin },
-  { register: websocketPlugin },
+  { register: require('inert') },
+  { register: require('./plugins/API') }, 
+  { register: require('./plugins/uploads') },
+  { register: require('./plugins/websocket') },
 ], err => {
   if (err) throw err;
   log('API and WS plugins registered');
@@ -88,7 +84,7 @@ server.start(() => {
   );
   if (0) log(...server.table()[0].table.map(t => `\n${t.method} - ${t.path}`));
   if (1) {
-    const {startActivists, stopActivists} = createActivists(10, 1000, 10000);
+    const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
     startActivists();
   }
 });
