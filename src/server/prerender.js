@@ -3,14 +3,12 @@ import React     from 'react';
 import JWT       from 'jsonwebtoken';
 import Location  from 'react-router/lib/Location';
 import { reduxRouteComponent } from 'redux-react-router';
-import {createStore, combineReducers, applyMiddleware} from 'redux';
 import log, { logAuthentication }  from '../shared/utils/logTailor';
 import Router, { Route } from 'react-router';
 import phidippides       from './phidippides';
 import protectRoutes     from '../shared/routes';
-import reducers          from '../shared/reducers';
 import devConfig         from '../../config/dev_server';
-import promiseMiddleware from '../shared/middleware/promiseMiddleware';
+import configureStore    from '../shared/configureStore';
 
 const { wds: { hotFile, publicPath, filename }, jwt: { key, ttl } } = devConfig;
 const HTML = fs.readFileSync('src/server/index.html', 'utf8');
@@ -42,7 +40,7 @@ export default function prerender(request, reply) {
     
     // Then we create a new Redux store and initialize the routes with it
     const html   = HTML;
-    const store  = applyMiddleware(promiseMiddleware)(createStore)(combineReducers(reducers), reduxState);
+    const store = configureStore(reduxState);
     const routes = <Route children={protectRoutes(store)} component={reduxRouteComponent(store)} />;
     
     // URL processing : /foo/ --> /foo || /foo?bar=baz --> /foo || / --> /

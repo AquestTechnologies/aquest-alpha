@@ -7,6 +7,7 @@ import Login       from './components/Login';
 import NewUniverse from './components/CreateUniverse';
 import Topic       from './components/Topic';
 import NewTopic    from './components/CreateTopic';
+import NotFound    from './components/NotFound';
 import { Route, Redirect } from 'react-router';
 import log, { logAuthentication } from './utils/logTailor';
 
@@ -44,6 +45,8 @@ export default function protectRoutes(store) {
       <Route path='@:userId' component={User} onEnter={protectAccess} />
       <Route path='Explore' component={Explore} onEnter={protectAccess} />
       <Route path='Create_universe' component={NewUniverse} onEnter={protectAccess} />
+      
+      <Route path="*" component={NotFound} />
       
       <Redirect from='about'    to='/' />
       <Redirect from='signup'   to='/' />
