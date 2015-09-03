@@ -127,70 +127,63 @@ export default function queryDb(intention, params) {
         // `LEFT JOIN (SELECT * FROM (SELECT * from aquest_schema.atommessage ORDER BY id DESC OFFSET $2 LIMIT ${nbrChatMessages}) atommessagedesc ORDER BY id ASC) AS atommessage ON chat.id = atommessage.chat_id ` +
         // 'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
         // 'WHERE chat.id = $1 GROUP BY chat.id';
-        
-        sql = 
+        sql =
         'SELECT ' +
           'json_build_object( ' +
-            `'id', chat.id,` +
-            `'name', chat.name,` + 
-            `'firstMessageId', (SELECT id FROM aquest_schema.atommessage WHERE atommessage.chat_id = $1 ORDER BY id ASC LIMIT 1),` +
-            `'messages', array_agg(atommessage.message)) as chat ` +
+            `'id', chat.id, ` +
+            `'name', chat.name, ` + 
+            `'firstMessageId', (SELECT id FROM aquest_schema.atommessage WHERE atommessage.chat_id = $1 ORDER BY id ASC LIMIT 1), ` +
+            `'count', count(messages.message), ` +
+            `'messages', array_agg(messages.message)` +
+          ') AS chat ' +
         'FROM ' +
           'aquest_schema.chat ' + 
           'LEFT JOIN ' +
-          '(SELECT * FROM ' +
+          '(SELECT * FROM (SELECT ' +
+            'all_ballot_message.chat_id, ' +
+            'all_ballot_message.id, ' +
+            'json_build_object(' +
+                `'id', all_ballot_message.id, ` +
+                `'type', all_ballot_message.type, ` +
+                `'content', all_ballot_message.message_content, ` +
+                `'createdAt', all_ballot_message.created_at, ` +
+                `'vote',json_object_agg(all_ballot_message.content, ` +
+                  'json_build_object(' +
+                    `'value',all_ballot_message.value, ` +
+                    `'users',CASE WHEN ballot_message.user_ballot IS NULL THEN ARRAY[]::JSON[] ELSE ballot_message.user_ballot END) ` +
+                ')' +
+            ') message ' +
+          'FROM ' +
             '(SELECT ' +
-              'atommessage.id id, ' +
-              'atommessage.chat_id chat_id, ' +
-              'atommessage.user_id user_id, ' +
-              'json_build_object(' +
-                `'id', atommessage.id,` +
-                `'type', atommessage.type,` +
-                `'content', atommessage.content,` +
-                `'createdAt', atommessage.created_at,` +
-                `'vote', json_object_agg(ballot_message.content, ballot_message.users) ` +
-              ') message ' +
+              'all_atommessage.id, all_atommessage.chat_id, all_atommessage.type, all_atommessage.content::jsonb message_content, all_atommessage.created_at, all_atommessage.user_id,' +
+              'ballot.id ballot_id, ballot.content, ballot.value ' +
             'FROM ' +
-              'aquest_schema.atommessage, ' +
-              '((SELECT ' +
-                `atommessage.id, atommessage.content, json_build_object('value', atommessage.value, 'users', '[]'::jsonb)::jsonb users ` +
-              'FROM ' +
-                '(SELECT ' +
-                  'atommessage.id, ballot_universe.content, ballot_universe.value '+ 
-                'FROM ' +
-                  '(SELECT universe_id, content, value FROM aquest_schema.ballot, aquest_schema.ballot_universe WHERE ballot.id = ballot_universe.ballot_id) ballot_universe, ' +
-                  'aquest_schema.atommessage, ' +
-                  '(SELECT id FROM aquest_schema.universe WHERE chat_id = $1) universe ' + 
-                'WHERE ballot_universe.universe_id = universe.id AND atommessage.chat_id = $1 ' +
-                'EXCEPT ' +
-                  'SELECT ' +
-                    'atommessage.id, ballot.content, ballot.value ' +
-                  'FROM ' +
-                    '(SELECT id FROM aquest_schema.universe WHERE chat_id = $1) universe, ' +
-                    'aquest_schema.atommessage, aquest_schema.ballot, aquest_schema.ballot_message ' +
-                  'WHERE ' +
-                    'ballot_message.universe_id = universe.id AND atommessage.id = ballot_message.message_id AND ballot_message.ballot_id = ballot.id ' +
-                ') AS atommessage) ' +
-              'UNION ' +
-                '(SELECT ' +
-                  `ballot_message.message_id, ballot.content, json_agg(aquest_schema.concat_json_object(json_build_object('value', ballot.value),ballot_message.user_ballot))::jsonb users ` +
-                'FROM ' +
-                  '(SELECT id FROM aquest_schema.universe WHERE chat_id = $1) universe, ' +
-                  `(SELECT message_id, ballot_id, universe_id, json_build_object('author', author_id, 'userId', user_id, 'updatedAt', updated_at) user_ballot FROM aquest_schema.ballot_message) AS ballot_message ` +
-                'LEFT JOIN ' +
-                  'aquest_schema.ballot ' +
-                'ON ballot_message.ballot_id = ballot.id ' +
-                'WHERE ballot_message.universe_id = universe.id ' +
-                'GROUP BY ballot_message.message_id, ballot.content) ' +
-              ') ballot_message ' +
-            'WHERE atommessage.id = ballot_message.id ' +
-            'GROUP BY atommessage.id ' +
-            `ORDER BY id DESC OFFSET $2 LIMIT ${nbrChatMessages}) atommessagedesc ORDER BY id ASC) atommessage ` + 
-          'ON chat.id = atommessage.chat_id ' +
-        'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
-        'WHERE chat.id = $1 GROUP BY chat.id';
-          
-         
+              'aquest_schema.ballot_universe, aquest_schema.ballot, ' +
+              '(SELECT atommessage.id, atommessage.chat_id, type, content, atommessage.created_at, atommessage.user_id, universe.id universe_id FROM aquest_schema.atommessage, aquest_schema.universe ' +
+              'WHERE atommessage.chat_id = $1 AND universe.chat_id = atommessage.chat_id) AS all_atommessage ' +
+            'WHERE ' +
+              'ballot_universe.universe_id = all_atommessage.universe_id AND ' +
+              'all_atommessage.universe_id = ballot_universe.universe_id AND ' +
+              'ballot_universe.ballot_id = ballot.id ' +
+            'GROUP BY all_atommessage.id, all_atommessage.chat_id, ballot.id, all_atommessage.type, all_atommessage.content::jsonb, all_atommessage.created_at, all_atommessage.user_id ' +
+            ') AS all_ballot_message ' +
+            'LEFT JOIN ' +
+            '(SELECT ' +
+              `ballot_message.message_id, ballot.id ballot_id, array_agg(json_build_object('author', author_id, 'userId', user_id, 'updatedAt', updated_at)) user_ballot ` +
+            'FROM ' +
+              '(SELECT atommessage.id message_id, universe.id universe_id FROM aquest_schema.atommessage, aquest_schema.universe ' + 
+              'WHERE atommessage.chat_id = $1 AND universe.chat_id = atommessage.chat_id) AS atommessage_ballot, ' +
+              'aquest_schema.ballot, aquest_schema.ballot_message ' +
+            'WHERE ' +
+              'atommessage_ballot.message_id = ballot_message.message_id AND atommessage_ballot.universe_id = ballot_message.universe_id AND ballot_message.ballot_id = ballot.id ' +
+            'GROUP BY ballot_message.message_id, ballot.id) ballot_message ' + 
+            'ON all_ballot_message.id = ballot_message.message_id AND all_ballot_message.ballot_id = ballot_message.ballot_id ' +
+          'GROUP BY all_ballot_message.id, all_ballot_message.chat_id, all_ballot_message.type, all_ballot_message.message_content, ' +
+          'all_ballot_message.created_at, all_ballot_message.user_id ' +
+          `ORDER BY all_ballot_message.id DESC OFFSET $2 LIMIT ${nbrChatMessages}) AS message_vote ORDER BY message_vote.id DESC) messages ` +
+          'ON chat.id = messages.chat_id ' +
+          'WHERE chat.id = messages.chat_id ' +
+          'GROUP BY chat.id, messages.id ORDER BY messages.id';
           
         paramaterized = [chatId, offset];
         
@@ -233,70 +226,67 @@ export default function queryDb(intention, params) {
         sql =
         'SELECT ' +
           'json_build_object( ' +
-            `'id', chat.id,` +
-            `'name', chat.name,` + 
-            `'firstMessageId', (SELECT id FROM aquest_schema.atommessage WHERE atommessage.chat_id = $1 ORDER BY id ASC LIMIT 1),` +
-            `'messages', array_agg(atommessage.message)) as chat ` +
+            `'id', chat.id, ` +
+            `'name', chat.name, ` + 
+            `'firstMessageId', (SELECT id FROM aquest_schema.atommessage WHERE atommessage.chat_id = $1 ORDER BY id ASC LIMIT 1), ` +
+            `'count', count(messages.message), ` +
+            `'messages', array_agg(messages.message)` +
+          ') AS chat ' +
         'FROM ' +
           'aquest_schema.chat ' + 
           'LEFT JOIN ' +
-          '(SELECT * FROM ' +
+          '(SELECT * FROM (SELECT ' +
+            'all_ballot_message.chat_id, ' +
+            'all_ballot_message.id, ' +
+            'json_build_object(' +
+                `'id', all_ballot_message.id, ` +
+                `'type', all_ballot_message.type, ` +
+                `'content', all_ballot_message.message_content, ` +
+                `'createdAt', all_ballot_message.created_at, ` +
+                `'vote',json_object_agg(all_ballot_message.content, ` +
+                  'json_build_object(' +
+                    `'value',all_ballot_message.value, ` +
+                    `'users',CASE WHEN ballot_message.user_ballot IS NULL THEN ARRAY[]::JSON[] ELSE ballot_message.user_ballot END) ` +
+                ')' +
+            ') message ' +
+          'FROM ' +
             '(SELECT ' +
-              'atommessage.id id, ' +
-              'atommessage.chat_id chat_id, ' +
-              'atommessage.user_id user_id, ' +
-              'json_build_object(' +
-                `'id', atommessage.id,` +
-                `'type', atommessage.type,` +
-                `'content', atommessage.content,` +
-                `'createdAt', atommessage.created_at,` +
-                `'vote', json_object_agg(ballot_message.content, ballot_message.users) ` +
-              ') message ' +
+              'all_atommessage.id, all_atommessage.chat_id, all_atommessage.type, all_atommessage.content::jsonb message_content, all_atommessage.created_at, all_atommessage.user_id,' +
+              'ballot.id ballot_id, ballot.content, ballot.value ' +
             'FROM ' +
-              'aquest_schema.atommessage, ' +
-              '((SELECT ' +
-                `atommessage.id, atommessage.content, json_build_object('value', atommessage.value, 'users', '[]'::jsonb)::jsonb users ` +
-              'FROM ' +
-                '(SELECT ' +
-                  'atommessage.id, ballot_universe.content, ballot_universe.value '+ 
-                'FROM ' +
-                  '(SELECT universe_id, content, value FROM aquest_schema.ballot, aquest_schema.ballot_universe WHERE ballot.id = ballot_universe.ballot_id) ballot_universe, ' +
-                  'aquest_schema.atommessage, ' +
-                  '(SELECT id FROM aquest_schema.universe WHERE chat_id = $1) universe ' + 
-                'WHERE ballot_universe.universe_id = universe.id AND atommessage.chat_id = $1 ' +
-                'EXCEPT ' +
-                  'SELECT ' +
-                    'atommessage.id, ballot.content, ballot.value ' +
-                  'FROM ' +
-                    '(SELECT id FROM aquest_schema.universe WHERE chat_id = $1) universe, ' +
-                    'aquest_schema.atommessage, aquest_schema.ballot, aquest_schema.ballot_message ' +
-                  'WHERE ' +
-                    'ballot_message.universe_id = universe.id AND atommessage.id = ballot_message.message_id AND ballot_message.ballot_id = ballot.id ' +
-                ') AS atommessage) ' +
-              'UNION ' +
-                '(SELECT ' +
-                  `ballot_message.message_id, ballot.content, json_agg(aquest_schema.concat_json_object(json_build_object('value', ballot.value),ballot_message.user_ballot))::jsonb users ` +
-                'FROM ' +
-                  '(SELECT id FROM aquest_schema.universe WHERE chat_id = $1) universe, ' +
-                  `(SELECT message_id, ballot_id, universe_id, json_build_object('author', author_id, 'userId', user_id, 'updatedAt', updated_at) user_ballot FROM aquest_schema.ballot_message) AS ballot_message ` +
-                'LEFT JOIN ' +
-                  'aquest_schema.ballot ' +
-                'ON ballot_message.ballot_id = ballot.id ' +
-                'WHERE ballot_message.universe_id = universe.id ' +
-                'GROUP BY ballot_message.message_id, ballot.content) ' +
-              ') ballot_message ' +
-            'WHERE atommessage.id = ballot_message.id ' +
-            'GROUP BY atommessage.id ' +
-            `ORDER BY atommessage.id DESC LIMIT ${nbrChatMessages}) message_vote ORDER BY message_vote.id ASC) atommessage ` +
-          'ON chat.id = atommessage.chat_id ' +
-        'LEFT JOIN aquest_schema.user aquest_user ON atommessage.user_id = aquest_user.id ' +
-        'WHERE chat.id = $1 GROUP BY chat.id';
+              'aquest_schema.ballot_universe, aquest_schema.ballot, ' +
+              '(SELECT atommessage.id, atommessage.chat_id, type, content, atommessage.created_at, atommessage.user_id, universe.id universe_id FROM aquest_schema.atommessage, aquest_schema.universe ' +
+              'WHERE atommessage.chat_id = $1 AND universe.chat_id = atommessage.chat_id) AS all_atommessage ' +
+            'WHERE ' +
+              'ballot_universe.universe_id = all_atommessage.universe_id AND ' +
+              'all_atommessage.universe_id = ballot_universe.universe_id AND ' +
+              'ballot_universe.ballot_id = ballot.id ' +
+            'GROUP BY all_atommessage.id, all_atommessage.chat_id, ballot.id, all_atommessage.type, all_atommessage.content::jsonb, all_atommessage.created_at, all_atommessage.user_id ' +
+            ') AS all_ballot_message ' +
+            'LEFT JOIN ' +
+            '(SELECT ' +
+              `ballot_message.message_id, ballot.id ballot_id, array_agg(json_build_object('author', author_id, 'userId', user_id, 'updatedAt', updated_at)) user_ballot ` +
+            'FROM ' +
+              '(SELECT atommessage.id message_id, universe.id universe_id FROM aquest_schema.atommessage, aquest_schema.universe ' + 
+              'WHERE atommessage.chat_id = $1 AND universe.chat_id = atommessage.chat_id) AS atommessage_ballot, ' +
+              'aquest_schema.ballot, aquest_schema.ballot_message ' +
+            'WHERE ' +
+              'atommessage_ballot.message_id = ballot_message.message_id AND atommessage_ballot.universe_id = ballot_message.universe_id AND ballot_message.ballot_id = ballot.id ' +
+            'GROUP BY ballot_message.message_id, ballot.id) ballot_message ' + 
+            'ON all_ballot_message.id = ballot_message.message_id AND all_ballot_message.ballot_id = ballot_message.ballot_id ' +
+          'GROUP BY all_ballot_message.id, all_ballot_message.chat_id, all_ballot_message.type, all_ballot_message.message_content, ' +
+          'all_ballot_message.created_at, all_ballot_message.user_id ' +
+          `ORDER BY all_ballot_message.id DESC LIMIT ${nbrChatMessages}) message_vote ORDER BY message_vote.id DESC) messages ` +
+          'ON chat.id = messages.chat_id ' +
+          'WHERE chat.id = messages.chat_id ' +
+          'GROUP BY chat.id';
           
         paramaterized = [params];
         
         callback = result => {
           if (result.rows[0]) {
             const { chat } = result.rows[0];
+            console.log(chat);
             if (!chat.messages[0].content) chat.messages = [];
             
             return chat;
@@ -315,44 +305,72 @@ export default function queryDb(intention, params) {
         //   'aquest_schema.topic ' +
         // 'WHERE ' + 
         //   'topic.universe_id = $1';
-        sql =  
+        
+        sql=
         'SELECT ' +
-          `topic.id, title, universe_id "universeId", user_id "userId", preview_type "previewType", preview_content "previewContent", COALESCE(to_char(created_at, 'MM-DD-YYYY HH24:MI:SS'), '') "createdAt", chat_id "chatId",` +
-          `json_object_agg(ballot_topic.content, ballot_topic.users::json) vote ` +
+          'all_ballot_topic.topic_id id, title, all_ballot_topic.universe_id "universeId", all_ballot_topic.user_id "userId", ' +
+          'preview_type "previewType", preview_content::jsonb "previewContent", created_at "createdAt", chat_id "chatId", ' +
+          'json_object_agg(all_ballot_topic.content, ' +
+            'json_build_object( ' +
+              `'value',all_ballot_topic.value, ` +
+              `'users',CASE WHEN ballot_topic.user_ballot IS NULL THEN ARRAY[]::JSON[] ELSE ballot_topic.user_ballot END) ` +
+          ') vote ' +
         'FROM ' +
-          'aquest_schema.topic, ' +
-          '((SELECT ' + 
-            `topic.id, topic.content, json_build_object('value',topic.value, 'users', '[]'::jsonb)::jsonb users ` +
-          'FROM ' +
-            '(SELECT ' + 
-              'topic.id, ballot_universe.content, ballot_universe.value ' +
-            'FROM ' +
-              '(SELECT universe_id, content, value FROM aquest_schema.ballot, aquest_schema.ballot_universe WHERE ballot.id = ballot_universe.ballot_id) ballot_universe, ' +
-              'aquest_schema.topic ' +
-            `WHERE topic.universe_id = $1 AND ballot_universe.universe_id = topic.universe_id ` +
-            'EXCEPT ' +
-              'SELECT ' +
-                'topic.id, ballot.content, ballot.value ' +
-              'FROM ' + 
-                'aquest_schema.topic, ' +
-                'aquest_schema.ballot, ' +
-                'aquest_schema.ballot_topic ' + 
-              'WHERE ' +
-                `topic.universe_id = $1 AND topic.id = ballot_topic.topic_id AND ballot.id = ballot_topic.ballot_id ` +
-            ') AS topic) ' +
-          'UNION ' +
             '(SELECT ' +
-              `ballot_topic.topic_id, ballot.content, json_agg(aquest_schema.concat_json_object(json_build_object('value', ballot.value),ballot_topic.user_ballot))::jsonb users ` +
+              'topic.id topic_id, title, topic.universe_id, topic.user_id, preview_type , preview_content, ' +
+              `COALESCE(to_char(topic.created_at, 'MM-DD-YYYY HH24:MI:SS'), '') created_at, chat_id, ` +
+              'ballot.id ballot_id, ballot.content, ballot.value ' +
             'FROM ' +
-              `(SELECT topic_id, ballot_id, universe_id, json_build_object('author', author_id, 'userId', user_id, 'updatedAt', updated_at) user_ballot FROM aquest_schema.ballot_topic) AS ballot_topic ` +
-            'LEFT JOIN ' +
-              'aquest_schema.ballot ' +
-            'ON ballot_topic.ballot_id = ballot.id ' +
-            'WHERE ballot_topic.universe_id = $1 ' +
-            'GROUP BY ballot_topic.topic_id, ballot.content) ' +
-          ') ballot_topic ' +
-        'WHERE topic.id = ballot_topic.id ' +
-        'GROUP BY topic.id';
+              'aquest_schema.ballot_universe, aquest_schema.ballot, aquest_schema.topic ' +
+            'WHERE ' +
+              'ballot_universe.universe_id = $1 AND topic.universe_id = ballot_universe.universe_id AND ballot_universe.ballot_id = ballot.id ' +
+            'GROUP BY topic_id, ballot.id ) AS all_ballot_topic ' +
+          'LEFT JOIN ' +
+            `(SELECT ballot_topic.topic_id, ballot.id ballot_id, array_agg(json_build_object('author', author_id, 'userId', user_id, 'updatedAt', updated_at)) user_ballot ` +
+            'FROM aquest_schema.ballot_topic, aquest_schema.ballot ' +
+            'WHERE ballot.id = ballot_topic.ballot_id AND universe_id = $1 ' +
+            'GROUP BY topic_id, ballot.id) ballot_topic ' +
+          'ON all_ballot_topic.topic_id = ballot_topic.topic_id AND all_ballot_topic.ballot_id = ballot_topic.ballot_id '+
+        'GROUP BY all_ballot_topic.topic_id, title, universe_id, user_id, preview_type, preview_content::jsonb, created_at, chat_id';
+        
+        // sql =  
+        // 'SELECT ' +
+        //   `topic.id, title, universe_id "universeId", user_id "userId", preview_type "previewType", preview_content "previewContent", COALESCE(to_char(created_at, 'MM-DD-YYYY HH24:MI:SS'), '') "createdAt", chat_id "chatId",` +
+        //   `json_object_agg(ballot_topic.content, ballot_topic.users::json) vote ` +
+        // 'FROM ' +
+        //   'aquest_schema.topic, ' +
+        //   '((SELECT ' + 
+        //     `topic.id, topic.content, json_build_object('value',topic.value, 'users', '[]'::jsonb)::jsonb users ` +
+        //   'FROM ' +
+        //     '(SELECT ' + 
+        //       'topic.id, ballot_universe.content, ballot_universe.value ' +
+        //     'FROM ' +
+        //       '(SELECT universe_id, content, value FROM aquest_schema.ballot, aquest_schema.ballot_universe WHERE ballot.id = ballot_universe.ballot_id) ballot_universe, ' +
+        //       'aquest_schema.topic ' +
+        //     `WHERE topic.universe_id = $1 AND ballot_universe.universe_id = topic.universe_id ` +
+        //     'EXCEPT ' +
+        //       'SELECT ' +
+        //         'topic.id, ballot.content, ballot.value ' +
+        //       'FROM ' + 
+        //         'aquest_schema.topic, ' +
+        //         'aquest_schema.ballot, ' +
+        //         'aquest_schema.ballot_topic ' + 
+        //       'WHERE ' +
+        //         `topic.universe_id = $1 AND topic.id = ballot_topic.topic_id AND ballot.id = ballot_topic.ballot_id ` +
+        //     ') AS topic) ' +
+        //   'UNION ' +
+        //     '(SELECT ' +
+        //       `ballot_topic.topic_id, ballot.content, json_agg(aquest_schema.concat_json_object(json_build_object('value', ballot.value),ballot_topic.user_ballot))::jsonb users ` +
+        //     'FROM ' +
+        //       `(SELECT topic_id, ballot_id, universe_id, json_build_object('author', author_id, 'userId', user_id, 'updatedAt', updated_at) user_ballot FROM aquest_schema.ballot_topic) AS ballot_topic ` +
+        //     'LEFT JOIN ' +
+        //       'aquest_schema.ballot ' +
+        //     'ON ballot_topic.ballot_id = ballot.id ' +
+        //     'WHERE ballot_topic.universe_id = $1 ' +
+        //     'GROUP BY ballot_topic.topic_id, ballot.content) ' +
+        //   ') ballot_topic ' +
+        // 'WHERE topic.id = ballot_topic.id ' +
+        // 'GROUP BY topic.id';
         
         paramaterized = [params];
         callback = result => { 
