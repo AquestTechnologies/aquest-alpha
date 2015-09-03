@@ -251,9 +251,18 @@ CREATE FUNCTION aquest_schema.prepare_insert()
   END;
 $prepare_insert$ LANGUAGE plpgsql;
 
-----------------------------------------------------------
+-- Universe
+CREATE TRIGGER prepare_insert
+  BEFORE INSERT ON aquest_schema.universe
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.prepare_insert();
+-- Topic
+CREATE TRIGGER prepare_insert
+  BEFORE INSERT ON aquest_schema.topic
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.prepare_insert();
+  
+------------------------------------------------------------
 -- TRIGGER : DEFAULT BALLOT VALUE GENERATION FOR UNIVERSE --
-----------------------------------------------------------
+------------------------------------------------------------
 CREATE FUNCTION aquest_schema.prepare_ballot() 
   RETURNS TRIGGER AS $prepare_ballot$
   DECLARE
@@ -270,14 +279,9 @@ CREATE FUNCTION aquest_schema.prepare_ballot()
   END;
 $prepare_ballot$ LANGUAGE plpgsql;
 
--- Universe
-CREATE TRIGGER prepare_insert
-  BEFORE INSERT ON aquest_schema.universe
-  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.prepare_insert();
--- Topic
-CREATE TRIGGER prepare_insert
-  BEFORE INSERT ON aquest_schema.topic
-  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.prepare_insert();
+----------------------
+-- TRIGGER : BALLOT --
+----------------------
 -- ballot
 CREATE TRIGGER prepare_ballot
   AFTER INSERT ON aquest_schema.universe

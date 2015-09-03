@@ -1,6 +1,7 @@
 import Joi        from 'joi';
 import SocketIo   from 'socket.io';
 import JWT        from 'jsonwebtoken';
+import queryDb    from '../../queryDb.js';
 import devConfig  from '../../../../config/dev_server';
 import log        from '../../../shared/utils/logTailor.js';
 import { randomInteger } from '../../../shared/utils/randomGenerators';
@@ -81,11 +82,19 @@ export default function websocketPlugin(server, options, next) {
             const d = new Date(); // let's fix that later
             const id = randomInteger(0, 1000000); // it's supposed to be the real id
             
-            log(`_w_ createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
+            queryDb('createMessage', {chatId, userId, content}).then(
+              result => {
+                log(`_w_ createMessage`, result);
+                // log(`_w_ createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
             
-            socket.emit('receiveMessageOwner', { chatId, lcId, message: { id, userId, content, createdAt: d.getTime()}});
-            
-            socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, createdAt: d.getTime()} });
+                // socket.emit('receiveMessageOwner', { chatId, lcId, message: { id, userId, content, createdAt: d.getTime()}});
+                
+                // socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, createdAt: d.getTime()} });
+              },
+              error => {
+                log(`_w_ createMessage error`, error);
+              }
+            );
           },
           error => {
             log('websocket authentication - ', error.stack ? error.stack : error);
