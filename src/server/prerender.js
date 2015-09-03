@@ -9,7 +9,6 @@ import phidippides    from './phidippides';
 import protectRoutes  from '../shared/routes';
 import devConfig      from '../../config/dev_server';
 import configureStore from '../shared/configureStore';
-import NotFound       from '../shared/components/NotFound';
 
 const { wds: { hotFile, publicPath, filename }, jwt: { key, ttl } } = devConfig;
 const HTML = fs.readFileSync('src/server/index.html', 'utf8');

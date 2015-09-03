@@ -1,11 +1,13 @@
 import React                  from 'react';
 import { bindActionCreators } from 'redux';
 import { connect }            from 'react-redux';
-import Menu                   from './universe/Menu';
-import Chat                   from './universe/Chat';
-import Inventory              from './universe/Inventory';
-import config             from '../../../config/dev_shared';
-import menuScroll             from '../../client/lib/menuScroll';
+import Menu       from './universe/Menu';
+import Chat       from './universe/Chat';
+import Inventory  from './universe/Inventory';
+import NotFound   from './common/NotFound';
+import Spinner    from './common/Spinner';
+import config     from '../../../config/dev_shared';
+import menuScroll from '../../client/lib/menuScroll';
 import { readUniverse, readInventory, readChat, readTopic, readTopicAtoms, emitJoinChat, emitLeaveChat, readChatOffset, emitCreateMessage, transitionTo } from '../actionCreators';
 
 class Universe extends React.Component {
@@ -59,9 +61,9 @@ class Universe extends React.Component {
     const topic = topicId ? topics[topicId] : undefined;
     const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
     const filteredTopics = !children ? this.createTopicsList(topics, universeId) : undefined;
-    const chat = chats[chatId];
+    const chat = chatId ? chats[chatId] : undefined;
     
-    return !universe ? <div>Loading...</div> : (
+    return !universe ? <Spinner /> : universe.notFound || (topic && topic.notFound) ? <NotFound /> : (
       <div> 
         <Menu 
           topicId={topicId}

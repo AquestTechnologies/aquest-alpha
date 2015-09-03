@@ -60,7 +60,7 @@ export default function phidippides(routerState, dispatch) {
           
           // Si aucune tache n'a échoué c'est terminé
           if (!failedTasks.length || tasks404.length) resolve();
-            
+          
           // Sinon on rappel les tâches échouées (possible boucle infinie ici)
           else clearTasks(failedTasks).then(resolve, reject);
         },

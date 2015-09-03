@@ -7,7 +7,7 @@ import Login       from './components/Login';
 import NewUniverse from './components/CreateUniverse';
 import Topic       from './components/Topic';
 import NewTopic    from './components/CreateTopic';
-import NotFound    from './components/NotFound';
+import NotFound    from './components/common/NotFound';
 import { Route, Redirect } from 'react-router';
 import log, { logAuthentication } from './utils/logTailor';
 
