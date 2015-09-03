@@ -56,14 +56,10 @@ export default function phidippides(routerState, dispatch) {
           logMeOrNot('.P. failed tasks:', failedTasks.map(task => task.id));
           logMeOrNot('\n');
           
-          const Its404 = tasks
-            .filter(t => t.nullIs404 && completedTasks.hasOwnProperty(t.id) && !completedTasks[t.id])
-            .length;
-          
-          if (Its404) return resolve(true);
+          const tasks404 = tasks.filter(t => t.nullIs404 && completedTasks.hasOwnProperty(t.id) && completedTasks[t.id].notFound);
           
           // Si aucune tache n'a échoué c'est terminé
-          if (!failedTasks.length) resolve(false);
+          if (!failedTasks.length || tasks404.length) resolve();
             
           // Sinon on rappel les tâches échouées (possible boucle infinie ici)
           else clearTasks(failedTasks).then(resolve, reject);

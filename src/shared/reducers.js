@@ -236,15 +236,9 @@ export default {
     }
   },
   
-  lastError: (state=false, action) => isAPIFailure(action) ? action.payload : false,
-  
-  lastSuccess: (state='', { type }) => {
-    if (type === 'SUCCESS_CREATE_TOPIC') return 'Topic creation success!';
-    if (type === 'SUCCESS_CREATE_UNIVERSE') return 'Universe creation success!';
-    return '';
-  },
-  
   router: (state={}, action) => routerStateReducer(state, action),
+  
+  lastError: (state=false, action) => isAPIFailure(action) ? action.payload : false,
   
   // Doit être exporté en dernier pour activer les side effects après la reduction des précédants
   records: (state = [], action) => [...state, Object.assign({date: new Date().getTime()}, action)]

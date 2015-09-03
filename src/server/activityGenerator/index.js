@@ -1,11 +1,7 @@
 import queryDb from '../queryDb';
 import log from '../../shared/utils/logTailor';
-import selectRandomItemIn from './selectRandomItemIn';
-import {getName, releaseName} from './activistsNames';
 import {randomInteger, randomText} from '../../shared/utils/randomGenerators';
-import {ip, universePicture, passwordHash, imageList, youtubeList, linkList} from './activistsConfig'; 
-
-const randomText2 = (min, max) => randomText(randomInteger(min, max));
+import {ip, universePicture, passwordHash, imageList, youtubeList, linkList, nameList} from './activistsConfig'; 
 
 export class Activist {
   
@@ -269,4 +265,39 @@ export function createActivists(n, minPace, maxPace) {
   }
   
   return {startActivists, stopActivists};
+}
+
+
+// Makes sure no activist has the same id
+const activeNames = [];
+function getName() {
+	
+	let name, selectedName, existant;
+	do {
+		selectedName = selectRandomItemIn(nameList);
+		existant = activeNames.find(name => name === selectedName);
+		
+		if (!existant) {
+			name = selectedName;
+			activeNames.push(selectedName);
+		}
+	} while(!name);
+	
+	return name;
+}
+
+function releaseName(name) {
+  activeNames.splice(activeNames.indexOf(name), 1);
+}
+
+
+// Utilities
+function randomText2(min, max) {
+  
+  return randomText(randomInteger(min, max));
+}
+
+function selectRandomItemIn(array) {
+  
+  return array[randomInteger(0, array.length - 1)];
 }

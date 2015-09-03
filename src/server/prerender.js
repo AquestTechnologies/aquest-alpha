@@ -64,18 +64,14 @@ export default function prerender(request, reply) {
       // Fetches initial data for components in router's branch
       log('... Entering phidippides');
       const dd = new Date();
-      phidippides(routerState, store.dispatch).then(is404 => {
-        
+      phidippides(routerState, store.dispatch).then(() => {
         log(`... Exiting phidippides (${new Date() - dd}ms)`);
-        if (is404) log('... 404');
         log('... Entering React.renderToString');
         
         // Renders the app (try...catch to be removed in production)
         try {
           var mountMeImFamous = React.renderToString(
-            is404 ?
-              <NotFound /> :
-              <Router {...routerState} children={routes} />
+            <Router {...routerState} children={routes} />
           );
         } 
         catch(err) { log('!!! Error while React.renderToString', err.message, err.stack); }
@@ -90,7 +86,9 @@ export default function prerender(request, reply) {
         const serverState = store.getState();
         ['router', 'records', 'lastError'].forEach(key => delete serverState[key]);
         for (let key in serverState) {
-          if (!Object.keys(serverState[key]).length) delete serverState[key];
+          const value = serverState[key];
+          const isEmpty = value === '' || (typeof value === 'object' && !Object.keys(value).length); // Could be better
+          if (isEmpty) delete serverState[key];
         }
         
         response.source = html
