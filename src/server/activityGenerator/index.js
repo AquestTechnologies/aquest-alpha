@@ -157,7 +157,7 @@ export class Activist {
     return queryDb('createUniverse', {
       ip,
       userId: this.id,
-      name: randomText2(1, 3),
+      name: randomText2(1, 3).slice(0, -1),
       picture: universePicture,
       description: randomText2(1, 20),
     });

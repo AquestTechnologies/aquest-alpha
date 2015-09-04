@@ -15,6 +15,7 @@ contact: bonjour@aquest.fr
 ### En manque d'idées ?
 
 - [ ] Pagination
+- [ ] VALIDATIONS!!!
 - [ ] Gérer formdata
 - [ ] queryDb renvoie une erreur si il n'y a pas d'atomes pour createTopic
 - [ ] Gérer les 400 et les 401 lors de login

@@ -125,7 +125,7 @@ export default function apiPlugin(server, options, next) {
                   if (token) response.state('jwt', JWT.sign(token, key), cookieOptions).send();
                   
                   else if (requestToken) JWT.verify(requestToken, key, (err, {userId, expiration}) => {
-                    if (err) return handleError(response, 'handler JWT.verify', err);
+                    if (err) return handleError(response, 'handler JWT.verify', createReason(500, '', err));
                     
                     const t = new Date().getTime();
                     if (expiration > t) {
@@ -140,7 +140,7 @@ export default function apiPlugin(server, options, next) {
                 
                 handleError.bind(null, response, 'afterQuery')
               ),
-              handleError.bind(null, response, 'queryDb')
+              err => handleError(response, 'queryDb', createReason(500, '', err))
             ),
             handleError.bind(null, response, 'beforeQuery')
           );
@@ -153,19 +153,16 @@ export default function apiPlugin(server, options, next) {
   
   function handleError(response, origin, reason) {
     
-    const msg = reason.msg || '';
     const code = reason.code || 500;
-    const err = reason.code ? reason.err : reason;
+    const msg = reason.msg || '';
+    const err = reason.err;
     
     log('!!! Error while API', origin, msg);
     log('Replying', code);
-    if (err) {
-      log('Reason:', err);
-      if (err instanceof Error) log(err.stack);
-    }
+    if (err instanceof Error) log(err.message, '\n', err.stack);
     
-    response.source = code < 500 ? msg : 'Internal server error';
-    response.code(code).send(); 
+    response.source = JSON.stringify(code < 500 ? msg : 'Internal server error');
+    response.code(code).send();
   }
 }
 

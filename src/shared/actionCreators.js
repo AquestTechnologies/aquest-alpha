@@ -147,9 +147,9 @@ function createActionCreator(shape) {
         xhr.open(method, path);
         
         xhr.onload = () => {
-          const { status } = xhr;
+          const {status} = xhr;
           const response = JSON.parse(xhr.response);
-          status === 200 ? resolve(response) : reject({ status, response, intention });
+          status === 200 ? resolve(response) : reject({ status, intention, response });
         };
         
         if (isPost) { // Stringifies objects before a POST request

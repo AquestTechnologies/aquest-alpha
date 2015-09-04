@@ -72,7 +72,7 @@ class Universe extends React.Component {
           universeName={universe.name} 
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'> { 
               
