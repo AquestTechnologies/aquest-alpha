@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default class Vote extends React.Component {
+export default class Ballot extends React.Component {
   
   constructor() {
     super();
@@ -16,10 +16,11 @@ export default class Vote extends React.Component {
   }
   
   render() {
-    const { id, users } = this.props;
+    const { users } = this.props;
+    
     return (
       <span className="vote">
-        <input type='button' value={`${id} ${users.length}`} onClick={this.handleVote}></input>
+        <input type='button' value={`${this.props.id} ${users.length}`} onClick={this.handleVote}></input>
         {users.length > 3 ? 
           <span className="voteAuthorsCollapsed">'...'</span> : 
           <span className="voteAuthors"> {users.map( (user) => user.userId )} </span>}

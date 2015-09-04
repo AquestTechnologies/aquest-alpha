@@ -1,6 +1,7 @@
 import Joi        from 'joi';
 import SocketIo   from 'socket.io';
 import JWT        from 'jsonwebtoken';
+import queryDb    from '../../queryDb.js';
 import devConfig  from '../../../../config/dev_server';
 import log        from '../../../shared/utils/logTailor.js';
 import { randomInteger } from '../../../shared/utils/randomGenerators';
@@ -12,6 +13,7 @@ export default function websocketPlugin(server, options, next) {
   
   // creates websocket server using 'ws' defined port
   const io = new SocketIo(server.select('ws').listener);
+  
   const chatNamespace = io.of('/chat');
   chatNamespace.use(socketAuthentication);
   
@@ -80,11 +82,19 @@ export default function websocketPlugin(server, options, next) {
             const d = new Date(); // let's fix that later
             const id = randomInteger(0, 1000000); // it's supposed to be the real id
             
-            log(`_w_ createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
+            queryDb('createMessage', {chatId, userId, content}).then(
+              result => {
+                log(`_w_ createMessage`, result);
+                // log(`_w_ createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
             
-            socket.emit('receiveMessageOwner', { chatId, lcId, message: { id, userId, content, createdAt: d.getTime()}});
-            
-            socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, createdAt: d.getTime()} });
+                // socket.emit('receiveMessageOwner', { chatId, lcId, message: { id, userId, content, createdAt: d.getTime()}});
+                
+                // socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, createdAt: d.getTime()} });
+              },
+              error => {
+                log(`_w_ createMessage error`, error);
+              }
+            );
           },
           error => {
             log('websocket authentication - ', error.stack ? error.stack : error);
@@ -121,17 +131,81 @@ export default function websocketPlugin(server, options, next) {
     });
   });
   
-  /**
-   * Should we really use socketio to vote ?
-   * namespace to vote for a topic/message
-   * */
-  const voteNamespace = io.of('/vote');
+  const voteNamespace= io.of('/vote');
+  voteNamespace.use(socketAuthentication);
+  
   let voteUsers = 0;
-  voteNamespace.on('connection', (socket) => {
+  voteNamespace.on('connection', socket => {
       voteUsers++;
-      log('_w_ [' + voteUsers + '] New client is able to vote for a topic | message');
       
-      socket.on('createVote', (() => console.log('vote')));
+      socket.on('joinVote', request => Joi.validate(request, validationSchema['joinVote'], (err, value) => {
+        if (err) return log(err);
+        socket.join(request);
+      }));
+    
+      socket.on('disable', request => Joi.validate(request, validationSchema['leaveVote'], (err, value) => {
+        if (err) return log(err);
+        socket.leave(request);
+      }));      
+      
+      socket.on('createVoteMessage', request => {
+        Joi.validate(request, validationSchema['createVoteMessage'], (err, value) => {
+          if (err) return log(err);
+          
+          userAuthentication(socket).then(
+            result => {
+              log('authentication succeded', result);
+              const { userId } = socket;
+              
+              const { id, voteTargetContext: {chatId, voteContextId, messageIndex, messageId} } = request;
+              const d = new Date(); // let's fix that later
+              const createdAt = d.getTime();
+              
+              log(`_w_ createVoteMessage`, { id, chatId, voteContextId, messageIndex, messageId, userId, createdAt });
+              
+              socket.emit('receiveVoteMessageOwner', { id, chatId, messageIndex, userId, createdAt } );
+              
+              socket.broadcast.to(voteContextId).emit('receiveVoteMessage', { id, chatId, messageId, userId, createdAt });
+            },
+            error => {
+              log('websocket authentication - ', error.stack ? error.stack : error);
+              
+              socket.error('To vote on a message please sign in !');
+            }
+          );
+        });
+      });
+      
+      socket.on('createVoteTopic', request => {
+        Joi.validate(request, validationSchema['createVoteTopic'], (err, value) => {
+          if (err) return log(err);
+          
+          userAuthentication(socket).then(
+            result => {
+              log('authentication succeded', result);
+              const { userId } = socket;
+              
+              const { id, voteTargetContext: {topicId, voteContextId} } = request;
+              const d = new Date(); // let's fix that later
+              const createdAt = d.getTime();
+              
+              log(`_w_ createVoteTopic`, { id, topicId, voteContextId, userId, createdAt });
+              
+              socket.emit('receiveVoteTopic', { id, topicId, userId, createdAt } );
+              
+              socket.broadcast.to(voteContextId).emit('receiveVoteTopic', { id, topicId, userId, createdAt });
+            },
+            error => {
+              log('websocket authentication - ', error.stack ? error.stack : error);
+              
+              socket.error('To vote on a topic please sign in !');
+            }
+          );
+        });
+      });
+      
+      socket.on('deleteVoteMessage', request => {
+      });
       
       socket.on('disconnect', (socket) => {
         voteUsers--;

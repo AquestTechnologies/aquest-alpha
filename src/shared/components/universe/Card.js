@@ -18,17 +18,26 @@ export default class Card extends React.Component {
   }
     
   render() {
-    const { topic: {id, title, userId, createdAt, universeId, previewType, previewContent} } = this.props;
+    const { 
+      topic: {id, title, userId, createdAt, universeId, previewType, previewContent, vote}, 
+      emitCreateVoteTopic, emitDeleteVoteTopic, voteContextId, sessionUserId, ballot
+    } = this.props;
+    
+    const voteTargetContext = {voteContextId, topicId: id};
     
     return (
       <div className='card' onClick={this.handleClick.bind(this, universeId, id)}>
-      
         <div className='card_title'>
           { title }
         </div>
         
         <div className='card_author'>
-          { `By ${userId}, ${createdAt} ago.` }
+          <span>{ `By ${userId}, ${createdAt} ago.` }</span>
+          <span>{ 
+            Object.keys(vote).length ? 
+              Object.keys(vote).reduce( (prev, key) =>  prev + ballot.find(({content}) => content === key ).value * vote[key].length, 0) + ' up' : 
+              '0 up'
+          }</span>
         </div>
         
         { this.renderPreview(previewType, previewContent) }

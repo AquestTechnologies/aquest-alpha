@@ -206,6 +206,58 @@ export default {
         return newState;
       })(action);
       
+    case 'EMIT_CREATE_VOTE_MESSAGE':
+      
+      return ( (action) => {
+        const {id, voteTargetContext: {chatId, messageIndex}, sessionUserId, universeId} = action.payload;
+        const newState = _cloneDeep(state);
+        
+        if (!newState[chatId].messages[messageIndex].vote) {
+          newState[chatId].messages[messageIndex].vote = { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
+          newState[chatId].messages[messageIndex].vote[universeId] = [];
+        }
+        
+        newState[chatId].messages[messageIndex].vote[id].push({id: sessionUserId});
+        
+        return newState;
+      })(action);
+      
+    case 'RECEIVE_VOTE_MESSAGE_OWNER':
+      
+      return ( (action) => {
+        const {id, chatId, messageIndex, userId, createdAt} = action.payload;
+        const newState = _cloneDeep(state);
+        
+        const userVoteIndex = state[chatId].messages[messageIndex].vote[id].findIndex( (userVote) => userVote.id === userId );
+        if( userVoteIndex !== -1 ) newState[chatId].messages[messageIndex].vote[id][userVoteIndex] = {id: userId, createdAt};
+        
+        return newState;
+      })(action);
+      
+    case 'RECEIVE_VOTE_MESSAGE':
+      
+      return ( (action) => {
+        const chatId = parseInt(action.payload.chatId, 10);
+        const {id, messageId, userId, createdAt, universeId} = action.payload;
+        const newState = _cloneDeep(state);
+        
+        const messageIndex = state[chatId].messages.findIndex( (message) => message.id === messageId );
+        if (messageIndex !== -1) {
+          if (!newState[chatId].messages[messageIndex].vote) { 
+            newState[chatId].messages[messageIndex].vote = { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
+            newState[chatId].messages[messageIndex].vote[universeId] = [];
+          }
+          newState[chatId].messages[messageIndex].vote[id].push({id: userId, createdAt});
+        }
+        
+        return newState;
+      })(action);
+      
+    case 'EMIT_DELETE_VOTE_MESSAGE':
+      
+      return ( (action) => {
+      })(action);
+      
     default:
       return state;
     }
@@ -230,6 +282,41 @@ export default {
       
     case 'SUCCESS_CREATE_TOPIC':
       return Object.assign({}, state, {[payload.id]: payload});
+      
+    case 'EMIT_CREATE_VOTE_TOPIC'  :
+      
+      return ( ({id, voteTargetContext: {topicId}, sessionUserId, universeId}) => {
+        const newState = _cloneDeep(state);
+        
+        if (!newState[topicId].vote) {
+          newState[topicId].vote = { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
+          newState[topicId].vote[universeId] = [];
+        }
+          
+        newState[topicId].vote[id].push(sessionUserId);
+        
+        return newState;
+      })({payload});
+      
+    case 'RECEIVE_VOTE_TOPIC_OWNER':
+      return ( ({id, topicId, userId, createdAt}) => {
+        const newState = _cloneDeep(state);
+        
+        const userVoteIndex = newState[topicId].vote[id].findIndex( (userVote) => userVote.id === userId);
+        if (userVoteIndex !== -1) newState[topicId].vote[id][userVoteIndex] = { id: userId, createdAt };
+        
+        return newState;
+      })(payload);
+      
+    case 'RECEIVE_VOTE_TOPIC':
+      return ( ({id, topicId, userId, createdAt}) => {
+        const newState = _cloneDeep(state);
+        
+        if (!newState[topicId].vote) newState[topicId].vote = { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
+        newState[topicId].vote[id].push({ id: userId, createdAt });
+        
+        return newState;
+      })(payload);
       
     default:
       return state;

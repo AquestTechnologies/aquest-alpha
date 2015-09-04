@@ -137,36 +137,60 @@ CREATE TABLE aquest_schema.FILE(
 --   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id)
 -- );
 
--- CREATE TABLE aquest_schema.VOTE_MESSAGE(
---   id                  BIGSERIAL PRIMARY KEY,
---   author_id           TEXT NOT NULL,
---   user_id             TEXT NOT NULL, 
---   universe_id         TEXT NOT NULL,
---   message_id          BIGINT NOT NULL,
---   content             TEXT NOT NULL,
---   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
---   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
---   FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(id),
---   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
---   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
---   FOREIGN KEY (message_id) REFERENCES aquest_schema.MESSAGE(id)
--- );
+CREATE TABLE aquest_schema.BALLOT(
+  id                  BIGSERIAL PRIMARY KEY,
+  content             TEXT NOT NULL,
+  value               INTEGER NOT NULL,
+  position            INTEGER NOT NULL,
+  description         TEXT,
+  deleted             BOOLEAN
+);
 
--- CREATE TABLE aquest_schema.VOTE_TOPIC(
---   id                  BIGSERIAL PRIMARY KEY,
---   author_id           TEXT NOT NULL,
---   user_id             TEXT NOT NULL, 
---   universe_id         TEXT NOT NULL,
---   topic_id            TEXT NOT NULL,
---   content             TEXT NOT NULL,
---   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
---   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
---   deleted             BOOLEAN,
---   FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(id),
---   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
---   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
---   FOREIGN KEY (topic_id) REFERENCES aquest_schema.UNIVERSE(id)
--- );
+CREATE TABLE aquest_schema.BALLOT_UNIVERSE(
+  id                  BIGSERIAL PRIMARY KEY,
+  universe_id         TEXT NOT NULL,
+  ballot_id           BIGINT NOT NULL,
+  user_id             TEXT,
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
+  FOREIGN KEY (ballot_id) REFERENCES aquest_schema.BALLOT(id)
+);
+
+CREATE TABLE aquest_schema.BALLOT_MESSAGE(
+  id                  BIGSERIAL PRIMARY KEY,
+  author_id           TEXT NOT NULL,
+  user_id             TEXT NOT NULL, 
+  universe_id         TEXT NOT NULL,
+  message_id          BIGINT NOT NULL,
+  ballot_id           BIGINT NOT NULL,
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
+  FOREIGN KEY (message_id) REFERENCES aquest_schema.ATOMMESSAGE(id),
+  FOREIGN KEY (ballot_id) REFERENCES aquest_schema.BALLOT(id)
+);
+
+CREATE TABLE aquest_schema.BALLOT_TOPIC(
+  id                  BIGSERIAL PRIMARY KEY,
+  author_id           TEXT NOT NULL,
+  user_id             TEXT NOT NULL, 
+  universe_id         TEXT NOT NULL,
+  topic_id            TEXT NOT NULL,
+  ballot_id           BIGINT NOT NULL,
+  created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  deleted             BOOLEAN,
+  FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
+  FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
+  FOREIGN KEY (topic_id) REFERENCES aquest_schema.TOPIC(id),
+  FOREIGN KEY (ballot_id) REFERENCES aquest_schema.BALLOT(id)
+);
 
 -- CREATE TABLE aquest_schema.GOALS(
 --   id                  BIGSERIAL PRIMARY KEY,
@@ -212,7 +236,6 @@ CREATE FUNCTION aquest_schema.prepare_insert()
       new_id := replace(trim(both ' ' from NEW.name), ' ', '_');
       same_id := (SELECT id FROM aquest_schema.universe WHERE universe.id = new_id);
       INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING id INTO new_chat_id;
-      
     -- Topic
     ELSIF (TG_TABLE_NAME = 'topic') THEN
       new_id := replace(trim(both ' ' from NEW.title), ' ', '_');
@@ -238,8 +261,33 @@ CREATE TRIGGER prepare_insert
 CREATE TRIGGER prepare_insert
   BEFORE INSERT ON aquest_schema.topic
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.prepare_insert();
+  
+------------------------------------------------------------
+-- TRIGGER : DEFAULT BALLOT VALUE GENERATION FOR UNIVERSE --
+------------------------------------------------------------
+CREATE FUNCTION aquest_schema.prepare_ballot() 
+  RETURNS TRIGGER AS $prepare_ballot$
+  DECLARE
+    ballot_id BIGINT;
+  BEGIN
+    INSERT INTO aquest_schema.ballot (content, value, position) VALUES (NEW.id, 1, 0) RETURNING id INTO ballot_id;
+    INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, ballot_id);
+    INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, 1);
+    INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, 2);
+    INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, 3);
+    INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, 4);
+    INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, 5);
+    RETURN NEW;
+  END;
+$prepare_ballot$ LANGUAGE plpgsql;
 
-
+----------------------
+-- TRIGGER : BALLOT --
+----------------------
+-- ballot
+CREATE TRIGGER prepare_ballot
+  AFTER INSERT ON aquest_schema.universe
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.prepare_ballot();
 --------------------------
 -- TRIGGER : UPDATED_AT -- 
 --------------------------
@@ -278,6 +326,10 @@ CREATE TRIGGER update_timestamp
 -- File
 CREATE TRIGGER update_timestamp
   BEFORE UPDATE ON aquest_schema.file
+  FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
+-- ballot
+CREATE TRIGGER update_timestamp
+  BEFORE UPDATE ON aquest_schema.ballot
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
   
 
@@ -356,6 +408,12 @@ RETURNS JSON AS $$
   return o;
 $$ LANGUAGE plv8 IMMUTABLE STRICT;
 
+-- DEFINE INITIALE BALLOTS
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Thanks', 1, 1);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Agree', 1, 2);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Disagree', 0, 3);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Irrelevant', -1, 4);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Shocking', -10, 5);
 
 -------------------------
 -- MOCK DATA INSERTION --
@@ -365,4 +423,4 @@ INSERT INTO aquest_schema.user (email, id, first_name, last_name, password_hash,
   VALUES ('admin@aquest.tech', 'admin', 'Aquest', 'Technologies', '$2a$10$m3jpaE2uelYFzoPTu/fG/eU5rTkmL0d8ph.eF3uQrdQE46UbhhpdW', '192.168.0.1');
 
 INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
-  VALUES ('Test', 'admin', 'Make some, fail some, love some.', 'img/pillars_compressed.png', '192.168.0.1');
+  VALUES ('Test', 'admin', 'Make some, fail some, love some.', 'http://d2ifokkknaunnx.cloudfront.net/pillars.png', '192.168.0.1');

@@ -16,7 +16,16 @@ export default class Chat extends React.Component {
       const messages = (chat || []).messages || [];
       
       if ( !isLoading && messages.length && e.target.scrollTop === 0 && chat.firstMessageId !== messages[0].id ) {
-        readChatOffset({chatId, offset: messages.length});
+        // NOTE : we might want keep this info in the state to avoid recompute this value
+        let originalMessageLength = messages.length;
+      
+        //fastest method
+        for (let i=0, messagesLength = messages.length ; i < messagesLength ; i++) {
+          if (typeof messages[i].id === 'string' && (messages[i].id.substr(0,2) === 'lc' || messages[i].id.substr(0,2) === 'fe')) {
+            originalMessageLength--;
+          }
+        }
+        readChatOffset({chatId, offset: originalMessageLength});
         this.setState({isLoading: true});
       }
     };
@@ -48,16 +57,21 @@ export default class Chat extends React.Component {
     // console.log('.C. Chat mount');
     
     const {chatId, chat, readChat, readChatOffset, emitJoinChat} = this.props;
-    const messages = (chat || []).messages || [];
+    const messages = (chat || {}).messages || [];
     
     if (messages && messages.length) {
-      let messageIndex = messages.length - 1;
+      if (chat.firstMessageId !== messages[0].id) { 
+        // NOTE : we might want keep this info in the state to avoid recompute this value
+        let originalMessageLength = messages.length;
       
-      while (typeof messages[messageIndex].id === 'string' && (messages[messageIndex].id.substr(0,2) === 'lc' || messages[messageIndex].id.substr(0,2) === 'fe')) {
-        messageIndex--;
+        //fastest method
+        for (let i=0, messagesLength = messages.length ; i < messagesLength ; i++) {
+          if (typeof messages[i].id === 'string' && (messages[i].id.substr(0,2) === 'lc' || messages[i].id.substr(0,2) === 'fe')) {
+            originalMessageLength--;
+          }
+        }
+        readChatOffset({ chatId, offset: originalMessageLength });
       }
-      
-      readChatOffset({ chatId, offset: messages[messageIndex].id });
     }
     else readChat(chatId);
     
@@ -93,7 +107,11 @@ export default class Chat extends React.Component {
   }
   
   render() {
-    const {chatId, users, chat, emitCreateMessage} = this.props;
+    const { 
+      chatId, users, chat, emitCreateMessage, 
+      emitCreateVoteMessage, emitDeleteVoteMessage, universeId, sessionUserId, voteContextId
+    } = this.props;
+    
     const name     = (chat || '').name || '';
     const messages = (chat || []).messages || [];
     const messagesList = messages.length ? 'chat_list-visible' : 'chat_list-hidden';
@@ -105,7 +123,24 @@ export default class Chat extends React.Component {
         <div ref='scrollMeDown' id='scrollMeDown' className='chat_scrollable'>
           <div className={messagesList}>
             
-            { messages.map(({id, userId, type, content, createdAt}) => <Message key={id} id={id} createdAt={createdAt} userId={userId} type={type} content={content} />) }
+            { messages.map(({id, userId, type, content, createdAt, vote}, index) => 
+              <Message 
+                id={id} 
+                key={id}
+                vote={vote}
+                type={type} 
+                chatId={chatId}
+                userId={userId} 
+                content={content} 
+                messageIndex={index}
+                createdAt={createdAt} 
+                universeId={universeId} 
+                sessionUserId={sessionUserId}
+                voteContextId={voteContextId}
+                emitCreateVoteMessage={emitCreateVoteMessage}
+                emitDeleteVoteMessage={emitDeleteVoteMessage}
+              />) 
+            }
             
           </div>
         </div>
