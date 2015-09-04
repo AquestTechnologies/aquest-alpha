@@ -1,5 +1,4 @@
 import React from 'react';
-import Vote from '../common/Vote';
 
 export default class Card extends React.Component {
   
@@ -20,12 +19,9 @@ export default class Card extends React.Component {
     
   render() {
     const { 
-      topic: {id, title, userId, createdAt, universeId, previewType, previewContent}, 
-      emitCreateVoteTopic, emitDeleteVoteTopic, voteContextId, sessionUserId 
+      topic: {id, title, userId, createdAt, universeId, previewType, previewContent, vote}, 
+      emitCreateVoteTopic, emitDeleteVoteTopic, voteContextId, sessionUserId, ballot
     } = this.props;
-    
-    const vote = this.props.topic.vote || { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
-    if (!vote[universeId]) vote[universeId] = []; 
     
     const voteTargetContext = {voteContextId, topicId: id};
     
@@ -37,9 +33,11 @@ export default class Card extends React.Component {
         
         <div className='card_author'>
           <span>{ `By ${userId}, ${createdAt} ago.` }</span>
-          <span>{ Object.keys(vote).reduce( (prev, key) => {
-            return prev + (vote[key].value * vote[key].users.length);
-          }, 0) + ' up' }</span>
+          <span>{ 
+            Object.keys(vote).length ? 
+              Object.keys(vote).reduce( (prev, key) =>  prev + ballot.find(({content}) => content === key ).value * vote[key].length, 0) + ' up' : 
+              '0 up'
+          }</span>
         </div>
         
         { this.renderPreview(previewType, previewContent) }

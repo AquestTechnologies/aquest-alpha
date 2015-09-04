@@ -1,17 +1,15 @@
 import React from 'react';
-import Vote from '../common/Vote';
+import Ballot from '../common/Ballot';
 import Icon from '../common/Icon';
 
 export default class Message extends React.Component {
   
   render() {
     
-    const { id, userId, type, content: {text}, createdAt, universeId, chatId, sessionUserId, voteContextId, emitCreateVoteMessage, emitDeleteVoteMessage, messageIndex } = this.props;
-    const vote = this.props.vote || { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
-    if (!vote[universeId]) vote[universeId] = []; 
+    const { id, userId, type, content: {text}, createdAt, universeId, chatId, sessionUserId, vote, voteContextId, emitCreateVoteMessage, emitDeleteVoteMessage, messageIndex } = this.props;
     
     const voteTargetContext = {chatId, voteContextId, messageId: id, messageIndex};
-    
+    console.log(vote);
     return (
       <div className="message">
         <Icon name="disk" cssclass="message_icon" />
@@ -24,10 +22,10 @@ export default class Message extends React.Component {
           </div>
           <div className="vote">
             { Object.keys(vote).map( (key) =>
-              <Vote 
+              <Ballot 
                 id={key}
                 key={key}
-                users={vote[key].users}
+                users={vote[key].users || []}
                 universeId={universeId} // not really necessary, depends on the database query optimization
                 sessionUserId={sessionUserId}
                 createVote={emitCreateVoteMessage}

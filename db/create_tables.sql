@@ -141,6 +141,8 @@ CREATE TABLE aquest_schema.BALLOT(
   id                  BIGSERIAL PRIMARY KEY,
   content             TEXT NOT NULL,
   value               INTEGER NOT NULL,
+  position            INTEGER NOT NULL,
+  description         TEXT,
   deleted             BOOLEAN
 );
 
@@ -268,7 +270,7 @@ CREATE FUNCTION aquest_schema.prepare_ballot()
   DECLARE
     ballot_id BIGINT;
   BEGIN
-    INSERT INTO aquest_schema.ballot (content, value) VALUES (NEW.id, 1) RETURNING id INTO ballot_id;
+    INSERT INTO aquest_schema.ballot (content, value, position) VALUES (NEW.id, 1, 0) RETURNING id INTO ballot_id;
     INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, ballot_id);
     INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, 1);
     INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, 2);
@@ -407,11 +409,11 @@ RETURNS JSON AS $$
 $$ LANGUAGE plv8 IMMUTABLE STRICT;
 
 -- DEFINE INITIALE BALLOTS
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Thanks', 1);
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Agree', 1);
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Disagree', 0);
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Irrelevant', -1);
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Shocking', -10);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Thanks', 1, 1);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Agree', 1, 2);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Disagree', 0, 3);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Irrelevant', -1, 4);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Shocking', -10, 5);
 
 -------------------------
 -- MOCK DATA INSERTION --
@@ -421,4 +423,4 @@ INSERT INTO aquest_schema.user (email, id, first_name, last_name, password_hash,
   VALUES ('admin@aquest.tech', 'admin', 'Aquest', 'Technologies', '$2a$10$m3jpaE2uelYFzoPTu/fG/eU5rTkmL0d8ph.eF3uQrdQE46UbhhpdW', '192.168.0.1');
 
 INSERT INTO aquest_schema.universe (name, user_id, description, picture, creation_ip) 
-  VALUES ('Test', 'admin', 'Make some, fail some, love some.', 'img/pillars_compressed.png', '192.168.0.1');
+  VALUES ('Test', 'admin', 'Make some, fail some, love some.', 'http://d2ifokkknaunnx.cloudfront.net/pillars.png', '192.168.0.1');

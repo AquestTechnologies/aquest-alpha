@@ -76,7 +76,7 @@ class Universe extends React.Component {
           universeName={universe.name} 
         />
         
-        <div className='universe_main' style={{backgroundImage: `url(${config.apiUrl}/${universe.picture})`}}>
+        <div className='universe_main' style={{backgroundImage: `url(${universe.picture})`}}>
           <div className='universe_main_scrollable' id='main_scrollable'>
             <div className='universe_main_scrolled'> { 
               
@@ -97,6 +97,7 @@ class Universe extends React.Component {
                 <Inventory 
                   universe={universe}
                   sessionUserId={userId}
+                  ballot={universe.ballot}
                   universeId={universeId}
                   topicsList={filteredTopics}
                   transitionTo={transitionTo}
