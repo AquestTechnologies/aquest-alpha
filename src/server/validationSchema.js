@@ -32,6 +32,7 @@ const API_VALIDATION_SCHEMA = {
     description:  Joi.string().trim().max(200),
     picture:      Joi.string().required().regex(/^http.+\.cloudfront\.net\/.+\.png$/),
     related:      Joi.array().required(),
+    ranks:        Joi.array().required(),
   },
   
   createTopic: {
