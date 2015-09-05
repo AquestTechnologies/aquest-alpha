@@ -71,9 +71,9 @@ export default function apiPlugin(server, options, next) {
             expiration: new Date().getTime() + ttl,
           });
         }
-        else reject(createReason(401, 'invalid password'));
+        else reject(createReason(401, 'Invalid password'));
       });
-      else reject(createReason(401, 'user not found'));
+      else reject(createReason(401, 'User not found'));
     }),
     
     createUser: (request, params, result) => new Promise((resolve, reject) => {

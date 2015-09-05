@@ -3,9 +3,13 @@ import React from 'react';
 class TextAtomViewer extends React.Component {
   
   render() {
+    const style = {
+      wordWrap: 'break-word',
+      whiteSpace: 'pre-wrap',
+    };
     
     return (
-      <div style={{whiteSpace: 'pre'}}>
+      <div style={style}>
         { this.props.content.text }
       </div>
     );

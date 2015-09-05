@@ -105,7 +105,7 @@ class CreateUniverse extends React.Component {
     return <div>
     {
       this.state.ranks.map((r, i) => 
-      <div>
+      <div key={i}>
         <div>{ `Level ${i + 1}:`}</div>
         <input type='text' value={r} onChange={this.handleRankInput.bind(this,i)} />
       </div>
@@ -254,7 +254,7 @@ class TagsInput extends React.Component {
         if (highlightList.length) {
           event.preventDefault();
           this.setState({
-            highlightPosition: Math.min(highlightPosition + 1, this.maxItemsInList - 1)
+            highlightPosition: Math.min(highlightPosition + 1, highlightList.length - 1)
           });
         }
         return;

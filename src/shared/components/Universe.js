@@ -6,7 +6,6 @@ import Chat       from './universe/Chat';
 import Inventory  from './universe/Inventory';
 import NotFound   from './common/NotFound';
 import Spinner    from './common/Spinner';
-import config     from '../../../config/dev_shared';
 import menuScroll from '../../client/lib/menuScroll';
 import { readUniverse, readInventory, readChat, readTopic, readTopicAtoms, emitJoinChat, emitLeaveChat, readChatOffset, emitCreateMessage, transitionTo } from '../actionCreators';
 
@@ -38,6 +37,10 @@ class Universe extends React.Component {
     const { universes, readUniverse, params: { universeId } } = this.props;
     if (!universes[universeId]) readUniverse(universeId);
     menuScroll('main_scrollable');
+  }
+  
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.currentPath !== this.props.currentPath) document.getElementsByClassName('menu')[0].style.top = 0;
   }
   
   createTopicsList(topics, universeId) {
@@ -113,10 +116,11 @@ class Universe extends React.Component {
 }
 
 const mapState = state => ({ 
-  chats:     state.chats,
-  topics:    state.topics,
-  universes: state.universes,
-  userId:    state.session.userId,
+  chats:        state.chats,
+  topics:       state.topics,
+  universes:    state.universes,
+  userId:       state.session.userId,
+  currentPath:  state.router.pathname,
 });
 
 const mapActions = dispatch => bindActionCreators({ 

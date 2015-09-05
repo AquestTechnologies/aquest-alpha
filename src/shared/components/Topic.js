@@ -30,7 +30,6 @@ export default class Topic extends React.Component {
   }
   
   render() {
-    console.log('render topic');
     const { topic } = this.props || {};
     const { title, userId, createdAt } = topic;
     const atoms = topic.atoms || [{type: 'text', content: {text: 'Loading...'}}];

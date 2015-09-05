@@ -92,7 +92,8 @@ export default function log(...messages) {
 }
 
 // Logs an error. Could also be used for client-side error reporting
-export function logError(msg, err) {
+export function logError(msg, error) {
+  const err = error || '';
   if (err instanceof Error) {
     log('!!!', msg);
     log('File:', err.fileName);
