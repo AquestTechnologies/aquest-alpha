@@ -12,7 +12,7 @@ export default function processAnyFile(fileStream) {
     // Full stream file processing!
     uploadStreamToS3(fileStream, name, 'public-read').then(
       url => resolve({ name, url }),
-      error => reject(error)
+      err => reject(err)
     );
   });
 }

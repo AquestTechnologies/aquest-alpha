@@ -1,16 +1,8 @@
 # Aquest alpha
 
-*Rock'n'Roll*
-
 Aquest Technologies © 2015
-contact: bonjour@aquest.fr
 
-
-### Liens utiles :
-- [Hapi](http://hapijs.com/api)
-- [Redux](https://github.com/gaearon/redux)
-- [Emoji](http://www.emoji-cheat-sheet.com)
-
+*Rock'n'Roll*
 
 ### En manque d'idées ?
 
@@ -47,6 +39,10 @@ contact: bonjour@aquest.fr
 - [x] chalk --> https://github.com/sindresorhus/chalk
 - [x] Correction logTailor
 
+### Liens utiles :
+- [Hapi](http://hapijs.com/api)
+- [Redux](https://github.com/gaearon/redux)
+- [Emoji](http://www.emoji-cheat-sheet.com)
 
 ### Convention de nommage des log :
 | Préfixe | Signification |

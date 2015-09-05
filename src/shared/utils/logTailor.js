@@ -91,6 +91,18 @@ export default function log(...messages) {
   }
 }
 
+// Logs an error. Could also be used for client-side error reporting
+export function logError(msg, err) {
+  if (err instanceof Error) {
+    log('!!!', msg);
+    log('File:', err.fileName);
+    log('Line:', err.lineNumber);
+    log('Message:', err.message);
+    log('Stack:', err.stack);
+  } 
+  else log('!!!', msg, err);
+}
+
 // Logs a request informations
 let c = 0;
 function preprendZero(i) {
@@ -117,7 +129,7 @@ export function logAuthentication(source, userId, expiration) {
 // :)
 export function logWelcome(x) {
   if (x) {
-    log('\n_-\' Welcome to Aquest v0.0.2 \'-_\n' +
+    log('\n_-\' Welcome to Aquest v0.0.1 \'-_\n' +
       'Enjoy your visit.\n' +
       'contact : hello@aquest.fr\n ');
     log('Hack us and get good French stuff shipped to you worldwide!\n' +

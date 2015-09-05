@@ -124,10 +124,7 @@ function createActionCreator(shape) {
     const promise = new Promise((resolve, reject) => {
       
       // Server : direct db middleware call
-      if (isServer) require('../server/queryDb')(intention, params).then(
-        result => resolve(result),
-        error => reject(error)
-      );
+      if (isServer) require('../server/queryDb')(intention, params).then(resolve, reject);
       
       // Client : API call through XMLHttpRequest
       else {

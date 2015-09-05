@@ -2,7 +2,7 @@ import Boom from 'boom';
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
 import queryDb from '../queryDb.js';
-import log from '../../shared/utils/logTailor.js';
+import log, {logError} from '../../shared/utils/logTailor.js';
 import devConfig from '../../../config/dev_server';
 import actionCreators from '../../shared/actionCreators';
 import { getAtomsValidationErrors, generatePreview } from '../../shared/components/atoms';
@@ -71,9 +71,9 @@ export default function apiPlugin(server, options, next) {
             expiration: new Date().getTime() + ttl,
           });
         }
-        else reject(401, 'invalid password');
+        else reject(createReason(401, 'invalid password'));
       });
-      else reject(401, 'user not found');
+      else reject(createReason(401, 'user not found'));
     }),
     
     createUser: (request, params, result) => new Promise((resolve, reject) => {
@@ -157,9 +157,9 @@ export default function apiPlugin(server, options, next) {
     const msg = reason.msg || '';
     const err = reason.err;
     
-    log('!!! Error while API', origin, msg);
+    log('!!! Error while API', origin);
+    logError(msg, err);
     log('Replying', code);
-    if (err instanceof Error) log(err.message, '\n', err.stack);
     
     response.source = JSON.stringify(code < 500 ? msg : 'Internal server error');
     response.code(code).send();

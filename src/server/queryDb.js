@@ -15,7 +15,7 @@ export default function queryDb(intention, params) {
      * ToDo : use the pg object to create pooled clients, build our own client pool implementation or use https://github.com/grncdr/node-any-db
      * */
     pg.connect(connectionString, (err, client, done) => { 
-      if (err) throw err;
+      if (err) return reject(err);
       
       const {sql, paramaterized, callback} = buildQuery(intention, params);
       

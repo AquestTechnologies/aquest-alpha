@@ -1,5 +1,5 @@
 import queryDb from '../queryDb';
-import log from '../../shared/utils/logTailor';
+import log, {logError} from '../../shared/utils/logTailor';
 import {randomInteger, randomText} from '../../shared/utils/randomGenerators';
 import {ip, universePicture, passwordHash, imageList, youtubeList, linkList, nameList} from './activistsConfig'; 
 
@@ -43,12 +43,12 @@ export class Activist {
           data => {
             if (this.started) setTimeout(loopActivities, pace);
           },
-          error => log('!!! activityGenerator', error)
+          err => logError('activityGenerator', err)
         );
         
         loopActivities();
       },
-      error => log('!!! activityGenerator', error)
+      err => logError('activityGenerator', err)
     );
     
   }

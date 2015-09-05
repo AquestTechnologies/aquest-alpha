@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import webpack from 'webpack';
 import config from './webpack.config';
-import log from '../../shared/utils/logTailor';
+import log, {logError} from '../../shared/utils/logTailor';
 import webpackDevServer from 'webpack-dev-server';
 import devConfig from '../../../config/dev_server';
 
@@ -37,7 +37,7 @@ export default function devServer() {
       target:  `http://localhost:${api.port}/`
     }]
   }).listen(port, host, err => {
-    if (err) return log(err);
+    if (err) return logError('devServer.listen', err);
     log(`WDS listening at ${host}:${port}`);
   });
 }

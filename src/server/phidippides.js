@@ -122,7 +122,7 @@ export default function phidippides(routerState, dispatch) {
             completedTasks[id] = data;
             resolve();
           },
-          error => reject(error)
+          reject
         );
         
       } else {
