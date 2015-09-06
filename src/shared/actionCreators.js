@@ -110,15 +110,11 @@ export const emitLeaveVote = params => ({ type: 'EMIT_LEAVE_VOTE', payload: para
 
 export const emitCreateVoteMessage = params => ({ type: 'EMIT_CREATE_VOTE_MESSAGE', payload: params });
 
-export const emitDeleteVoteMessage = params => ({ type: 'EMIT_DELETE_VOTE_MESSAGE', payload: params });
-
 export const receiveVoteMessage = params => ({ type: 'RECEIVE_VOTE_MESSAGE', payload: params });
 
 export const receiveVoteMessageOwner = params => ({ type: 'RECEIVE_VOTE_MESSAGE_OWNER', payload: params });
 
 export const emitCreateVoteTopic = params => ({ type: 'EMIT_CREATE_VOTE_TOPIC', payload: params });
-
-export const emitDeleteVoteTopic = params => ({ type: 'EMIT_DELETE_VOTE_TOPIC', payload: params });
 
 export const receiveVoteTopic = params => ({ type: 'RECEIVE_VOTE_TOPIC', payload: params });
 
@@ -128,7 +124,7 @@ const actionCreators = {
   transitionTo, login, logout,
   createUser, createUniverse, createTopic, 
   emitJoinChat, emitLeaveChat, emitCreateMessage, receiveJoinChat, receiveLeaveChat, receiveMessage,
-  emitJoinVote, emitLeaveVote, emitCreateVoteMessage, emitDeleteVoteMessage, receiveVoteMessage, receiveVoteMessageOwner,
+  emitJoinVote, emitLeaveVote, emitCreateVoteMessage, receiveVoteMessage, receiveVoteMessageOwner,
   readUniverse, readUniverses, readInventory, readChat, readChatOffset, readTopic, readTopicAtoms, 
 };
 

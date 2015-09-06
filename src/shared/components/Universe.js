@@ -9,7 +9,7 @@ import menuScroll             from '../../client/lib/menuScroll';
 import { 
   readUniverse, readInventory, transitionTo,
   readChat, readChatOffset, emitJoinChat, emitLeaveChat, emitCreateMessage,
-  emitJoinVote, emitLeaveVote, emitCreateVoteMessage, emitDeleteVoteMessage, emitCreateVoteTopic, emitDeleteVoteTopic
+  emitJoinVote, emitLeaveVote, emitCreateVoteMessage, emitCreateVoteTopic
 } from '../actionCreators';
 
 class Universe extends React.Component {
@@ -55,7 +55,7 @@ class Universe extends React.Component {
       universes, topics, chats, userId,
       readInventory, transitionTo, 
       readChat, emitJoinChat, emitLeaveChat, readChatOffset, emitCreateMessage,
-      emitJoinVote, emitLeaveVote, emitCreateVoteMessage, emitDeleteVoteMessage, emitCreateVoteTopic, emitDeleteVoteTopic,
+      emitJoinVote, emitLeaveVote, emitCreateVoteMessage, emitCreateVoteTopic,
       children, location: { pathname }, params: { universeId, topicId },
     } = this.props;
     
@@ -90,8 +90,7 @@ class Universe extends React.Component {
                   emitJoinVote, 
                   emitLeaveVote,
                   voteContextId,
-                  emitCreateVoteTopic,
-                  emitDeleteVoteTopic
+                  emitCreateVoteTopic
                 }) 
                 :
                 <Inventory 
@@ -106,7 +105,6 @@ class Universe extends React.Component {
                   voteContextId={voteContextId}
                   readInventory={readInventory}
                   emitCreateVoteTopic={emitCreateVoteTopic}
-                  emitDeleteVoteTopic={emitDeleteVoteTopic}
                 />
                 
             } </div>
@@ -120,13 +118,13 @@ class Universe extends React.Component {
           readChat={readChat}
           sessionUserId={userId}
           universeId={universeId}
+          ballot={universe.ballot}
           emitJoinChat={emitJoinChat}
           emitLeaveChat={emitLeaveChat}
           voteContextId={voteContextId}
           readChatOffset={readChatOffset}
           emitCreateMessage={emitCreateMessage}
           emitCreateVoteMessage={emitCreateVoteMessage}
-          emitDeleteVoteMessage={emitDeleteVoteMessage}
         />
       </div>
     );
@@ -152,9 +150,7 @@ const mapActions = dispatch => bindActionCreators({
   emitJoinVote, 
   emitLeaveVote,
   emitCreateVoteMessage,
-  emitDeleteVoteMessage, 
   emitCreateVoteTopic, 
-  emitDeleteVoteTopic
 }, dispatch);
 
 export default connect(mapState, mapActions)(Universe);

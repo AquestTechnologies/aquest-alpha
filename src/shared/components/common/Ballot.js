@@ -6,24 +6,22 @@ export default class Ballot extends React.Component {
     super();
     
     this.handleVote = e => {
-      const { id, users, voteTargetContext, sessionUserId, universeId, createVote, deleteVote } = this.props;
+      const { id, content, voteTargetContext, sessionUserId, universeId, createVote } = this.props;
       
-      const voteIndex = users && users.length ? users.findIndex( (user) => user === sessionUserId ) : -1;
-      
-      if (voteIndex === -1) createVote({id, voteTargetContext, sessionUserId, universeId});
-      else deleteVote({id, voteTargetContext, sessionUserId, universeId});
+      createVote({id, voteTargetContext, sessionUserId, universeId});
     };
   }
   
   render() {
-    const { users } = this.props;
+    const { voteTargetContext, content, value, position, description } = this.props;
+    const vote = this.props.vote.length ? JSON.parse(this.props.vote) : [];
     
     return (
-      <span className="vote">
-        <input type='button' value={`${this.props.id} ${users.length}`} onClick={this.handleVote}></input>
-        {users.length > 3 ? 
+      <span className="ballot">
+        <input type='button' value={`${content} ${vote.length}`} onClick={this.handleVote}></input>
+        {vote.length > 3 ? 
           <span className="voteAuthorsCollapsed">'...'</span> : 
-          <span className="voteAuthors"> {users.map( (user) => user.userId )} </span>}
+          <span className="voteAuthors"> {vote.map( ({userId}) => userId )} </span>}
       </span>
     );
   }
