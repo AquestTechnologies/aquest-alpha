@@ -43,6 +43,8 @@ export default function phidippides(routerState, dispatch) {
   function clearTasks(tasks) {
     cycleCount++;
     failedTasks = []; // RAZ des tâches irrésolues devenues tâches à accomplir
+    if (cycleCount > 10) throw('!!! Infinite loop detected');
+    
     return new Promise((resolve, reject) => {
       
       // Attend que toutes les tâches soient résolues
@@ -54,21 +56,15 @@ export default function phidippides(routerState, dispatch) {
           logMeOrNot('.P. failed tasks:', failedTasks.map(task => task.id));
           logMeOrNot('\n');
           
+          const tasks404 = tasks.filter(t => t.nullIs404 && completedTasks.hasOwnProperty(t.id) && completedTasks[t.id].notFound);
+          
           // Si aucune tache n'a échoué c'est terminé
-          if (!failedTasks.length) resolve();
-            
+          if (!failedTasks.length || tasks404.length) resolve();
+          
           // Sinon on rappel les tâches échouées (possible boucle infinie ici)
-          else { 
-            if (cycleCount > 10) throw('!!! Infinite loop detected');
-            
-            // Inception des promises 8)
-            clearTasks(failedTasks).then(
-              () => resolve(),
-              error => reject(error)
-            );
-          }
+          else clearTasks(failedTasks).then(resolve, reject);
         },
-        error => reject(error)
+        reject
       );
     });
   }
@@ -121,12 +117,12 @@ export default function phidippides(routerState, dispatch) {
         else promise.then(
           data => {
             logMeOrNot(`.P.  _ Dispatch for ${id} resolved`);
-            logMeOrNot(JSON.stringify(data).substr(0,150));
+            if (data) logMeOrNot(JSON.stringify(data).substr(0,150));
             logMeOrNot(`.P. clearOneTask ${id} complete`);
             completedTasks[id] = data;
             resolve();
           },
-          error => reject(error)
+          reject
         );
         
       } else {

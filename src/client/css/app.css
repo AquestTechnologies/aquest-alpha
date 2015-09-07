@@ -12,6 +12,7 @@
 @import './components/chat.css';
 @import './components/message.css';
 @import './components/topic.css';
+@import './components/spinner.css';
 
 html {
   font-family: 			'Roboto', sans-serif;

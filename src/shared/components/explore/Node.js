@@ -5,6 +5,7 @@ export default class Node extends React.Component {
   
   render() {
     const { universe: { id, name, description } } = this.props;
+    
     const desc = description.length > 100 ? description.slice(0, 100) + '...' : description;
     
     return (

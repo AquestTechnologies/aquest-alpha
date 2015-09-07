@@ -28,11 +28,11 @@ const API_VALIDATION_SCHEMA = {
   },
   
   createUniverse: {
-    // name:         Joi.string().trim().required().min(1).regex(/^[0-9a-zA-Z]{1,15}$/), // Le regex n'est pas bon, "ô-ïçé" doit etre valide
     name:         Joi.string().trim().required().min(1).max(100),
     description:  Joi.string().trim().max(200),
-    picture:      Joi.string().required(),
-    // related:      Joi.array().optional(),
+    picture:      Joi.string().required().regex(/^http.+\.cloudfront\.net\/.+\.png$/),
+    related:      Joi.array().required(),
+    ranks:        Joi.array().required(),
   },
   
   createTopic: {
@@ -42,7 +42,7 @@ const API_VALIDATION_SCHEMA = {
       Joi.object().keys({
         type: Joi.string().trim().required().min(1),
         content: Joi.object().required(),
-      }).unknown(false).required()), 
+      }).unknown(false).required()).required(), 
   },
   
   login: {

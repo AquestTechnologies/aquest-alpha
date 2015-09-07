@@ -124,10 +124,7 @@ function createActionCreator(shape) {
     const promise = new Promise((resolve, reject) => {
       
       // Server : direct db middleware call
-      if (isServer) require('../server/queryDb')(intention, params).then(
-        result => resolve(result),
-        error => reject(error)
-      );
+      if (isServer) require('../server/queryDb')(intention, params).then(resolve, reject);
       
       // Client : API call through XMLHttpRequest
       else {
@@ -147,9 +144,9 @@ function createActionCreator(shape) {
         xhr.open(method, path);
         
         xhr.onload = () => {
-          const { status } = xhr;
+          const {status} = xhr;
           const response = JSON.parse(xhr.response);
-          status === 200 ? resolve(response) : reject({ status, response, intention });
+          status === 200 ? resolve(response) : reject({ status, intention, response });
         };
         
         if (isPost) { // Stringifies objects before a POST request

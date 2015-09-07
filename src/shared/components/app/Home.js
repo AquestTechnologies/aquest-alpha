@@ -38,6 +38,9 @@ export default class Home extends React.Component {
       <div style={s1}>    
         <h1>Aquest</h1>
         <Link to='/Explore'>Explore</Link>
+        { ' - ' }
+        <Link to='/~YOLO404'>Test 404</Link>
+        
         { this.renderLogin() }
       </div>
     );

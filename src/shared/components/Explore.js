@@ -28,13 +28,18 @@ class Explore extends React.Component {
       fontSize: '2rem',
     };
     
+    const nodeList = Object.keys(universes).sort()
+      .map(key => universes[key])
+      .filter(universe => !universe.notFound)
+      .map(universe => <Node key={universe.id} universe={universe} />);
+    
     return <div style={divStyle}>
       <Link to='/'>Home</Link>
       {' - '}
       <Link to='/Create_universe'>Create a new universe</Link>
       <br/>
       <br/>
-      { Object.keys(universes).sort().map(key => <Node key={key} universe={universes[key]} />) }
+      { nodeList }
     </div>;
   }
 }

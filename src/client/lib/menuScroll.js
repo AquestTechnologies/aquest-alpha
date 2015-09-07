@@ -5,14 +5,12 @@ export default function menuScroll(elementId) {
 	if (!menuElement) return;
 	menuElement.style.top = 0;
 	
-	let wasScrollingUp = false;
-	let isScrollingUp = false;
-	let previousScrollTop = 0;
 	let inflexion = 0;
-	let scrollTop = 0;
-	let h, distance, top, newTop, newTopUp;
+	let previousScrollTop = 0;
+	let wasScrollingUp = false;
+	let h, top, scrollTop, distance, isScrollingUp, newTop;
 	const classList = document.querySelector('.menu').classList;
-	const menuScrolledClass = 'menu-scrolled';
+	const scrolledClass = 'menu-scrolled';
 	
 	scrollableElement.onscroll = e => {
 		
@@ -35,7 +33,8 @@ export default function menuScroll(elementId) {
 		if (wasScrollingUp !== isScrollingUp) inflexion = scrollTop;
 		
 		// Si le menu est partiellement affiché
-		newTopUp = top > -h && top < 0 ? top + distance : inflexion - scrollTop - h;
+		let newTopUp = top > -h && top < 0 ? top + distance : inflexion - scrollTop - h;
+		
 		// Si le menu est complement affiché (top === 0)
 		newTopUp = top ? newTopUp : 0;
 		
@@ -46,12 +45,7 @@ export default function menuScroll(elementId) {
 		wasScrollingUp = isScrollingUp;
 		previousScrollTop = scrollTop;
 		
-		// Peut être optimisé ?
-		if (scrollTop + newTop) {
-			if (!classList.contains(menuScrolledClass)) classList.toggle(menuScrolledClass);
-		} else {
-			if (classList.contains(menuScrolledClass)) classList.toggle(menuScrolledClass);
-		}
+		// Application de la classe CSS appropriée
+		if (!!(scrollTop + newTop) !== classList.contains(scrolledClass)) classList.toggle(scrolledClass);
 	};
-	
 }

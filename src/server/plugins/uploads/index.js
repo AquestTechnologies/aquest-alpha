@@ -2,7 +2,7 @@ import Joi from 'joi';
 import Boom from 'boom';
 import JWT from 'jsonwebtoken';
 import queryDb from '../../queryDb';
-import log from '../../../shared/utils/logTailor';
+import log, {logError} from '../../../shared/utils/logTailor';
 
 
 export default function uploadsPlugin(server, options, next) {
@@ -67,15 +67,15 @@ export default function uploadsPlugin(server, options, next) {
               reply({url});
             },
             
-            error => {
-              log('!!! Error while queryDb\n', error, error.stack);
-              reply(Boom.badImplementation(error.message)); // 500, args are not sent to client, just logged by Boom on server
+            err => {
+              logError('queryDb', err);
+              reply(Boom.badImplementation(err.message)); // 500, args are not sent to client, just logged by Boom on server
             }
           );
         },
-        error => {
-          log('!!! Error while file processing\n', error, error.stack);
-          reply(Boom.badImplementation(error.message));
+        err => {
+          logError('file processing', err);
+          reply(Boom.badImplementation(err.message));
         }
       );
     }

@@ -15,16 +15,22 @@ export default function queryDb(intention, params) {
      * ToDo : use the pg object to create pooled clients, build our own client pool implementation or use https://github.com/grncdr/node-any-db
      * */
     pg.connect(connectionString, (err, client, done) => { 
-      if (err) throw err;
+      if (err) return reject(err);
       
-      const {sql, paramaterized, callback} = buildQuery(intention, params); // Query construction
+      const {sql, paramaterized, callback} = buildQuery(intention, params);
+      
       if (sql) client.query(sql, paramaterized, (err, result) => {
         done();
         if (err) return reject(err);
-        log(`+++ <-- ${intention} : `, result.rowCount ? `${result.rowCount}rows` : 'nothing', ` after ${new Date() - d}ms`);
-        resolve(typeof callback === 'function' ? callback(result) : result);
+        
+        const {rowCount, rows} = result;
+        log(`+++ <-- ${intention} : `, rowCount ? `${rowCount}rows` : 'nothing', ` after ${new Date() - d}ms`);
+        resolve(typeof callback === 'function' ? callback(rows) : rows);
       });
-      else reject(`queryDb.buildQuery did not produce any SQL, check your intention: ${intention}`);
+      else {
+        done();
+        reject(`queryDb.buildQuery did not produce any SQL, check your intention: ${intention}`);
+      }
     });
   });
   
@@ -32,8 +38,8 @@ export default function queryDb(intention, params) {
   // Builds the SQL query and optionnal callback
   function buildQuery(intention, params) {
     
-    const {id, userId, universeId, title, chatId, offset, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture, url} = 
-      typeof params === 'object' && !(params instanceof Array) ? params : {};
+    const {userId, universeId, title, chatId, offset, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture, url} = 
+      typeof params === 'object' && !Array.isArray(params) ? params : {};
       
     // define the maximum number of message to load
     const nbrChatMessages = 30;
@@ -44,14 +50,12 @@ export default function queryDb(intention, params) {
       
       
       case 'readUniverses':
-        // sql = 'SELECT id, name, description, picture, chat_id FROM aquest_schema.universe';
+        
         sql = 
         'SELECT ' + 
           'id, name, description, picture, chat_id "chatId", rules ' +
         'FROM ' + 
           'aquest_schema.universe';
-        
-        callback = result => result.rows;
         
         break;
         
@@ -67,8 +71,8 @@ export default function queryDb(intention, params) {
           'id = $1';
         
         paramaterized = [params];
-        callback = result => result.rows[0];
-          
+        callback = rows => rows[0] || {id: params, notFound: true};
+        
         break;
         
         
@@ -100,7 +104,7 @@ export default function queryDb(intention, params) {
         ') topics GROUP BY universe';
         
         paramaterized = [params];
-        callback = result => result.rows[0].UniverseWithTopics;
+        callback = rows => rows[0].UniverseWithTopics;
         
         break;
         
@@ -130,9 +134,13 @@ export default function queryDb(intention, params) {
           
         paramaterized = [chatId, offset];
         
-        callback = result => {
-          const { chat } = result.rows[0];
-          if (!chat.messages[0].content) chat.messages = [];
+        callback = rows => {
+          const chat = rows[0] ? rows[0].chat : {
+            id: chatId,
+            notFound: true,
+          };
+          
+          if (chat.messages && !chat.messages[0].content) chat.messages = [];
           
           return chat;
         };
@@ -165,13 +173,15 @@ export default function queryDb(intention, params) {
           
         paramaterized = [params];
         
-        callback = result => {
-          if (result.rows[0]) {
-            const { chat } = result.rows[0];
-            if (!chat.messages[0].content) chat.messages = [];
-            
-            return chat;
-          }
+        callback = rows => {
+          const chat = rows[0] ? rows[0].chat : {
+            id: chatId,
+            notFound: true,
+          };
+          
+          if (chat.messages && !chat.messages[0].content) chat.messages = [];
+          
+          return chat;
         };
         
         break;
@@ -188,7 +198,6 @@ export default function queryDb(intention, params) {
           'topic.universe_id = $1';
         
         paramaterized = [params];
-        callback = result => result.rows;
         
         break;  
         
@@ -225,33 +234,12 @@ export default function queryDb(intention, params) {
         'WHERE topic.id = $1';
         
         paramaterized = [params];
-        callback = result => result.rows[0].topic;
+        callback = rows => rows[0] ? rows[0].topic : {id: params, notFound: true};
         
         break;
-      
-      
-      case 'readTopicAtoms':
         
-        // sql = 
-        // 'SELECT ' +
-        //   'json_build_object(' +
-        //     'array_agg(' +
-        //       'json_build_object(' +
-        //         `'type', atomtopic.type,` +
-        //         `'content', atomtopic.content,` +
-        //       ')' +
-        //     ')' +
-        //   ') AS atoms ' +
-        // 'FROM ' +
-        //   '(SELECT ' +
-        // 		'atomtopic.content, atomtopic.type ' +
-        // 	'FROM ' +
-        // 		'aquest_schema.atomtopic ' +
-        // 	'WHERE ' +
-        // 		'atomtopic.topic_id = $1 ' + 	
-        // 	'ORDER BY ' + 
-        // 		'atomtopic.position' +
-        // 	') atomtopics';
+        
+      case 'readTopicAtoms':
         
         sql =
         'SELECT ' +
@@ -261,9 +249,9 @@ export default function queryDb(intention, params) {
         'WHERE ' +
           'atomtopic.topic_id = $1 ' + 
         'ORDER BY ' + 
-      		'atomtopic.position';
+          'atomtopic.position';
+        
         paramaterized = [params];
-        callback = result => result.rows;
         
         break;
         
@@ -279,7 +267,7 @@ export default function queryDb(intention, params) {
         "RETURNING json_build_object('id', id, 'chatId', chat_id, 'type', type, 'content', content) AS message";
         
         paramaterized = [chatId, userId, 'text', JSON.stringify(content)];
-        callback = result => result.rows[0].message;
+        callback = rows => rows[0].message;
         
         break;
         
@@ -294,7 +282,7 @@ export default function queryDb(intention, params) {
         `RETURNING json_build_object('id', id, 'chatId', chat_id, 'name', name, 'description', description, 'picture', picture, 'rules', rules) AS universe`;
         
         paramaterized = [name, userId, description, picture, ip];
-        callback = result => result.rows[0].universe;
+        callback = rows => rows[0].universe;
         
         break;
         
@@ -307,7 +295,7 @@ export default function queryDb(intention, params) {
         'AS topic';
         
         paramaterized = [userId, universeId, title, previewType, JSON.stringify(previewContent), JSON.stringify(atoms)];
-        callback = result => result.rows[0].topic;
+        callback = rows => rows[0].topic;
         
         break;
         
@@ -322,7 +310,7 @@ export default function queryDb(intention, params) {
         "RETURNING json_build_object('id', id, 'email', email, 'picture', picture) AS user";
         
         paramaterized = [pseudo, email, passwordHash, ip, picture];
-        callback = result => result.rows[0].user;
+        callback = rows => rows[0].user;
         
         break;
         
@@ -335,7 +323,7 @@ export default function queryDb(intention, params) {
         'FROM aquest_schema."user" ' +
         `WHERE "user".id = '${email}' OR "user".email = '${email}' LIMIT 1`;
         
-        callback = result => result.rows[0];
+        callback = rows => rows[0];
         
         break;
         
@@ -347,7 +335,7 @@ export default function queryDb(intention, params) {
           '($1, $2, $3, $4)';
         
         paramaterized = [userId, name, url, ip];
-        callback = result => result.rows[0];
+        callback = rows => rows[0];
         
         break;
         
@@ -355,7 +343,7 @@ export default function queryDb(intention, params) {
         
         sql = `SELECT * FROM aquest_schema.${params} ORDER BY RANDOM() LIMIT 1`;
         
-        callback = result => result.rows[0];
+        callback = rows => rows[0];
         
         break;
     }

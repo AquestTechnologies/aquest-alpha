@@ -2,7 +2,7 @@ import Boom from 'boom';
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
 import queryDb from '../queryDb.js';
-import log from '../../shared/utils/logTailor.js';
+import log, {logError} from '../../shared/utils/logTailor.js';
 import devConfig from '../../../config/dev_server';
 import actionCreators from '../../shared/actionCreators';
 import { getAtomsValidationErrors, generatePreview } from '../../shared/components/atoms';
@@ -71,9 +71,9 @@ export default function apiPlugin(server, options, next) {
             expiration: new Date().getTime() + ttl,
           });
         }
-        else reject(401, 'invalid password');
+        else reject(createReason(401, 'Invalid password'));
       });
-      else reject(401, 'user not found');
+      else reject(createReason(401, 'User not found'));
     }),
     
     createUser: (request, params, result) => new Promise((resolve, reject) => {
@@ -125,7 +125,7 @@ export default function apiPlugin(server, options, next) {
                   if (token) response.state('jwt', JWT.sign(token, key), cookieOptions).send();
                   
                   else if (requestToken) JWT.verify(requestToken, key, (err, {userId, expiration}) => {
-                    if (err) return handleError(response, 'handler JWT.verify', err);
+                    if (err) return handleError(response, 'handler JWT.verify', createReason(500, '', err));
                     
                     const t = new Date().getTime();
                     if (expiration > t) {
@@ -140,7 +140,7 @@ export default function apiPlugin(server, options, next) {
                 
                 handleError.bind(null, response, 'afterQuery')
               ),
-              handleError.bind(null, response, 'queryDb')
+              err => handleError(response, 'queryDb', createReason(500, '', err))
             ),
             handleError.bind(null, response, 'beforeQuery')
           );
@@ -153,19 +153,16 @@ export default function apiPlugin(server, options, next) {
   
   function handleError(response, origin, reason) {
     
-    const msg = reason.msg || '';
     const code = reason.code || 500;
-    const err = reason.code ? reason.err : reason;
+    const msg = reason.msg || '';
+    const err = reason.err;
     
-    log('!!! Error while API', origin, msg);
+    log('!!! Error while API', origin);
+    logError(msg, err);
     log('Replying', code);
-    if (err) {
-      log('Reason:', err);
-      if (err instanceof Error) log(err.stack);
-    }
     
-    response.source = code < 500 ? msg : 'Internal server error';
-    response.code(code).send(); 
+    response.source = JSON.stringify(code < 500 ? msg : 'Internal server error');
+    response.code(code).send();
   }
 }
 

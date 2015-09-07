@@ -83,8 +83,9 @@ server.start(() => {
     '          |_|'
   );
   if (0) log(...server.table()[0].table.map(t => `\n${t.method} - ${t.path}`));
-  if (1) {
-    const {startActivists, stopActivists} = createActivists(4, 1000, 10000);
+  if (0) {
+    const {startActivists, stopActivists} = createActivists(30, 1000, 10000);
     startActivists();
+    // setTimeout(stopActivists, 1000 * 60 * 2);
   }
 });
