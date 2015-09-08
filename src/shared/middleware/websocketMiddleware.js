@@ -97,8 +97,8 @@ export default function websocketMiddleware({ dispatch, getState }) {
         
         socket = sockets['vote'];
         
-        const { id, voteTargetContext } = payload;
-        socket.emit('createVoteMessage', {id, voteTargetContext});
+        const { ballotId, voteTargetContext } = payload;
+        socket.emit('createVoteMessage', {ballotId, voteTargetContext});
         
         break;
         

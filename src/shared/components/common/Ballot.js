@@ -6,15 +6,16 @@ export default class Ballot extends React.Component {
     super();
     
     this.handleVote = e => {
-      const { id, content, voteTargetContext, sessionUserId, universeId, createVote } = this.props;
+      const { ballotId, voteTargetContext, sessionUserId, createVote } = this.props;
       
-      createVote({id, voteTargetContext, sessionUserId, universeId});
+      createVote({ballotId, voteTargetContext, sessionUserId});
     };
   }
   
   render() {
-    const { voteTargetContext, content, value, position, description } = this.props;
-    const vote = this.props.vote.length ? JSON.parse(this.props.vote) : [];
+    //NOTE : ballot are already in ascending order
+    const { content, position, description, vote} = this.props;
+    console.log(vote);
     
     return (
       <span className="ballot">

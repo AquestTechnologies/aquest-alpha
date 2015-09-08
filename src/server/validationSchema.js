@@ -67,12 +67,12 @@ const WEBSOCKET_VALIDATION_SCHEMA = {
   joinVote: voteRoomId,
   leaveVote: voteRoomId,
   createVoteMessage: {
-    id: Joi.string().trim().required().min(1),
+    ballotId: Joi.number().positive().integer().required().min(1),
     voteTargetContext: {
       chatId,
-      chatContextId: voteRoomId,
+      voteContextId: voteRoomId,
       messageId: Joi.number().positive().integer().required().min(1), 
-      messageIndex: Joi.number().positive().integer().required().min(1)
+      messageIndex: Joi.number().integer().required().min(0)
     }
   }
 };  

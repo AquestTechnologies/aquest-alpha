@@ -109,7 +109,7 @@ export default class Chat extends React.Component {
   render() {
     const { 
       chatId, users, chat, emitCreateMessage, 
-      emitCreateVoteMessage, universeId, sessionUserId, voteContextId, ballot
+      emitCreateVoteMessage, sessionUserId, voteContextId, ballot
     } = this.props;
     
     const name     = (chat || '').name || '';
@@ -135,7 +135,6 @@ export default class Chat extends React.Component {
                 content={content} 
                 messageIndex={index}
                 createdAt={createdAt} 
-                universeId={universeId} 
                 sessionUserId={sessionUserId}
                 voteContextId={voteContextId}
                 emitCreateVoteMessage={emitCreateVoteMessage}

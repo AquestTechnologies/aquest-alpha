@@ -6,7 +6,7 @@ export default class Message extends React.Component {
   
   render() {
     
-    const { id, userId, type, content: {text}, createdAt, universeId, chatId, sessionUserId, voteContextId, emitCreateVoteMessage, emitDeleteVoteMessage, messageIndex, vote, ballot } = this.props;
+    const { id, userId, type, content: {text}, createdAt, chatId, sessionUserId, voteContextId, emitCreateVoteMessage, messageIndex, vote, ballot } = this.props;
     
     const voteTargetContext = {chatId, voteContextId, messageId: id, messageIndex};
       
@@ -23,16 +23,15 @@ export default class Message extends React.Component {
           <div className="vote">
             { ballot.map( ({id, content, value, position, description}) =>
               <Ballot 
-                id={id}
                 key={id}
-                content={content}
                 value={value}
+                ballotId={id}
+                content={content}
                 position={position}
                 description={description}
-                vote={vote[content] || []}
-                universeId={universeId} // not really necessary, depends on the database query optimization
                 sessionUserId={sessionUserId}
                 createVote={emitCreateVoteMessage}
+                vote={(vote || {})[id] || []}
                 voteTargetContext={voteTargetContext}
               />)
             }

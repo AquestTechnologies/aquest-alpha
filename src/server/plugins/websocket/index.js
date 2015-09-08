@@ -84,15 +84,17 @@ export default function websocketPlugin(server, options, next) {
             
             queryDb('createMessage', {chatId, userId, content}).then(
               result => {
-                log(`_w_ createMessage`, result);
-                // log(`_w_ createMessage`, { chatId, message: { id, lcId, userId, content, createdAt: d.getTime()}});
-            
-                // socket.emit('receiveMessageOwner', { chatId, lcId, message: { id, userId, content, createdAt: d.getTime()}});
                 
-                // socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, createdAt: d.getTime()} });
+                const {id, chatId, type, content, createdAt} = result;
+                
+                log(`_w_ createMessage`, { chatId, lcId, message: { id, userId, content, createdAt}});
+            
+                socket.emit('receiveMessageOwner', { chatId, lcId, message: { id, userId, content, createdAt}});
+                socket.broadcast.to(chatId).emit('receiveMessage', { chatId, message: { id, userId, content, createdAt}});
               },
               error => {
                 log(`_w_ createMessage error`, error);
+                socket.error('An error occured, sorry for the inconvenience, please bear with us and retry :) !');
               }
             );
           },
@@ -149,6 +151,7 @@ export default function websocketPlugin(server, options, next) {
       }));      
       
       socket.on('createVoteMessage', request => {
+        console.log(request);
         Joi.validate(request, validationSchema['createVoteMessage'], (err, value) => {
           if (err) return log(err);
           
@@ -157,15 +160,26 @@ export default function websocketPlugin(server, options, next) {
               log('authentication succeded', result);
               const { userId } = socket;
               
-              const { id, voteTargetContext: {chatId, voteContextId, messageIndex, messageId} } = request;
+              const { ballotId, voteTargetContext: {chatId, voteContextId, messageIndex, messageId} } = request;
               const d = new Date(); // let's fix that later
-              const createdAt = d.getTime();
               
-              log(`_w_ createVoteMessage`, { id, chatId, voteContextId, messageIndex, messageId, userId, createdAt });
+              queryDb('createVote', {userId, messageId, ballotId}).then(
+                result => {
+                  
+                  const {id, userId, ballotId, createdAt, deleted} = result;
+                  
+                  log(`_w_ createVoteMessage`, { ballotId, chatId, messageId, vote: {id, userId, createdAt}, deleted });
               
-              socket.emit('receiveVoteMessageOwner', { id, chatId, messageIndex, userId, createdAt } );
+                  socket.emit('receiveVoteMessageOwner', { ballotId, chatId, messageIndex, vote: {id, userId, createdAt}, deleted } );
+                  
+                  socket.broadcast.to(voteContextId).emit('receiveVoteMessage', { ballotId, chatId, messageId, vote: {id, userId, createdAt}, deleted });
+                },
+                error => {
+                  log(`_w_ createMessage error`, error);
+                  socket.error('An error occured, sorry for the inconvenience, please bear with us and retry :) !');
+                }
+              );
               
-              socket.broadcast.to(voteContextId).emit('receiveVoteMessage', { id, chatId, messageId, userId, createdAt });
             },
             error => {
               log('websocket authentication - ', error.stack ? error.stack : error);
