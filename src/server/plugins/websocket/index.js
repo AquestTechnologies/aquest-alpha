@@ -151,7 +151,7 @@ export default function websocketPlugin(server, options, next) {
       }));      
       
       socket.on('createVoteMessage', request => {
-        console.log(request);
+        console.log('createVoteMessage', request);
         Joi.validate(request, validationSchema['createVoteMessage'], (err, value) => {
           if (err) return log(err);
           
@@ -161,12 +161,13 @@ export default function websocketPlugin(server, options, next) {
               const { userId } = socket;
               
               const { ballotId, voteTargetContext: {chatId, voteContextId, messageIndex, messageId} } = request;
+              const voteContext = voteContextId.split('-')[0];
               
-              console.log({userId, messageId, ballotId});              
-              queryDb('createVoteMessage', {userId, messageId, ballotId}).then(
+              console.log({voteContext, userId, voteTargetId: messageId, ballotId});
+              queryDb('createVoteMessage', {voteContext, userId, voteTargetId: messageId, ballotId}).then(
                 result => {
                   
-                  const {userId, ballotId, createdAt, deleted} = result;
+                  const {userId, ballotId, messageId, createdAt, deleted} = result;
                   
                   log(`_w_ createVoteMessage`, { ballotId, chatId, messageId, vote: {userId, createdAt}, deleted });
               
@@ -191,23 +192,34 @@ export default function websocketPlugin(server, options, next) {
       });
       
       socket.on('createVoteTopic', request => {
+        console.log('createVoteTopic', request);
         Joi.validate(request, validationSchema['createVoteTopic'], (err, value) => {
           if (err) return log(err);
           
           userAuthentication(socket).then(
             result => {
               log('authentication succeded', result);
+              
               const { userId } = socket;
+              const { ballotId, voteTargetContext: {topicId, voteContextId} } = request;
+
+              console.log({voteContextId, userId, voteTargetId: topicId, ballotId});
+              queryDb('createVoteTopic', {userId, voteTargetId: topicId, ballotId}).then(
+                result => {
+                  
+                  const {userId, ballotId, topicId, createdAt, deleted} = result;
+                  
+                  log(`_w_ createVoteTopic`, { ballotId, topicId, vote: {userId, createdAt}, deleted });
               
-              const { id, voteTargetContext: {topicId, voteContextId} } = request;
-              const d = new Date(); // let's fix that later
-              const createdAt = d.getTime();
-              
-              log(`_w_ createVoteTopic`, { id, topicId, voteContextId, userId, createdAt });
-              
-              socket.emit('receiveVoteTopic', { id, topicId, userId, createdAt } );
-              
-              socket.broadcast.to(voteContextId).emit('receiveVoteTopic', { id, topicId, userId, createdAt });
+                  socket.emit('receiveVoteTopicOwner', { ballotId, topicId, vote: {userId, createdAt}, deleted } );
+                  
+                  socket.broadcast.to(voteContextId).emit('receiveVoteTopic', { ballotId, topicId, vote: {userId, createdAt}, deleted });
+                },
+                error => {
+                  log(`_w_ createMessage error`, error);
+                  socket.error('An error occured, sorry for the inconvenience, please bear with us and retry :) !');
+                }
+              );
             },
             error => {
               log('websocket authentication - ', error.stack ? error.stack : error);
@@ -216,9 +228,6 @@ export default function websocketPlugin(server, options, next) {
             }
           );
         });
-      });
-      
-      socket.on('deleteVoteMessage', request => {
       });
       
       socket.on('disconnect', (socket) => {

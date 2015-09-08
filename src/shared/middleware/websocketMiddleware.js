@@ -3,7 +3,8 @@ import websocket from 'socket.io-client';
 import { wsUrl } from '../../../config/dev_shared';
 import { 
   receiveMessage, receiveMessageOwner, receiveJoinChat, receiveJoinChatOwner, receiveLeaveChat,
-  receiveVoteMessage, receiveVoteMessageOwner 
+  receiveVoteMessage, receiveVoteMessageOwner, 
+  receiveVoteTopic, receiveVoteTopicOwner
 } from '../actionCreators';
 
 export default function websocketMiddleware({ dispatch, getState }) {
@@ -78,7 +79,9 @@ export default function websocketMiddleware({ dispatch, getState }) {
         socket = sockets['vote'];
         socket.emit('joinVote', payload);
         socket.on('receiveVoteMessage', result => next(receiveVoteMessage(result)));
+        socket.on('receiveVoteTopic', result => next(receiveVoteTopic(result)));
         socket.on('receiveVoteMessageOwner', result => next(receiveVoteMessageOwner(result)));
+        socket.on('receiveVoteTopicOwner', result => next(receiveVoteTopicOwner(result)));
         
         break;
         
@@ -88,7 +91,9 @@ export default function websocketMiddleware({ dispatch, getState }) {
         socket = sockets['vote'];
         
         socket.removeListener('receiveVoteMessage');
+        socket.removeListener('receiveVoteTopic');
         socket.removeListener('receiveVoteMessageOwner');
+        socket.removeListener('receiveVoteTopicOwner');
         
         break;
         
@@ -97,17 +102,16 @@ export default function websocketMiddleware({ dispatch, getState }) {
         
         socket = sockets['vote'];
         
-        const { ballotId, voteTargetContext } = payload;
-        socket.emit('createVoteMessage', {ballotId, voteTargetContext});
+        ( ({ballotId, voteTargetContext}) => socket.emit('createVoteMessage', {ballotId, voteTargetContext}) )(payload);
         
         break;
         
-      case 'EMIT_DELETE_VOTE_MESSAGE':
+      case 'EMIT_CREATE_VOTE_TOPIC':
         logWs(type, payload);
         
         socket = sockets['vote'];
         
-        socket.emit('deleteVoteMessage', payload);
+        ( ({ballotId, voteTargetContext}) => socket.emit('createVoteTopic', {ballotId, voteTargetContext}) )(payload);
         
         break;
     }

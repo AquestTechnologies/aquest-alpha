@@ -82,6 +82,16 @@ export default {
     
     switch (type) {
       
+    case 'SUCCES_READ_CHAT_FROM_MESSAGE':
+       return ((action) => {
+        const chatId = action.payload && action.payload.id ? parseInt(action.payload.id, 10) : action.params ? parseInt(action.params, 10) : false;
+        const newState = _cloneDeep(state);
+        
+        if (action.payload.messages.length) newState[chatId].messages = newState[chatId].messages.concat(action.payload.messages);
+        
+        return newState;
+      })(action);
+      
     case 'SUCCESS_READ_CHAT_OFFSET':
       
       return ((action) => {
@@ -208,60 +218,67 @@ export default {
       
     case 'EMIT_CREATE_VOTE_MESSAGE':
       
-      return ( (action) => {
-        const {ballotId, voteTargetContext: {chatId, messageIndex}, sessionUserId} = action.payload;
+      return ( ({ballotId, voteTargetContext: {chatId, messageIndex}, sessionUserId}) => {
         const newState = _cloneDeep(state);
         
         // if already exists revome, else add
         if(newState[chatId].messages[messageIndex].vote && newState[chatId].messages[messageIndex].vote[ballotId]) {
-          const userVoteIndex = state[chatId].messages[messageIndex].vote[ballotId].findIndex( (userVote) => userVote.userId === sessionUserId );
-          if( userVoteIndex !== -1 ) newState[chatId].messages[messageIndex].vote[ballotId].splice(userVoteIndex, 1);
-          else newState[chatId].messages[messageIndex].vote[ballotId].push({userId: sessionUserId});
+          const userVoteIndex = state[chatId].messages[messageIndex].vote[ballotId].findIndex( ({userId}) => userId === sessionUserId );
+          
+          userVoteIndex !== -1 ? 
+          newState[chatId].messages[messageIndex].vote[ballotId].splice(userVoteIndex, 1) :
+          newState[chatId].messages[messageIndex].vote[ballotId].push({userId: sessionUserId});
         } else {
+          if (!newState[chatId].messages[messageIndex].vote) newState[chatId].messages[messageIndex].vote = {};
           newState[chatId].messages[messageIndex].vote[ballotId] = [{userId: sessionUserId}];
         }
         
-        console.log(newState[chatId]);
-        
         return newState;
-      })(action);
+      })(action.payload);
       
     case 'RECEIVE_VOTE_MESSAGE_OWNER':
       
-      return ( (action) => {
-        const {ballotId, chatId, messageIndex, vote, deleted } = action.payload;
+      return ( ({ballotId, chatId, messageIndex, vote, deleted }) => {
         const userVoteIndex = state[chatId].messages[messageIndex].vote[ballotId].findIndex( ({userId}) => userId === vote.userId );
         
         if ( userVoteIndex !== -1 ) {
           const newState = _cloneDeep(state);
-          if (deleted) newState[chatId].messages[messageIndex].vote[ballotId].splice(userVoteIndex, 1);
-          else newState[chatId].messages[messageIndex].vote[ballotId][userVoteIndex] = vote;
+          
+          deleted ? 
+          newState[chatId].messages[messageIndex].vote[ballotId].splice(userVoteIndex, 1) :
+          newState[chatId].messages[messageIndex].vote[ballotId][userVoteIndex] = vote;
           
           return newState;
         }
         
         return state;
-      })(action);
+      })(action.payload);
       
     case 'RECEIVE_VOTE_MESSAGE':
       
-      return ( (action) => {
-        const {ballotId, chatId, messageId, vote, deleted} = action.payload;
+      return ( ({ballotId, chatId, messageId, vote, deleted}) => {
+        
         const messageIndex = state[chatId].messages.findIndex( (message) => message.id === messageId );
         
-        if (messageIndex !== -1 && state[chatId].messages[messageIndex].vote && state[chatId].messages[messageIndex].vote[ballotId]) {
+        if (messageIndex !== -1) {
           const newState = _cloneDeep(state);
-          if (deleted) {
-            const userVoteIndex = state[chatId].messages[messageIndex].vote[ballotId].findIndex( ({userId}) => userId === vote.userId );
-            if (userVoteIndex !== -1) newState[chatId].messages[messageIndex].vote[ballotId].splice(userVoteIndex, 1);
-          } 
-          else newState[chatId].messages[messageIndex].vote[ballotId].push(vote);
+          
+          if (state[chatId].messages[messageIndex].vote && state[chatId].messages[messageIndex].vote[ballotId]) {
+            if (deleted) {
+              const userVoteIndex = state[chatId].messages[messageIndex].vote[ballotId].findIndex( ({userId}) => userId === vote.userId );
+              if (userVoteIndex !== -1) newState[chatId].messages[messageIndex].vote[ballotId].splice(userVoteIndex, 1);
+            } 
+            else newState[chatId].messages[messageIndex].vote[ballotId].push(vote);
+          } else if (!deleted) {
+            if (!newState[chatId].messages[messageIndex].vote) newState[chatId].messages[messageIndex].vote = {};
+            newState[chatId].messages[messageIndex].vote[ballotId] = [vote];
+          }
           
           return newState;
         }
         
         return state;
-      })(action);
+      })(action.payload);
       
     default:
       return state;
@@ -289,36 +306,58 @@ export default {
       return Object.assign({}, state, {[payload.id]: payload});
       
     case 'EMIT_CREATE_VOTE_TOPIC'  :
-      
-      return ( ({id, voteTargetContext: {topicId}, sessionUserId, universeId}) => {
+      return ( ({ballotId, voteTargetContext: { topicId }, sessionUserId}) => {
         const newState = _cloneDeep(state);
         
-        if (!newState[topicId].vote) {
-          newState[topicId].vote = { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
-          newState[topicId].vote[universeId] = [];
-        }
+        console.log({ballotId, voteTargetContext: { topicId }, sessionUserId});
+        
+        if (newState[topicId].vote && newState[topicId].vote[ballotId]) {
+          const voteTopicIndex = state[topicId].vote[ballotId].findIndex( ({userId}) => userId === sessionUserId);
           
-        newState[topicId].vote[id].push(sessionUserId);
-        
-        return newState;
-      })({payload});
-      
-    case 'RECEIVE_VOTE_TOPIC_OWNER':
-      return ( ({id, topicId, userId, createdAt}) => {
-        const newState = _cloneDeep(state);
-        
-        const userVoteIndex = newState[topicId].vote[id].findIndex( (userVote) => userVote.id === userId);
-        if (userVoteIndex !== -1) newState[topicId].vote[id][userVoteIndex] = { id: userId, createdAt };
+          voteTopicIndex !== -1 ? 
+          newState[topicId].vote[ballotId].splice(voteTopicIndex, 1) :
+          newState[topicId].vote[ballotId].push({userId: sessionUserId});
+        } else {
+          if (!newState[topicId].vote) newState[topicId].vote = {};
+          newState[topicId].vote[ballotId] = [{userId: sessionUserId}];
+        }
         
         return newState;
       })(payload);
       
-    case 'RECEIVE_VOTE_TOPIC':
-      return ( ({id, topicId, userId, createdAt}) => {
-        const newState = _cloneDeep(state);
+    case 'RECEIVE_VOTE_TOPIC_OWNER':
+      return ( ({ballotId, topicId, vote, deleted}) => {
+        const userVoteIndex = state[topicId].vote[ballotId].findIndex( ({userId}) => userId === vote.userId );
         
-        if (!newState[topicId].vote) newState[topicId].vote = { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
-        newState[topicId].vote[id].push({ id: userId, createdAt });
+        if ( userVoteIndex !== -1 ) {
+          const newState = _cloneDeep(state);
+          
+          deleted ? 
+          newState[topicId].vote[ballotId].splice(userVoteIndex, 1) :
+          newState[topicId].vote[ballotId][userVoteIndex] = vote;
+          
+          return newState;
+        }
+        
+        return state;
+      })(payload);
+      
+    case 'RECEIVE_VOTE_TOPIC':
+      return ( ({ballotId, topicId, vote, deleted}) => {
+        const newState = _cloneDeep(state);
+        console.log({ballotId, topicId, vote, deleted});
+        
+        if (state[topicId].vote && state[topicId].vote[ballotId]) {
+          if (deleted) {
+            const userVoteIndex = state[topicId].vote[ballotId].findIndex( ({userId}) => userId === vote.userId );
+            console.log(userVoteIndex);
+            if (userVoteIndex !== -1) newState[topicId].vote[ballotId].splice(userVoteIndex, 1);
+          } 
+          else newState[topicId].vote[ballotId].push(vote);
+        } else if (!deleted) {
+          if (!newState[topicId].vote) newState[topicId].vote = {};
+          newState[topicId].vote[ballotId] = [vote];
+        }
         
         return newState;
       })(payload);

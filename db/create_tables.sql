@@ -11,7 +11,7 @@ ALTER DATABASE aquestdb SET search_path='"$user", public, aquest_schema';
 -- PRIVILEGES --
 -----------------
 GRANT ALL ON ALL TABLES IN SCHEMA aquest_schema TO admin WITH GRANT OPTION;
-GRANT SELECT, REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA aquest_schema TO users;
+GRANT SELECT, REFERENCES, TRIGGER, UPDATE ON ALL TABLES IN SCHEMA aquest_schema TO users;
 
 GRANT USAGE ON SCHEMA aquest_schema TO users;
 
@@ -333,11 +333,11 @@ CREATE TRIGGER update_timestamp
   BEFORE UPDATE ON aquest_schema.ballot
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
   
-------------------------------
--- FUNCTION : VOTE CREATION --
-------------------------------
+------------------------------------------
+-- FUNCTION : VOTE CREATION FOR MESSAGE --
+------------------------------------------
 -- remove a vote if exists, else create it
-CREATE OR REPLACE FUNCTION aquest_schema.createVoteMessage(new_user_id TEXT, new_message_id BIGINT, new_ballot_id BIGINT) 
+CREATE OR REPLACE FUNCTION aquest_schema.createVoteMessage(new_user_id TEXT, new_message_id BIGINT, new_ballot_id BIGINT, voteContext TEXT) 
   RETURNS JSON AS $createVoteMessage$
   DECLARE 
     vote JSON;
@@ -350,14 +350,45 @@ CREATE OR REPLACE FUNCTION aquest_schema.createVoteMessage(new_user_id TEXT, new
       INSERT INTO aquest_schema.votemessage
       (author_id, universe_id, user_id, message_id, ballot_id, deleted)
       VALUES
-        ((SELECT user_id FROM aquest_schema.atommessage WHERE atommessage.id = new_message_id),
-        (SELECT universe.id FROM aquest_schema.atommessage, aquest_schema.universe WHERE atommessage.id = new_message_id AND atommessage.chat_id = universe.chat_id), 
+        ((SELECT user_id FROM aquest_schema.atommessage WHERE atommessage.id = new_message_id::BIGINT),
+        (CASE 
+        WHEN voteContext = 'universe' THEN 
+          (SELECT universe.id FROM aquest_schema.atommessage, aquest_schema.universe WHERE atommessage.id = new_message_id AND atommessage.chat_id = universe.chat_id)
+        ELSE (SELECT universe_id FROM aquest_schema.atommessage, aquest_schema.topic WHERE atommessage.id = new_message_id AND atommessage.chat_id = topic.chat_id) END), 
         new_user_id, new_message_id, new_ballot_id, false)
-      RETURNING json_build_object('authorId', author_id, 'userId', user_id, 'messageId', message_id, 'ballotId', ballot_id, 'createdAt', created_at) AS vote INTO vote;
+      RETURNING json_build_object('authorId', author_id, 'userId', user_id, 'messageId', message_id, 'ballotId', ballot_id, 'createdAt', created_at, 'deleted', deleted) AS vote INTO vote;
     END IF;
+      
     RETURN vote;
   END;
 $createVoteMessage$ LANGUAGE plpgsql;
+
+----------------------------------------
+-- FUNCTION : VOTE CREATION FOR TOPIC --
+----------------------------------------
+-- remove a vote if exists, else create it
+CREATE OR REPLACE FUNCTION aquest_schema.createVoteTopic(new_user_id TEXT, new_topic_id TEXT, new_ballot_id BIGINT) 
+  RETURNS JSON AS $createVoteTopic$
+  DECLARE 
+    vote JSON;
+  BEGIN 
+    IF EXISTS(SELECT 1 FROM aquest_schema.votetopic WHERE user_id = new_user_id AND topic_id = new_topic_id AND ballot_id = new_ballot_id) THEN 
+      UPDATE aquest_schema.votetopic SET deleted = (SELECT NOT deleted FROM aquest_schema.votetopic WHERE user_id = new_user_id AND topic_id = new_topic_id AND ballot_id = new_ballot_id)
+      WHERE votetopic.user_id = new_user_id AND votetopic.topic_id = new_topic_id AND votetopic.ballot_id = new_ballot_id
+      RETURNING json_build_object('authorId', author_id, 'userId', user_id, 'topicId', topic_id, 'ballotId', ballot_id, 'createdAt', created_at, 'deleted', deleted) as vote INTO vote;
+    ELSE 
+      INSERT INTO aquest_schema.votetopic
+      (author_id, universe_id, user_id, topic_id, ballot_id, deleted)
+      VALUES
+        ((SELECT user_id FROM aquest_schema.topic WHERE topic.id = new_topic_id),
+        (SELECT universe_id FROM aquest_schema.topic WHERE topic.id = new_topic_id), 
+        new_user_id, new_topic_id, new_ballot_id, false)
+      RETURNING json_build_object('authorId', author_id, 'userId', user_id, 'topicId', topic_id, 'ballotId', ballot_id, 'createdAt', created_at, 'deleted', deleted) AS vote INTO vote;
+    END IF;
+    
+    RETURN vote;
+  END;
+$createVoteTopic$ LANGUAGE plpgsql;
 
 ----------------------------------------
 -- FUNCTION : TOPIC w/ ATOMS CREATION --
@@ -454,8 +485,8 @@ INSERT INTO aquest_schema.universe (name, user_id, description, picture, creatio
 INSERT INTO aquest_schema.user (id, email, password_hash, creation_ip) VALUES ('PertinentDuck', 'everywhere@around.pyp', '$2a$10$m3jpaE2uelYFzoPTu/fG/eU5rTkmL0d8ph.eF3uQrdQE46UbhhpdW', '192.168.0.1');
 INSERT INTO aquest_schema.user (id, email, password_hash, creation_ip) VALUES ('FlakyTurtle', 'everywhere@around.pyt', '$2a$10$m3jpaE2uelYFzoPTu/fG/eU5rTkmL0d8ph.eF3uQrdQE46UbhhpdW', '192.168.0.1');
 INSERT INTO aquest_schema.atommessage (chat_id, user_id, type, content) VALUES (1, 'PertinentDuck', 'text', '{"text":"bonjour"}');
-SELECT aquest_schema.createVoteMessage('FlakyTurtle', 1, 1) AS vote;
-SELECT aquest_schema.createVoteMessage('admin', 1, 1) AS vote;
-SELECT aquest_schema.createVoteMessage('FlakyTurtle', 1, 2) AS vote;
-SELECT aquest_schema.createVoteMessage('FlakyTurtle', 1, 3) AS vote;
-SELECT aquest_schema.createVoteMessage('admin', 1, 3) AS vote;
+SELECT aquest_schema.createVote('votemessage', 'FlakyTurtle', 1, 1) AS vote;
+SELECT aquest_schema.createVote('votemessage', 'admin', 1, 1) AS vote;
+SELECT aquest_schema.createVote('votemessage', 'FlakyTurtle', 1, 2) AS vote;
+SELECT aquest_schema.createVote('votemessage', 'FlakyTurtle', 1, 3) AS vote;
+SELECT aquest_schema.createVote('votemessage', 'admin', 1, 3) AS vote;

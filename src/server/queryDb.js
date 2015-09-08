@@ -34,8 +34,8 @@ export default function queryDb(intention, params) {
   function buildQuery(intention, params) {
     
     const {
-      id, userId, universeId, title, chatId, offset, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture, url,
-      messageId, ballotId
+      id, userId, universeId, title, chatId, offset, messageId, atoms, content, name, description, previewType, previewContent, pseudo, email, passwordHash, ip, picture, url,
+      voteTargetId, ballotId, voteContext
     } = typeof params === 'object' && !(params instanceof Array) ? params : {};
       
     // define the maximum number of message to load
@@ -109,6 +109,56 @@ export default function queryDb(intention, params) {
         
         break;
         
+      case 'readChatFromMessage':
+        
+        sql =
+        'SELECT ' +
+          `json_build_object('id', chat.id, 'name', chat.name, ` +
+           `'firstMessageId', (SELECT id FROM aquest_schema.atommessage WHERE chat_id = $1 ORDER BY id ASC LIMIT 1), ` +
+           `'messages', array_agg(CASE WHEN atommessage.message IS NULL THEN '[]'::JSON ELSE atommessage.message END)  ` +
+          ') as chat ' +
+        'FROM ' +
+          'aquest_schema.chat ' +
+          'LEFT JOIN ' +
+            '(SELECT ' +
+            'atommessage.id, atommessage.chat_id, ' +
+            `json_build_object('id', atommessage.id, ` +
+            `'user_id',atommessage.user_id,'type', atommessage.type,'content', atommessage.content,'createdAt', atommessage.created_at,'vote', ` +
+            `COALESCE(votemessage.vote::jsonb, '{}'::jsonb)) message ` +
+            'FROM ' +
+            'aquest_schema.atommessage ' +
+              'LEFT JOIN ' +
+              '(SELECT ' +
+                `votemessage.message_id, json_object_agg(ballot.id, votemessage.user_ballot) vote ` +
+              'FROM ' +
+                '(SELECT id FROM aquest_schema.universe WHERE chat_id = $1) universe, ' +
+                `(SELECT message_id, ballot_id, universe_id, json_agg(json_build_object('author', author_id, 'userId', user_id, 'updatedAt', updated_at)) user_ballot ` +
+                'FROM aquest_schema.votemessage GROUP BY message_id, ballot_id, universe_id) AS votemessage ' +
+                'LEFT JOIN ' +
+                  'aquest_schema.ballot ' +
+                'ON votemessage.ballot_id = ballot.id ' +
+                'WHERE votemessage.universe_id = universe.id ' +
+                'GROUP BY votemessage.message_id) votemessage ' +
+              'ON atommessage.id = votemessage.message_id ' +
+            'WHERE atommessage.chat_id = $1 AND atommessage.id > $2' +
+            'GROUP BY atommessage.id, atommessage.chat_id, votemessage.vote::jsonb ' +
+            `ORDER BY atommessage.id ASC LIMIT ${nbrChatMessages}) atommessage ` +
+          'ON chat.id = atommessage.chat_id ' +
+          'WHERE chat.id = $1 GROUP BY chat.id';
+        
+        paramaterized = [chatId, messageId];
+        
+        callback = result => {
+          if (result.rows[0]) {
+            const { chat } = result.rows[0];
+            console.log(chat);
+            if (!chat.messages[0].content) chat.messages = [];
+            
+            return chat;
+          }
+        };
+        
+        break;  
         
       case 'readChatOffset':
         
@@ -254,32 +304,33 @@ export default function queryDb(intention, params) {
       case 'readTopic':
         
         sql =
-        'SELECT json_build_object(' +
-          `'id', topic.id,` +
-          `'userId', topic.user_id,` +
-          `'chatId', topic.chat_id,` +
-          `'universeId', topic.universe_id,` +
-          `'title', topic.title,` +
-          `'previewContent', topic.preview_content,` +
-          `'previewType', topic.preview_type,` +
-          `'createdAt', COALESCE(to_char(topic.created_at, 'MM-DD-YYYY HH24:MI:SS'), ''),` +
-          `'atoms', atomtopic.atoms` +
+        `SELECT json_build_object(` +
+          `'id', topic.id, 'userId', topic.user_id, 'chatId', topic.chat_id, 'universeId', topic.universe_id,` +
+          `'title', topic.title, 'previewContent', topic.preview_content, 'previewType', topic.preview_type,` +
+          `'createdAt', COALESCE(to_char(topic.created_at, 'MM-DD-YYYY HH24:MI:SS'), ''), 'atoms', atomtopic.atoms,` +
+          `'vote',COALESCE(votetopic.vote, '{}'::JSON)` +
         ') as topic ' +
         'FROM aquest_schema.topic ' +
         'LEFT JOIN ' +
           '(SELECT ' +
             'atomtopic.topic_id, ' +
-            'array_agg(' +
-              'json_build_object(' +
-                `'type', atomtopic.type,` +
-                `'content', atomtopic.content` +
-              ') ' +
-              'ORDER BY atomtopic.position ' +
-            ') as atoms ' +
+            `array_agg(json_build_object('type', atomtopic.type,'content', atomtopic.content) ORDER BY atomtopic.position) as atoms ` +
           'FROM aquest_schema.atomtopic ' +
           'GROUP BY atomtopic.topic_id' +
           ') as atomtopic ' +
-        'ON topic.id = atomtopic.topic_id ' +
+        'ON topic.id = atomtopic.topic_id, ' +
+        '(SELECT ' +
+          'votetopic.topic_id, json_object_agg(votetopic.ballot_id, CASE WHEN votetopic.user_ballot IS NULL THEN ARRAY[]::JSON[] ELSE votetopic.user_ballot END ' +
+        ') AS vote ' +
+        'FROM ' +
+          '(SELECT ' +
+            `votetopic.topic_id, ballot.id ballot_id, array_agg(json_build_object('author', author_id, 'userId', user_id, 'updatedAt', updated_at)) user_ballot ` +
+          'FROM ' +
+            'aquest_schema.votetopic, aquest_schema.ballot ' +
+          'WHERE ' +
+            'ballot.id = votetopic.ballot_id AND votetopic.topic_id = $1 ' +
+          'GROUP BY topic_id, ballot.id) votetopic ' +
+        'GROUP BY votetopic.topic_id) votetopic ' +
         'WHERE topic.id = $1';
         
         paramaterized = [params];
@@ -328,21 +379,9 @@ export default function queryDb(intention, params) {
         
       case 'createVoteMessage':
         
-      //                                                               Table "aquest_schema.votemessage"
-      //   Column    |           Type           |                                 Modifiers                                 | Storage  | Stats target | Description 
-      // -------------+--------------------------+---------------------------------------------------------------------------+----------+--------------+-------------
-      // id          | bigint                   | not null default nextval('aquest_schema.votemessage_id_seq'::regclass) | plain    |              | 
-      // author_id   | text                     | not null                                                                  | extended |              | 
-      // user_id     | text                     | not null                                                                  | extended |              | 
-      // universe_id | text                     | not null                                                                  | extended |              | 
-      // message_id  | bigint                   | not null                                                                  | plain    |              | 
-      // ballot_id   | bigint                   | not null                                                                  | plain    |              | 
-      // created_at  | timestamp with time zone | default now()                                                             | plain    |              | 
-      // updated_at  | timestamp with time zone | default now()                                                             | plain    |              | 
+        sql = 'SELECT aquest_schema.createVoteMessage($1, $2, $3, $4) as vote'; 
         
-        sql = 'SELECT aquest_schema.createVoteMessage($1, $2, $3) as vote'; 
-        
-        paramaterized = [userId, messageId, ballotId];
+        paramaterized = [userId, voteTargetId, ballotId, voteContext];
         callback = result => result.rows[0].vote;
         
         break;  
@@ -375,7 +414,15 @@ export default function queryDb(intention, params) {
         callback = result => result.rows[0].universe;
         
         break;
+      
+      case 'createVoteTopic':
         
+        sql = 'SELECT aquest_schema.createVoteTopic($1, $2, $3) as vote'; 
+        
+        paramaterized = [userId, voteTargetId, ballotId];
+        callback = result => result.rows[0].vote;
+        
+        break;  
         
       case 'createTopic':
         

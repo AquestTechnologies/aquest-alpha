@@ -34,15 +34,17 @@ export default class Chat extends React.Component {
   componentWillReceiveProps(nextProps) {
     // console.log('.C. Chat.componentWillReceiveProps');
     
-    const {chatId, chat, readChat, emitJoinChat, emitLeaveChat} = this.props;
-    const messages = (chat || []).messages || [];
+    const {chatId, chat, readChat, readChatFromMessage, emitJoinChat, emitLeaveChat} = this.props;
+    const messages = (chat || {}).messages || [];
     
     const nextChatId = nextProps.chatId;
-    const nextMessages = (nextProps.chat || []).messages || [];
+    const nextMessages = (nextProps.chat || {}).messages || [];
     
     if ( chatId && nextChatId && chatId !== nextChatId ) {
       if (!nextMessages || !nextMessages.length ) { 
         readChat(nextProps.chatId);
+      } else if (nextMessages.length) {
+        readChatFromMessage({chatId: nextProps.chatId, messageId: nextMessages[nextMessages.length - 1].id});
       }
     
       emitLeaveChat(chatId);

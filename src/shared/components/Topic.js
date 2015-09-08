@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { readTopic, readTopicAtoms } from '../actionCreators';
 import { getAtomViewers } from './atoms';
+import Ballot from './common/Ballot';
 
 class Topic extends React.Component {
   
@@ -42,13 +43,10 @@ class Topic extends React.Component {
   }
   
   render() {
-    const { emitCreateVoteTopic, emitDeleteVoteTopic, voteContextId, universeId, userId: sessionUserId } = this.props;
+    const { emitCreateVoteTopic, voteContextId, userId: sessionUserId, ballot } = this.props;
     const { topic } = this.props || {};
-    const { title, userId, createdAt, id: topicId } = topic;
+    const { title, userId, createdAt, id: topicId, vote } = topic;
     const atoms = topic.atoms || [{type: 'text', content: {text: 'Loading...'}}];
-    
-    const vote = this.props.vote || { 'Thanks': [], 'Agree': [], 'Disagree': [], 'Irrelevant': [], 'Shocking': [] };
-    if (!vote[universeId]) vote[universeId] = []; 
     
     const voteTargetContext = {voteContextId, topicId};
     
@@ -56,15 +54,18 @@ class Topic extends React.Component {
       <div>
         <div className="topic">
           <div className="vote">
-            { Object.keys(vote).map( (key) =>
-              <Vote 
-                id={key}
-                key={key}
-                users={vote[key]}
-                universeId={universeId} // not really necessary, depends on the database query optimization
+            { ballot.map( ({id, content, value, position, description}) =>
+              <Ballot 
+                id={id}
+                key={id}
+                value={value}
+                ballotId={id}
+                content={content}
+                position={position}
+                description={description}
+                vote={(vote || {})[id] || []}
                 sessionUserId={sessionUserId}
                 createVote={emitCreateVoteTopic}
-                deleteVote={emitDeleteVoteTopic}
                 voteTargetContext={voteTargetContext}
               />)
             }

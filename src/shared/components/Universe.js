@@ -8,7 +8,7 @@ import config             from '../../../config/dev_shared';
 import menuScroll             from '../../client/lib/menuScroll';
 import { 
   readUniverse, readInventory, transitionTo,
-  readChat, readChatOffset, emitJoinChat, emitLeaveChat, emitCreateMessage,
+  readChat, readChatOffset, readChatFromMessage, emitJoinChat, emitLeaveChat, emitCreateMessage,
   emitJoinVote, emitLeaveVote, emitCreateVoteMessage, emitCreateVoteTopic
 } from '../actionCreators';
 
@@ -64,6 +64,7 @@ class Universe extends React.Component {
     const chatId = universe ? topic ? topic.chatId : universe.chatId : undefined;
     const filteredTopics = !children ? this.createTopicsList(topics, universeId) : undefined;
     const chat = chats[chatId];
+    const ballot = universe.ballot;
     
     const voteContextId = topicId ? `topic-${topicId}` : `universe-${universeId}`;
     
@@ -84,9 +85,9 @@ class Universe extends React.Component {
                 React.cloneElement(children, {
                   topic,
                   userId,
+                  ballot,
                   topicId,
                   universe,
-                  universeId,
                   emitJoinVote, 
                   emitLeaveVote,
                   voteContextId,
@@ -94,9 +95,9 @@ class Universe extends React.Component {
                 }) 
                 :
                 <Inventory 
+                  ballot={ballot}
                   universe={universe}
                   sessionUserId={userId}
-                  ballot={universe.ballot}
                   universeId={universeId}
                   topicsList={filteredTopics}
                   transitionTo={transitionTo}
@@ -113,17 +114,18 @@ class Universe extends React.Component {
         
         <Chat 
           chat={chat} 
+          ballot={ballot}
           chatId={chatId}
           userId={userId}
           readChat={readChat}
           sessionUserId={userId}
           universeId={universeId}
-          ballot={universe.ballot}
           emitJoinChat={emitJoinChat}
           emitLeaveChat={emitLeaveChat}
           voteContextId={voteContextId}
           readChatOffset={readChatOffset}
           emitCreateMessage={emitCreateMessage}
+          readChatFromMessage={readChatFromMessage}
           emitCreateVoteMessage={emitCreateVoteMessage}
         />
       </div>
@@ -146,6 +148,7 @@ const mapActions = dispatch => bindActionCreators({
   emitJoinChat,
   emitLeaveChat,
   readChatOffset,
+  readChatFromMessage,
   emitCreateMessage,
   emitJoinVote, 
   emitLeaveVote,

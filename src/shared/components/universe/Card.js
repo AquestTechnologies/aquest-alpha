@@ -19,11 +19,8 @@ export default class Card extends React.Component {
     
   render() {
     const { 
-      topic: {id, title, userId, createdAt, universeId, previewType, previewContent, vote}, 
-      emitCreateVoteTopic, emitDeleteVoteTopic, voteContextId, sessionUserId, ballot
+      topic: {id, title, userId, createdAt, universeId, previewType, previewContent, vote}, ballot
     } = this.props;
-    
-    const voteTargetContext = {voteContextId, topicId: id};
     
     return (
       <div className='card' onClick={this.handleClick.bind(this, universeId, id)}>
@@ -35,7 +32,7 @@ export default class Card extends React.Component {
           <span>{ `By ${userId}, ${createdAt} ago.` }</span>
           <span>{ 
             Object.keys(vote).length ? 
-              Object.keys(vote).reduce( (prev, key) =>  prev + ballot.find(({content}) => content === key ).value * vote[key].length, 0) + ' up' : 
+              Object.keys(vote).reduce( (prev, key) =>  prev + ballot.find(({id}) => id === parseInt(key,10) ).value * vote[key].length, 0) + ' up' : 
               '0 up'
           }</span>
         </div>

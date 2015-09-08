@@ -53,7 +53,14 @@ export const readChat = createActionCreator({
 export const readChatOffset = createActionCreator({
   intention:  'readChatOffset',
   method:     'get',
-  pathx:      '/api/chat/{chatId}/{offset}', 
+  pathx:      '/api/chat/{chatId}/offset/{offset}', 
+  auth:       false,
+});
+
+export const readChatFromMessage = createActionCreator({
+  intention:  'readChatFromMessage',
+  method:     'get',
+  pathx:      '/api/chat/{chatId}/message/{messageId}', 
   auth:       false,
 });
 
@@ -124,8 +131,8 @@ const actionCreators = {
   transitionTo, login, logout,
   createUser, createUniverse, createTopic, 
   emitJoinChat, emitLeaveChat, emitCreateMessage, receiveJoinChat, receiveLeaveChat, receiveMessage,
-  emitJoinVote, emitLeaveVote, emitCreateVoteMessage, receiveVoteMessage, receiveVoteMessageOwner,
-  readUniverse, readUniverses, readInventory, readChat, readChatOffset, readTopic, readTopicAtoms, 
+  emitJoinVote, emitLeaveVote, emitCreateVoteMessage, receiveVoteMessage, receiveVoteMessageOwner, emitCreateVoteTopic, receiveVoteTopic, receiveVoteTopicOwner,
+  readUniverse, readUniverses, readInventory, readChat, readChatOffset, readChatFromMessage, readTopic, readTopicAtoms, 
 };
 
 export default actionCreators;

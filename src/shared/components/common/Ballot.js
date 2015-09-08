@@ -15,7 +15,6 @@ export default class Ballot extends React.Component {
   render() {
     //NOTE : ballot are already in ascending order
     const { content, position, description, vote} = this.props;
-    console.log(vote);
     
     return (
       <span className="ballot">

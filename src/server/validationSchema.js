@@ -1,10 +1,11 @@
 import Joi from 'joi';
 
-const userId    = Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/);
-const chatId    = Joi.number().positive().integer().required().min(1);
-const email     = Joi.string().email();
-const password  = Joi.string().trim().required().min(6);
-const voteRoomId = Joi.string().trim().required().regex(/^(topic|universe)-/);
+const userId      = Joi.string().trim().required().min(1).max(15).regex(/^[0-9a-zA-Z]{1,15}$/);
+const chatId      = Joi.number().positive().integer().required().min(1);
+const email       = Joi.string().email();
+const password    = Joi.string().trim().required().min(6);
+const voteRoomId  = Joi.string().trim().required().regex(/^(topic|universe)-/);
+const topicId     = Joi.string().trim().required().min(1);
 
 /**
  * Hapijs Joi validation schema
@@ -73,6 +74,13 @@ const WEBSOCKET_VALIDATION_SCHEMA = {
       voteContextId: voteRoomId,
       messageId: Joi.number().positive().integer().required().min(1), 
       messageIndex: Joi.number().integer().required().min(0)
+    }
+  },
+  createVoteTopic: {
+    ballotId: Joi.number().positive().integer().required().min(1),
+    voteTargetContext: {
+      topicId,
+      voteContextId: voteRoomId
     }
   }
 };  
