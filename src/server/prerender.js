@@ -1,4 +1,5 @@
 import fs        from 'fs';
+import btoa      from 'btoa';
 import React     from 'react';
 import JWT       from 'jsonwebtoken';
 import Location  from 'react-router/lib/Location';
@@ -85,7 +86,7 @@ export default function prerender(request, reply) {
         }
         
         response.source = html.replace('<body>', `<body><div id="mountNode">${mountMeImFamous}</div>` +
-          `<script>window.STATE_FROM_SERVER=${JSON.stringify(serverState)}</script>` +
+          `<script>window.STATE_FROM_SERVER="${btoa(JSON.stringify(serverState))}"</script>` +
           `<script src="${hotFile}"></script>` +
           `<script src="${publicPath + filename}"></script>`);
         

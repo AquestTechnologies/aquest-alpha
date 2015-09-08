@@ -113,7 +113,7 @@ export default function apiPlugin(server, options, next) {
         handler: (request, reply) => {
           const requestToken = request.state.jwt;
           const response = reply.response().hold();
-          const params = method === 'post' ? request.payload : Object.keys(request.params).length === 1 && request.params.p ? request.params.p : request.params;
+          const params = method === 'post' || method === 'put' ? request.payload : request.params.p || request.params;
           
           before(request, params).then(
             () => queryDb(intention, params).then(
