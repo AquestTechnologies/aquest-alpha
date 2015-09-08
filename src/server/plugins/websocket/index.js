@@ -161,18 +161,18 @@ export default function websocketPlugin(server, options, next) {
               const { userId } = socket;
               
               const { ballotId, voteTargetContext: {chatId, voteContextId, messageIndex, messageId} } = request;
-              const d = new Date(); // let's fix that later
               
-              queryDb('createVote', {userId, messageId, ballotId}).then(
+              console.log({userId, messageId, ballotId});              
+              queryDb('createVoteMessage', {userId, messageId, ballotId}).then(
                 result => {
                   
-                  const {id, userId, ballotId, createdAt, deleted} = result;
+                  const {userId, ballotId, createdAt, deleted} = result;
                   
-                  log(`_w_ createVoteMessage`, { ballotId, chatId, messageId, vote: {id, userId, createdAt}, deleted });
+                  log(`_w_ createVoteMessage`, { ballotId, chatId, messageId, vote: {userId, createdAt}, deleted });
               
-                  socket.emit('receiveVoteMessageOwner', { ballotId, chatId, messageIndex, vote: {id, userId, createdAt}, deleted } );
+                  socket.emit('receiveVoteMessageOwner', { ballotId, chatId, messageIndex, vote: {userId, createdAt}, deleted } );
                   
-                  socket.broadcast.to(voteContextId).emit('receiveVoteMessage', { ballotId, chatId, messageId, vote: {id, userId, createdAt}, deleted });
+                  socket.broadcast.to(voteContextId).emit('receiveVoteMessage', { ballotId, chatId, messageId, vote: {userId, createdAt}, deleted });
                 },
                 error => {
                   log(`_w_ createMessage error`, error);

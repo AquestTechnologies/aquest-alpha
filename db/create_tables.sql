@@ -8,7 +8,7 @@ ALTER DATABASE aquestdb SET search_path='"$user", public, aquest_schema';
 
 
 -----------------
--- PRIVILEDGES --
+-- PRIVILEGES --
 -----------------
 GRANT ALL ON ALL TABLES IN SCHEMA aquest_schema TO admin WITH GRANT OPTION;
 GRANT SELECT, REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA aquest_schema TO users;
@@ -16,7 +16,7 @@ GRANT SELECT, REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA aquest_schema TO users
 GRANT USAGE ON SCHEMA aquest_schema TO users;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA aquest_schema 
-GRANT SELECT, REFERENCES, INSERT ON TABLES TO users;
+GRANT SELECT, REFERENCES, INSERT, UPDATE ON TABLES TO users;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA aquest_schema
 GRANT ALL ON TABLES TO admin WITH GRANT OPTION;
@@ -168,6 +168,7 @@ CREATE TABLE aquest_schema.VOTEMESSAGE(
   ballot_id           BIGINT NOT NULL,
   created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  deleted             BOOLEAN,
   FOREIGN KEY (author_id) REFERENCES aquest_schema.USER(id),
   FOREIGN KEY (user_id) REFERENCES aquest_schema.USER(id),
   FOREIGN KEY (universe_id) REFERENCES aquest_schema.UNIVERSE(id),
@@ -342,16 +343,16 @@ CREATE OR REPLACE FUNCTION aquest_schema.createVoteMessage(new_user_id TEXT, new
     vote JSON;
   BEGIN
     IF EXISTS(SELECT 1 FROM aquest_schema.votemessage WHERE user_id = new_user_id AND message_id = new_message_id AND ballot_id = new_ballot_id) THEN 
-      DELETE FROM aquest_schema.votemessage 
-      WHERE votemessage.user_id = new_user_id AND votemessage.message_id = new_message_id 
-      RETURNING json_build_object('authorId', author_id, 'userId', user_id, 'messageId', message_id, 'ballotId', ballot_id, 'createdAt', created_at, 'deleted', true) as vote INTO vote;
+      UPDATE aquest_schema.votemessage SET deleted = (SELECT NOT deleted FROM aquest_schema.votemessage WHERE user_id = new_user_id AND message_id = new_message_id AND ballot_id = new_ballot_id)
+      WHERE votemessage.user_id = new_user_id AND votemessage.message_id = new_message_id AND votemessage.ballot_id = new_ballot_id
+      RETURNING json_build_object('authorId', author_id, 'userId', user_id, 'messageId', message_id, 'ballotId', ballot_id, 'createdAt', created_at, 'deleted', deleted) as vote INTO vote;
     ELSE 
       INSERT INTO aquest_schema.votemessage
-      (author_id, universe_id, user_id, message_id, ballot_id)
+      (author_id, universe_id, user_id, message_id, ballot_id, deleted)
       VALUES
         ((SELECT user_id FROM aquest_schema.atommessage WHERE atommessage.id = new_message_id),
         (SELECT universe.id FROM aquest_schema.atommessage, aquest_schema.universe WHERE atommessage.id = new_message_id AND atommessage.chat_id = universe.chat_id), 
-        new_user_id, new_message_id, new_ballot_id)
+        new_user_id, new_message_id, new_ballot_id, false)
       RETURNING json_build_object('authorId', author_id, 'userId', user_id, 'messageId', message_id, 'ballotId', ballot_id, 'createdAt', created_at) AS vote INTO vote;
     END IF;
     RETURN vote;
