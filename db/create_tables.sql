@@ -141,6 +141,8 @@ CREATE TABLE aquest_schema.BALLOT(
   id                  BIGSERIAL PRIMARY KEY,
   content             TEXT NOT NULL,
   value               INTEGER NOT NULL,
+  position            INTEGER NOT NULL,
+  description         TEXT,
   deleted             BOOLEAN
 );
 
@@ -231,12 +233,12 @@ CREATE FUNCTION aquest_schema.prepare_insert()
   BEGIN
     -- Universe
     IF (TG_TABLE_NAME = 'universe') THEN
-      new_id := replace(trim(both ' ' from NEW.name), ' ', '_');
+      new_id := regexp_replace(trim(both ' ' from NEW.name), '[^a-zA-Z0-9]', '_', 'g');
       same_id := (SELECT id FROM aquest_schema.universe WHERE universe.id = new_id);
       INSERT INTO aquest_schema.chat (name) VALUES (NEW.name) RETURNING id INTO new_chat_id;
     -- Topic
     ELSIF (TG_TABLE_NAME = 'topic') THEN
-      new_id := replace(trim(both ' ' from NEW.title), ' ', '_');
+      new_id := regexp_replace(trim(both ' ' from NEW.title), '[^a-zA-Z0-9]', '_', 'g');
       same_id := (SELECT id FROM aquest_schema.topic WHERE topic.id = new_id ORDER BY id DESC);
       INSERT INTO aquest_schema.chat (name) VALUES (NEW.title) RETURNING id INTO new_chat_id;
     END IF;
@@ -268,7 +270,7 @@ CREATE FUNCTION aquest_schema.prepare_ballot()
   DECLARE
     ballot_id BIGINT;
   BEGIN
-    INSERT INTO aquest_schema.ballot (content, value) VALUES (NEW.id, 1) RETURNING id INTO ballot_id;
+    INSERT INTO aquest_schema.ballot (content, value, position) VALUES (NEW.id, 1, 0) RETURNING id INTO ballot_id;
     INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, ballot_id);
     INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, 1);
     INSERT INTO aquest_schema.ballot_universe (universe_id, ballot_id) VALUES (NEW.id, 2);
@@ -330,6 +332,31 @@ CREATE TRIGGER update_timestamp
   BEFORE UPDATE ON aquest_schema.ballot
   FOR EACH ROW EXECUTE PROCEDURE aquest_schema.set_updated_timestamp();
   
+------------------------------
+-- FUNCTION : VOTE CREATION --
+------------------------------
+-- remove a vote if exists, else create it
+CREATE OR REPLACE FUNCTION aquest_schema.createVoteMessage(new_user_id TEXT, new_message_id BIGINT, new_ballot_id BIGINT) 
+  RETURNS JSON AS $createVoteMessage$
+  DECLARE 
+    vote JSON;
+  BEGIN
+    IF EXISTS(SELECT 1 FROM aquest_schema.ballot_message WHERE user_id = new_user_id AND message_id = new_message_id AND ballot_id = new_ballot_id) THEN 
+      DELETE FROM aquest_schema.ballot_message 
+      WHERE ballot_message.user_id = new_user_id AND ballot_message.message_id = new_message_id 
+      RETURNING json_build_object('authorId', author_id, 'userId', user_id, 'messageId', message_id, 'ballotId', ballot_id, 'createdAt', created_at, 'deleted', true) as vote INTO vote;
+    ELSE 
+      INSERT INTO aquest_schema.ballot_message
+      (author_id, universe_id, user_id, message_id, ballot_id)
+      VALUES
+        ((SELECT user_id FROM aquest_schema.atommessage WHERE atommessage.id = new_message_id),
+        (SELECT universe.id FROM aquest_schema.atommessage, aquest_schema.universe WHERE atommessage.id = new_message_id AND atommessage.chat_id = universe.chat_id), 
+        new_user_id, new_message_id, new_ballot_id)
+      RETURNING json_build_object('authorId', author_id, 'userId', user_id, 'messageId', message_id, 'ballotId', ballot_id, 'createdAt', created_at) AS vote INTO vote;
+    END IF;
+    RETURN vote;
+  END;
+$createVoteMessage$ LANGUAGE plpgsql;
 
 ----------------------------------------
 -- FUNCTION : TOPIC w/ ATOMS CREATION --
@@ -406,12 +433,12 @@ RETURNS JSON AS $$
   return o;
 $$ LANGUAGE plv8 IMMUTABLE STRICT;
 
--- DEFINE INITIALE BALLOTS
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Thanks', 1);
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Agree', 1);
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Disagree', 0);
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Irrelevant', -1);
-INSERT INTO aquest_schema.ballot (content, value) VALUES ('Shocking', -10);
+-- DEFINE INITIAL BALLOTS
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Thanks', 1, 1);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Agree', 1, 2);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Disagree', 0, 3);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Irrelevant', -1, 4);
+INSERT INTO aquest_schema.ballot (content, value, position) VALUES ('Shocking', -10, 5);
 
 -------------------------
 -- MOCK DATA INSERTION --
